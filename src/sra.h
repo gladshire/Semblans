@@ -1,3 +1,4 @@
+#pragma once
 #include <vector>
 #include <string>
 #include <iostream>
@@ -5,6 +6,7 @@
 #include <boost/filesystem.hpp>
 #include <rapidxml.hpp>
 #include <rapidxml_utils.hpp>
+#include "ini_parse.h"
 
 namespace fs = boost::filesystem;
 
@@ -31,7 +33,7 @@ class SRA {
     fs::path sra_path_filt_2;
   public:
     SRA();
-    SRA(std::string sra_accession);
+    SRA(std::string sra_accession, INI_MAP cfgIni);
     std::string get_accession();
     std::string get_org_name();
     std::string get_tax_id();

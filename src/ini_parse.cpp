@@ -41,4 +41,3 @@ INI_MAP make_ini_map(const char * configPath) {
   return iniMap;
 }
 
-INI_MAP cfgIni = make_ini_map("../config.ini");

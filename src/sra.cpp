@@ -1,5 +1,4 @@
 #include "sra.h"
-#include "ini_parse.h"
 
 
 // Default constructor for SRA object
@@ -16,8 +15,7 @@ SRA::SRA() {
 // SRA accession number constructor for SRA object
 // Takes SRA accession number string as input
 // Fills object members with correct values using NCBI eutils API
-SRA::SRA(std::string sra_accession) {
-  extern INI_MAP cfgIni;
+SRA::SRA(std::string sra_accession, INI_MAP cfgIni) {
   std::string outDir(cfgIni["General"]["output_directory"]);
   std::string projName(cfgIni["General"]["project_name"]);
 
@@ -78,9 +76,8 @@ SRA::SRA(std::string sra_accession) {
 
   std::string fileBase = make_file_str();
   std::string projPath = outDir + projName + "/";
-  std::vector<std::string> stepDirs = {"00-Raw_Reads/", "01-Quality_analysis_1/",
-                                       "02-Error_correction/", "03-Trimming/",
-                                       "04-Filtering/"};
+  extern std::vector<std::string> stepDirs;
+
   sra_path_raw_1  = (projPath + stepDirs[0] + fileBase + ".fastq").c_str();
   fastqc_dir_1    = (projPath + stepDirs[1] + fileBase + "/" + fileBase).c_str();
   sra_path_corr_1 = (projPath + stepDirs[2] + fileBase + ".corr.fastq").c_str();
