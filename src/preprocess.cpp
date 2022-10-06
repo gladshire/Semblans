@@ -51,6 +51,7 @@ int main(int argc, char * argv[]) {
     retrieve_sra_data(sras, threads);
     run_fastqc(sras, threads);
     run_rcorr(sras, threads);
+    rem_unfix_bulk(sras, threads);
   }
 
   return 0;

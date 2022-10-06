@@ -10,6 +10,10 @@ void run_fastqc(std::vector<SRA> sras, std::string threads) {
     std::cout << "\nRunning quality analysis for:\n" << std::endl;
     summarize_sing_sra(sra);
     outFile = outDir + "/" + sra.make_file_str();
+    if (fs::exists(fs::path(outFile.c_str()))) {
+      std::cout << "FastQC analysis found for: " << sra.get_accession() << std::endl;
+      continue;
+    }
     system(("mkdir " + outFile).c_str());
     if (sra.is_paired()) {
       inFile1 = sra.get_sra_path_raw().first.c_str();

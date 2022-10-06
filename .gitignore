@@ -1,0 +1,7 @@
+*.fasta
+*.fastq
+*.fa
+*.fq
+*.bc
+dev-proj/*
+

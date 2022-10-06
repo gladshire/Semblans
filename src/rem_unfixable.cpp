@@ -1,26 +1,86 @@
-#include <iostream>
-#include <thread>
-#include <boost/filesystem.hpp>
-#include "sra.h"
+#include "rem_unfixable.h"
 
-void remove_unfixable_reads(std::vector<SRA> sras, std::string threads) {
-  std::string outDir(sras[0].get_sra_path_corr().first.parent_path().native().c_str());
-  std::string inFile1;
-  std::string inFile2;
-  std::string outFile1;
-  std::string outFile2;
 
-  for (auto sra : sras) {
-    if (sra.is_paired()) {
-      std::string inFile1(sra.get_sra_path_corr().first.native().c_str());
-      std::string inFile2(sra.get_sra_path_corr().second.native().c_str());
-      std::string outFile1(sra.get_sra_path_corr().first.stem().native().c_str() +
-                           ".fix.fastq");
-      std::string outFile2(sra.get_sra_path_corr().second.stem().native().c_str() +
-                           ".fix.fastq");
-      
+void rem_unfix_pe(SRA sra) {
+  std::string inFile1Str(sra.get_sra_path_corr().first.c_str());
+  std::string inFile2Str(sra.get_sra_path_corr().second.c_str());
+  std::string outFile1Str(std::string(sra.get_sra_path_corr().first.replace_extension("fix.fq").c_str()));
+  std::string outFile2Str(std::string(sra.get_sra_path_corr().second.replace_extension("fix.fq").c_str()));
+  std::ifstream inFile1(inFile1Str);
+  std::ifstream inFile2(inFile2Str);
+  std::ofstream outFile1(outFile1Str);
+  std::ofstream outFile2(outFile2Str);
+
+  std::string currLine1;
+  std::string currLine2;
+
+  if (!inFile1.is_open() || !inFile2.is_open()) {
+    std::cout << "Cannot open file(s)" << std::endl;
+    return;
+  }
+  while (getline(inFile1, currLine1) && getline(inFile2, currLine2)) {
+    if (currLine1.find("unfixable") == std::string::npos &&
+        currLine2.find("unfixable") == std::string::npos) {
+      outFile1 << currLine1 << std::endl;
+      outFile2 << currLine2 << std::endl;
     }
     else {
-
+      for (int i = 0; i < 3; i++) {
+        getline(inFile1, currLine1);
+        getline(inFile2, currLine2);
+      }
     }
   }
+  inFile1.close();
+  inFile2.close();
+  outFile1.close();
+  outFile2.close();
+}
+
+
+void rem_unfix_se(SRA sra) {
+  std::string inFileStr(sra.get_sra_path_corr().first.c_str());
+  std::string outFileStr(std::string(sra.get_sra_path_corr().first.replace_extension("fix.fq").c_str()));
+
+  std::ifstream inFile(inFileStr);
+  std::ofstream outFile(outFileStr);
+
+  std::string currLine;
+
+  if (!inFile.is_open()) {
+    std::cout << "Cannot open file(s)" << std::endl;
+  }
+  while (getline(inFile, currLine)) {
+    if (currLine.find("unfixable") == std::string::npos) {
+      outFile << currLine << std::endl;
+    }
+    else {
+      for (int i = 0; i < 3; i++) {
+        getline(inFile, currLine);
+      }
+    }
+  }
+  inFile.close();
+  outFile.close();
+}
+
+
+void rem_unfix_bulk(std::vector<SRA> sras, std::string threads) {
+  int threadNum = stoi(threads);
+  std::vector<std::thread> procVec;
+  for (int i = 0; i < sras.size(); i++) {
+    if (i >= threadNum) {
+      std::cout << "Waiting to finish: " << sras[i - threadNum].get_accession() << std::endl;
+      procVec.front().join();
+      procVec.erase(procVec.begin());
+    }
+    if (sras[i].is_paired()) {
+      procVec.push_back(std::thread(rem_unfix_pe, sras[i]));
+      std::cout << "Created process for: " << sras[i].get_accession() << std::endl;
+    }
+    else {
+      procVec.push_back(std::thread(rem_unfix_se, sras[i]));
+      std::cout << "Created process for: " << sras[i].get_accession() << std::endl;
+    }
+  }
+}

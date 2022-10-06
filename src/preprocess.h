@@ -8,6 +8,7 @@
 #include "sra_toolkit.h"
 #include "fastqc_wrap.h"
 #include "rcorr_wrap.h"
+#include "rem_unfixable.h"
 #include "print_info.h"
 
 std::vector<SRA> get_sras(const INI_MAP &iniFile);

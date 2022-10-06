@@ -18,10 +18,17 @@ SRA::SRA() {
 SRA::SRA(std::string sra_accession, INI_MAP cfgIni) {
   std::string outDir(cfgIni["General"]["output_directory"]);
   std::string projName(cfgIni["General"]["project_name"]);
+  std::string apiKey(cfgIni["General"]["api_key"]);
+  std::chrono::milliseconds queryLim(500);
+  if (apiKey != "") {
+    std::chrono::milliseconds queryLim(100);
+  }
 
   // Download temp XML file for SRA accession, containing information for object members
-  std::string curlCmdStr = "curl -s -o tmp.xml \"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?rettype=runinfo&db=sra&id=\"" + sra_accession;
+  std::string curlCmdStr = "curl -s -o tmp.xml \"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?rettype=runinfo&db=sra&id=\"" +
+                           sra_accession + "&api_key=" + apiKey;
   system(curlCmdStr.c_str());
+  std::this_thread::sleep_for(queryLim);
   
   // Parse XML file for object information
   rapidxml::file<> sra_xml("tmp.xml");
@@ -80,9 +87,9 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni) {
 
   sra_path_raw_1  = (projPath + stepDirs[0] + fileBase + ".fastq").c_str();
   fastqc_dir_1    = (projPath + stepDirs[1] + fileBase + "/" + fileBase).c_str();
-  sra_path_corr_1 = (projPath + stepDirs[2] + fileBase + ".corr.fastq").c_str();
-  sra_path_trim_1 = (projPath + stepDirs[3] + fileBase + ".trim.fastq").c_str();
-  sra_path_filt_1 = (projPath + stepDirs[4] + fileBase + ".filt.fastq").c_str();
+  sra_path_corr_1 = (projPath + stepDirs[2] + fileBase + ".cor.fq").c_str();
+  sra_path_trim_1 = (projPath + stepDirs[3] + fileBase + ".trim.fq").c_str();
+  sra_path_filt_1 = (projPath + stepDirs[4] + fileBase + ".filt.fq").c_str();
  
   if (paired) {
     std::string sra_path_raw_1_str(sra_path_raw_1.native().c_str());
@@ -92,15 +99,15 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni) {
     std::string sra_path_filt_1_str(sra_path_filt_1.native().c_str());
     sra_path_raw_1 = (sra_path_raw_1_str.insert(sra_path_raw_1_str.length() - 6, "_1")).c_str();
     fastqc_dir_1 = (fastqc_dir_1_str.insert(fastqc_dir_1_str.length() - 1, "_1")).c_str();
-    sra_path_corr_1 = (sra_path_corr_1_str.insert(sra_path_corr_1_str.length() - 10, "_1")).c_str();
-    sra_path_trim_1 = (sra_path_trim_1_str.insert(sra_path_trim_1_str.length() - 10, "_1")).c_str();
-    sra_path_filt_1 = (sra_path_trim_1_str.insert(sra_path_filt_1_str.length() - 10, "_1")).c_str();
+    sra_path_corr_1 = (sra_path_corr_1_str.insert(sra_path_corr_1_str.length() - 7, "_1")).c_str();
+    sra_path_trim_1 = (sra_path_trim_1_str.insert(sra_path_trim_1_str.length() - 11, "_1")).c_str();
+    sra_path_filt_1 = (sra_path_trim_1_str.insert(sra_path_filt_1_str.length() - 11, "_1")).c_str();
 
     sra_path_raw_2 = (projPath + stepDirs[0] + fileBase + "_2.fastq").c_str();
     fastqc_dir_2 = (projPath + stepDirs[1] + fileBase + "/" + fileBase + "_2").c_str();
-    sra_path_corr_2 = (projPath + stepDirs[2] + fileBase + "_2.corr.fastq").c_str();
-    sra_path_trim_2 = (projPath + stepDirs[3] + fileBase + "_2.trim.fastq").c_str();
-    sra_path_filt_2 = (projPath + stepDirs[4] + fileBase + "_2.filt.fastq").c_str();
+    sra_path_corr_2 = (projPath + stepDirs[2] + fileBase + "_2.cor.fq").c_str();
+    sra_path_trim_2 = (projPath + stepDirs[3] + fileBase + "_2.trim.fq").c_str();
+    sra_path_filt_2 = (projPath + stepDirs[4] + fileBase + "_2.filt.fq").c_str();
   }
  
   system("rm tmp.xml");
