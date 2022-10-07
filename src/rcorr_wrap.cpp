@@ -1,7 +1,7 @@
 #include "rcorr_wrap.h"
 
 void run_rcorr(std::vector<SRA> sras, std::string threads) {
-  std::string outDir(sras[0].get_sra_path_corr().first.parent_path().native().c_str());
+  std::string outDir(sras[0].get_sra_path_corr().first.parent_path().c_str());
   std::string inFile1;
   std::string inFile2;
   

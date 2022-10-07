@@ -3,5 +3,7 @@
 *.fa
 *.fq
 *.bc
+*.jf_dump
+*.mer_counts
 dev-proj/*
 

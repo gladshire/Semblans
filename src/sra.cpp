@@ -88,25 +88,29 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni) {
   sra_path_raw_1  = (projPath + stepDirs[0] + fileBase + ".fastq").c_str();
   fastqc_dir_1    = (projPath + stepDirs[1] + fileBase + "/" + fileBase).c_str();
   sra_path_corr_1 = (projPath + stepDirs[2] + fileBase + ".cor.fq").c_str();
-  sra_path_trim_1 = (projPath + stepDirs[3] + fileBase + ".trim.fq").c_str();
+  sra_path_trim_u1 = (projPath + stepDirs[3] + fileBase + ".trim.fq").c_str();
+  sra_path_trim_p1 = (projPath + stepDirs[3] + fileBase + ".trim.fq").c_str();
   sra_path_filt_1 = (projPath + stepDirs[4] + fileBase + ".filt.fq").c_str();
  
   if (paired) {
-    std::string sra_path_raw_1_str(sra_path_raw_1.native().c_str());
-    std::string fastqc_dir_1_str(fastqc_dir_1.native().c_str());
-    std::string sra_path_corr_1_str(sra_path_corr_1.native().c_str());
-    std::string sra_path_trim_1_str(sra_path_trim_1.native().c_str());
-    std::string sra_path_filt_1_str(sra_path_filt_1.native().c_str());
+    std::string sra_path_raw_1_str(sra_path_raw_1.c_str());
+    std::string fastqc_dir_1_str(fastqc_dir_1.c_str());
+    std::string sra_path_corr_1_str(sra_path_corr_1.c_str());
+    std::string sra_path_trim_u1_str(sra_path_trim_u1.c_str());
+    std::string sra_path_trim_p1_str(sra_path_trim_u1.c_str());
+    std::string sra_path_filt_1_str(sra_path_filt_1.c_str());
     sra_path_raw_1 = (sra_path_raw_1_str.insert(sra_path_raw_1_str.length() - 6, "_1")).c_str();
     fastqc_dir_1 = (fastqc_dir_1_str.insert(fastqc_dir_1_str.length() - 1, "_1")).c_str();
     sra_path_corr_1 = (sra_path_corr_1_str.insert(sra_path_corr_1_str.length() - 7, "_1")).c_str();
-    sra_path_trim_1 = (sra_path_trim_1_str.insert(sra_path_trim_1_str.length() - 11, "_1")).c_str();
-    sra_path_filt_1 = (sra_path_trim_1_str.insert(sra_path_filt_1_str.length() - 11, "_1")).c_str();
+    sra_path_trim_u1 = (sra_path_trim_u1_str.insert(sra_path_trim_u1_str.length() - 7, "_1.unpaired")).c_str();
+    sra_path_trim_p1 = (sra_path_trim_p1_str.insert(sra_path_trim_p1_str.length() - 7, "_1.paired")).c_str();
+    sra_path_filt_1 = (sra_path_filt_1_str.insert(sra_path_filt_1_str.length() - 7, "_1")).c_str();
 
     sra_path_raw_2 = (projPath + stepDirs[0] + fileBase + "_2.fastq").c_str();
     fastqc_dir_2 = (projPath + stepDirs[1] + fileBase + "/" + fileBase + "_2").c_str();
     sra_path_corr_2 = (projPath + stepDirs[2] + fileBase + "_2.cor.fq").c_str();
-    sra_path_trim_2 = (projPath + stepDirs[3] + fileBase + "_2.trim.fq").c_str();
+    sra_path_trim_u2 = (projPath + stepDirs[3] + fileBase + "_2.unpaired.trim.fq").c_str();
+    sra_path_trim_p2 = (projPath + stepDirs[3] + fileBase + "_2.paired.trim.fq").c_str();
     sra_path_filt_2 = (projPath + stepDirs[4] + fileBase + "_2.filt.fq").c_str();
   }
  
@@ -166,10 +170,16 @@ std::pair<fs::path, fs::path> SRA::get_sra_path_corr() {
   return sra_path_corr;
 }
 
-// Getter function for path to trimmed SRA sequence
-std::pair<fs::path, fs::path> SRA::get_sra_path_trim() {
-  std::pair<fs::path, fs::path> sra_path_trim(sra_path_trim_1, sra_path_trim_2);
-  return sra_path_trim;
+// Getter function for path to trimmed unpaired SRA sequence
+std::pair<fs::path, fs::path> SRA::get_sra_path_trim_u() {
+  std::pair<fs::path, fs::path> sra_path_trim_u(sra_path_trim_u1, sra_path_trim_u2);
+  return sra_path_trim_u;
+}
+
+// Getter functio nfor path to trimmed paired SRA sequence
+std::pair<fs::path, fs::path> SRA::get_sra_path_trim_p() {
+  std::pair<fs::path, fs::path> sra_path_trim_p(sra_path_trim_p1, sra_path_trim_p2);
+  return sra_path_trim_p;
 }
 
 // Getter function for path to filtered SRA sequence
