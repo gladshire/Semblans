@@ -19,8 +19,9 @@ void rem_unfix_pe(SRA sra) {
     return;
   }
   while (getline(inFile1, currLine1) && getline(inFile2, currLine2)) {
-    if (currLine1.find("unfixable") == std::string::npos &&
-        currLine2.find("unfixable") == std::string::npos) {
+    if (currLine1 == "+" || 
+       (currLine1.substr(currLine1.length()-5, 5) != "error" &&
+        currLine2.substr(currLine2.length()-5, 5) != "error")) {
       outFile1 << currLine1 << std::endl;
       outFile2 << currLine2 << std::endl;
     }
@@ -51,7 +52,7 @@ void rem_unfix_se(SRA sra) {
     std::cout << "Cannot open file(s)" << std::endl;
   }
   while (getline(inFile, currLine)) {
-    if (currLine.find("unfixable") == std::string::npos) {
+    if (currLine == "+" || currLine.substr(currLine.length()-5, 5) != "error") {
       outFile << currLine << std::endl;
     }
     else {
@@ -68,12 +69,13 @@ void rem_unfix_se(SRA sra) {
 void rem_unfix_bulk(std::vector<SRA> sras, std::string threads) {
   int threadNum = stoi(threads);
   std::vector<std::thread> procVec;
+  std::vector<std::thread>::iterator start = procVec.begin();
   for (int i = 0; i < sras.size(); i++) {
-    if (i >= threadNum) {
+    /*if (i >= threadNum) {
       std::cout << "Waiting to finish: " << sras[i - threadNum].get_accession() << std::endl;
       procVec.front().join();
       procVec.erase(procVec.begin());
-    }
+    }*/
     if (sras[i].is_paired()) {
       procVec.push_back(std::thread(rem_unfix_pe, sras[i]));
       std::cout << "Created process for: " << sras[i].get_accession() << std::endl;
@@ -81,6 +83,12 @@ void rem_unfix_bulk(std::vector<SRA> sras, std::string threads) {
     else {
       procVec.push_back(std::thread(rem_unfix_se, sras[i]));
       std::cout << "Created process for: " << sras[i].get_accession() << std::endl;
+    }
+    if (i == sras.size() - 1) {
+      procVec.back().join();
+    }
+    else {
+      procVec.back().detach();
     }
   }
 }
