@@ -29,6 +29,8 @@ class SRA {
     fs::path sra_path_raw_2;
     fs::path sra_path_corr_1;
     fs::path sra_path_corr_2;
+    fs::path sra_path_corr_fix_1;
+    fs::path sra_path_corr_fix_2;
     fs::path sra_path_trim_u1;
     fs::path sra_path_trim_u2;
     fs::path sra_path_trim_p1;
@@ -48,6 +50,7 @@ class SRA {
     std::pair<fs::path, fs::path> get_fastqc_dir();
     std::pair<fs::path, fs::path> get_sra_path_raw();
     std::pair<fs::path, fs::path> get_sra_path_corr();
+    std::pair<fs::path, fs::path> get_sra_path_corr_fix();
     std::pair<fs::path, fs::path> get_sra_path_trim_u();
     std::pair<fs::path, fs::path> get_sra_path_trim_p();
     std::pair<fs::path, fs::path> get_sra_path_filt();

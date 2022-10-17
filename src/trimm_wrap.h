@@ -1,4 +1,5 @@
 #include <boost/filesystem.hpp>
+#include "print_info.h"
 #include "sra.h"
 
 #define PATH_TRIMM std::string("../lib/Trimmomatic-0.39/trimmomatic-0.39.jar")

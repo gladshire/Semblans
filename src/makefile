@@ -3,7 +3,7 @@ CFLAGS = -Wl,-rpath,../lib/ -g -pthread
 LIBS = -L../lib/ -lboost_system -lboost_filesystem -lconfini
 BOOST_PATH = -I../lib/boost_1_80_0
 INCLUDE_PATH = -I../lib/ -I../include
-OBJ_LINK = preprocess.o sra.o ini_parse.o sra_toolkit.o fastqc_wrap.o rcorr_wrap.o rem_unfixable.o trimm_wrap.o kraken_wrap.o print_info.o
+OBJ_LINK = preprocess.o sra.o ini_parse.o sra_toolkit.o fastqc_wrap.o rcorr_wrap.o thread_pool.o rem_unfixable.o trimm_wrap.o kraken_wrap.o print_info.o
 
 
 preprocess: $(OBJ_LINK)
@@ -28,6 +28,8 @@ kraken_wrap.o: kraken_wrap.cpp kraken_wrap.h
 	$(CC) $(CFLAGS) $(BOOST_PATH) $(INCLUDE_PATH) -c kraken_wrap.cpp $(LIBS)
 print_info.o: print_info.cpp print_info.h
 	$(CC) $(CFLAGS) $(BOOST_PATH) $(INCLUDE_PATH) -c print_info.cpp $(LIBS)
+thread_pool.o: thread_pool.cpp thread_pool.h
+	$(CC) $(CFLAGS) $(BOOST_PATH) $(INCLUDE_PATH) -c thread_pool.cpp $(LIBS)
 clean:
 	rm ini_parse.o
 	rm sra_toolkit.o
@@ -39,3 +41,4 @@ clean:
 	rm rem_unfixable.o
 	rm trimm_wrap.o
 	rm kraken_wrap.o
+	rm thread_pool.o

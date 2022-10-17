@@ -1,8 +1,9 @@
 #include <iostream>
 #include <fstream>
-#include <thread>
 #include <boost/filesystem.hpp>
+#include "print_info.h"
 #include "sra.h"
+#include "thread_pool.h"
 
 void rem_unfix_pe(SRA sra);
 

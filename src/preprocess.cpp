@@ -46,12 +46,15 @@ int main(int argc, char * argv[]) {
     INI_MAP cfgIni = make_ini_map(argv[1]);
     std::string threads = argv[2];
     std::vector<SRA> sras = get_sras(cfgIni);
+    std::vector<std::string> kraken2Dbs = get_kraken2_dbs(cfgIni);
     
     make_proj_space(cfgIni);
     retrieve_sra_data(sras, threads);
     run_fastqc(sras, threads);
     run_rcorr(sras, threads);
     rem_unfix_bulk(sras, threads);
+    run_trimmomatic(sras, threads);
+    run_kraken2_dbs(sras, threads, kraken2Dbs);
   }
 
   return 0;
