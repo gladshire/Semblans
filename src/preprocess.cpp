@@ -2,7 +2,7 @@
 
 std::vector<std::string> stepDirs = {"00-Raw_reads/", "01-Quality_analysis_1/",
                                      "02-Error_correction/", "03-Trimming/",
-                                     "04-Filtering/"};
+                                     "04-Filter_foreign/", "05-Filter_overrepresented/"};
 
 
 std::vector<SRA> get_sras(const INI_MAP &iniFile) {
@@ -35,27 +35,35 @@ void print_help() {
   std::cout << "\n" << "NAME_OF_PROGRAM" << " - "
             << "A tool for bulk assemblies of de novo transcriptome data" << std::endl;
   std::cout << "\n" << "COMMAND STRUCTURE" << std::endl;
-  std::cout << "\n" << "preprocess PATH/TO/CONFIG.INI num_threads" << std::endl;
+  std::cout << "\n" << "preprocess PATH/TO/CONFIG.INI num_threads RAM_GB" << std::endl;
 }
 int main(int argc, char * argv[]) {
-  if (argc != 3) {
+  if (argc != 4) {
     print_help();
     return 0;
   }
   else {
     INI_MAP cfgIni = make_ini_map(argv[1]);
     std::string threads = argv[2];
+    std::string ram_gb = argv[3];
     std::vector<SRA> sras = get_sras(cfgIni);
     std::vector<std::string> kraken2Dbs = get_kraken2_dbs(cfgIni);
-    
+    std::pair<std::vector<std::string>, std::vector<std::string>> overrepSeqs;
     make_proj_space(cfgIni);
     retrieve_sra_data(sras, threads);
     run_fastqc(sras, threads);
     run_rcorr(sras, threads);
-    rem_unfix_bulk(sras, threads);
+    rem_unfix_bulk(sras, threads, ram_gb);
     run_trimmomatic(sras, threads);
     run_kraken2_dbs(sras, threads, kraken2Dbs);
-    std::pair<std::vector<std::string>, std::vector<std::string>> overrepPair = get_overrep_seqs_pe(sras[0]);
+    overrepSeqs = get_overrep_seqs_pe(sras[0]);
+
+    for (auto s : overrepSeqs.first) {
+      std::cout << s << std::endl;
+    }
+    for (auto s : overrepSeqs.second) {
+      std::cout << s << std::endl;
+    }
   }
 
   return 0;

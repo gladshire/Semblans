@@ -68,11 +68,11 @@ void run_kraken2(std::vector<SRA> sras, std::string threads, std::string db, boo
               " --report " + outDir + "/" + sra.make_file_str() + "." +
               dbPath.filename().c_str() + ".report").c_str());
     }
-    std::string tmpIn1 = std::string(sra.get_sra_path_filt().first.parent_path().c_str()) + "/INPUT1.fq";
-    std::string tmpIn2 = std::string(sra.get_sra_path_filt().first.parent_path().c_str()) + "/INPUT2.fq";
-    std::remove(tmpIn1.c_str());
-    std::remove(tmpIn2.c_str());
   }
+  std::string tmpIn1 = std::string(sras[0].get_sra_path_filt().first.parent_path().c_str()) + "/INPUT1.fq";
+  std::string tmpIn2 = std::string(sras[0].get_sra_path_filt().first.parent_path().c_str()) + "/INPUT2.fq";
+  std::remove(tmpIn1.c_str());
+  std::remove(tmpIn2.c_str());
 }
 
 

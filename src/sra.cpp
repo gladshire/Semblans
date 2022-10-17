@@ -21,7 +21,7 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni) {
   std::string apiKey(cfgIni["General"]["api_key"]);
   std::chrono::milliseconds queryLim(500);
   if (apiKey != "") {
-    std::chrono::milliseconds queryLim(105);
+    std::chrono::milliseconds queryLim(150);
   }
 
   // Download temp XML file for SRA accession, containing information for object members
@@ -102,7 +102,7 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni) {
     std::string sra_path_trim_p1_str(sra_path_trim_u1.c_str());
     std::string sra_path_filt_1_str(sra_path_filt_1.c_str());
     sra_path_raw_1 = (sra_path_raw_1_str.insert(sra_path_raw_1_str.length() - 6, "_1")).c_str();
-    fastqc_dir_1 = (fastqc_dir_1_str.insert(fastqc_dir_1_str.length() - 1, "_1")).c_str();
+    fastqc_dir_1 = (fastqc_dir_1_str.insert(fastqc_dir_1_str.length(), "_1")).c_str();
     sra_path_corr_1 = (sra_path_corr_1_str.insert(sra_path_corr_1_str.length() - 7, "_1")).c_str();
     sra_path_corr_fix_1 = (sra_path_corr_fix_1_str.insert(sra_path_corr_fix_1_str.length() - 11, "_1")).c_str();
     sra_path_trim_u1 = (sra_path_trim_u1_str.insert(sra_path_trim_u1_str.length() - 8, "_1.unpaired")).c_str();

@@ -3,7 +3,7 @@
 std::vector<std::thread> procVec;
 std::mutex threadMutex;
 
-void rem_unfix_pe(SRA sra) {
+void rem_unfix_pe(SRA sra, long long int ram_b) {
   std::string inFile1Str(sra.get_sra_path_corr().first.c_str());
   std::string inFile2Str(sra.get_sra_path_corr().second.c_str());
   std::string outFile1Str(std::string(sra.get_sra_path_corr().first.replace_extension("fix.fq").c_str()));
@@ -20,33 +20,46 @@ void rem_unfix_pe(SRA sra) {
     std::cout << "Cannot open file(s)" << std::endl;
     return;
   }
-  while (getline(inFile1, currLine1) && getline(inFile2, currLine2)) {
-  /*char buffer1[1024];
-  char buffer2[1024];
-  char * buffer1L;
-  char * buffer2L;
-  char * nl1c;
-  char * nl2c;
-  char * nl1l;
-  char * nl2l;
 
-  while (!inFile1.eof() && !inFile2.eof()) {
-    inFile1.read(buffer1, buffer1.sizeof());
-    inFile2.read(buffer2, buffer2.sizeof());
-    std::streamsize s1 = inFile1.gcount();
-    std::streamsize s2 = inFile2.gcount();
-    nl1c = strtok(buffer1, '\n');
-    nl2c = strtok(buffer2, '\n');
-    nl1l = buffer1;
-    nl2l = buffer2;
-    while (nlc1 != NULL || nlc2 != NULL) {
-      if (strcmp(nl1c - 5, "error") == 0 ||
-          strcmp(nl2c - 5, "error") == 0) {
-        if (nl1c - buffer1 < nl2c - buffer2) {
-          
-        }
-      }
-   */   
+  /*long long int ram_b_per_file = ram_b / 2;
+
+  inFile1.seekg(0, inFile1.end);
+  long int lenFile1 = inFile1.tellg();
+  inFile1.seekg(0, inFile1.beg);
+
+  inFile2.seekg(0, inFile2.end);
+  long int lenFile2 = inFile2.tellg();
+  inFile2.seekg(0, inFile2.beg);
+
+  std::string inFile1Data;
+  std::string inFile2Data;
+
+  std::streamsize s1;
+  std::streamsize s2;
+
+  inFile1Data.reserve(ram_b_per_file);
+  inFile2Data.reserve(ram_b_per_file);
+
+  size_t currPos1 = 0;
+  size_t currPos2 = 0;
+  size_t nlPos1;
+  size_t nlPos2;
+
+  while(!inFile1.eof() && !inFile2.eof()) {
+    fread(inFile1Data, ram_b_per_file, inFile1);
+    fread(inFile2Data, ram_b_per_file, inFile2);
+    s1 = inFile1.gcount();
+    s2 = inFile2.gcount();
+
+    // Unstream end of buffer to just before last '@' or '>' character in inFile1, inFile2
+    // Remove characters from inFile1Data, inFile2Data appropriately
+    //
+    // Purpose: removes edge cases, allows for 4-line processing, increasing
+    //          parse time by: 4RT() - T(unget)
+
+  }*/
+
+  while (getline(inFile1, currLine1) && getline(inFile2, currLine2)) {
     if (currLine1.size() == 1 || 
        (currLine1.compare(currLine1.length()-5, 5, "error") != 0 &&
         currLine2.compare(currLine2.length()-5, 5, "error") != 0)) {
@@ -67,7 +80,7 @@ void rem_unfix_pe(SRA sra) {
 }
 
 
-void rem_unfix_se(SRA sra) {
+void rem_unfix_se(SRA sra, long long int ram_b) {
   std::string inFileStr(sra.get_sra_path_corr().first.c_str());
   std::string outFileStr(std::string(sra.get_sra_path_corr().first.replace_extension("fix.fq").c_str()));
 
@@ -95,11 +108,14 @@ void rem_unfix_se(SRA sra) {
 }
 
 
-void rem_unfix_bulk(std::vector<SRA> sras, std::string threads) {
+void rem_unfix_bulk(std::vector<SRA> sras, std::string threads, std::string ram_gb) {
   std::cout << "\nRemoving unfixable reads for:\n" << std::endl;
   summarize_all_sras(sras);
 
   int threadNum = stoi(threads);
+  long long int ram_b = stoi(ram_gb) * 1000000000 - 1000;
+  long long int ram_b_per_thread = ram_b / threadNum;
+
   threadPool fileCorrPool;
   fileCorrPool.start(threadNum);
   for (auto sra : sras) {
@@ -108,10 +124,10 @@ void rem_unfix_bulk(std::vector<SRA> sras, std::string threads) {
       continue;
     }
     if (sra.is_paired()) {
-      fileCorrPool.queueJob([sra] {rem_unfix_pe(sra);});
+      fileCorrPool.queueJob([sra, ram_b_per_thread] {rem_unfix_pe(sra, ram_b_per_thread);});
     }
     else {
-      fileCorrPool.queueJob([sra] {rem_unfix_se(sra);});
+      fileCorrPool.queueJob([sra, ram_b_per_thread] {rem_unfix_se(sra, ram_b_per_thread);});
     }
   }
   fileCorrPool.stop();
