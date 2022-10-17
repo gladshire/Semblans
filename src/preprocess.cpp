@@ -55,6 +55,7 @@ int main(int argc, char * argv[]) {
     rem_unfix_bulk(sras, threads);
     run_trimmomatic(sras, threads);
     run_kraken2_dbs(sras, threads, kraken2Dbs);
+    std::pair<std::vector<std::string>, std::vector<std::string>> overrepPair = get_overrep_seqs_pe(sras[0]);
   }
 
   return 0;

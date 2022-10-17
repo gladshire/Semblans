@@ -1,12 +1,9 @@
+#pragma once
 #include <iostream>
 #include <fstream>
-#include <regex>
+#include <sstream>
 #include <boost/filesystem.hpp>
+#include <boost/regex.hpp>
 #include "sra.h"
-#include "thread_pool.h"
 
-void rem_overrep_se(SRA sra);
-
-void rem_overrep_pe(SRA sra);
-
-void rem_overrep_bulk(std::vector<SRA>, std::string threads);
+std::pair<std::vector<std::string>, std::vector<std::string>> get_overrep_seqs_pe(SRA sra); 
