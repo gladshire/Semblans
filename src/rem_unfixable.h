@@ -1,5 +1,7 @@
 #pragma once
 #include <iostream>
+#include <cstring>
+#include <algorithm>
 #include <fstream>
 #include <sstream>
 #include <boost/filesystem.hpp>

@@ -53,17 +53,10 @@ int main(int argc, char * argv[]) {
     retrieve_sra_data(sras, threads);
     run_fastqc(sras, threads);
     run_rcorr(sras, threads);
-    rem_unfix_bulk(sras, threads, ram_gb);
+    //rem_unfix_bulk(sras, threads, ram_gb);
+    rem_unfix_pe(sras[0], 1000000000);
     run_trimmomatic(sras, threads);
     run_kraken2_dbs(sras, threads, kraken2Dbs);
-    overrepSeqs = get_overrep_seqs_pe(sras[0]);
-
-    for (auto s : overrepSeqs.first) {
-      std::cout << s << std::endl;
-    }
-    for (auto s : overrepSeqs.second) {
-      std::cout << s << std::endl;
-    }
   }
 
   return 0;
