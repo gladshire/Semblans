@@ -51,7 +51,7 @@ void rem_unfix_pe(SRA sra, long long int ram_b) {
 
   std::string readMatch;
   std::string read;
-  while (!inFile1.eof() && !inFile2.eof()) {
+  while (!inFile1.eof() || !inFile2.eof()) {
     inFile1.read(inFile1Data, ram_b_per_file);
     inFile2.read(inFile2Data, ram_b_per_file);
 
@@ -68,93 +68,132 @@ void rem_unfix_pe(SRA sra, long long int ram_b) {
     inFile1L = inFile1Data + s1;
     inFile2L = inFile2Data + s2;
 
-    // Unget character until end of inFile1 / inFile2 buffer before a read
-    while ((inFile1.peek() != '@' && inFile1.peek() != '>') &&
-           (inFile2.peek() != '@' && inFile2.peek() != '>')) {
-      if (inFile1.peek() != '@' && inFile1.peek() != '>') {
-        inFile1.unget();
-        inFile1Data[s1 - 1] = '\0';
-        s1--;
+    if (!inFile1.eof() && !inFile2.eof()) {
+      while ((inFile1.peek() != '@' && inFile1.peek() != '>') &&
+             (inFile2.peek() != '@' && inFile2.peek() != '>')) {
+        if (inFile1.peek() != '@' && inFile1.peek() != '>') {
+          inFile1.unget();
+          inFile1Data[s1 - 1] = '\0';
+          s1--;
+        }
+        if (inFile2.peek() != '@' && inFile2.peek() != '>') {
+          inFile2.unget();
+          inFile2Data[s2 - 1] = '\0';
+          s2--; 
+        }
       }
-      if (inFile2.peek() != '@' && inFile2.peek() != '>') {
-        inFile2.unget();
-        inFile2Data[s2 - 1] = '\0';
-        s2--;
+
+      // TODO: Whichever branch is entered here results in file stream
+      //       being one read behind buffer content.
+      //
+      //       For every chunk, a read is duplicated
+      if (inFile1.peek() == '@' || inFile1.peek() == '>') {
+        inFile1.get();
+        inFile1 >> readMatch;
+        while (inFile1.peek() != '@' && inFile1.peek() != '>') {
+          inFile1.unget();
+        }
+        while (inFile2.peek() != '@' && inFile2.peek() != '>') {
+          inFile2.unget();
+          inFile2Data[s2 - 1] = '\0';
+          s2--;
+        }
+        inFile2.get();
+        inFile2 >> read;
+        while (inFile2.peek() != '@' && inFile2.peek() != '>') {
+          inFile2.unget();
+        }
+        if (read > readMatch) {
+          while (read.compare(readMatch) != 0) {
+            while (inFile2.peek() != '@' && inFile2.peek() != '>') {
+              inFile2.unget();
+              inFile2Data[s2 - 1] = '\0';
+              s2--;
+            }
+            inFile2.get();
+            inFile2 >> read;
+            while (inFile2.peek() != '@' && inFile2.peek() != '>') {
+              inFile2.unget();
+            }
+            inFile2.unget();
+          }
+          inFile2.get();
+        }
+        else if (read < readMatch) {
+          while (read.compare(readMatch) != 0) {
+            while (inFile1.peek() != '@' && inFile1.peek() != '>') {
+              inFile1.unget();
+              inFile1Data[s1 - 1] = '\0';
+              s1--;
+            }
+            inFile1.get();
+            inFile1 >> readMatch;
+            while (inFile1.peek() != '@' && inFile1.peek() != '>') {
+              inFile1.unget();
+            }
+            inFile1.unget();
+          }
+          inFile1.get();
+        }
+        else {
+          // Buffer in position -- do nothing
+        }
+      }
+
+      else {
+        inFile2.get();
+        inFile2 >> readMatch;
+        while (inFile2.peek() != '@' && inFile2.peek() != '>') {
+          inFile2.unget();
+        }
+        while (inFile1.peek() != '@' && inFile1.peek() != '>') {
+          inFile1.unget();
+          inFile1Data[s1 - 1] = '\0';
+          s1--;
+        }
+        inFile1.get();
+        inFile1 >> read;
+        while (inFile1.peek() != '@' && inFile1.peek() != '>') {
+          inFile1.unget();
+        }
+        if (read > readMatch) {
+          while (read.compare(readMatch) != 0) {
+            while (inFile1.peek() != '@' && inFile1.peek() != '>') {
+              inFile1.unget();
+              inFile1Data[s1 - 1] = '\0';
+              s1--;
+            }
+            inFile1.get();
+            inFile1 >> read;
+            while (inFile1.peek() != '@' && inFile1.peek() != '>') {
+              inFile1.unget();
+            }
+            inFile1.unget();
+          }
+          inFile1.get();
+        }
+        else if (read < readMatch) {
+          while (read.compare(readMatch) != 0) {
+            while (inFile2.peek() != '@' && inFile2.peek() != '>') {
+              inFile2.unget();
+              inFile2Data[s2 - 1] = '\0';
+              s2--;
+            }
+            inFile2.get();
+            inFile2 >> readMatch;
+            while (inFile2.peek() != '@' && inFile2.peek() != '>') {
+              inFile2.unget();
+            }
+            inFile2.unget();
+          }
+          inFile2.get();
+        }
+        else {
+          // Buffer in position -- do nothing
+        }
       }
     }
 
-    // inFile1 buffer in correct position
-    // Correctly position the end of inFile2 buffer
-    if (inFile1.peek() == '@' || inFile1.peek() == '>') {
-      inFile1.get();
-      inFile1 >> readMatch;
-      while (inFile1.peek() != '@' && inFile1.peek() != '>') {
-        inFile1.unget();
-      }
-      while (inFile2.peek() != '@' && inFile2.peek() != '>') {
-        inFile2.unget();
-        inFile2Data[s2 - 1] = '\0';
-        s2--; 
-      }
-      inFile2.get();
-      inFile2 >> read;
-      if (read > readMatch) {
-        while (read.compare(readMatch)) {
-          // Unget file2 until '@' or '>' reached
-          // Decrement s2 accordingly
-          // Remove last char from inFile2Data accordingly
-          // Get new read string
-        }
-      }
-      else if (read < readMatch) {
-        while (read.compare(readMatch)) {
-          // Get file2 until '@' or '>' reached
-          // Increment s2 accordingly
-          // Add last char to inFile2Data accordingly
-          // Get new read string
-        }
-      }
-      else {
-        // Buffer in position -- do nothing
-      }
-    }
-
-    // inFile2 buffer in correct position
-    // Correctly position the end of inFile1 buffer
-    else {
-      inFile2.get();
-      inFile2 >> readMatch;
-      while (inFile2.peek() != '@' && inFile2.peek() != '>') {
-        inFile2.unget();
-      }
-      while (inFile1.peek() != '@' && inFile2.peek() != '>') {
-        inFile1.unget();
-        inFile1Data[s1 - 1] = '\0';
-        s1--;
-      }
-      inFile1.get();
-      inFile1 >> read;
-      if (read > readMatch) {
-        while (read.compare(readMatch)) {
-          // Unget file1 until '@' or '>' reached
-          // Decrement s1 accordingly
-          // Remove last char from inFile1Data accordingly
-          // Get new read string
-        }
-      }
-      else if (read < readMatch) {
-        while (read.compare(readMatch)) {
-          // Get file1 until '@' or '>' reached
-          // Increment s1 accordingly
-          // Add last char to inFile2Data accordingly
-          // Get new read string
-        }
-      }
-      else {
-        // Buffer in position -- do nothing
-      }
-    }
-    
     while (nlPos1 != inFile1L && nlPos2 != inFile2L) {
       nlPos1Prev = nlPos1;
       nlPos2Prev = nlPos2;
