@@ -3,36 +3,52 @@
 std::vector<std::thread> procVec;
 std::mutex threadMutex;
 
+
+// Notes:
+//  - Concurrent file writing bad
+//  - Fastest file reading/writing:
+//    - Use buffer in RAM
+//    - Find optimal size, based on user's choice
+//      - char * limit: 65535
+//      - Possibly use strings?
+//        - Would need to adapt algo to work on strings
+
 void rem_unfix_pe(SRA sra, long long int ram_b) {
   std::string inFile1Str(sra.get_sra_path_corr().first.c_str());
   std::string inFile2Str(sra.get_sra_path_corr().second.c_str());
-  std::string outFile1Str(std::string(sra.get_sra_path_corr().first.replace_extension("fixB.fq").c_str()));
-  std::string outFile2Str(std::string(sra.get_sra_path_corr().second.replace_extension("fixB.fq").c_str()));
+  std::string outFile1Str(std::string(sra.get_sra_path_corr().first.replace_extension("fix.fq").c_str()));
+  std::string outFile2Str(std::string(sra.get_sra_path_corr().second.replace_extension("fix.fq").c_str()));
   std::ifstream inFile1(inFile1Str);
   std::ifstream inFile2(inFile2Str);
   std::ofstream outFile1(outFile1Str);
   std::ofstream outFile2(outFile2Str);
 
-  std::string currLine1;
-  std::string currLine2;
-
-  if (!inFile1.is_open() || !inFile2.is_open()) {
-    std::cout << "Cannot open file(s)" << std::endl;
-    return;
-  }
 
   long long int ram_b_per_file = ram_b / 2;
 
   inFile1.seekg(0, inFile1.end);
   long int lenFile1 = inFile1.tellg();
-  inFile1.seekg(0, inFile1.beg);
+  inFile1.seekg(0);
 
   inFile2.seekg(0, inFile2.end);
   long int lenFile2 = inFile2.tellg();
-  inFile2.seekg(0, inFile2.beg);
+  inFile2.seekg(0);
 
-  char * inFile1Data = new char[ram_b_per_file];
-  char * inFile2Data = new char[ram_b_per_file];
+  char * inFile1Data;
+  char * inFile2Data;
+
+  long long int writeSize;
+
+  inFile1Data = new char[ram_b_per_file];
+  inFile2Data = new char[ram_b_per_file];
+  writeSize = ram_b_per_file;
+
+
+  /*int writeSize = 4096;
+
+  char inFile1Data[writeSize];
+  char inFile2Data[writeSize];
+*/
   std::streamsize s1;
   std::streamsize s2;
 
@@ -52,8 +68,8 @@ void rem_unfix_pe(SRA sra, long long int ram_b) {
   std::string readMatch;
   std::string read;
   while (!inFile1.eof() || !inFile2.eof()) {
-    inFile1.read(inFile1Data, ram_b_per_file);
-    inFile2.read(inFile2Data, ram_b_per_file);
+    inFile1.read(inFile1Data, writeSize);
+    inFile2.read(inFile2Data, writeSize);
 
     s1 = inFile1.gcount();
     s2 = inFile2.gcount();
@@ -83,10 +99,6 @@ void rem_unfix_pe(SRA sra, long long int ram_b) {
         }
       }
 
-      // TODO: Whichever branch is entered here results in file stream
-      //       being one read behind buffer content.
-      //
-      //       For every chunk, a read is duplicated
       if (inFile1.peek() == '@' || inFile1.peek() == '>') {
         inFile1.get();
         inFile1 >> readMatch;
@@ -104,6 +116,7 @@ void rem_unfix_pe(SRA sra, long long int ram_b) {
           inFile2.unget();
         }
         if (read > readMatch) {
+          inFile2.unget();
           while (read.compare(readMatch) != 0) {
             while (inFile2.peek() != '@' && inFile2.peek() != '>') {
               inFile2.unget();
@@ -116,10 +129,13 @@ void rem_unfix_pe(SRA sra, long long int ram_b) {
               inFile2.unget();
             }
             inFile2.unget();
+            inFile2Data[s2 - 1] = '\0';
+            s2--;
           }
           inFile2.get();
         }
         else if (read < readMatch) {
+          inFile1.unget();
           while (read.compare(readMatch) != 0) {
             while (inFile1.peek() != '@' && inFile1.peek() != '>') {
               inFile1.unget();
@@ -132,6 +148,8 @@ void rem_unfix_pe(SRA sra, long long int ram_b) {
               inFile1.unget();
             }
             inFile1.unget();
+            inFile1Data[s1 - 1] = '\0';
+            s1--;
           }
           inFile1.get();
         }
@@ -157,6 +175,7 @@ void rem_unfix_pe(SRA sra, long long int ram_b) {
           inFile1.unget();
         }
         if (read > readMatch) {
+          inFile1.unget();
           while (read.compare(readMatch) != 0) {
             while (inFile1.peek() != '@' && inFile1.peek() != '>') {
               inFile1.unget();
@@ -169,10 +188,13 @@ void rem_unfix_pe(SRA sra, long long int ram_b) {
               inFile1.unget();
             }
             inFile1.unget();
+            inFile1Data[s1 - 1] = '\0';
+            s1--;
           }
           inFile1.get();
         }
         else if (read < readMatch) {
+          inFile2.unget();
           while (read.compare(readMatch) != 0) {
             while (inFile2.peek() != '@' && inFile2.peek() != '>') {
               inFile2.unget();
@@ -185,6 +207,8 @@ void rem_unfix_pe(SRA sra, long long int ram_b) {
               inFile2.unget();
             }
             inFile2.unget();
+            inFile2Data[s2 - 1] = '\0';
+            s2--;
           }
           inFile2.get();
         }
@@ -217,24 +241,6 @@ void rem_unfix_pe(SRA sra, long long int ram_b) {
     outFile1.write(writeStart1, inFile1Data + s1 - writeStart1);
     outFile2.write(writeStart2, inFile2Data + s2 - writeStart2);
   }
-/*
-  std::string currLine1;
-  std::string currLine1;
-  while (getline(inFile1, currLine1) && getline(inFile2, currLine2)) {
-    if (currLine1.size() == 1 || 
-       (currLine1.compare(currLine1.length()-5, 5, "error") != 0 &&
-        currLine2.compare(currLine2.length()-5, 5, "error") != 0)) {
-      outFile1 << currLine1 << '\n';
-      outFile2 << currLine2 << '\n';
-    }
-    else {
-      for (int i = 0; i < 3; i++) {
-        getline(inFile1, currLine1);
-        getline(inFile2, currLine2);
-      }
-    }
-  }
-*/
   inFile1.close();
   inFile2.close();
   outFile1.close();
@@ -249,48 +255,70 @@ void rem_unfix_se(SRA sra, long long int ram_b) {
   std::ifstream inFile(inFileStr);
   std::ofstream outFile(outFileStr);
 
-  std::string currLine;
+  inFile.seekg(0, inFile.end);
+  long int lenFile = inFile.tellg();
+  inFile.seekg(0, inFile.beg);
 
-  if (!inFile.is_open()) {
-    std::cout << "Cannot open file(s)" << std::endl;
-  }
-  while (getline(inFile, currLine)) {
-    if (currLine.size() == 1 ||
-        currLine.compare(currLine.length()-5, 5, "error") != 0) {
-      outFile << currLine << '\n';
-    }
-    else {
-      for (int i = 0; i < 3; i++) {
-        getline(inFile, currLine);
+  char * inFileData = new char[ram_b];
+  std::streamsize s;
+
+  char * currPos;
+  char * nlPos;
+  char * nlPosPrev;
+  char * writeStart;
+  char * writeEnd;
+  char * inFileL;
+
+  while (!inFile.eof()) {
+    inFile.read(inFileData, ram_b);
+    s = inFile.gcount();
+    currPos = inFileData;
+    nlPos = inFileData;
+    writeStart = inFileData;
+    inFileL = inFileData + s;
+
+    if (!inFile.eof()) {
+      while (inFile.peek() != '@' && inFile.peek() != '>') {
+        inFile.unget();
+        inFileData[s - 1] = '\0';
+        s--;
       }
     }
+
+    while (nlPos != inFileL) {
+      nlPosPrev = nlPos;
+      nlPos = std::find(nlPos + 1, inFileL, '\n');
+      if (strncmp(nlPos - 5, "error", 4) == 0) {
+        writeEnd = nlPosPrev;
+        outFile.write(writeStart, writeEnd - writeStart);
+
+        for (int i = 0; i < 3; i++) {
+          nlPos = std::find(nlPos + 1, inFileL, '\n');
+        }
+        writeStart = nlPos;
+      }
+    }
+    outFile.write(writeStart, inFileData + s - writeStart);
   }
   inFile.close();
   outFile.close();
 }
 
 
-void rem_unfix_bulk(std::vector<SRA> sras, std::string threads, std::string ram_gb) {
+void rem_unfix_bulk(std::vector<SRA> sras, std::string ram_gb) {
   std::cout << "\nRemoving unfixable reads for:\n" << std::endl;
   summarize_all_sras(sras);
-
-  int threadNum = stoi(threads);
-  long long int ram_b = stoi(ram_gb) * 1000000000 - 1000;
-  long long int ram_b_per_thread = ram_b / threadNum;
-
-  threadPool fileCorrPool;
-  fileCorrPool.start(threadNum);
+  long long int ram_b = stoi(ram_gb) * 1000000000;
   for (auto sra : sras) {
     if (fs::exists(sra.get_sra_path_corr_fix().first.c_str())) {
       std::cout << "Fixed version found for: " << sra.get_accession() << std::endl;
       continue;
     }
     if (sra.is_paired()) {
-      fileCorrPool.queueJob([sra, ram_b_per_thread] {rem_unfix_pe(sra, ram_b_per_thread);});
+      rem_unfix_pe(sra, ram_b);
     }
     else {
-      fileCorrPool.queueJob([sra, ram_b_per_thread] {rem_unfix_se(sra, ram_b_per_thread);});
+      rem_unfix_se(sra, ram_b);
     }
   }
-  fileCorrPool.stop();
 }

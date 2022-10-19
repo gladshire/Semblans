@@ -21,7 +21,7 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni) {
   std::string apiKey(cfgIni["General"]["api_key"]);
   std::chrono::milliseconds queryLim(500);
   if (apiKey != "") {
-    std::chrono::milliseconds queryLim(175);
+    std::chrono::milliseconds queryLim(200);
   }
 
   // Download temp XML file for SRA accession, containing information for object members
