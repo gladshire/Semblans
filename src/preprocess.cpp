@@ -53,10 +53,10 @@ int main(int argc, char * argv[]) {
     retrieve_sra_data(sras, threads);
     run_fastqc(sras, threads);
     run_rcorr(sras, threads);
-    //rem_unfix_bulk(sras, ram_gb);
-    rem_unfix_pe(sras[0], stoi(ram_gb) * 1000000000);
-    //run_trimmomatic(sras, threads);
-    //run_kraken2_dbs(sras, threads, kraken2Dbs);
+    rem_unfix_bulk(sras, ram_gb);
+    run_trimmomatic(sras, threads);
+    run_kraken2_dbs(sras, threads, kraken2Dbs);
+    rem_overrep_bulk(sras, ram_gb);
   }
 
   return 0;

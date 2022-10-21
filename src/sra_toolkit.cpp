@@ -31,3 +31,141 @@ void fasterq_sra(std::vector<SRA> sras, std::string threads) {
   }
 }
 
+
+void align_file_buffer(std::ifstream & inFile1, std::ifstream & inFile2,
+                       char * inFile1Data, char * inFile2Data,
+                       std::streamsize & s1, std::streamsize & s2) {
+  std::string read;
+  std::string readMatch;
+  if (!inFile1.eof() && !inFile2.eof()) {
+    while ((inFile1.peek() != '@' && inFile1.peek() != '>') &&
+           (inFile2.peek() != '@' && inFile2.peek() != '>')) {
+      if (inFile1.peek() != '@' && inFile1.peek() != '>') {
+        inFile1.unget();
+        inFile1Data[s1 - 1] = '\0';
+        s1--;
+      }
+      if (inFile2.peek() != '@' && inFile2.peek() != '>') {
+        inFile2.unget();
+        inFile2Data[s2 - 1] = '\0';
+        s2--;
+      }
+    }
+    if (inFile1.peek() == '@' || inFile1.peek() == '>') {
+      inFile1.get();
+      inFile1 >> readMatch;
+      while (inFile1.peek() != '@' && inFile1.peek() != '>') {
+        inFile1.unget();
+      }
+      while (inFile2.peek() != '@' && inFile2.peek() != '>') {
+        inFile2.unget();
+        inFile2Data[s2 - 1] = '\0';
+        s2--;
+      }
+      inFile2.get();
+      inFile2 >> read;
+      while (inFile2.peek() != '@' && inFile2.peek() != '>') {
+        inFile2.unget();
+      }
+      if (read > readMatch) {
+        inFile2.unget();
+        while (read.compare(readMatch) != 0) {
+          while (inFile2.peek() != '@' && inFile2.peek() != '>') {
+            inFile2.unget();
+            inFile2Data[s2 - 1] = '\0';
+            s2--;
+          }
+          inFile2.get();
+          inFile2 >> read;
+          while (inFile2.peek() != '@' && inFile2.peek() != '>') {
+            inFile2.unget();
+          }
+          inFile2.unget();
+          inFile2Data[s2 - 1] = '\0';
+          s2--;
+        }
+        inFile1.get();
+      }
+      else if (read < readMatch) {
+        inFile1.unget();
+        while (read.compare(readMatch) != 0) {
+          while (inFile1.peek() != '@' && inFile1.peek() != '>') {
+            inFile1.unget();
+            inFile1Data[s1 - 1] = '\0';
+            s1--;
+          }
+          inFile1.get();
+          inFile1 >> readMatch;
+          while (inFile1.peek() != '@' && inFile1.peek() != '>') {
+            inFile1.unget();
+          }
+          inFile1.unget();
+          inFile1Data[s1 - 1] = '\0';
+          s1--;
+        }
+        inFile1.get();
+      }
+      else {
+        // Buffer in position -- do nothing
+      }
+    }
+    else {
+      inFile2.get();
+      inFile2 >> readMatch;
+      while (inFile2.peek() != '@' && inFile2.peek() != '>') {
+        inFile2.unget();
+      }
+      while (inFile1.peek() != '@' && inFile1.peek() != '>') {
+        inFile1.unget();
+        inFile1Data[s1 - 1] = '\0';
+        s1--;
+      }
+      inFile1.get();
+      inFile1 >> read;
+      while (inFile1.peek() != '@' && inFile1.peek() != '>') {
+        inFile1.unget();
+      }
+      if (read > readMatch) {
+        inFile1.unget();
+        while (read.compare(readMatch) != 0) {
+          while (inFile1.peek() != '@' && inFile1.peek() != '>') {
+            inFile1.unget();
+            inFile1Data[s1 - 1] = '\0';
+            s1--;
+          }
+          inFile1.get();
+          inFile1 >> read;
+          while (inFile1.peek() != '@' && inFile1.peek() != '>') {
+            inFile1.unget();
+          }
+          inFile1.unget();
+          inFile1Data[s1 - 1] = '\0';
+          s1--;
+        }
+        inFile1.get();
+      }
+      else if (read < readMatch) {
+        inFile2.unget();
+        while (read.compare(readMatch) != 0) {
+          while (inFile2.peek() != '@' && inFile2.peek() != '>') {
+            inFile2.unget();
+            inFile2Data[s2 - 1] = '\0';
+            s2--;
+          }
+          inFile2.get();
+          inFile2 >> readMatch;
+          while (inFile2.peek() != '@' && inFile2.peek() != '>') {
+            inFile2.unget();
+          }
+          inFile2.unget();
+          inFile2Data[s2 - 1] = '\0';
+          s2--;
+        }
+        inFile2.get();
+      }
+      else {
+        // Buffer in position -- do nothing
+      }
+    }
+  }
+}

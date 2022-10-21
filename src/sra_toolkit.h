@@ -11,3 +11,7 @@ namespace fs = boost::filesystem;
 void prefetch_sra(std::vector<SRA> sras);
 
 void fasterq_sra(std::vector<SRA> sras, std::string threads);
+
+void align_file_buffer(std::ifstream & inFile1, std::ifstream & inFile2,
+                       char * inFile1Data, char * inFile2Data,
+                       std::streamsize & s1, std::streamsize & s2);

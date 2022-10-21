@@ -1,9 +1,5 @@
 #include "rem_unfixable.h"
 
-std::vector<std::thread> procVec;
-std::mutex threadMutex;
-
-
 // Notes:
 //  - Concurrent file writing bad
 //  - Fastest file reading/writing:
@@ -23,37 +19,17 @@ void rem_unfix_pe(SRA sra, long long int ram_b) {
   std::ofstream outFile1(outFile1Str);
   std::ofstream outFile2(outFile2Str);
 
-
   long long int ram_b_per_file = ram_b / 2;
 
-  inFile1.seekg(0, inFile1.end);
-  long int lenFile1 = inFile1.tellg();
-  inFile1.seekg(0);
+  std::string inFile1Data;
+  std::string inFile2Data;
 
-  inFile2.seekg(0, inFile2.end);
-  long int lenFile2 = inFile2.tellg();
-  inFile2.seekg(0);
+  inFile1Data.reserve(ram_b_per_file);
+  inFile2Data.reserve(ram_b_per_file);
 
-  char * inFile1Data;
-  char * inFile2Data;
-
-  long long int writeSize;
-
-  inFile1Data = new char[ram_b_per_file];
-  inFile2Data = new char[ram_b_per_file];
-  writeSize = ram_b_per_file;
-
-
-  /*int writeSize = 4096;
-
-  char inFile1Data[writeSize];
-  char inFile2Data[writeSize];
-*/
   std::streamsize s1;
   std::streamsize s2;
 
-  char * currPos1;
-  char * currPos2;
   char * nlPos1;
   char * nlPos2;
   char * nlPos1Prev;
@@ -65,158 +41,22 @@ void rem_unfix_pe(SRA sra, long long int ram_b) {
   char * inFile1L;
   char * inFile2L;
 
-  std::string readMatch;
-  std::string read;
   while (!inFile1.eof() || !inFile2.eof()) {
-    inFile1.read(inFile1Data, writeSize);
-    inFile2.read(inFile2Data, writeSize);
+    inFile1.read(&inFile1Data[0], ram_b_per_file);
+    inFile2.read(&inFile2Data[0], ram_b_per_file);
 
     s1 = inFile1.gcount();
     s2 = inFile2.gcount();
 
-    currPos1 = inFile1Data;
-    currPos2 = inFile2Data;
-    nlPos1 = inFile1Data;
-    nlPos2 = inFile2Data;
-    writeStart1 = inFile1Data;
-    writeStart2 = inFile2Data;
+    nlPos1 = &inFile1Data[0];
+    nlPos2 = &inFile2Data[0];
+    writeStart1 = &inFile1Data[0];
+    writeStart2 = &inFile2Data[0];
 
-    inFile1L = inFile1Data + s1;
-    inFile2L = inFile2Data + s2;
+    inFile1L = &inFile1Data[0] + s1;
+    inFile2L = &inFile2Data[0] + s2;
 
-    if (!inFile1.eof() && !inFile2.eof()) {
-      while ((inFile1.peek() != '@' && inFile1.peek() != '>') &&
-             (inFile2.peek() != '@' && inFile2.peek() != '>')) {
-        if (inFile1.peek() != '@' && inFile1.peek() != '>') {
-          inFile1.unget();
-          inFile1Data[s1 - 1] = '\0';
-          s1--;
-        }
-        if (inFile2.peek() != '@' && inFile2.peek() != '>') {
-          inFile2.unget();
-          inFile2Data[s2 - 1] = '\0';
-          s2--; 
-        }
-      }
-
-      if (inFile1.peek() == '@' || inFile1.peek() == '>') {
-        inFile1.get();
-        inFile1 >> readMatch;
-        while (inFile1.peek() != '@' && inFile1.peek() != '>') {
-          inFile1.unget();
-        }
-        while (inFile2.peek() != '@' && inFile2.peek() != '>') {
-          inFile2.unget();
-          inFile2Data[s2 - 1] = '\0';
-          s2--;
-        }
-        inFile2.get();
-        inFile2 >> read;
-        while (inFile2.peek() != '@' && inFile2.peek() != '>') {
-          inFile2.unget();
-        }
-        if (read > readMatch) {
-          inFile2.unget();
-          while (read.compare(readMatch) != 0) {
-            while (inFile2.peek() != '@' && inFile2.peek() != '>') {
-              inFile2.unget();
-              inFile2Data[s2 - 1] = '\0';
-              s2--;
-            }
-            inFile2.get();
-            inFile2 >> read;
-            while (inFile2.peek() != '@' && inFile2.peek() != '>') {
-              inFile2.unget();
-            }
-            inFile2.unget();
-            inFile2Data[s2 - 1] = '\0';
-            s2--;
-          }
-          inFile2.get();
-        }
-        else if (read < readMatch) {
-          inFile1.unget();
-          while (read.compare(readMatch) != 0) {
-            while (inFile1.peek() != '@' && inFile1.peek() != '>') {
-              inFile1.unget();
-              inFile1Data[s1 - 1] = '\0';
-              s1--;
-            }
-            inFile1.get();
-            inFile1 >> readMatch;
-            while (inFile1.peek() != '@' && inFile1.peek() != '>') {
-              inFile1.unget();
-            }
-            inFile1.unget();
-            inFile1Data[s1 - 1] = '\0';
-            s1--;
-          }
-          inFile1.get();
-        }
-        else {
-          // Buffer in position -- do nothing
-        }
-      }
-
-      else {
-        inFile2.get();
-        inFile2 >> readMatch;
-        while (inFile2.peek() != '@' && inFile2.peek() != '>') {
-          inFile2.unget();
-        }
-        while (inFile1.peek() != '@' && inFile1.peek() != '>') {
-          inFile1.unget();
-          inFile1Data[s1 - 1] = '\0';
-          s1--;
-        }
-        inFile1.get();
-        inFile1 >> read;
-        while (inFile1.peek() != '@' && inFile1.peek() != '>') {
-          inFile1.unget();
-        }
-        if (read > readMatch) {
-          inFile1.unget();
-          while (read.compare(readMatch) != 0) {
-            while (inFile1.peek() != '@' && inFile1.peek() != '>') {
-              inFile1.unget();
-              inFile1Data[s1 - 1] = '\0';
-              s1--;
-            }
-            inFile1.get();
-            inFile1 >> read;
-            while (inFile1.peek() != '@' && inFile1.peek() != '>') {
-              inFile1.unget();
-            }
-            inFile1.unget();
-            inFile1Data[s1 - 1] = '\0';
-            s1--;
-          }
-          inFile1.get();
-        }
-        else if (read < readMatch) {
-          inFile2.unget();
-          while (read.compare(readMatch) != 0) {
-            while (inFile2.peek() != '@' && inFile2.peek() != '>') {
-              inFile2.unget();
-              inFile2Data[s2 - 1] = '\0';
-              s2--;
-            }
-            inFile2.get();
-            inFile2 >> readMatch;
-            while (inFile2.peek() != '@' && inFile2.peek() != '>') {
-              inFile2.unget();
-            }
-            inFile2.unget();
-            inFile2Data[s2 - 1] = '\0';
-            s2--;
-          }
-          inFile2.get();
-        }
-        else {
-          // Buffer in position -- do nothing
-        }
-      }
-    }
+    align_file_buffer(inFile1, inFile2, &inFile1Data[0], &inFile2Data[0], s1, s2);
 
     while (nlPos1 != inFile1L && nlPos2 != inFile2L) {
       nlPos1Prev = nlPos1;
@@ -238,8 +78,8 @@ void rem_unfix_pe(SRA sra, long long int ram_b) {
         writeStart2 = nlPos2;
       }
     }
-    outFile1.write(writeStart1, inFile1Data + s1 - writeStart1);
-    outFile2.write(writeStart2, inFile2Data + s2 - writeStart2);
+    outFile1.write(writeStart1, &inFile1Data[0] + s1 - writeStart1);
+    outFile2.write(writeStart2, &inFile2Data[0] + s2 - writeStart2);
   }
   inFile1.close();
   inFile2.close();
@@ -262,7 +102,6 @@ void rem_unfix_se(SRA sra, long long int ram_b) {
   char * inFileData = new char[ram_b];
   std::streamsize s;
 
-  char * currPos;
   char * nlPos;
   char * nlPosPrev;
   char * writeStart;
@@ -272,7 +111,6 @@ void rem_unfix_se(SRA sra, long long int ram_b) {
   while (!inFile.eof()) {
     inFile.read(inFileData, ram_b);
     s = inFile.gcount();
-    currPos = inFileData;
     nlPos = inFileData;
     writeStart = inFileData;
     inFileL = inFileData + s;
@@ -308,7 +146,7 @@ void rem_unfix_se(SRA sra, long long int ram_b) {
 void rem_unfix_bulk(std::vector<SRA> sras, std::string ram_gb) {
   std::cout << "\nRemoving unfixable reads for:\n" << std::endl;
   summarize_all_sras(sras);
-  long long int ram_b = stoi(ram_gb) * 1000000000;
+  long long int ram_b = (long long int)stoi(ram_gb) * 1000000000;
   for (auto sra : sras) {
     if (fs::exists(sra.get_sra_path_corr_fix().first.c_str())) {
       std::cout << "Fixed version found for: " << sra.get_accession() << std::endl;

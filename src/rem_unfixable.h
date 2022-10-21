@@ -5,6 +5,7 @@
 #include <fstream>
 #include <boost/filesystem.hpp>
 #include "print_info.h"
+#include "sra_toolkit.h"
 #include "sra.h"
 
 void rem_unfix_pe(SRA sra, long long int ram_b);

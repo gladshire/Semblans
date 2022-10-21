@@ -35,8 +35,10 @@ class SRA {
     fs::path sra_path_trim_u2;
     fs::path sra_path_trim_p1;
     fs::path sra_path_trim_p2;
-    fs::path sra_path_filt_1;
-    fs::path sra_path_filt_2;
+    fs::path sra_path_for_filt_1;
+    fs::path sra_path_for_filt_2;
+    fs::path sra_path_orep_filt_1;
+    fs::path sra_path_orep_filt_2;
   public:
     SRA();
     SRA(std::string sra_accession, INI_MAP cfgIni);
@@ -53,6 +55,7 @@ class SRA {
     std::pair<fs::path, fs::path> get_sra_path_corr_fix();
     std::pair<fs::path, fs::path> get_sra_path_trim_u();
     std::pair<fs::path, fs::path> get_sra_path_trim_p();
-    std::pair<fs::path, fs::path> get_sra_path_filt();
+    std::pair<fs::path, fs::path> get_sra_path_for_filt();
+    std::pair<fs::path, fs::path> get_sra_path_orep_filt();
     std::string make_file_str();
 };
