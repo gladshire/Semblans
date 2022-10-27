@@ -23,8 +23,8 @@ class SRA {
     int spots_m;
     long int bp;
     bool paired;
-    fs::path fastqc_dir_1;
-    fs::path fastqc_dir_2;
+    fs::path fastqc_dir_1_1;
+    fs::path fastqc_dir_2_1;
     fs::path sra_path_raw_1;
     fs::path sra_path_raw_2;
     fs::path sra_path_corr_1;
@@ -37,6 +37,8 @@ class SRA {
     fs::path sra_path_trim_p2;
     fs::path sra_path_for_filt_1;
     fs::path sra_path_for_filt_2;
+    fs::path fastqc_dir_1_2;
+    fs::path fastqc_dir_2_2;
     fs::path sra_path_orep_filt_1;
     fs::path sra_path_orep_filt_2;
   public:
@@ -49,13 +51,14 @@ class SRA {
     int get_spots_m();
     long int get_bp();
     bool is_paired();
-    std::pair<fs::path, fs::path> get_fastqc_dir();
+    std::pair<fs::path, fs::path> get_fastqc_dir_1();
     std::pair<fs::path, fs::path> get_sra_path_raw();
     std::pair<fs::path, fs::path> get_sra_path_corr();
     std::pair<fs::path, fs::path> get_sra_path_corr_fix();
     std::pair<fs::path, fs::path> get_sra_path_trim_u();
     std::pair<fs::path, fs::path> get_sra_path_trim_p();
     std::pair<fs::path, fs::path> get_sra_path_for_filt();
+    std::pair<fs::path, fs::path> get_fastqc_dir_2();
     std::pair<fs::path, fs::path> get_sra_path_orep_filt();
     std::string make_file_str();
 };

@@ -1,7 +1,7 @@
 #include "kraken_wrap.h"
 
 std::vector<std::string> get_kraken2_dbs(const INI_MAP &iniFile) {
-  std::string krakDbDir = iniFile.at("General").at("kraken2_db_directory");
+  std::string krakDbDir = iniFile.at("Kraken2 settings").at("db_directory");
   std::vector<std::string> kraken2Dbs;
   std::string dbPath;
   for (auto db : iniFile.at("Kraken2 filter order")) {
@@ -11,12 +11,19 @@ std::vector<std::string> get_kraken2_dbs(const INI_MAP &iniFile) {
   return kraken2Dbs;
 }
 
+
+std::string get_kraken2_conf(const INI_MAP &iniFile) {
+  return iniFile.at("Kraken2 settings").at("confidence_threshold");
+}
+
+
 void pre_summary(SRA sra, std::string db) {
   std::cout << "\nFor SRA accession: " << sra.get_accession() << std::endl;
 }
 
 
-void run_kraken2(std::vector<SRA> sras, std::string threads, std::string db, bool selfPass) {
+void run_kraken2(std::vector<SRA> sras, std::string threads, std::string db, 
+                 std::string conf_threshold, bool selfPass) {
   std::string outDir(sras[0].get_sra_path_for_filt().first.parent_path().c_str());
   std::string inFile1;
   std::string inFile2;
@@ -56,13 +63,14 @@ void run_kraken2(std::vector<SRA> sras, std::string threads, std::string db, boo
       }
       outFile = std::string(outFile).replace(outFile.length() - 10, 2, "#");
       system((krakCmd + " " + krakFlags + " " + outFile + " --paired " + "--output - " +
-              inFile1 + " " + inFile2 + " --report " + outDir + "/" + sra.make_file_str() +
-              "." + dbPath.filename().c_str() + ".report").c_str());
+              inFile1 + " " + inFile2 + " --confidence " + conf_threshold + " --report " +
+              outDir + "/" + sra.make_file_str() + "." + dbPath.filename().c_str() +
+              ".report").c_str());
     }
     else {
       system((krakCmd + " " + krakFlags + " " + outFile + "--output - " + inFile1 + " " +
-              " --report " + outDir + "/" + sra.make_file_str() + "." +
-              dbPath.filename().c_str() + ".report").c_str());
+              " --confidence " + conf_threshold + " --report " + outDir + "/" +
+              sra.make_file_str() + "." + dbPath.filename().c_str() + ".report").c_str());
     }
   }
   std::string tmpIn1 = std::string(sras[0].get_sra_path_for_filt().first.parent_path().c_str()) + "/INPUT1.fq";
@@ -72,17 +80,18 @@ void run_kraken2(std::vector<SRA> sras, std::string threads, std::string db, boo
 }
 
 
-void run_kraken2_dbs(std::vector<SRA> sras, std::string threads, std::vector<std::string> dbs) {
+void run_kraken2_dbs(std::vector<SRA> sras, std::string threads, std::vector<std::string> dbs,
+                     std::string conf_threshold) {
   std::cout << "\nFiltering foreign reads for:\n" << std::endl;
   summarize_all_sras(sras);
   int i = 0;
   for (auto db : dbs) {
     std::cout << "\nNow filtering: " << fs::path(db.c_str()).filename().c_str() << std::endl;
     if (i == 0) {
-      run_kraken2(sras, threads, db, false);
+      run_kraken2(sras, threads, db, conf_threshold, false);
     }
     else {
-      run_kraken2(sras, threads, db, true);
+      run_kraken2(sras, threads, db, conf_threshold, true);
     }
     i++;
   }

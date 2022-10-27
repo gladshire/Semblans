@@ -4,8 +4,8 @@ std::pair<std::vector<std::string>, std::vector<std::string>> get_overrep_seqs_p
   std::vector<std::string> overrepSeqs1;
   std::vector<std::string> overrepSeqs2;
 
-  std::string inFile1Str(std::string(sra.get_fastqc_dir().first.c_str()) + "_fastqc.html");
-  std::string inFile2Str(std::string(sra.get_fastqc_dir().second.c_str()) + "_fastqc.html");
+  std::string inFile1Str(std::string(sra.get_fastqc_dir_2().first.c_str()) + ".filt_fastqc.html");
+  std::string inFile2Str(std::string(sra.get_fastqc_dir_2().second.c_str()) + ".filt_fastqc.html");
 
   std::ifstream inFile1(inFile1Str);
   std::ifstream inFile2(inFile2Str);
@@ -48,7 +48,7 @@ std::pair<std::vector<std::string>, std::vector<std::string>> get_overrep_seqs_p
 std::vector<std::string> get_overrep_seqs_se(SRA sra) {
   std::vector<std::string> overrepSeqs;
 
-  std::string inFileStr(std::string(sra.get_fastqc_dir().first.c_str()) + "_fastqc.html");
+  std::string inFileStr(std::string(sra.get_fastqc_dir_2().first.c_str()) + "_fastqc.html");
 
   std::ifstream inFile(inFileStr);
 
@@ -85,8 +85,17 @@ void rem_overrep_pe(SRA sra, long long int ram_b,
   std::ofstream outFile1(outFile1Str);
   std::ofstream outFile2(outFile2Str);
 
-  int lenOverReps1 = overrepSeqs.first.front().size();
-  int lenOverReps2 = overrepSeqs.second.front().size();
+  if (overrepSeqs.first.empty() && overrepSeqs.second.empty()) {
+    return;
+  }
+  int lenOverReps1;
+  int lenOverReps2;
+  if (!overrepSeqs.first.empty()) {
+    lenOverReps1 = overrepSeqs.first.front().size();
+  }
+  if (!overrepSeqs.second.empty()) {
+    lenOverReps2 = overrepSeqs.second.front().size();
+  }
 
   long long int ram_b_per_file = ram_b / 2;
 
@@ -140,19 +149,44 @@ void rem_overrep_pe(SRA sra, long long int ram_b,
       nlPos2 = std::find(nlPos2Head + 1, inFile2L, '\n');
       seqLength = nlPos1 - nlPos1Head - 1;
       overRep = false;
-      for (int i = 0; i < seqLength - lenOverReps1; i++) {
-        for (auto const & seq : overrepSeqs.first) {
-          if (strncmp(nlPos1Head + 1 + i, &seq[0], lenOverReps1) == 0) {
+      if (!overrepSeqs.first.empty()) {
+        for (int i = 0; i < seqLength - lenOverReps1; i++) {
+          for (auto const & seq : overrepSeqs.first) {
+            
+            if (strncmp(nlPos1Head + 1 + i, &seq[0], lenOverReps1) == 0) {
+              overRep = true;
+              goto checkOverrep;
+            }
+            /*for (int j = 0; j < lenOverReps1; j++) {
+              if (*(nlPos1Head + 1 + i + j) != *(&seq[0] + j)) {
+                // Overrepresented NOT in read frame
+                //   try next sequence
+                goto seqiter1;
+              }
+            }
+            // Overrepresented IS in read frame
+            //   go to removal of read
             overRep = true;
             goto checkOverrep;
+            seqiter1: ;*/
           }
         }
       }
-      for (int i = 0; i < seqLength - lenOverReps2; i++) {
-        for (auto const & seq : overrepSeqs.second) {
-          if (strncmp(nlPos2Head + 1 + i, &seq[0], lenOverReps2) == 0) {
+      if (!overrepSeqs.second.empty()) {
+        for (int i = 0; i < seqLength - lenOverReps2; i++) {
+          for (auto const & seq : overrepSeqs.second) {
+            if (strncmp(nlPos2Head + 1 + i, &seq[0], lenOverReps2) == 0) {
+              overRep = true;
+              goto checkOverrep;
+            }
+            /*for (int j = 0; j < lenOverReps2; j++) {
+              if (*(nlPos2Head + 1 + i + j) != *(&seq[0] + j)) {
+                goto seqiter2;
+              }
+            }
             overRep = true;
             goto checkOverrep;
+            seqiter2: ;*/
           }
         }
       }
