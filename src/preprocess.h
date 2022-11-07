@@ -1,5 +1,8 @@
 #pragma once
 #include <iostream>
+#include <iomanip>
+#include <sys/ioctl.h>
+#include <unistd.h>
 #include <boost/filesystem.hpp>
 #include <confini.h>
 #include "sra.h"
