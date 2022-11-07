@@ -3,17 +3,28 @@
 namespace fs = boost::filesystem;
 
 
+std::vector<SRA> get_sras(const INI_MAP &iniFile) {
+  std::vector<SRA> sras;
+  for (auto sra : iniFile.at("SRA accessions")) {
+    sras.push_back(SRA(sra.first, iniFile));
+  }
+  return sras;
+}
+
 void prefetch_sra(std::vector<SRA> sras) {
   std::string outDir(sras[0].get_sra_path_raw().first.parent_path().native().c_str());
+  std::string sra_accessions = "";
   std::string prefetchFlag = " --max-size u -p -O ";
   for (auto sra : sras) {
-    if (fs::exists(fs::path(std::string(sra.get_sra_path_raw().first.parent_path().c_str()) +
+    /*if (fs::exists(fs::path(std::string(sra.get_sra_path_raw().first.parent_path().c_str()) +
                    "/" + sra.get_accession()))) {
       std::cout << "Prefetch found for: " << sra.get_accession() << std::endl;
       continue;
     }
-    system((PATH_PREFETCH + " " + sra.get_accession() + prefetchFlag + outDir).c_str());
+    system((PATH_PREFETCH + " " + sra.get_accession() + prefetchFlag + outDir).c_str());*/
+    sra_accessions += (sra.get_accession() + " ");
   }
+  system((PATH_PREFETCH + " " + sra_accessions + prefetchFlag + outDir).c_str());
 }
 
 void fasterq_sra(std::vector<SRA> sras, std::string threads) {

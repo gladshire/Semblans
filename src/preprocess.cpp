@@ -1,18 +1,5 @@
 #include "preprocess.h"
 
-std::vector<std::string> stepDirs = {"00-Raw_reads/", "01-Quality_analysis_1/",
-                                     "02-Error_correction/", "03-Trimming/",
-                                     "04-Filter_foreign/", "05-Quality_analysis_2/",
-                                     "06-Filter_overrepresented/"};
-
-
-std::vector<SRA> get_sras(const INI_MAP &iniFile) {
-  std::vector<SRA> sras;
-  for (auto sra : iniFile.at("SRA accessions")) {
-    sras.push_back(SRA(sra.first, iniFile));
-  }
-  return sras;
-}
 
 void retrieve_sra_data(std::vector<SRA> sras, std::string threads) {
   std::cout << "Retrieving SRA runs for:\n" << std::endl;
@@ -22,15 +9,6 @@ void retrieve_sra_data(std::vector<SRA> sras, std::string threads) {
   fasterq_sra(sras, threads);
 }
 
-void make_proj_space(const INI_MAP &iniFile) {
-  std::string projDir = iniFile.at("General").at("output_directory") +
-                        iniFile.at("General").at("project_name") + "/";
-  extern std::vector<std::string> stepDirs;
-  system(("mkdir " + projDir).c_str());
-  for (auto dir : stepDirs) {
-    system(("mkdir " + projDir + dir).c_str());
-  }
-}
 
 void print_help() {
   std::cout << "\n" << "NAME_OF_PROGRAM" << " - "

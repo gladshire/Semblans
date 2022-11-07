@@ -8,6 +8,8 @@
 
 namespace fs = boost::filesystem;
 
+std::vector<SRA> get_sras(const INI_MAP & iniFile);
+
 void prefetch_sra(std::vector<SRA> sras);
 
 void fasterq_sra(std::vector<SRA> sras, std::string threads);

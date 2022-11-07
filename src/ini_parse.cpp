@@ -21,6 +21,18 @@ static int ini_callback(IniDispatch * const dispatch, void * map_pt) {
 }
 
 
+// Create directory space for project
+void make_proj_space(const INI_MAP &iniFile) {
+  std::string projDir = iniFile.at("General").at("output_directory") +
+                        iniFile.at("General").at("project_name") + "/";
+  extern std::vector<std::string> stepDirs;
+  system(("mkdir " + projDir).c_str());
+  for (auto dir : stepDirs) {
+    system(("mkdir " + projDir + dir).c_str());
+  }
+}
+
+
 // Given the path/name of an INI config file, return a map of its data
 // which can be indexed by sections, and then by keys
 INI_MAP make_ini_map(const char * configPath) {

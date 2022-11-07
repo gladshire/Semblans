@@ -37,7 +37,7 @@ void run_kraken2(std::vector<SRA> sras, std::string threads, std::string db,
     repFile = std::string(outDir + "/" + sra.make_file_str() + "." +
                           dbPath.filename().c_str() + ".report");
     if (fs::exists(fs::path(repFile.c_str()))) {
-      std::cout << "Fitlered version found for: " << sra.get_accession() << std::endl;
+      std::cout << "Filtered version found for: " << sra.get_accession() << std::endl;
       continue;
     }
     pre_summary(sra, db);

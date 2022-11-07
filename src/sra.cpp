@@ -1,6 +1,13 @@
 #include "sra.h"
 
 
+std::vector<std::string> stepDirs = {"00-Raw_reads/", "01-Quality_analysis_1/",
+                                     "02-Error_correction/", "03-Trimming/",
+                                     "04-Filter_foreign/", "05-Quality_analysis_2/",
+                                     "06-Filter_overrepresented/", "07-Trinity_assembly/",
+                                     "08-Filter_chimera/"};
+
+
 // Default constructor for SRA object
 SRA::SRA() {
   sra_accession = "";
@@ -21,7 +28,7 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni) {
   std::string apiKey(cfgIni["General"]["api_key"]);
   std::chrono::milliseconds queryLim(500);
   if (apiKey != "") {
-    std::chrono::milliseconds queryLim(250);
+    std::chrono::milliseconds queryLim(325);
   }
 
   // Download temp XML file for SRA accession, containing information for object members
@@ -219,8 +226,7 @@ std::pair<fs::path, fs::path> SRA::get_sra_path_orep_filt() {
 // Utility function to construct filename for SRA
 std::string SRA::make_file_str() {
   std::string filename;
-  filename = get_accession() + "_" +
-             (std::string)(get_tax_id()) + "_" +
+  filename = get_accession() + "_" + get_tax_id() + "_" +
              get_org_name().replace(get_org_name().find(" "), 1, "_");
   return filename;
 }
