@@ -29,17 +29,17 @@ void print_help() {
   std::cout << std::left << std::setw(w.ws_col) << "      ## #### # \\ #| /  #### ##/##" << std::endl;
   std::cout << std::left << std::setw(w.ws_col) << "       __#_--###`  |{,###---###-~" << std::endl;
   std::cout << std::left << std::setw(w.ws_col) << "                   \\-`/" << std::endl;
-  std::cout << std::left << std::setw(w.ws_col) << "                    }P}  ipeline for the       " << std::endl;
-  std::cout << std::left << std::setw(w.ws_col) << "                    /A{  ssembly and           " << std::endl;
-  std::cout << std::left << std::setw(w.ws_col) << "                   {AN}  alysis of            " << std::endl;
-  std::cout << std::left << std::setw(w.ws_col) << "                   {D}   e novo                " << std::endl;
-  std::cout << std::left << std::setw(w.ws_col) << "      transcript   {O{   mics datasets         " << std::endl;
+  std::cout << std::left << std::setw(w.ws_col) << "                    }P} -ipeline for the       " << std::endl;
+  std::cout << std::left << std::setw(w.ws_col) << "                    /A{ -ssembly and           " << std::endl;
+  std::cout << std::left << std::setw(w.ws_col) << "                   {AN} -alysis of            " << std::endl;
+  std::cout << std::left << std::setw(w.ws_col) << "                   {D}  -e novo                " << std::endl;
+  std::cout << std::left << std::setw(w.ws_col) << "      transcript-  {O{  -mics datasets         " << std::endl;
   std::cout << std::left << std::setw(w.ws_col) << "  ────────────────────────────────────────\n" << std::endl;
-  std::cout << std::left << std::setw(w.ws_col) << "" << "A C++ package enabling the bulk retrieval," << std::endl;
-  std::cout << std::left << std::setw(w.ws_col) << "" << "assembly, and analysis of de novo transcriptomes" << std::endl;
-  std::cout << std::left << std::setw(w.ws_col) << "" << "from multiple individuals" << std::endl;
-  std::cout << std::left << std::setw(w.ws_col) << "" << "COMMAND STRUCTURE" << std::endl;
-  std::cout << std::left << std::setw(w.ws_col) << "" << "preprocess PATH/TO/CONFIG.INI num_threads RAM_GB" << std::endl;
+  std::cout << std::left << std::setw(w.ws_col) << "A C++ package enabling the bulk retrieval," << std::endl;
+  std::cout << std::left << std::setw(w.ws_col) << "assembly, and analysis of de novo transcriptomes" << std::endl;
+  std::cout << std::left << std::setw(w.ws_col) << "from multiple individuals\n" << std::endl;
+  std::cout << std::left << std::setw(w.ws_col) << "COMMAND STRUCTURE" << std::endl;
+  std::cout << std::left << std::setw(w.ws_col) << "preprocess PATH/TO/CONFIG.INI num_threads RAM_GB" << std::endl;
 }
 
 
