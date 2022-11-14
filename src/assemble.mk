@@ -5,8 +5,8 @@ BOOST_PATH = -I../lib/boost_1_80_0
 INCLUDE_PATH = -I../lib -I../include
 OBJ_LINK = assemble.o sra.o sra_toolkit.o transcript.o ini_parse.o trinity_wrap.o
 
-assemble: $(OBJ_LINK)
-	$(CC) $(CFLAGS) $(BOOST_PATH) -o assemble $(OBJ_LINK) $(LIBS)
+../bin/assemble: $(OBJ_LINK)
+	$(CC) $(CFLAGS) $(BOOST_PATH) -o ../bin/assemble $(OBJ_LINK) $(LIBS)
 assemble.o: assemble.cpp assemble.h
 	$(CC) $(CFLAGS) $(BOOST_PATH) $(INCLUDE_PATH) -c assemble.cpp $(LIBS)
 sra.o: sra.cpp sra.h

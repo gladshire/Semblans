@@ -52,7 +52,35 @@ int main(int argc, char * argv[]) {
     INI_MAP cfgIni = make_ini_map(argv[1]);
     std::string threads = argv[2];
     std::string ram_gb = argv[3];
-    std::vector<SRA> sras = get_sras(cfgIni);
+    std::vector<SRA> sras;
+    std::string localDataBoolStr = cfgIni["General"]["use_local_data"];
+    bool localDataBool;
+    for (int i = 0; i < localDataBoolStr.length(); i++) {
+      localDataBoolStr[i] = std::tolower(localDataBoolStr[i]);
+    }
+    localDataBool = (localDataBoolStr == "true") ? true : false;
+    if (localDataBool) {
+      std::string localDataDirStr = cfgIni["General"]["local_data_directory"];
+      fs::path localDataDir(localDataDirStr.c_str());
+      fs::directory_iterator localDirIter{localDataDir};
+      std::vector<fs::path> filesSkip;
+      while (localDirIter != fs::directory_iterator{}) {
+        std::string sraFileStr(localDirIter->path().c_str());
+        // TODO: Implement filling of SRA vector with local files
+        // Check if "*_1.fasta" AND "*_2.fasta" both exist
+        //   If both exist
+        //     Construct PAIRED SRA object, with filenames
+        //     Add both file paths to 'filesSkip'
+        //   If one or none exist
+        //     Construct UNPAIRED SRA object, with filename
+        localDirIter++;
+      }
+    }
+    else {
+      // Not using local files, retrieve from NCBI instead
+      sras = get_sras(cfgIni);
+    }
+/*
     std::string fastqc_dir_1(sras[0].get_fastqc_dir_1().first.parent_path().parent_path().c_str());
     std::string fastqc_dir_2(sras[0].get_fastqc_dir_2().first.parent_path().parent_path().c_str());
     std::vector<std::string> kraken2Dbs = get_kraken2_dbs(cfgIni);
@@ -67,6 +95,7 @@ int main(int argc, char * argv[]) {
     run_kraken2_dbs(sras, threads, kraken2Dbs, kraken2_conf);
     run_fastqc_bulk(sras, threads, fastqc_dir_2);
     rem_overrep_bulk(sras, ram_gb);
+*/
   }
 
   return 0;

@@ -6,8 +6,8 @@ INCLUDE_PATH = -I../lib -I../include
 OBJ_LINK = postprocess.o sra.o sra_toolkit.o ini_parse.o transcript.o ncbi_blast.o rem_chimera.o print_info.o thread_pool.o
 
 
-postprocess: $(OBJ_LINK)
-	$(CC) $(CFLAGS) $(BOOST_PATH) -o postprocess $(OBJ_LINK) $(LIBS)
+../bin/postprocess: $(OBJ_LINK)
+	$(CC) $(CFLAGS) $(BOOST_PATH) -o ../bin/postprocess $(OBJ_LINK) $(LIBS)
 postprocess.o: postprocess.cpp postprocess.h
 	$(CC) $(CFLAGS) $(BOOST_PATH) $(INCLUDE_PATH) -c postprocess.cpp $(LIBS)
 sra.o: sra.cpp sra.h

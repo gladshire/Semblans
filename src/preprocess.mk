@@ -6,8 +6,8 @@ INCLUDE_PATH = -I../lib/ -I../include
 OBJ_LINK = preprocess.o sra.o ini_parse.o sra_toolkit.o fastqc_wrap.o rcorr_wrap.o thread_pool.o rem_unfixable.o trimm_wrap.o kraken_wrap.o rem_overrep.o print_info.o
 
 
-preprocess: $(OBJ_LINK)
-	$(CC) $(CFLAGS) $(BOOST_PATH) -o preprocess $(OBJ_LINK) $(LIBS)
+../bin/preprocess: $(OBJ_LINK)
+	$(CC) $(CFLAGS) $(BOOST_PATH) -o ../bin/preprocess $(OBJ_LINK) $(LIBS)
 preprocess.o: preprocess.cpp preprocess.h
 	$(CC) $(CFLAGS) $(BOOST_PATH) $(INCLUDE_PATH) -c preprocess.cpp $(LIBS)
 sra_toolkit.o: sra_toolkit.cpp sra_toolkit.h ini_parse.h
