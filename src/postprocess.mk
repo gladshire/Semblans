@@ -1,8 +1,8 @@
 CC = g++
-CFLAGS = -Wl,-rpath,..lib/ -g -pthread
+CFLAGS = -Wl,-rpath,../lib/ -g -pthread
 LIBS = -L../lib -lboost_system -lboost_filesystem -lconfini
 BOOST_PATH = -I../lib/boost_1_80_0
-INCLUDE_PATH = -I../lib -I../include
+INCLUDE_PATH = -I../lib/ -I../include
 OBJ_LINK = postprocess.o sra.o sra_toolkit.o ini_parse.o transcript.o ncbi_blast.o rem_chimera.o print_info.o thread_pool.o
 
 

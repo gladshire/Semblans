@@ -59,20 +59,62 @@ int main(int argc, char * argv[]) {
       localDataBoolStr[i] = std::tolower(localDataBoolStr[i]);
     }
     localDataBool = (localDataBoolStr == "true") ? true : false;
+    // TODO: Add error message for value that isn't 'true' or 'false'
     if (localDataBool) {
       std::string localDataDirStr = cfgIni["General"]["local_data_directory"];
       fs::path localDataDir(localDataDirStr.c_str());
       fs::directory_iterator localDirIter{localDataDir};
       std::vector<fs::path> filesSkip;
       while (localDirIter != fs::directory_iterator{}) {
-        std::string sraFileStr(localDirIter->path().c_str());
-        // TODO: Implement filling of SRA vector with local files
-        // Check if "*_1.fasta" AND "*_2.fasta" both exist
-        //   If both exist
-        //     Construct PAIRED SRA object, with filenames
-        //     Add both file paths to 'filesSkip'
-        //   If one or none exist
-        //     Construct UNPAIRED SRA object, with filename
+        fs::path sraFile = localDirIter->path();
+        if (std::find(filesSkip.begin(), filesSkip.end(), sraFile) != filesSkip.end()) {
+          localDirIter++;
+          continue;
+        }
+        std::string sraFileName = sraFile.filename().c_str();
+        std::string sraFileNameP = sraFileName;
+        std::string sraFile1;
+        std::string sraFile2;
+        if (std::string(sraFile.stem().c_str()).back() == '1' ||
+            std::string(sraFile.stem().c_str()).back() == '2') {
+          if (std::string(sraFile.stem().c_str()).back() == '1') {
+            sraFileNameP.replace(sraFileName.length() - 7, 1, "2");
+            sraFile1 = sraFileName;
+            sraFile2 = sraFileNameP;
+          }
+          else if (std::string(sraFile.stem().c_str()).back() == '2') {
+            sraFileNameP.replace(sraFileName.length() - 7, 1, "1");
+            sraFile1 = sraFileNameP;
+            sraFile2 = sraFileName;
+          }
+          else {
+            // File not paired-end
+            //   Construct UNPAIRED SRA object with filename
+            //   Add filename to filesskip
+            SRA currSra(sraFileName, "", cfgIni);
+            sras.push_back(currSra);
+            filesSkip.push_back(sraFile);
+            continue;
+          }
+          fs::path sraFileP = sraFile.parent_path() / fs::path(sraFileNameP);
+          if (fs::exists(sraFileP)) {
+            SRA currSra(sraFile1, sraFile2, cfgIni);
+            sras.push_back(currSra);
+            filesSkip.push_back(sraFile);
+            filesSkip.push_back(sraFileP);
+          }
+          else {
+            SRA currSra(sraFileName, "", cfgIni);
+            sras.push_back(currSra);
+            filesSkip.push_back(sraFile);
+          }
+        }
+        else {
+          // File not paired-end
+          SRA currSra(sraFileName, "", cfgIni);
+          sras.push_back(currSra);
+          filesSkip.push_back(sraFile);
+        }
         localDirIter++;
       }
     }
@@ -80,7 +122,6 @@ int main(int argc, char * argv[]) {
       // Not using local files, retrieve from NCBI instead
       sras = get_sras(cfgIni);
     }
-/*
     std::string fastqc_dir_1(sras[0].get_fastqc_dir_1().first.parent_path().parent_path().c_str());
     std::string fastqc_dir_2(sras[0].get_fastqc_dir_2().first.parent_path().parent_path().c_str());
     std::vector<std::string> kraken2Dbs = get_kraken2_dbs(cfgIni);
@@ -95,7 +136,6 @@ int main(int argc, char * argv[]) {
     run_kraken2_dbs(sras, threads, kraken2Dbs, kraken2_conf);
     run_fastqc_bulk(sras, threads, fastqc_dir_2);
     rem_overrep_bulk(sras, ram_gb);
-*/
   }
 
   return 0;

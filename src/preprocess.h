@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <algorithm>
 #include <cctype>
 #include <iomanip>
 #include <sys/ioctl.h>
@@ -17,4 +18,6 @@
 #include "rem_overrep.h"
 #include "print_info.h"
 
+void retrieve_sra_data(std::vector<SRA> sras, std::string threads);
 
+void print_help();

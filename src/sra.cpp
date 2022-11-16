@@ -136,6 +136,46 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni) {
   system("rm tmp.xml");
 }
 
+
+// Constructor for if local paired-end data used
+SRA::SRA(std::string fileName1, std::string fileName2, INI_MAP cfgIni) {
+  std::string outDir(cfgIni["General"]["output_directory"]);
+  std::string projName(cfgIni["General"]["project_name"]);
+  std::string projPath = outDir + projName + "/";
+  std::string localDataDir(cfgIni["General"]["local_data_directory"]);
+  std::string fileBase1(fs::path(fileName1.c_str()).stem().c_str());
+  std::string fileBase2(fs::path(fileName2.c_str()).stem().c_str());
+
+  sra_accession = "";
+  org_name = "";
+  tax_id = "";
+  spots = -1;
+  spots_m = -1;
+  bp = -1;
+  paired = (fileName2 == "") ? false : true;
+  
+  sra_path_raw_1  = (projPath + stepDirs[0] + fileBase1 + ".fastq").c_str();
+  fastqc_dir_1_1  = (projPath + stepDirs[1] + fileBase1 + "/" + fileBase1).c_str();
+  sra_path_corr_1 = (projPath + stepDirs[2] + fileBase1 + ".cor.fq").c_str();
+  sra_path_corr_fix_1 = (projPath + stepDirs[2] + fileBase1 + ".cor.fix.fq").c_str();
+  sra_path_trim_u1 = (projPath + stepDirs[3] + fileBase1 + ".trim.fq").c_str();
+  sra_path_trim_p1 = (projPath + stepDirs[3] + fileBase1 + ".trim.fq").c_str();
+  sra_path_for_filt_1 = (projPath + stepDirs[4] + fileBase1 + ".filt.fq").c_str();
+  fastqc_dir_1_2 = (projPath + stepDirs[5] + fileBase1 + "/" + fileBase1).c_str();
+  sra_path_orep_filt_1 = (projPath + stepDirs[6] + fileBase1 + ".orep.filt.fq").c_str();
+
+  if (paired) {
+    sra_path_raw_2 = (projPath + stepDirs[0] + fileBase2 + ".fastq").c_str();
+    fastqc_dir_2_1 = (projPath + stepDirs[1] + fileBase2 + "/" + fileBase2).c_str();
+    sra_path_corr_2 = (projPath + stepDirs[2] + fileBase2 + ".cor.fq").c_str();
+    sra_path_corr_fix_2 = (projPath + stepDirs[2] + fileBase2 + ".cor.fix.fq").c_str();
+    sra_path_trim_u2 = (projPath + stepDirs[3] + fileBase2 + ".unpaired.trim.fq").c_str();
+    sra_path_trim_p2 = (projPath + stepDirs[3] + fileBase2 + ".paired.trim.fq").c_str();
+    sra_path_for_filt_2 = (projPath + stepDirs[4] + fileBase2 + ".filt.fq").c_str();
+    fastqc_dir_2_2 = (projPath + stepDirs[5] + fileBase2 + "/" + fileBase2).c_str();
+    sra_path_orep_filt_2 = (projPath + stepDirs[6] + fileBase2 + ".orep.filt.fq").c_str();
+  }
+}
 // Getter function for object SRA accession number
 std::string SRA::get_accession() {
   return sra_accession;
