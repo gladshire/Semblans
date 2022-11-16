@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -Wl,-rpath,../lib/ -g -pthread
+CFLAGS = '-Wl,-rpath,$$ORIGIN/../lib' -g -pthread
 LIBS = -L../lib -lboost_system -lboost_filesystem -lconfini
 BOOST_PATH = -I../lib/boost_1_80_0
 INCLUDE_PATH = -I../lib/ -I../include
