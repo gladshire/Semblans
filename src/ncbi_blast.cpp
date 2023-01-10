@@ -21,7 +21,7 @@ void blastx(transcript transcripts, std::string blastDb,
   std::string pathTransStr(pathTrans.c_str());
   std::string transStr(pathTrans.stem().c_str());
 
-  fs::path outBlastxFile((outDir + "/" + transStr).c_str());
+  fs::path outBlastxFile((outDir + "/" + transStr + ".blastx").c_str());
   std::string outBlastxStr(outBlastxFile.c_str());
   if (fs::exists(outBlastxFile)) {
     std::cout << "BLASTX output found for: " + transStr << std::endl;
@@ -29,7 +29,7 @@ void blastx(transcript transcripts, std::string blastDb,
   }
   std::string blastxCmd = BLASTX + " -db " + blastDb + " -query " + pathTransStr +
                           " -evalue " + "0.01" +
-                          " -outfmt " + "\"6 qseqid qlen sseqid slend frames pident nident length mismatch gapopen qstart qend start send evalue bitscord\"" +
+                          " -outfmt " + "\"6 qseqid qlen sseqid slen frames pident nident length mismatch gapopen qstart qend start send evalue bitscord\"" +
                           " -out " + outBlastxStr +
                           " -num_threads " + threads +
                           " -max_target_seqs 100";

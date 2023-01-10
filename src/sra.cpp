@@ -28,13 +28,23 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni) {
   std::string apiKey(cfgIni["General"]["api_key"]);
   std::chrono::milliseconds queryLim(500);
   if (apiKey != "") {
-    std::chrono::milliseconds queryLim(325);
+    std::chrono::milliseconds queryLim(150);
   }
 
   // Download temp XML file for SRA accession, containing information for object members
   std::string curlCmdStr = "curl -s -o tmp.xml \"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?rettype=runinfo&db=sra&id=\"" +
                            sra_accession + "&api_key=" + apiKey;
-  system(curlCmdStr.c_str());
+  while (true) {
+    try {
+      system(curlCmdStr.c_str());
+      std::this_thread::sleep_for(queryLim);
+      break;
+    }
+    catch (std::runtime_error & e) {
+      std::cout << "Throttled: too many requests. Retrying ..." << std::endl;
+      std::this_thread::sleep_for(5 * queryLim);
+    }
+  }
   std::this_thread::sleep_for(queryLim);
   
   // Parse XML file for object information

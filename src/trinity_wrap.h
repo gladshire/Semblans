@@ -1,11 +1,15 @@
 #include <fstream>
 #include <boost/filesystem.hpp>
+#include <boost/dll.hpp>
 #include "print_info.h"
 #include "ini_parse.h"
 #include "sra.h"
 #include "transcript.h"
 
-#define PATH_TRINITY std::string("../lib/trinityrnaseq-v2.14.0/Trinity")
+namespace fs = boost::filesystem;
+namespace dl = boost::dll;
+
+#define PATH_TRINITY std::string((dl::program_location().parent_path() / fs::path(std::string("../lib/trinityrnaseq-v2.14.0/Trinity"))).c_str())
 
 // Get vector of SRAs to combine into single Trinity assembly
 std::vector<SRA> get_sra_to_combine(std::vector<SRA> sras, std::string org_name);

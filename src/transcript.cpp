@@ -21,8 +21,8 @@ transcript::transcript(SRA sra) {
   tax_id = sra.get_tax_id();
   std::string fileBase = make_file_str();
   
-  trans_path_trinity = (projPath + stepDirs[7] + fileBase + ".Trinity.fasta").c_str();
-  trans_path_gene_map = (projPath + stepDirs[7] + fileBase + "Trinity.fasta" + 
+  trans_path_trinity = (projPath + stepDirs[7] + fileBase + ".Trinity.fasta.Trinity.fasta").c_str();
+  trans_path_gene_map = (projPath + stepDirs[7] + fileBase + "Trinity.fasta.Trinity.fasta" + 
                          ".gene_trans_map").c_str();
   trans_path_chimera = (projPath + stepDirs[9] + fileBase + ".chim_filt.fasta").c_str();
   // Define salmon index path

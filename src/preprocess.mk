@@ -1,9 +1,11 @@
 CC = g++
-CFLAGS = '-Wl,-rpath,$$ORIGIN/../lib' -g -pthread
-LIBS = -L../lib -lboost_system -lboost_filesystem -lconfini
+CFLAGS = '-Wl,-rpath,$$ORIGIN/../lib/' -g -pthread
+
+# Change these to $home/.local/share/Paando/
+LIBS = -L../lib -lboost_system -lboost_filesystem -ldl -lconfini
 BOOST_PATH = -I../lib/boost_1_80_0
 INCLUDE_PATH = -I../lib/ -I../include
-OBJ_LINK = preprocess.o sra.o ini_parse.o sra_toolkit.o fastqc_wrap.o rcorr_wrap.o rem_unfixable.o trimm_wrap.o kraken_wrap.o rem_overrep.o print_info.o
+OBJ_LINK = preprocess.o sra.o sra_toolkit.o ini_parse.o fastqc_wrap.o rcorr_wrap.o rem_unfixable.o trimm_wrap.o kraken_wrap.o rem_overrep.o print_info.o
 
 
 ../bin/preprocess: $(OBJ_LINK)

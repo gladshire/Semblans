@@ -3,16 +3,20 @@
 #include <fstream>
 #include <boost/filesystem.hpp>
 #include <boost/regex.hpp>
+#include <boost/dll.hpp>
 #include "sra.h"
 #include "transcript.h"
 #include "print_info.h"
 
 
-#define PATH_BLAST std::string("../lib/ncbi-blast-2.13.0+-src/c++/ReleaseMT/bin/")
+namespace fs = boost::filesystem;
+namespace dl = boost::dll;
+
+#define PATH_BLAST std::string((dl::program_location().parent_path() / fs::path(std::string("../lib/ncbi-blast-2.13.0+-src/c++/ReleaseMT/bin/"))).c_str())
 #define MAKEBLASTDB (PATH_BLAST + "makeblastdb")
 #define BLASTX (PATH_BLAST + "blastx")
 
-namespace fs = boost::filesystem;
+
 
 
 void makeBlastDb(std::string pathProfRef, std::string outDir);
