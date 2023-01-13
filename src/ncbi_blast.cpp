@@ -2,16 +2,20 @@
 
 void makeBlastDb(std::string protRef, std::string outDir) {
   fs::path pathProtRef(protRef.c_str());
-  std::string protRefStr(pathProtRef.stem().c_str());
-  
+  std::string protRefStr(pathProtRef.stem().c_str()); 
   fs::path outDbFile((outDir + "/" + protRefStr).c_str());
+  int result;
   if (fs::exists(outDbFile)) {
     std::cout << "BLAST database found for: " + protRefStr << std::endl;
     return;
   }
   std::string makeblastdbCmd = MAKEBLASTDB + " -in " + protRef + " -dbtype prot -out " +
                                outDbFile.c_str();
-  system(makeblastdbCmd.c_str());
+  result = system(makeblastdbCmd.c_str());
+  if (WIFSIGNALED(result)) {
+    std::cout << "Exited with signal " << WTERMSIG(result) << std::endl;
+    exit(1);
+  }
 }
 
 
@@ -23,6 +27,7 @@ void blastx(transcript transcripts, std::string blastDb,
 
   fs::path outBlastxFile((outDir + "/" + transStr + ".blastx").c_str());
   std::string outBlastxStr(outBlastxFile.c_str());
+  int result;
   if (fs::exists(outBlastxFile)) {
     std::cout << "BLASTX output found for: " + transStr << std::endl;
     return;
@@ -33,6 +38,10 @@ void blastx(transcript transcripts, std::string blastDb,
                           " -out " + outBlastxStr +
                           " -num_threads " + threads +
                           " -max_target_seqs 100";
-  system(blastxCmd.c_str());
+  result = system(blastxCmd.c_str());
+  if (WIFSIGNALED(result)) {
+    std::cout << "Exited with signal " << WTERMSIG(result) << std::endl;
+    exit(1);
+  }
 }
 

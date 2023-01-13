@@ -34,6 +34,7 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni) {
   // Download temp XML file for SRA accession, containing information for object members
   std::string curlCmdStr = "curl -s -o tmp.xml \"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?rettype=runinfo&db=sra&id=\"" +
                            sra_accession + "&api_key=" + apiKey;
+  int result;
   while (true) {
     try {
       system(curlCmdStr.c_str());

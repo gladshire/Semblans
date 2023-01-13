@@ -1,9 +1,13 @@
 #pragma once
 #include <boost/filesystem.hpp>
+#include <boost/dll.hpp>
 #include "sra.h"
 #include "print_info.h"
 
-#define PATH_FASTQC std::string("../lib/FastQC/fastqc")
+namespace fs = boost::filesystem;
+namespace dl = boost::dll;
+
+#define PATH_FASTQC std::string((dl::program_location().parent_path() / fs::path(std::string("../lib/FastQC/fastqc"))).c_str())
 
 namespace fs = boost::filesystem;
 

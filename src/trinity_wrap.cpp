@@ -57,6 +57,7 @@ transcript run_trinity(SRA sra, std::string threads, std::string ram_gb) {
   transcript sra_trans(sra);
   std::string outFile(sra_trans.get_trans_path_trinity().c_str());
   std::string trin_cmd;
+  int result;
   if (fs::exists(sra_trans.get_trans_path_trinity().c_str())) {
     std::cout << "Trinity assembly found for: " << sra.get_accession() << std::endl;
     return sra_trans;
@@ -74,7 +75,11 @@ transcript run_trinity(SRA sra, std::string threads, std::string ram_gb) {
                "--CPU " + threads + " --bflyCalculateCPU" + " --full_cleanup" +
                " --no_normalize_reads" + " --output " + outFile;
   }
-  system(trin_cmd.c_str());
+  result = system(trin_cmd.c_str());
+  if (WIFSIGNALED(result)) {
+    std::cout << "Exited with signal " << WTERMSIG(result) << std::endl;
+    exit(1);
+  }
   return sra_trans;
 }
 
@@ -86,6 +91,7 @@ transcript run_trinity_comb(std::vector<SRA> sras_comb,
   transcript sra_trans(sras_comb[0]);
   std::string outFile(sra_trans.get_trans_path_trinity().c_str());
   std::string trin_cmd;
+  int result;
   if (fs::exists(sra_trans.get_trans_path_trinity().c_str())) {
     std::cout << "Trinity assembly found for: " << sras_comb[0].get_org_name() << std::endl;
     return sra_trans;
@@ -93,7 +99,11 @@ transcript run_trinity_comb(std::vector<SRA> sras_comb,
   trin_cmd = PATH_TRINITY + " --seqType fq" + " --single " + inFile + " --max_memory " +
              ram_gb + "G " + "--CPU " + threads + " --bflyCalculateCPU" + " --full_cleanup" +
              " --no_normalize_reads" + " --run_as_paired" + " --output " + outFile; 
-  system(trin_cmd.c_str());
+  result = system(trin_cmd.c_str());
+  if (WIFSIGNALED(result)) {
+    std::cout << "Exited with signal " << WTERMSIG(result) << std::endl;
+    exit(1);
+  }
   return sra_trans;
 }
 

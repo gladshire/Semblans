@@ -33,6 +33,7 @@ void run_kraken2(std::vector<SRA> sras, std::string threads, std::string db,
 
   std::string krakCmd(PATH_KRAK2 + " --db " + db);
   std::string krakFlags("--threads " + threads + " --unclassified-out");
+  int result;
   for (auto sra : sras) {
     repFile = std::string(outDir + "/" + sra.make_file_str() + "." +
                           dbPath.filename().c_str() + ".report");
@@ -62,15 +63,19 @@ void run_kraken2(std::vector<SRA> sras, std::string threads, std::string db,
         inFile2 = sra.get_sra_path_trim_p().second.c_str();
       }
       outFile = std::string(outFile).replace(outFile.length() - 10, 2, "#");
-      system((krakCmd + " " + krakFlags + " " + outFile + " --paired " + "--output - " +
-              inFile1 + " " + inFile2 + " --confidence " + conf_threshold + " --report " +
-              outDir + "/" + sra.make_file_str() + "." + dbPath.filename().c_str() +
-              ".report").c_str());
+      result = system((krakCmd + " " + krakFlags + " " + outFile + " --paired " + "--output - " +
+                       inFile1 + " " + inFile2 + " --confidence " + conf_threshold + " --report " +
+                       outDir + "/" + sra.make_file_str() + "." + dbPath.filename().c_str() +
+                       ".report").c_str());
     }
     else {
-      system((krakCmd + " " + krakFlags + " " + outFile + "--output - " + inFile1 + " " +
-              " --confidence " + conf_threshold + " --report " + outDir + "/" +
-              sra.make_file_str() + "." + dbPath.filename().c_str() + ".report").c_str());
+      result = system((krakCmd + " " + krakFlags + " " + outFile + "--output - " + inFile1 + " " +
+                       " --confidence " + conf_threshold + " --report " + outDir + "/" +
+                       sra.make_file_str() + "." + dbPath.filename().c_str() + ".report").c_str());
+    }
+    if (WIFSIGNALED(result)) {
+      std::cout << "Exited with signal " << WTERMSIG(result) << std::endl;
+      exit(1);
     }
   }
   std::string tmpIn1 = std::string(sras[0].get_sra_path_for_filt().first.parent_path().c_str()) + "/INPUT1.fq";

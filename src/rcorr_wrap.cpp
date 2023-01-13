@@ -14,6 +14,7 @@ void run_rcorr(std::vector<SRA> sras, std::string threads) {
   std::string wkProp;
  
   std::string rcorrCmd("perl " + PATH_RCORR + " -t " + threads + " -od " + outDir);
+  int result;
   for (auto sra : sras) {
     inFile1 = sra.get_sra_path_raw().first.c_str();
     if (fs::exists(sra.get_sra_path_corr().first)) {
@@ -22,10 +23,14 @@ void run_rcorr(std::vector<SRA> sras, std::string threads) {
     }
     if (sra.is_paired()) {
       inFile2 = sra.get_sra_path_raw().second.c_str();
-      system((rcorrCmd + " -1 " + inFile1 + " -2 " + inFile2).c_str()); 
+      result = system((rcorrCmd + " -1 " + inFile1 + " -2 " + inFile2).c_str()); 
     }
     else {
-      system((rcorrCmd + " -s " + inFile1).c_str());
+      result = system((rcorrCmd + " -s " + inFile1).c_str());
+    }
+    if (WIFSIGNALED(result)) {
+      std::cout << "Exited with signal " << WTERMSIG(result) << std::endl;
+      exit(1);
     }
   }
 } 
