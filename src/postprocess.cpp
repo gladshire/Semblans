@@ -34,10 +34,13 @@ int main(int argc, char * argv[]) {
     // Get RAM in GB
     std::string ram_gb = argv[3];
     // Make blast db
-    //makeBlastDb("../uniprot-download_true_format_fasta_query__28_28proteome_3AUP00000080-2022.11.14-19.12.00.85.fasta", "../");
+    makeBlastDb("../uniprot-download_true_format_fasta_query__28_28proteome_3AUP00000080-2022.11.14-19.12.00.85.fasta", "../");
     // Run BlastX
-    //blastx(trans, "../uniprot-download_true_format_fasta_query__28_28proteome_3AUP00000080-2022.11.14-19.12.00.85", threads, "../");
+    blastx(trans, "../uniprot-download_true_format_fasta_query__28_28proteome_3AUP00000080-2022.11.14-19.12.00.85", threads, "../");
     detect_chimera(trans, "7227_Drosophila_melanogaster.Trinity.fasta.Trinity.blastx", ".");
+    removeChimera(trans, "7227_Drosophila_melanogaster.Trinity.fasta.Trinity.blastx.info",
+                         "7227_Drosophila_melanogaster.Trinity.fasta.Trinity.blastx.cut",
+                         ".");
   }
   else {
     print_help();

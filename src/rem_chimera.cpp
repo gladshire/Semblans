@@ -282,6 +282,7 @@ void removeChimera(transcript trans, std::string infoFilePath,
   fs::path transPath = trans.get_trans_path_trinity();
   std::string transPathStr(transPath.c_str());
   std::string transFileStr(transPath.stem().c_str());
+  std::set<std::string> chimeraSet;
 
   std::string filtTrans(trans.get_trans_path_chimera().c_str());
   std::string chimTrans = std::string(fs::path(filtTrans.c_str()).stem().c_str()) + ".chim_trns.fasta";
@@ -299,4 +300,8 @@ void removeChimera(transcript trans, std::string infoFilePath,
   //     Write two lines to filtered output
   std::ifstream cutFile(cutFilePath);
   std::ifstream infoFile(infoFilePath);
+  chimeraSet = makeChimeraSet(cutFile);
+  for (auto chimSeq : chimeraSet) {
+    std::cout << chimSeq << std::endl;
+  }
 }

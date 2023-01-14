@@ -298,6 +298,7 @@ void rem_overrep_bulk(std::vector<SRA> sras, std::string ram_gb) {
       std::cout << "Fixed version found for: " << sra.get_accession() << std::endl;
       continue;
     }
+    std::cout << "\nNow processing: " << sra.get_accession() << " ..." << std::endl;
     if (sra.is_paired()) {
       std::pair<std::vector<std::string>, std::vector<std::string>> overrepSeqs = get_overrep_seqs_pe(sra);
       rem_overrep_pe(sra, ram_b, overrepSeqs);
@@ -306,5 +307,6 @@ void rem_overrep_bulk(std::vector<SRA> sras, std::string ram_gb) {
       std::vector<std::string> overrepSeqs = get_overrep_seqs_se(sra);
       rem_overrep_se(sra, ram_b, overrepSeqs);
     }
+    std::cout << "Processing of file complete" << std::endl;
   }
 }

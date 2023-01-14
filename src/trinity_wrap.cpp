@@ -23,6 +23,8 @@ std::string combine_reads(std::vector<SRA> sras_comb, long long int ram_b) {
 
   std::ofstream outFile;
   std::ifstream inFile;
+  std::cout << "Combined assembly chosen" << std::endl;
+  std::cout << "Now combining files for assembly with Trinity ..." << std::endl;
   if (fs::exists(outFileStr)) {
     std::cout << "Combined FASTA file found for: " << sras_comb[0].get_org_name() << std::endl;
     return outFileStr;
@@ -47,6 +49,7 @@ std::string combine_reads(std::vector<SRA> sras_comb, long long int ram_b) {
     }
     outFile.close();
   }
+  std::cout << "Complete!\nNow initiating Trinity assembly ..." << std::endl;
   return outFileStr;
 }
 
