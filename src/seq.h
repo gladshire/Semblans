@@ -12,15 +12,14 @@ namespace fs = boost::filesystem;
 class sequence {
   private:
     std::string header;
-    std::string sequence;
+    std::string sequenceData;
     std::string quality;
     int numBp;
     int numLine;
+    int bpPerLine;
   public:
     sequence();
-    sequence(std::string header);
-    sequence(std::string sequence);
-    sequence(std::string header, std::string sequence);
-    sequence(std::string sequence, std::string quality);
-    sequence(std::string header, std::string sequence, std::string quality);
-    seq
+    sequence(std::string header, std::string sequenceData);
+    std::string get_header();
+    std::string get_sequence();
+};

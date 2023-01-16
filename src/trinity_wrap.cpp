@@ -83,6 +83,7 @@ transcript run_trinity(SRA sra, std::string threads, std::string ram_gb) {
     std::cout << "Exited with signal " << WTERMSIG(result) << std::endl;
     exit(1);
   }
+  std::rename((outFile + ".Trinity.fasta").c_str(), outFile.c_str());
   return sra_trans;
 }
 
@@ -107,6 +108,7 @@ transcript run_trinity_comb(std::vector<SRA> sras_comb,
     std::cout << "Exited with signal " << WTERMSIG(result) << std::endl;
     exit(1);
   }
+  std::rename((outFile + ".Trinity.fasta").c_str(), outFile.c_str());
   return sra_trans;
 }
 

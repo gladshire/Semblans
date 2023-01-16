@@ -1,13 +1,5 @@
 #include "rem_unfixable.h"
 
-// Notes:
-//  - Concurrent file writing bad
-//  - Fastest file reading/writing:
-//    - Use buffer in RAM
-//    - Find optimal size, based on user's choice
-//      - char * limit: 65535
-//      - Possibly use strings?
-//        - Would need to adapt algo to work on strings
 
 void rem_unfix_pe(SRA sra, long long int ram_b) {
   std::string inFile1Str(sra.get_sra_path_corr().first.c_str());

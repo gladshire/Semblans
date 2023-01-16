@@ -158,7 +158,7 @@ void detect_chimera(transcript trans, std::string pathBlastxFile, std::string ou
   fs::path cutFilePath((outDir + "/" + cutFile).c_str());
   fs::path infoFilePath((outDir + "/" + infoFile).c_str());
   if (fs::exists(cutFilePath) && fs::exists(infoFilePath)) {
-    std::cout << "Chimera detection files found for: " + blastxFileStr;
+    std::cout << "Chimera detection files found for: " + blastxFileStr << std::endl;
     return;
   }
   std::ifstream blastxFile(pathBlastxFile);
@@ -235,30 +235,75 @@ void detect_chimera(transcript trans, std::string pathBlastxFile, std::string ou
 }
 
 
+// Align buffer with end of last transcript
+void align_buffer_end(std::ifstream & inFile, char * inFileData, std::streamsize & s) {
+  if (!inFile.eof()) {
+    while (inFile.peek() != '@' && inFile.peek() != '>') {
+      inFile.unget();
+      inFileData[s - 1] = '\0';
+      s--;
+    }
+  }
+}
+
 
 // Create chained hash table of sequence objects, keyed by sequence header
-/***sequence makeFastaHash(transcript trans) {
-  fs::path transFilePath = trans.get_trans_path_trinity();
-  uintmax_t numBytesTrans = fs::file_size(transFilePath);
-  size_t lenHashTable = numBytesTrans / 80;
-  // Hash table is #bytes in transcript file / 80
-  **sequence seqHashTable[lenHashTable];
-  std::ifstream transFile(std::string(transFilePath.c_str()));
-  while (!transFile.eof()) {
-    // Process file in buffer chunks
-    //   Instantiate sequence object
-    //     sequence header = line1 after ">"
-    //     sequence seq    = line2 b/t "\n" tailing header and next ">"
-    //   Generate hash index from header
-    //   If hash table index contains a sequence object
-    //     Append to end of chain at that position
-    //   If hash table index contains no sequence object
-    //     Instantiate array of sequence objects
-    //     Initialize first position of array with current sequence obj
-  }
-  return seqHashTable;
-}*/
+void fillFastaHash(sequence ** fastaHashTable, transcript trans, uintmax_t ram_b) {
+  fs::path transFilePathT = trans.get_trans_path_trinity();
+  fs::path transFilePathC = trans.get_trans_path_chimera();
 
+  std::string inFileStr(transFilePathT.c_str());
+  std::string outFileStr(transFilePathC.c_str());
+
+  std::ifstream inFile(inFileStr);
+  std::ofstream outFile(outFileStr);
+
+  std::string inFileData;
+
+  inFileData.reserve(ram_b);
+
+  std::streamsize s;
+
+  char * headerStartPos;
+  char * headerEndPos;
+  char * seqStartPos;
+  char * seqEndPos;
+  char * inFileL;
+  while (!inFile.eof()) {
+    // Process file in buffer chunks
+    // Store chunk into buffer
+    inFile.read(&inFileData[0], ram_b);
+    // Get number of bytes just read
+    s = inFile.gcount();
+    // Initialize header start position
+    headerStartPos = &inFileData[0];
+    // Initizlie address of last buffer position
+    inFileL = &inFileData[0] + s;
+    // Align end of buffer just before next transcript
+    align_buffer_end(inFile, &inFileData[0], s);
+    // While loop to retrieve all transcripts in buffer
+    //   Each iteration corresponds to single transcript
+    std::string currHeader;
+    std::string currSequence;
+    while (/* Condition that ends when all transcripts from buffer retrieved */) {
+      // Extract header
+      if (*headerStartPos != '>') {
+        std::cout << "Buffer not aligned. Header doesn't start with \">\"" << std::endl;
+        exit(0);
+      }
+      seqStartPos = std::find(headerStartPos, inFileL, '\n') + 1;
+      currHeader = std::string(headerStartPos + 1, seqStartPos - 1);
+      // Extract sequence
+      headerStartPos = std::find(seqStartPos, inFileL, '>');
+      currSequence = std::string(seqStartPos, headerStartPos - 1);
+      // Instantiate sequence object with header, sequence info
+      // Define hashing function
+      //   Input:  Sequence header
+      //   Output: Index for that sequence in hash table
+      // Get that index, allocate heap space for sequence object at that memory position
+    }
+  }
+}
 
 // Create list of unique chimeric transcripts based on .cut file
 std::set<std::string> makeChimeraSet(std::ifstream & chimFile) {
@@ -283,6 +328,7 @@ void removeChimera(transcript trans, std::string infoFilePath,
   std::string transPathStr(transPath.c_str());
   std::string transFileStr(transPath.stem().c_str());
   std::set<std::string> chimeraSet;
+  sequence ** fastaHashTable;
 
   std::string filtTrans(trans.get_trans_path_chimera().c_str());
   std::string chimTrans = std::string(fs::path(filtTrans.c_str()).stem().c_str()) + ".chim_trns.fasta";
@@ -291,17 +337,22 @@ void removeChimera(transcript trans, std::string infoFilePath,
     std::cout << "Filtered transcripts found for: " << transFileStr << std::endl;
     return;
   }
-  // Create unique list of chimeric transcript IDs
-  // Create hash table of all transcripts
-  // Loop through unique chimera list IDs
-  //   If sequence ID in hash table
-  //     Skip to next sequence (2 lines)
-  //   If sequence ID not in hash table
-  //     Write two lines to filtered output
+
   std::ifstream cutFile(cutFilePath);
   std::ifstream infoFile(infoFilePath);
+  // Create unique list of chimeric transcript IDs
   chimeraSet = makeChimeraSet(cutFile);
-  for (auto chimSeq : chimeraSet) {
-    std::cout << chimSeq << std::endl;
-  }
+  // Determine size of hash table
+  uintmax_t numBytesTrans = fs::file_size(transPath);
+  size_t lenHashTable = numBytesTrans / 80;
+  sequence * seqHashTable[lenHashTable];
+  // Fill hash table with all transcripts
+  // Iterate over chimera set
+  //   For all sequences in chimera set
+  //     Remove that sequence from the hash table
+  //   Resulting hash table contains only non-chimeric seqs
+  // Iterate over hash table
+  //   For all sequences in hash table
+  //     Write sequence to new file (chimera filtered)
+  // Done.
 }

@@ -6,7 +6,7 @@
 #include <boost/regex.hpp>
 #include "sra.h"
 #include "transcript.h"
-//#include "seq.h"
+#include "seq.h"
 #include "print_info.h"
 
 #define PIDENT_CUTOFF 30

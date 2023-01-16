@@ -20,11 +20,11 @@ transcript::transcript(SRA sra) {
   org_name = sra.get_org_name();
   tax_id = sra.get_tax_id();
   std::string fileBase = make_file_str();
-  
-  trans_path_trinity = (projPath + stepDirs[7] + fileBase + ".Trinity.fasta.Trinity.fasta").c_str();
-  trans_path_gene_map = (projPath + stepDirs[7] + fileBase + "Trinity.fasta.Trinity.fasta" + 
+ 
+  trans_path_trinity = (projPath + stepDirs[7] + fileBase + ".Trinity.fasta").c_str();
+  trans_path_gene_map = (projPath + stepDirs[7] + fileBase + ".Trinity.fasta" + 
                          ".gene_trans_map").c_str();
-  trans_path_chimera = (projPath + stepDirs[9] + fileBase + ".chim_filt.fasta").c_str();
+  trans_path_chimera = (projPath + stepDirs[8] + fileBase + ".chim_filt.fasta").c_str();
   // Define salmon index path
   // Define salmon quant path
   // Define corset cluster path
