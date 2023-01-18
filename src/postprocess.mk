@@ -3,7 +3,7 @@ CFLAGS = '-Wl,-rpath,$$ORIGIN/../lib/' -g -pthread
 LIBS = -L../lib -lboost_system -lboost_filesystem -ldl -lconfini
 BOOST_PATH = -I../lib/boost_1_80_0
 INCLUDE_PATH = -I../lib/ -I../include
-OBJ_LINK = postprocess.o sra.o sra_toolkit.o ini_parse.o transcript.o ncbi_blast.o rem_chimera.o print_info.o thread_pool.o
+OBJ_LINK = postprocess.o sra.o sra_toolkit.o ini_parse.o transcript.o seq.o ncbi_blast.o rem_chimera.o print_info.o thread_pool.o
 
 
 ../bin/postprocess: $(OBJ_LINK)
@@ -18,6 +18,8 @@ ini_parse.o: ini_parse.cpp ini_parse.h
 	$(CC) $(CFLAGS) $(BOOST_PATH) $(INCLUDE_PATH) -c ini_parse.cpp $(LIBS)
 transcript.o: transcript.cpp transcript.h
 	$(CC) $(CFLAGS) $(BOOST_PATH) $(INCLUDE_PATH) -c transcript.cpp $(LIBS)
+seq.o: seq.cpp seq.h
+	$(CC) $(CFLAGS) $(BOOST_PATH) $(INCLUDE_PATH) -c seq.cpp $(LIBS)
 ncbi_blast.o: ncbi_blast.cpp ncbi_blast.h
 	$(CC) $(CFLAGS) $(BOOST_PATH) $(INCLUDE_PATH) -c ncbi_blast.cpp $(LIBS)
 rem_chimera.o: rem_chimera.cpp rem_chimera.h

@@ -9,6 +9,7 @@
 #include "sra.h"
 #include "sra_toolkit.h"
 #include "transcript.h"
+#include "seq.h"
 #include "ini_parse.h"
 #include "ncbi_blast.h"
 #include "rem_chimera.h"

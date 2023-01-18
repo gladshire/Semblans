@@ -19,7 +19,7 @@ sequence::sequence(std::string header, std::string sequenceData) {
     nlPos = sequenceData.find('\n');
   }
   this->sequenceData = sequenceData;
-  numBp = sequence.length();
+  numBp = sequenceData.length();
 }
 
 std::string sequence::get_header() {
