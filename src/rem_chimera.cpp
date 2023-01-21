@@ -314,13 +314,10 @@ bool inHashTable(std::vector<sequence> * fastaHashTable, uintmax_t lenHashTable,
 void fillFastaHash(std::vector<sequence> * fastaHashTable, uintmax_t lenHashTable, 
                    transcript trans, uintmax_t ram_b) {
   fs::path transFilePathT = trans.get_trans_path_trinity();
-  fs::path transFilePathC = trans.get_trans_path_chimera();
 
   std::string inFileStr(transFilePathT.c_str());
-  std::string outFileStr(transFilePathC.c_str());
 
   std::ifstream inFile(inFileStr);
-  std::ofstream outFile(outFileStr);
 
   std::string inFileData;
 
@@ -441,4 +438,21 @@ void removeChimera(transcript trans, std::string infoFilePath,
   //   For all sequences in hash table
   //     Write sequence to new file (chimera filtered)
   // Done.
+  std::ofstream chimFiltFile(std::string(trans.get_trans_path_chimera().c_str()));
+  std::string currHeader;
+  std::string currSeq;
+  for (uintmax_t i = 0; i < lenHashTable; i++) {
+    if (fastaHashTable[i].empty()) {
+      continue;
+    }
+    else {
+      for (auto seq : fastaHashTable[i]) {
+        currHeader = seq.get_header();
+        currSeq = seq.get_sequence();
+        chimFiltFile << currHeader << std::endl;
+        chimFiltFile << currSeq << std::endl;
+      }
+    }
+  }
+  chimFiltFile.close();
 }
