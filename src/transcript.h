@@ -21,6 +21,7 @@ class transcript {
     fs::path trans_path_index;
     fs::path trans_path_quant;
     fs::path trans_path_clust;
+    fs::path trans_path_counts;
     fs::path trans_path_cds;
     fs::path trans_path_prot;
   public:
@@ -34,6 +35,7 @@ class transcript {
     fs::path get_trans_path_index();
     fs::path get_trans_path_quant();
     fs::path get_trans_path_clust();
+    fs::path get_trans_path_counts();
     fs::path get_trans_path_cds();
     fs::path get_trans_path_prot();
     std::string make_file_str();

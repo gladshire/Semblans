@@ -246,73 +246,8 @@ void align_buffer_end(std::ifstream & inFile, char * inFileData, std::streamsize
   }
 }
 
-// Implement djb2 hashing function
-unsigned long hashFunction(char * key) {
-  unsigned long hash = 5381;
-  int c;
-  while (c = *key++) {
-    hash = ((hash << 5) + hash) + c;
-  }
-  return hash;
-}
-
-// Insert element into hash table
-void insertHash(std::vector<sequence> * fastaHashTable, uintmax_t lenHashTable, 
-                std::string header, std::string sequenceData) {
-  std::string keyStr = header.substr(0, header.find(' '));
-  unsigned long hashIndex = hashFunction(&keyStr[0]) % lenHashTable;
-  if (keyStr == "TRINITY_DN1016_c0_g1_i2" || hashIndex == 202923) {
-   std::cout << "here" << std::endl;
-  }
-  fastaHashTable[hashIndex].push_back(sequence(header, sequenceData));
-}
-
-void deleteHash(std::vector<sequence> * fastaHashTable, uintmax_t lenHashTable,
-                std::string header) {
-  std::string keyStr = header.substr(0, header.find(' '));
-  unsigned long hashIndex = hashFunction(&keyStr[0]) % lenHashTable;
-  if (fastaHashTable[hashIndex].empty()) {
-    std::cout << "Error: not found in hash table" << std::endl;
-    return;
-  }
-  std::string currKeyStrHash;
-  auto vecIter = fastaHashTable[hashIndex].begin();
-  while (vecIter != fastaHashTable[hashIndex].end()) {
-    currKeyStrHash = (vecIter->get_header()).substr(0, vecIter->get_header().find(' '));
-    if (keyStr == currKeyStrHash) {
-      vecIter = fastaHashTable[hashIndex].erase(vecIter);
-    }
-    else {
-      vecIter++;
-    }
-  }
-}
-
-bool inHashTable(std::vector<sequence> * fastaHashTable, uintmax_t lenHashTable,
-                 std::string header) {
-  std::string keyStr = header.substr(0, header.find(' '));
-  unsigned long hashIndex = hashFunction(&keyStr[0]) % lenHashTable;
-  std::cout << "Index: " << hashIndex << std::endl;
-  if (fastaHashTable[hashIndex].empty()) {
-    return false;
-  }
-  else {
-    std::string currKeyStrHash;
-    auto vecIter = fastaHashTable[hashIndex].begin();
-    while (vecIter != fastaHashTable[hashIndex].end()) {
-      currKeyStrHash = (vecIter->get_header()).substr(0, vecIter->get_header().find(' '));
-      if (vecIter->get_header() == header || currKeyStrHash == keyStr) {
-        return true;
-      }
-      vecIter++;
-    }
-    return false;
-  }
-}
-
 // Create chained hash table of sequence objects, keyed by sequence header
-void fillFastaHash(std::vector<sequence> * fastaHashTable, uintmax_t lenHashTable, 
-                   transcript trans, uintmax_t ram_b) {
+void fillFastaHash(seqHash fastaHashTable, transcript trans, uintmax_t ram_b) {
   fs::path transFilePathT = trans.get_trans_path_trinity();
 
   std::string inFileStr(transFilePathT.c_str());
@@ -359,7 +294,7 @@ void fillFastaHash(std::vector<sequence> * fastaHashTable, uintmax_t lenHashTabl
       headerStartPos = std::find(seqStartPos, inFileL, '>');
       currSequence = std::string(seqStartPos, headerStartPos - 1);
       // Insert information into hash table
-      insertHash(fastaHashTable, lenHashTable, currHeader, currSequence); 
+      fastaHashTable.insertHash(currHeader, currSequence); 
     }
   }
 }
@@ -390,7 +325,6 @@ void removeChimera(transcript trans, std::string infoFilePath,
   std::set<std::string> chimeraSet;
 
   std::string filtTrans(trans.get_trans_path_chimera().c_str());
-  std::string chimTrans = std::string(fs::path(filtTrans.c_str()).stem().c_str()) + ".chim_trns.fasta";
 
   if (fs::exists(trans.get_trans_path_chimera())) {
     std::cout << "Filtered transcripts found for: " << transFileStr << std::endl;
@@ -404,9 +338,10 @@ void removeChimera(transcript trans, std::string infoFilePath,
   // Determine size of hash table
   uintmax_t numBytesTrans = fs::file_size(transPath);
   uintmax_t lenHashTable = numBytesTrans / 160;
-  std::vector<sequence> * fastaHashTable = new std::vector<sequence>[lenHashTable];
+  seqHash fastaHashTable(lenHashTable);
+  //std::vector<sequence> * fastaHashTable = new std::vector<sequence>[lenHashTable];
   // Fill hash table with all transcripts
-  fillFastaHash(fastaHashTable, lenHashTable, trans, ram_b);
+  fillFastaHash(fastaHashTable, trans, ram_b);
   // Iterate over chimera set
   //   For all sequences in chimera set
   //     Remove that sequence from the hash table
@@ -414,12 +349,12 @@ void removeChimera(transcript trans, std::string infoFilePath,
   bool foundInHashTable;
   for (auto head : chimeraSet) {
     std::cout << "Now attempting to remove chimera: \"" << head << "\"" << std::endl;
-    foundInHashTable = inHashTable(fastaHashTable, lenHashTable, head);
+    foundInHashTable = fastaHashTable.inHashTable(head);
     std::cout << "Looking in hash table" << std::endl;
     if (foundInHashTable) {
       std::cout << "Found in hash table! Now attempting removal" << std::endl;
-      deleteHash(fastaHashTable, lenHashTable, head);
-      foundInHashTable = inHashTable(fastaHashTable, lenHashTable, head);
+      fastaHashTable.deleteHash(head);
+      foundInHashTable = fastaHashTable.inHashTable(head);
       if (!foundInHashTable) {
         std::cout << "Successfully removed chimera: " << head << std::endl;
         std::cout << std::endl;
@@ -434,25 +369,6 @@ void removeChimera(transcript trans, std::string infoFilePath,
       return;
     }
   }
-  // Iterate over hash table
-  //   For all sequences in hash table
-  //     Write sequence to new file (chimera filtered)
-  // Done.
-  std::ofstream chimFiltFile(std::string(trans.get_trans_path_chimera().c_str()));
-  std::string currHeader;
-  std::string currSeq;
-  for (uintmax_t i = 0; i < lenHashTable; i++) {
-    if (fastaHashTable[i].empty()) {
-      continue;
-    }
-    else {
-      for (auto seq : fastaHashTable[i]) {
-        currHeader = seq.get_header();
-        currSeq = seq.get_sequence();
-        chimFiltFile << currHeader << std::endl;
-        chimFiltFile << currSeq << std::endl;
-      }
-    }
-  }
-  chimFiltFile.close();
+  fastaHashTable.dump(filtTrans);
 }
+

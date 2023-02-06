@@ -4,6 +4,16 @@
 //   Allow postprocessing of local transcripts
 //   Otherwise retrieve from Trinity folder of project
 
+// TODO:
+//   Blast wrapping   (X)
+//   Chimera filter   (X)
+//   Salmon wrapping  (X)
+//   Corset wrapping  (X)
+//   Corset filtering ( )
+//   Transdecoder wrp ( )
+
+extern std::vector<std::string> stepDirs;
+
 std::vector<transcript> get_transcript(std::vector<SRA> sras) {
   std::vector<transcript> transcripts;
   for (auto & sra : sras) {
@@ -34,9 +44,13 @@ int main(int argc, char * argv[]) {
     // Get RAM in GB
     std::string ram_gb = argv[3];
     // Make blast db
-    makeBlastDb("../uniprot-download_true_format_fasta_query__28_28proteome_3AUP00000080-2022.11.14-19.12.00.85.fasta", "../");
+    std::string ref_prot_path = cfgIni["General"]["reference_proteome_path"];
+    makeBlastDb(ref_prot_path, cfgIni["General"]["output_directory"] + cfgIni["General"]["project_name"] + "/" + stepDirs[8]);
     // Run BlastX
-    blastx(trans, "../uniprot-download_true_format_fasta_query__28_28proteome_3AUP00000080-2022.11.14-19.12.00.85", threads, "../");
+    std::string blastDbName = ref_prot_path.substr(ref_prot_path.find_last_of("/"),
+                                                   ref_prot_path.find_last_of(".") - ref_prot_path.find_last_of("/"));
+    blastx(trans, cfgIni["General"]["output_directory"] + cfgIni["General"]["project_name"] + "/" + stepDirs[8] + blastDbName, threads, "../");
+    // TODO: Make the below commands' directories dynamic
     detect_chimera(trans, "../7227_Drosophila_melanogaster.Trinity.blastx", "../");
     removeChimera(trans, "../7227_Drosophila_melanogaster.Trinity.info",
                          "../7227_Drosophila_melanogaster.Trinity.cut",

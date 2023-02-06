@@ -6,5 +6,10 @@
 *.jf_dump
 *.mer_counts
 *.o
+*.cut
+*.info
+*.blastx
+*.p*
+*.tmp
 dev-proj/*
-
+lib/*

@@ -26,9 +26,15 @@ transcript::transcript(SRA sra) {
                          ".gene_trans_map").c_str();
   trans_path_chimera = (projPath + stepDirs[8] + fileBase + ".chim_filt.fasta").c_str();
   // Define salmon index path
+  trans_path_index = (projPath + stepDirs[9] + fileBase + "_salmon_index").c_str();
   // Define salmon quant path
+  trans_path_quant = (projPath + stepDirs[9] + fileBase + "_salmon_quant").c_str();
   // Define corset cluster path
+  trans_path_clust = (projPath + stepDirs[9] + fileBase + "_salmon-clusters.txt").c_str();
+  // Define corset counts path
+  trans_path_counts = (projPath + stepDirs[9] + fileBase + "_salmon-counts.txt").c_str();
   // Define transdecoder cds path
+
   // Define transdecoder prot path 
 }
 
@@ -62,6 +68,10 @@ fs::path transcript::get_trans_path_quant() {
 
 fs::path transcript::get_trans_path_clust() {
   return trans_path_clust;
+}
+
+fs::path transcript::get_trans_path_counts() {
+  return trans_path_counts;
 }
 
 fs::path transcript::get_trans_path_cds() {

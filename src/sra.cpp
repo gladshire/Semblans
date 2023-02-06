@@ -5,7 +5,7 @@ std::vector<std::string> stepDirs = {"00-Raw_reads/", "01-Quality_analysis_1/",
                                      "02-Error_correction/", "03-Trimming/",
                                      "04-Filter_foreign/", "05-Quality_analysis_2/",
                                      "06-Filter_overrepresented/", "07-Trinity_assembly/",
-                                     "08-Filter_chimera/"};
+                                     "08-Filter_chimera/", "09-Clustering/"};
 
 
 // Default constructor for SRA object
@@ -25,10 +25,10 @@ SRA::SRA() {
 SRA::SRA(std::string sra_accession, INI_MAP cfgIni) {
   std::string outDir(cfgIni["General"]["output_directory"]);
   std::string projName(cfgIni["General"]["project_name"]);
-  std::string apiKey(cfgIni["General"]["api_key"]);
+  std::string apiKey(cfgIni["General"]["ncbi_api_key"]);
   std::chrono::milliseconds queryLim(500);
   if (apiKey != "") {
-    std::chrono::milliseconds queryLim(150);
+    std::chrono::milliseconds queryLim(250);
   }
 
   // Download temp XML file for SRA accession, containing information for object members
@@ -36,69 +36,66 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni) {
                            sra_accession + "&api_key=" + apiKey;
   int result;
   while (true) {
+    system(curlCmdStr.c_str());
+    std::this_thread::sleep_for(queryLim);
+  
+    // Parse XML file for object information
     try {
-      system(curlCmdStr.c_str());
-      std::this_thread::sleep_for(queryLim);
+      rapidxml::file<> sra_xml("tmp.xml");
+      rapidxml::xml_document<> sra_doc;
+      sra_doc.parse<0>(sra_xml.data());
+      rapidxml::xml_node<> * parse_node = sra_doc.first_node()->first_node()->first_node();
+      // Set object SRA accession number
+      this->sra_accession = sra_accession;
+
+      // Set object member for number of spots read
+      while(strcmp(parse_node->name(), "spots")) {
+        parse_node = parse_node->next_sibling();
+      }
+      spots = atoi(parse_node->value());
+
+      // Set object member for number of base pairs in SRA run
+      while(strcmp(parse_node->name(), "bases")) {
+        parse_node = parse_node->next_sibling();
+      }
+      bp = atoi(parse_node->value());
+
+      // Set object member for number of spots that have mates
+      while(strcmp(parse_node->name(), "spots_with_mates")) {
+        parse_node = parse_node->next_sibling();
+      }
+      spots_m = atoi(parse_node->value());
+
+      // Set object member for whether SRA run is single-ended or paired-ended
+      while(strcmp(parse_node->name(), "LibraryLayout")) {
+        parse_node = parse_node->next_sibling();
+      }
+      if (!strcmp(parse_node->value(), "PAIRED")) {
+        paired = true;
+      }
+      else {
+        paired = false;
+      }
+
+      // Set object member for taxonomic ID number
+      while(strcmp(parse_node->name(), "TaxID")) {
+        parse_node = parse_node->next_sibling();
+      }
+      this->tax_id = std::string(parse_node->value());
+
+      // Set object member for organism name
+      while(strcmp(parse_node->name(), "ScientificName")) {
+        parse_node = parse_node->next_sibling();
+      }
+      this->org_name = std::string(parse_node->value());
       break;
     }
-    catch (std::runtime_error & e) {
+    catch (const std::runtime_error & e) {
       std::cout << "Throttled: too many requests. Retrying ..." << std::endl;
       std::this_thread::sleep_for(5 * queryLim);
     }
   }
-  std::this_thread::sleep_for(queryLim);
   
-  // Parse XML file for object information
-  rapidxml::file<> sra_xml("tmp.xml");
-  rapidxml::xml_document<> sra_doc;
-  sra_doc.parse<0>(sra_xml.data());
-
-  rapidxml::xml_node<> * parse_node = sra_doc.first_node()->first_node()->first_node();
- 
-  // Set object SRA accession number
-  this->sra_accession = sra_accession;
-
-  // Set object member for number of spots read
-  while(strcmp(parse_node->name(), "spots")) {
-    parse_node = parse_node->next_sibling();
-  }
-  spots = atoi(parse_node->value());
-
-  // Set object member for number of base pairs in SRA run
-  while(strcmp(parse_node->name(), "bases")) {
-    parse_node = parse_node->next_sibling();
-  }
-  bp = atoi(parse_node->value());
-
-  // Set object member for number of spots that have mates
-  while(strcmp(parse_node->name(), "spots_with_mates")) {
-    parse_node = parse_node->next_sibling();
-  }
-  spots_m = atoi(parse_node->value());
-
-  // Set object member for whether SRA run is single-ended or paired-ended
-  while(strcmp(parse_node->name(), "LibraryLayout")) {
-    parse_node = parse_node->next_sibling();
-  }
-  if (!strcmp(parse_node->value(), "PAIRED")) {
-    paired = true;
-  }
-  else {
-    paired = false;
-  }
-
-  // Set object member for taxonomic ID number
-  while(strcmp(parse_node->name(), "TaxID")) {
-    parse_node = parse_node->next_sibling();
-  }
-  this->tax_id = std::string(parse_node->value());
-
-  // Set object member for organism name
-  while(strcmp(parse_node->name(), "ScientificName")) {
-    parse_node = parse_node->next_sibling();
-  }
-  this->org_name = std::string(parse_node->value());
-
   std::string fileBase = make_file_str();
   std::string projPath = outDir + projName + "/";
   extern std::vector<std::string> stepDirs;

@@ -58,13 +58,9 @@ transcript run_trinity(SRA sra, std::string threads, std::string ram_gb) {
   std::string inFile1;
   std::string inFile2;
   transcript sra_trans(sra);
-  std::string outFile(sra_trans.get_trans_path_trinity().c_str());
+  std::string outFile(sra.get_accession() + "_" + sra_trans.get_trans_path_trinity().c_str());
   std::string trin_cmd;
   int result;
-  if (fs::exists(sra_trans.get_trans_path_trinity().c_str())) {
-    std::cout << "Trinity assembly found for: " << sra.get_accession() << std::endl;
-    return sra_trans;
-  }
   if (sra.is_paired()) {
     trin_cmd = PATH_TRINITY + " --seqType fq" + " --left " +
                sra.get_sra_path_orep_filt().first.c_str() + " --right " +
@@ -96,10 +92,6 @@ transcript run_trinity_comb(std::vector<SRA> sras_comb,
   std::string outFile(sra_trans.get_trans_path_trinity().c_str());
   std::string trin_cmd;
   int result;
-  if (fs::exists(sra_trans.get_trans_path_trinity().c_str())) {
-    std::cout << "Trinity assembly found for: " << sras_comb[0].get_org_name() << std::endl;
-    return sra_trans;
-  }
   trin_cmd = PATH_TRINITY + " --seqType fq" + " --single " + inFile + " --max_memory " +
              ram_gb + "G " + "--CPU " + threads + " --bflyCalculateCPU" + " --full_cleanup" +
              " --no_normalize_reads" + " --run_as_paired" + " --output " + outFile; 
@@ -119,6 +111,10 @@ std::vector<transcript> run_trinity_bulk(std::vector<SRA> sras,
   std::vector<transcript> sra_transcripts;
   transcript currSraTrans;
   for (auto &sra : sras) {
+    if (fs::exists(transcript(sra).get_trans_path_trinity().c_str())) {
+      std::cout << "Assembly found for: " << sra.get_accession() << ", " << sra.get_org_name() << std::endl;
+      continue;
+    }
     if (mult_sra) {
       std::vector<SRA> sras_comb = get_sra_to_combine(sras, sra.get_org_name());
       currSraTrans = run_trinity_comb(sras_comb, threads, ram_gb);
