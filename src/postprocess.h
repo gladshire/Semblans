@@ -13,6 +13,8 @@
 #include "ini_parse.h"
 #include "ncbi_blast.h"
 #include "rem_chimera.h"
+#include "salmon_wrap.h"
+#include "corset_wrap.h"
 #include "print_info.h"
 
 std::vector<transcript> get_transcript(std::vector<SRA> sras);

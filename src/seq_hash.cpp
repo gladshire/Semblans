@@ -4,11 +4,13 @@
 seqHash::seqHash() {
   seqHashData = NULL;
   lenHashTable = 0;
+  numItems = 0;
 }
 
 seqHash::seqHash(uintmax_t lenTable) {
   seqHashData = new std::vector<sequence>[lenTable];
   lenHashTable = lenTable;
+  numItems = 0;
 }
 
 // Apply djb2 hashing function to key
@@ -26,6 +28,7 @@ void seqHash::insertHash(std::string header, std::string sequenceData) {
   std::string keyStr = header.substr(0, header.find(' '));
   unsigned long hashIndex = hashFunction(&keyStr[0]) % lenHashTable;
   seqHashData[hashIndex].push_back(sequence(header, sequenceData));
+  numItems++;
 }
 
 // Remove sequence element from hash table, if it exists
@@ -46,13 +49,13 @@ void seqHash::deleteHash(std::string header) {
       vecIter++;
     }
   }
+  numItems--;
 }
 
 // Determine if sequence element is contained in hash table
 bool seqHash::inHashTable(std::string header) {
   std::string keyStr = header.substr(0, header.find(' '));
   unsigned long hashIndex = hashFunction(&keyStr[0]) % lenHashTable;
-  std::cout << "Index: " << hashIndex << std::endl;
   if (seqHashData[hashIndex].empty()) {
     return false;
   }
@@ -80,13 +83,19 @@ void seqHash::dump(std::string filePath) {
       continue;
     }
     else {
+      int bpPerLine;
       for (auto seq : seqHashData[i]) {
         currHeader = seq.get_header();
         currSeq = seq.get_sequence();
-        outFile << currHeader << '\n';
-        outFile << currSeq << '\n';
+        outFile << ">" << currHeader << '\n';
+        outFile << currSeq << std::endl;
       }
     }
   }
   outFile.close();
+}
+
+// Return number of items in hash table
+uintmax_t seqHash::getSize() {
+  return numItems;
 }

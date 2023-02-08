@@ -21,16 +21,29 @@ transcript::transcript(SRA sra) {
   tax_id = sra.get_tax_id();
   std::string fileBase = make_file_str();
  
+  // Define trinity assembly path
   trans_path_trinity = (projPath + stepDirs[7] + fileBase + ".Trinity.fasta").c_str();
+  // Define trinity gene map path
   trans_path_gene_map = (projPath + stepDirs[7] + fileBase + ".Trinity.fasta" + 
                          ".gene_trans_map").c_str();
+  // Define chimera cut file path
+  trans_path_ccut = (projPath + stepDirs[8] + fileBase + ".Trinity.cut").c_str();
+  // Define chimera info file path
+  trans_path_cinfo = (projPath + stepDirs[8] + fileBase + ".Trinity.info").c_str();
+  // Define chimera-filtered transcript path
   trans_path_chimera = (projPath + stepDirs[8] + fileBase + ".chim_filt.fasta").c_str();
+  // Define blastx output path
+  trans_path_blastx = (projPath + stepDirs[8] + fileBase + ".Trinity.blastx").c_str();
   // Define salmon index path
   trans_path_index = (projPath + stepDirs[9] + fileBase + "_salmon_index").c_str();
   // Define salmon quant path
   trans_path_quant = (projPath + stepDirs[9] + fileBase + "_salmon_quant").c_str();
   // Define corset cluster path
   trans_path_clust = (projPath + stepDirs[9] + fileBase + "_salmon-clusters.txt").c_str();
+  // Define largest cluster transcripts path
+  trans_path_largest = (projPath + stepDirs[9] + fileBase + ".lc.fasta").c_str();
+  // Define redundant transcripts path
+  trans_path_redund = (projPath + stepDirs[9] + fileBase + ".rd.fasta").c_str();
   // Define corset counts path
   trans_path_counts = (projPath + stepDirs[9] + fileBase + "_salmon-counts.txt").c_str();
   // Define transdecoder cds path
@@ -54,8 +67,20 @@ fs::path transcript::get_trans_path_gene_map() {
   return trans_path_gene_map;
 }
 
+fs::path transcript::get_trans_path_ccut() {
+  return trans_path_ccut;
+}
+
+fs::path transcript::get_trans_path_cinfo() {
+  return trans_path_cinfo;
+}
+
 fs::path transcript::get_trans_path_chimera() {
   return trans_path_chimera;
+}
+
+fs::path transcript::get_trans_path_blastx() {
+  return trans_path_blastx;
 }
 
 fs::path transcript::get_trans_path_index() {
@@ -68,6 +93,14 @@ fs::path transcript::get_trans_path_quant() {
 
 fs::path transcript::get_trans_path_clust() {
   return trans_path_clust;
+}
+
+fs::path transcript::get_trans_path_largest() {
+  return trans_path_largest;
+}
+
+fs::path transcript::get_trans_path_redund() {
+  return trans_path_redund;
 }
 
 fs::path transcript::get_trans_path_counts() {

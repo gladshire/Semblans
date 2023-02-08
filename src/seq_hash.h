@@ -14,6 +14,7 @@ class seqHash {
   private:
     std::vector<sequence> * seqHashData;
     uintmax_t lenHashTable;
+    uintmax_t numItems;
   public:
     seqHash();
     seqHash(uintmax_t lenTable);
@@ -22,4 +23,5 @@ class seqHash {
     void deleteHash(std::string header);
     bool inHashTable(std::string header);
     void dump(std::string filePath);
+    uintmax_t getSize();
 };

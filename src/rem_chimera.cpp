@@ -347,28 +347,29 @@ void removeChimera(transcript trans, std::string infoFilePath,
   //     Remove that sequence from the hash table
   //   Resulting hash table contains only non-chimeric seqs
   bool foundInHashTable;
+  int numRemoved = 0;
   for (auto head : chimeraSet) {
-    std::cout << "Now attempting to remove chimera: \"" << head << "\"" << std::endl;
     foundInHashTable = fastaHashTable.inHashTable(head);
-    std::cout << "Looking in hash table" << std::endl;
     if (foundInHashTable) {
-      std::cout << "Found in hash table! Now attempting removal" << std::endl;
       fastaHashTable.deleteHash(head);
       foundInHashTable = fastaHashTable.inHashTable(head);
-      if (!foundInHashTable) {
-        std::cout << "Successfully removed chimera: " << head << std::endl;
-        std::cout << std::endl;
-      }
-      else {
+      if (foundInHashTable) {
         std::cout << "Could not remove chimera. Something failed" << std::endl;
         return;
       }
+      numRemoved++;
     }
     else {
       std::cout << "Not found in hash table! Something failed" << std::endl;
       return;
     }
   }
+  std::cout << "Chimeric removal successful!\n" << std::endl;
+  std::cout << "====================" << std::endl;
+  std::cout << "  SUMMARY:" << std::endl;
+  std::cout << "    Removed:  " << numRemoved << std::endl;
+  std::cout << "    Retained: " << fastaHashTable.getSize() << std::endl;
+  std::cout << "====================\n" << std::endl;
   fastaHashTable.dump(filtTrans);
 }
 

@@ -15,8 +15,6 @@ class sequence {
     std::string sequenceData;
     std::string quality;
     int numBp;
-    int numLine;
-    int bpPerLine;
   public:
     sequence();
     sequence(std::string header, std::string sequenceData);

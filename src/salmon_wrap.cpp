@@ -42,6 +42,7 @@ void combine_paired(std::vector<SRA> sras, long long int ram_b) {
   }
 }
 
+// Index reads from sequence data
 void salmon_index(transcript trans, std::string threads) {
   std::string transFilePath(trans.get_trans_path_chimera().c_str());
   std::string indexFilePath(trans.get_trans_path_index().c_str());
@@ -53,12 +54,30 @@ void salmon_index(transcript trans, std::string threads) {
     return;
   }
   std::string salm_cmd = PATH_SALMON + " index" + " -t " + transFilePath +
-                         " -i " + indexFilePath + " --type" + " puff" + " -p " +
-                         threads;
+                         " -i " + indexFilePath + " -p " + threads;
   result = system(salm_cmd.c_str());
   if (WIFSIGNALED(result)) {
     std::cout << "Exited with signal " << WTERMSIG(result) << std::endl;
     exit(1);
+  }
+}
+
+bool runPaired(std::vector<SRA> sras) {
+  int numSingle = 0;
+  int numPaired = 0;
+  for (auto sra : sras) {
+    if (sra.is_paired()) {
+      numPaired++;
+    }
+    else {
+      numSingle++;
+    }
+  }
+  if (numPaired >= numSingle) {
+    return true;
+  }
+  else {
+    return false;
   }
 }
 
@@ -89,18 +108,19 @@ void salmon_quant(transcript trans, std::vector<SRA> sras, std::string threads) 
     std::cout << "Quant found for: " << trans.get_org_name() << std::endl;
     return;
   }
-  if (sras[0].is_paired()) {
+  bool morePaired = false;
+  morePaired = runPaired(sras);
+  if (morePaired) {
     std::string salm_cmd = PATH_SALMON + " quant" + " -i " + indexFilePath + " --dumpEq" +
                            " --libType" + " A" + " -p " + threads +
-                           " -1 <(cat " + sras1 + ")" + " -2 <(cat " + sras2 + ")" +
+                           " -1 " + sras1 + " -2 " + sras2 +
                            " --validateMappings" + " -o " + quantFilePath;
     result = system(salm_cmd.c_str());
   }
   else {
     std::string salm_cmd = PATH_SALMON + " quant" + " -i " + indexFilePath + " --dumpEq" +
                            " --libType" + " A" + " -p " + threads +
-                           " -r <(cat " + sras1 + ")" +
-                           " --validateMappings" + " -o " + quantFilePath;
+                           " -r " + sras1 + " --validateMappings" + " -o " + quantFilePath;
     result = system(salm_cmd.c_str());
   }
   if (WIFSIGNALED(result)) {
