@@ -22,6 +22,7 @@ class seqHash {
     void insertHash(std::string header, std::string sequence);
     void deleteHash(std::string header);
     bool inHashTable(std::string header);
+    sequence getSeq(std::string header);
     void dump(std::string filePath);
     uintmax_t getSize();
 };

@@ -73,6 +73,26 @@ bool seqHash::inHashTable(std::string header) {
   }
 }
 
+sequence seqHash::getSeq(std::string header) {
+  std::string keyStr = header.substr(0, header.find(' '));
+  unsigned long hashIndex = hashFunction(&keyStr[0]) & lenHashTable;
+  if (seqHashData[hashIndex].empty()) {
+    return sequence();
+  }
+  else {
+    std::string currKeyStrHash;
+    auto vecIter = seqHashData[hashIndex].begin();
+    while (vecIter != seqHashData[hashIndex].end()) {
+      currKeyStrHash = (vecIter->get_header()).substr(0, vecIter->get_header().find(' '));
+      if (vecIter->get_header() == header || currKeyStrHash == keyStr) {
+        return sequence(vecIter->get_header(), vecIter->get_sequence());
+      }
+      vecIter++;
+    }
+    return sequence();
+  }
+}
+
 // Output all hash table data to text file
 void seqHash::dump(std::string filePath) {
   std::ofstream outFile(filePath);
