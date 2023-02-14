@@ -21,6 +21,4 @@
 
 void retrieve_sra_data(std::vector<SRA> sras, std::string threads);
 
-void print_intro();
-
 void print_help();

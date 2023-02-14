@@ -4,3 +4,4 @@ all:
 	$(MAKE) preprocess.mk
 	$(MAKE) assemble.mk
 	$(MAKE) postprocess.mk
+	$(MAKE) paando.mk
