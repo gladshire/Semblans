@@ -4,14 +4,6 @@
 //   Allow postprocessing of local transcripts
 //   Otherwise retrieve from Trinity folder of project
 
-// TODO:
-//   Blast wrapping   (X)
-//   Chimera filter   (X)
-//   Salmon wrapping  (X)
-//   Corset wrapping  (X)
-//   Corset filtering ( )
-//   Transdecoder wrp ( )
-
 extern std::vector<std::string> stepDirs;
 
 std::vector<transcript> get_transcript(std::vector<SRA> sras) {

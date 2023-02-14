@@ -45,3 +45,21 @@ void blastx(transcript transcripts, std::string blastDb,
   }
 }
 
+
+void blastp(std::string pepFilePath, std::string blastDb,
+            std::string threads, std::string outFile) {
+  fs::path outBlastpFile(outFile.c_str());
+  int result;
+  if (fs::exists(outBlastpFile)) {
+    std::cout << "BLASTP output found for: " + pepFilePath << std::endl;
+    return;
+  }
+  std::string blastpCmd = BLASTP + " -query " + pepFilePath + " -db " + blastDb +
+                          " -max_target_seqs 1 -outfmt 6 -evalue 10 " + "-num_threads " +
+                          threads + " > " + outFile;
+  result = system(blastpCmd.c_str());
+  if (WIFSIGNALED(result)) {
+    std::cout << "Exited with signal " << WTERMSIG(result) << std::endl;
+    exit(1);
+  }
+}

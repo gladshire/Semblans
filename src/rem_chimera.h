@@ -31,22 +31,6 @@ bool checkBlock(std::vector<std::vector<std::string>> & block, bool multiGene,
 
 void detect_chimera(transcript trans, std::string blastxFile, std::string outDir);
 
-//void align_buffer_end(std::ifstream & inFile, char * inFileData, std::streamsize & s);
-
-/*
-unsigned long hashFunction(char * key);
-
-void insertHash(std::vector<sequence> * fastaHashTable, uintmax_t lenHashTable,
-                std::string header, std::string sequence);
-
-void deleteHash(std::vector<sequence> * fastaHashTable, uintmax_t lenHashTable,
-                std::string header);
-
-bool inHashTable(std::vector<sequence> * fastaHashTable, uintmax_t lenHashTable,
-                 std::string header);
-*/
-//void fillFastaHash(seqHash fastaHashTable, transcript trans, uintmax_t ram_b);
-
 std::set<std::string> makeChimeraSet(std::ifstream & chimFile);
 
 void removeChimera(transcript trans, std::string infoFilePath, std::string cutFilePath,

@@ -6,6 +6,7 @@
 #include "sra.h"
 #include "transcript.h"
 #include "seq_hash.h"
+#include "ncbi_blast.h"
 
 namespace fs = boost::filesystem;
 namespace dl = boost::dll;

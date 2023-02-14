@@ -68,19 +68,18 @@ void run_transdecoder(transcript trans, std::string threads, uintmax_t ram_b,
       // Only operates on un-stranded. Implement stranded later
       std::string tdLongOrfs_cmd = PATH_TRANSD_LONGORFS + " -t " + transFilePath + " -O " +
                                    std::string(allpep.parent_path().c_str());
-      system(tdLongOrfs_cmd.c_str());
+      int resultLO;
+      resultLO = system(tdLongOrfs_cmd.c_str());
+      if (WIFSIGNALED(resultLO)) {
+        std::cout << "Exited with signal " << WTERMSIG(resultLO) << std::endl;
+        exit(1);
+      }
     }
     if (blastpout_ok(outDir + blastpout)) {
       std::cout << "Skipping blastp" << std::endl;
     }
     else {
-      // Update blastp path. Add wrapper
-      std::string blastp_cmd = std::string((dl::program_location().parent_path() /
-                                            fs::path(std::string("../lib/ncbi-blast-2.13.0+-src/c++/ReleaseMT/bin/blastp"))).c_str()) +
-                               " -query " + std::string(allpep.c_str()) +
-                               " -db " + dbPath + " -max_target_seqs 1 -outfmt 6 -evalue 10 " +
-                               "-num_threads " + threads + " > " + outDir + blastpout;
-      system(blastp_cmd.c_str());
+      blastp(std::string(allpep.c_str()), dbPath, threads, outDir + blastpout);
     }
     if (fasta_ok(std::string(cdsFilePath.c_str()), ram_b) &&
         fasta_ok(std::string(pepFilePath.c_str()), ram_b)) {
@@ -90,7 +89,15 @@ void run_transdecoder(transcript trans, std::string threads, uintmax_t ram_b,
       std::string tdPredict_cmd = PATH_TRANSD_PREDICT + " -t " + transFilePath +
                                   " --retain_blastp_hits " + outDir + blastpout + " --cpu " +
                                   threads;
-      system(tdPredict_cmd.c_str());
+      fs::path currDir = fs::current_path();
+      fs::current_path(fs::path(outDir.c_str()));
+      int resultPD;
+      resultPD = system(tdPredict_cmd.c_str());
+      if (WIFSIGNALED(resultPD)) {
+        std::cout << "Exited with signal " << WTERMSIG(resultPD) << std::endl;
+        exit(1);
+      }
+      fs::current_path(currDir);
     }
   }
 }
