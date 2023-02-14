@@ -234,71 +234,6 @@ void detect_chimera(transcript trans, std::string pathBlastxFile, std::string ou
   fileInfo.close();
 }
 
-
-// Align buffer with end of last transcript
-void align_buffer_end(std::ifstream & inFile, char * inFileData, std::streamsize & s) {
-  if (!inFile.eof()) {
-    while (inFile.peek() != '@' && inFile.peek() != '>') {
-      inFile.unget();
-      inFileData[s - 1] = '\0';
-      s--;
-    }
-  }
-}
-
-// Create chained hash table of sequence objects, keyed by sequence header
-void fillFastaHash(seqHash fastaHashTable, transcript trans, uintmax_t ram_b) {
-  fs::path transFilePathT = trans.get_trans_path_trinity();
-
-  std::string inFileStr(transFilePathT.c_str());
-
-  std::ifstream inFile(inFileStr);
-
-  std::string inFileData;
-
-  inFileData.reserve(ram_b);
-
-  std::streamsize s;
-
-  char * headerStartPos;
-  char * headerEndPos;
-  char * seqStartPos;
-  char * seqEndPos;
-  char * inFileL;
-  while (!inFile.eof()) {
-    // Process file in buffer chunks
-    // Store chunk into buffer
-    inFile.read(&inFileData[0], ram_b);
-    // Get number of bytes just read
-    s = inFile.gcount();
-    // Initialize header start position
-    headerStartPos = &inFileData[0];
-    // Initizlie address of last buffer position
-    inFileL = &inFileData[0] + s;
-    // Align end of buffer just before next transcript
-    align_buffer_end(inFile, &inFileData[0], s);
-    // While loop to retrieve all transcripts in buffer
-    //   Each iteration corresponds to single transcript
-    std::string currHeader;
-    std::string currSequence;
-    std::string currKey;
-    while (headerStartPos != inFileL) {
-      // Extract header
-      if (*headerStartPos != '>') {
-        std::cout << "Buffer not aligned. Header doesn't start with \">\"" << std::endl;
-        exit(0);
-      }
-      seqStartPos = std::find(headerStartPos, inFileL, '\n') + 1;
-      currHeader = std::string(headerStartPos + 1, seqStartPos - 1);
-      // Extract sequence
-      headerStartPos = std::find(seqStartPos, inFileL, '>');
-      currSequence = std::string(seqStartPos, headerStartPos - 1);
-      // Insert information into hash table
-      fastaHashTable.insertHash(currHeader, currSequence); 
-    }
-  }
-}
-
 // Create list of unique chimeric transcripts based on .cut file
 std::set<std::string> makeChimeraSet(std::ifstream & chimFile) {
   std::set<std::string> chimSet;
@@ -338,10 +273,8 @@ void removeChimera(transcript trans, std::string infoFilePath,
   // Determine size of hash table
   uintmax_t numBytesTrans = fs::file_size(transPath);
   uintmax_t lenHashTable = numBytesTrans / 160;
-  seqHash fastaHashTable(lenHashTable);
-  //std::vector<sequence> * fastaHashTable = new std::vector<sequence>[lenHashTable];
+  seqHash fastaHashTable(lenHashTable, transPath, ram_b);
   // Fill hash table with all transcripts
-  fillFastaHash(fastaHashTable, trans, ram_b);
   // Iterate over chimera set
   //   For all sequences in chimera set
   //     Remove that sequence from the hash table

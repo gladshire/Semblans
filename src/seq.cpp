@@ -14,6 +14,13 @@ sequence::sequence(std::string header, std::string sequenceData) {
   numBp = sequenceData.length();
 }
 
+sequence::sequence(const sequence & seq) {
+  header = seq.header;
+  sequenceData = seq.sequenceData;
+  quality = seq.quality;
+  int numBp = seq.numBp;
+}
+
 std::string sequence::get_header() {
   return this->header;
 }

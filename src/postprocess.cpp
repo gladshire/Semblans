@@ -36,7 +36,7 @@ int main(int argc, char * argv[]) {
   if (argc > 1) {
     // Retrieve SRA objects, convert to transcripts
     INI_MAP cfgIni = make_ini_map(argv[1]);
-
+    make_proj_space(cfgIni);
     std::string outputDir = cfgIni["General"]["output_directory"];
     std::string projDir = outputDir + cfgIni["General"]["project_name"] + "/";
     std::string refProt = cfgIni["General"]["reference_proteome_path"];
@@ -73,8 +73,12 @@ int main(int argc, char * argv[]) {
                                          fs::path("eq_classes.txt.gz")).c_str()),
                              std::string(projDir + stepDirs[9]));
     // Filter corset output
-
+    filterCorset(trans, std::string(trans.get_trans_path_clust().c_str()),
+                 (uintmax_t)(stoi(ram_gb) * 1000000000),
+                 std::string(projDir + stepDirs[9]));
     // Run transdecoder
+    run_transdecoder(trans, threads, (uintmax_t)(stoi(ram_gb) * 1000000000),
+                     projDir + stepDirs[8] + blastDbName, projDir + stepDirs[10]);
   }
   else {
     print_help();

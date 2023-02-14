@@ -18,6 +18,7 @@ class sequence {
   public:
     sequence();
     sequence(std::string header, std::string sequenceData);
+    sequence(const sequence & seq);
     std::string get_header();
     std::string get_sequence();
 };

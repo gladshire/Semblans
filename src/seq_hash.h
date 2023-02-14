@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <vector>
 #include <boost/filesystem.hpp>
@@ -18,6 +19,8 @@ class seqHash {
   public:
     seqHash();
     seqHash(uintmax_t lenTable);
+    seqHash(uintmax_t lenTable, fs::path transFilePath, uintmax_t ram_b);
+    void align_buffer_end(std::ifstream & inFile, char * inFileData, std::streamsize & s);
     unsigned long hashFunction(char * key);
     void insertHash(std::string header, std::string sequence);
     void deleteHash(std::string header);

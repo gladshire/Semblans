@@ -13,6 +13,64 @@ seqHash::seqHash(uintmax_t lenTable) {
   numItems = 0;
 }
 
+seqHash::seqHash(uintmax_t lenTable, fs::path transFilePath, uintmax_t ram_b) {
+
+  seqHashData = new std::vector<sequence>[lenTable];
+  lenHashTable = lenTable;
+  numItems = 0;
+
+  std::string inFileStr(transFilePath.c_str());
+  std::ifstream inFile(inFileStr);
+  std::string inFileData;
+  inFileData.reserve(ram_b);
+  std::streamsize s;
+
+  char * headerStartPos;
+  char * headerEndPos;
+  char * seqStartPos;
+  char * seqEndPos;
+  char * inFileL;
+  while (!inFile.eof()) {
+    // Store file chunk into buffer
+    inFile.read(&inFileData[0], ram_b);
+    // Get number of bytes just read
+    s = inFile.gcount();
+    // Initialize header start position
+    headerStartPos = &inFileData[0];
+    // Initizlie address of last buffer position
+    inFileL = &inFileData[0] + s;
+    // Align end of buffer with end of last transcript
+    this->align_buffer_end(inFile, &inFileData[0], s);
+    std::string currHeader;
+    std::string currSequence;
+    std::string currKey;
+    while (headerStartPos != inFileL) {
+      // Extract header
+      if (*headerStartPos != '>') {
+        std::cout << "Buffer not aligned. Header doesn't start with \">\" or \"@\"" << std::endl;
+        exit(0);
+      }
+      seqStartPos = std::find(headerStartPos, inFileL, '\n') + 1;
+      currHeader = std::string(headerStartPos + 1, seqStartPos - 1);
+      // Extract sequence
+      headerStartPos = std::find(seqStartPos, inFileL, '>');
+      currSequence = std::string(seqStartPos, headerStartPos - 1);
+      // Insert information into hash table
+      this->insertHash(currHeader, currSequence);
+    }
+  }
+}
+
+void seqHash::align_buffer_end(std::ifstream & inFile, char * inFileData, std::streamsize & s) {
+  if (!inFile.eof()) {
+    while (inFile.peek() != '@' && inFile.peek() != '>') {
+      inFile.unget();
+      inFileData[s - 1] = '\0';
+      s--;
+    }
+  }
+}
+
 // Apply djb2 hashing function to key
 unsigned long seqHash::hashFunction(char * key) {
   unsigned long hash = 5381;
@@ -75,7 +133,7 @@ bool seqHash::inHashTable(std::string header) {
 
 sequence seqHash::getSeq(std::string header) {
   std::string keyStr = header.substr(0, header.find(' '));
-  unsigned long hashIndex = hashFunction(&keyStr[0]) & lenHashTable;
+  unsigned long hashIndex = hashFunction(&keyStr[0]) % lenHashTable;
   if (seqHashData[hashIndex].empty()) {
     return sequence();
   }

@@ -1,12 +1,5 @@
 #include "transcript.h"
 
-/*
-std::vector<std::string> stepDirs = {"00-Raw_reads/", "01-Quality_analysis_1/",
-                                     "02-Error_correction/", "03-Trimming/",
-                                     "04-Filter_foreign/", "05-Quality_analysis_2/",
-                                     "06-Filter_overrepresented/", "07-Trinity_assembly/",
-                                     "08-Filter_chimera/"};
-*/
 extern std::vector<std::string> stepDirs;
 
 transcript::transcript() {
@@ -47,9 +40,11 @@ transcript::transcript(SRA sra) {
   // Define corset counts path
   trans_path_counts = (projPath + stepDirs[9] + fileBase + "_salmon-counts.txt").c_str();
   // Define transdecoder cds path
-
+  trans_path_cds = (projPath + stepDirs[10] + ".transdecoder.cds").c_str();
   // Define transdecoder prot path 
-}
+  trans_path_prot = (projPath + stepDirs[10] + ".transdecoder.pep").c_str();
+
+} 
 
 std::string transcript::get_org_name() {
   return org_name;

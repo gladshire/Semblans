@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <fstream>
 #include <set>
@@ -11,7 +12,15 @@
 #include "print_info.h"
 
 namespace fs = boost::filesystem;
-namespace dl = boost::filesystem;
+namespace dl = boost::dll;
 
+/*
+void align_buffer_end(std::ifstream & inFile, char * inFileData,
+                      std::streamsize & s);
 
-void filterCorset(transcript trans, std::string clusterPath, std::string out_dir);
+void fillFastaHash(seqHash fastaHashTable, transcript trans, uintmax_t ram_b);
+*/
+std::set<std::string> makeClusterSet(std::ifstream & clustFile);
+
+void filterCorset(transcript trans, std::string clusterPath, uintmax_t ram_b,
+                  std::string out_dir);

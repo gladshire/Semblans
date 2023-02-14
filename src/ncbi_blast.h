@@ -16,8 +16,7 @@ namespace dl = boost::dll;
 #define MAKEBLASTDB (PATH_BLAST + "makeblastdb")
 #define BLASTX (PATH_BLAST + "blastx")
 
-
-
+// Add wrapper for blastp
 
 void makeBlastDb(std::string pathProfRef, std::string outDir);
 
