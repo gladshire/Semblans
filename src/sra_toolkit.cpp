@@ -22,10 +22,12 @@ void prefetch_sra(std::vector<SRA> sras) {
     }
     sra_accessions += (sra.get_accession() + " ");
   }
-  result = system((PATH_PREFETCH + " " + sra_accessions + prefetchFlag + outDir).c_str());
-  if (WIFSIGNALED(result)) {
-    std::cout << "Exited with signal " << WTERMSIG(result) << std::endl;
-    exit(1);
+  if (sra_accessions != "") {
+    result = system((PATH_PREFETCH + " " + sra_accessions + prefetchFlag + outDir).c_str());
+    if (WIFSIGNALED(result)) {
+      std::cout << "Exited with signal " << WTERMSIG(result) << std::endl;
+      exit(1);
+    }
   }
 }
 

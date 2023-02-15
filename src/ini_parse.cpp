@@ -26,7 +26,9 @@ void make_proj_space(const INI_MAP &iniFile) {
   std::string projDir = iniFile.at("General").at("output_directory") +
                         iniFile.at("General").at("project_name") + "/";
   extern std::vector<std::string> stepDirs;
-  system(("mkdir " + projDir).c_str());
+  if (!fs::exists(fs::path(projDir.c_str()))) {
+    system(("mkdir " + projDir).c_str());
+  }
   for (auto dir : stepDirs) {
     if (fs::exists(fs::path((projDir + dir).c_str()))) {
       continue;

@@ -7,7 +7,7 @@ void corset_eq_classes(transcript trans, std::string pathEqClassFile, std::strin
     std::cout << "Cluster/count files found for: " << trans.get_org_name() << std::endl;
     return;
   }
-  if (fs::extension(eqClassFile) == fs::path(".gz")) {
+  if (eqClassFile.extension() == fs::path(".gz")) {
     system(("gzip -d " + pathEqClassFile).c_str());
     pathEqClassFile = std::string(eqClassFile.replace_extension().c_str());
   }

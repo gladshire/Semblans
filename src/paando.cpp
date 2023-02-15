@@ -12,8 +12,8 @@ void print_intro() {
   std::cout << std::left << std::setw(w.ws_col) << "  │ | |  | (_| | (_| | | | | (_| | (_) | │" << std::endl;
   std::cout << std::left << std::setw(w.ws_col) << "  │ |_|   \\__,_|\\__,_|_| |_|\\__,_|\\___/  │" << std::endl;
   std::cout << std::left << std::setw(w.ws_col) << "  └──────────────────────────────────────┘\n" << std::endl;
-  std::cout << std::left << std::setw(w.ws_col) << "                    P -ipeline for the       " << std::endl;
-  std::cout << std::left << std::setw(w.ws_col) << "                    A -ssembly and           " << std::endl;
+  std::cout << std::left << std::setw(w.ws_col) << "                    P  -ipeline for the       " << std::endl;
+  std::cout << std::left << std::setw(w.ws_col) << "                    A  -ssembly and           " << std::endl;
   std::cout << std::left << std::setw(w.ws_col) << "                    An -alysis of            " << std::endl;
   std::cout << std::left << std::setw(w.ws_col) << "                    D  -e novo                " << std::endl;
   std::cout << std::left << std::setw(w.ws_col) << "       transcript-  O  -mics datasets         " << std::endl;
@@ -21,19 +21,31 @@ void print_intro() {
   std::cout << std::left << std::setw(w.ws_col) << "A C++ package enabling the bulk retrieval," << std::endl;
   std::cout << std::left << std::setw(w.ws_col) << "assembly, and analysis of de novo transcriptomes" << std::endl;
   std::cout << std::left << std::setw(w.ws_col) << "from multiple individuals\n" << std::endl;
+  std::cout << std::left << std::setw(w.ws_col) << "  ────────────────────────────────────────\n" << std::endl;
+
 }
 
 
 void print_help() {
-  std::cout << "  USAGE:\n" << std::endl;
-  std::cout << "    paando [FUNCTION] [--config/-cfg] configuration_file_path "
-            << "[--threads/-t] num_threads [--ram/-r] ram_to_dedicate\n" << std::endl;
+  std::cout << "USAGE:\n" << std::endl;
+  std::cout << "  paando [--help/-h] [COMMAND] [--config/-cfg]\n"
+            << "         [--threads/-t] [--ram/-r] [--multi/-m]\n" << std::endl;
+  std::cout << "ARGUMENTS:\n" << std::endl;
+  std::cout << "  [COMMAND]" << std::endl;
+  std::cout << "    preprocess       Performs pre-assembly steps only" << std::endl;
+  std::cout << "    assemble         Performs de novo assembly step only" << std::endl;
+  std::cout << "    postprocess      Performs post-assembly steps only" << std::endl;
+  std::cout << "    all (default)    Performs all steps in pipeline\n" << std::endl;
+  std::cout << "  -cfg, --config     Specifies path to configuration file (REQUIRED)" << std::endl;
+  std::cout << "  -t,   --threads    Specifies number of threads/CPU cores to employ" << std::endl;
+  std::cout << "  -r,   --ram        Specifies ammount of memory/RAM (GB) to dedicate" << std::endl;
+  std::cout << "  -m,   --multi      Perform assembly from multiple SRA runs" << std::endl;
+  std::cout << "  -h,   --help       Displays this help screen" << std::endl;
+
 }
 
 int main(int argc, char * argv[]) {
   print_intro();
-  // Command structure:
-  //   ./paando preprocess/assemble/postprocess/{empty} config.ini threads ram_gb
   std::string threadStr;
   std::string ramStr;
   int numThreads;
@@ -44,8 +56,8 @@ int main(int argc, char * argv[]) {
 
   if (argc == 1 || 
       (argc == 2 && 
-       (argv[1] == "--help" ||
-        argv[1] == "-h"))) {
+       (strcmp("--help", argv[1]) == 0 ||
+        strcmp("-h", argv[1]) == 0))) {
     print_help();
     exit(0);
   }
@@ -104,11 +116,14 @@ int main(int argc, char * argv[]) {
           fs::path pathConfigFile(pathConfig.c_str());
           if (!fs::exists(pathConfigFile)) {
             // ERROR: Config file not found!
+            std::cout << "ERROR: Config file: " << pathConfig << " not found\n" << std::endl;
             exit(1);
           }
         }
         else {
           // ERROR: No config file specified!
+          std::cout << "ERROR: Must specify config file" << std::endl;
+          std::cout << "  (example: --config path/to/config.ini)\n" << std::endl;
           exit(1);
         }
       }
@@ -123,6 +138,8 @@ int main(int argc, char * argv[]) {
           for (int j = 0; j < strlen(argv[i + 1]); j++) {
             if (!isdigit(threadStr[j])) {
               // ERROR: Bad thread argument
+              std::cout << "ERROR: Invalid argument given for --threads/-t" << std::endl;
+              std::cout << "  (example: --threads 8)\n" << std::endl;
               exit(1);
             }
           }
@@ -143,6 +160,8 @@ int main(int argc, char * argv[]) {
           for (int j = 0; j < strlen(argv[i + 1]); j++) {
             if (!isdigit(ramStr[j])) {
               // ERROR: Bad memory argument
+              std::cout << "ERROR: Invalid argument given for --ram/-r" << std::endl;
+              std::cout << "  (example: --ram 10)\n" << std::endl;
               exit(1);
             }
           }
@@ -156,6 +175,8 @@ int main(int argc, char * argv[]) {
       // Check if user specified a multi-SRA assembly
       else if (strcmp("--multi", argv[i]) == 0 ||
                strcmp("--Multi", argv[i]) == 0 ||
+               strcmp("--mult", argv[i]) == 0 ||
+               strcmp("--Mult", argv[i]) == 0 ||
                strcmp("-m", argv[i]) == 0 ||
                strcmp("-M", argv[i]) == 0) {
         multAssembly = true;
@@ -166,9 +187,10 @@ int main(int argc, char * argv[]) {
     }
     if (pathConfig == "") {
       // ERROR: No config file specified
+      std::cout << "ERROR: Must specify config file" << std::endl;
+      std::cout << "  (example: --config path/to/config.ini)\n" << std::endl;
       exit(1);
     }
-    // Case 1: preprocess
     std::string preCmd = PAANDO_DIR + "preprocess " + pathConfig + " " +
                          std::to_string(numThreads) + " " +
                          std::to_string(ram);
@@ -182,7 +204,6 @@ int main(int argc, char * argv[]) {
                           std::to_string(numThreads) + " " +
                           std::to_string(ram);
 
-    std::cout << preCmd << std::endl;
     // Case 1: preprocess
     if (command == "preprocess") {
       std::cout << "Performing preprocessing only ..." << std::endl;
