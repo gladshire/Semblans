@@ -6,7 +6,7 @@
 namespace dl = boost::dll;
 namespace fs = boost::filesystem;
 
-#define PATH_SRA_BIN std::string((dl::program_location().parent_path() / fs::path(std::string("../lib/sratoolkit.3.0.0-ubuntu64/bin/"))).c_str())
+#define PATH_SRA_BIN std::string((dl::program_location().parent_path() / fs::path(std::string("../external/sratoolkit.3.0.1/bin/"))).c_str())
 #define PATH_PREFETCH std::string(PATH_SRA_BIN + "prefetch")
 #define PATH_FASTERQ std::string(PATH_SRA_BIN + "fasterq-dump")
 

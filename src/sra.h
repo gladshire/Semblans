@@ -6,8 +6,8 @@
 #include <chrono>
 #include <thread>
 #include <boost/filesystem.hpp>
-#include <rapidxml.hpp>
-#include <rapidxml_utils.hpp>
+#include <rapidxml/rapidxml.hpp>
+#include <rapidxml/rapidxml_utils.hpp>
 #include "ini_parse.h"
 
 namespace fs = boost::filesystem;

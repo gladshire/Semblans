@@ -7,7 +7,7 @@
 namespace fs = boost::filesystem;
 namespace dl = boost::dll;
 
-#define PATH_FASTQC std::string((dl::program_location().parent_path() / fs::path(std::string("../lib/FastQC/fastqc"))).c_str())
+#define PATH_FASTQC std::string((dl::program_location().parent_path() / fs::path(std::string("../external/FastQC/fastqc"))).c_str())
 
 namespace fs = boost::filesystem;
 

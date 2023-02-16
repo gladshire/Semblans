@@ -8,7 +8,7 @@
 namespace fs = boost::filesystem;
 namespace dl = boost::dll;
 
-#define PATH_SALMON std::string((dl::program_location().parent_path() / fs::path(std::string("../lib/salmon-1.9.0_linux_x86_64/bin/salmon"))).c_str())
+#define PATH_SALMON std::string((dl::program_location().parent_path() / fs::path(std::string("../external/salmon-1.9.0/bin/salmon"))).c_str())
 
 void combine_paired(std::vector<SRA> sras, long long int ram_b);
 

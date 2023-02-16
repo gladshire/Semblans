@@ -7,6 +7,6 @@
 namespace fs = boost::filesystem;
 namespace dl = boost::dll;
 
-#define PATH_RCORR std::string((dl::program_location().parent_path() / fs::path(std::string("../lib/Rcorrector-1.0.5/run_rcorrector.pl"))).c_str())
+#define PATH_RCORR std::string((dl::program_location().parent_path() / fs::path(std::string("../external/Rcorrector-1.0.5/run_rcorrector.pl"))).c_str())
 
 void run_rcorr(std::vector<SRA> sras, std::string threads);

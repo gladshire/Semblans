@@ -61,6 +61,10 @@ int main(int argc, char * argv[]) {
     print_help();
     exit(0);
   }
+  if (argc == 2 && (strcmp("--version", argv[1]) == 0 ||
+                    strcmp("-v", argv[1]) == 0)) {
+    std::cout << "Paando version: 0.0.1" << std::endl;
+  }
   else {
     // Parse through flags in commands
     threadStr = "";

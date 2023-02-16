@@ -7,7 +7,7 @@
 namespace fs = boost::filesystem;
 namespace dl = boost::dll;
 
-#define PATH_KRAK2 std::string((dl::program_location().parent_path() / fs::path(std::string("../lib/kraken2-2.1.2/kraken2"))).c_str())
+#define PATH_KRAK2 std::string((dl::program_location().parent_path() / fs::path(std::string("../external/kraken2-2.1.2/kraken2"))).c_str())
 
 std::vector<std::string> get_kraken2_dbs(const INI_MAP &iniFile);
 

@@ -5,7 +5,6 @@
 #include <unistd.h>
 #include <boost/filesystem.hpp>
 #include <boost/dll.hpp>
-#include <confini.h>
 #include "sra.h"
 #include "sra_toolkit.h"
 #include "transcript.h"

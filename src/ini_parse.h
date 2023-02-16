@@ -9,7 +9,7 @@
 #include <map>
 #include <cstdio>
 
-#include <confini.h>
+#include <libconfini/confini.h>
 #include <boost/filesystem.hpp>
 #include <boost/variant.hpp>
 
