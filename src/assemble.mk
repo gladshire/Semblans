@@ -19,4 +19,5 @@ ini_parse.o: ini_parse.cpp ini_parse.h
 trinity_wrap.o: trinity_wrap.cpp trinity_wrap.h
 	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c trinity_wrap.cpp $(LIBS)
 clean:
-	rm $(OBJ_LINK)
+	rm assemble.o
+	rm trinity_wrap.o

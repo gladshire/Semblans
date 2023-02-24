@@ -1,15 +1,15 @@
 #include "ncbi_blast.h"
 
-void makeBlastDb(std::string protRef, std::string outDir) {
-  fs::path pathProtRef(protRef.c_str());
-  std::string protRefStr(pathProtRef.stem().c_str()); 
+void makeBlastDb(std::string pathProtRef, std::string outDir) {
+  fs::path pathProtRefFile(pathProtRef.c_str());
+  std::string protRefStr(pathProtRefFile.stem().c_str()); 
   fs::path outDbFile((outDir + "/" + protRefStr).c_str());
   int result;
   if (fs::exists(outDbFile)) {
     std::cout << "BLAST database found for: " + protRefStr << std::endl;
     return;
   }
-  std::string makeblastdbCmd = MAKEBLASTDB + " -in " + protRef + " -dbtype prot -out " +
+  std::string makeblastdbCmd = MAKEBLASTDB + " -in " + pathProtRef + " -dbtype prot -out " +
                                outDbFile.c_str();
   result = system(makeblastdbCmd.c_str());
   if (WIFSIGNALED(result)) {
@@ -34,7 +34,7 @@ void blastx(transcript transcripts, std::string blastDb,
   }
   std::string blastxCmd = BLASTX + " -db " + blastDb + " -query " + pathTransStr +
                           " -evalue " + "0.01" +
-                          " -outfmt " + "\"6 qseqid qlen sseqid slen frames pident nident length mismatch gapopen qstart qend start send evalue bitscord\"" +
+                          " -outfmt " + "\"6 qseqid qlen sseqid slen frames pident nident length mismatch gapopen qstart qend start send evalue bitscore\"" +
                           " -out " + outBlastxStr +
                           " -num_threads " + threads +
                           " -max_target_seqs 100";

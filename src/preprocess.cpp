@@ -1,3 +1,7 @@
+// TODO: Allow use of local data
+//   - Process input as comma-separated pairs ending with .fastq / .fq
+
+
 #include "preprocess.h"
 
 void retrieve_sra_data(std::vector<SRA> sras, std::string threads) {
@@ -8,6 +12,14 @@ void retrieve_sra_data(std::vector<SRA> sras, std::string threads) {
   fasterq_sra(sras, threads);
 }
 
+bool stringToBool(std::string boolStr) {
+  bool boolConv;
+  for (int i = 0; i < boolStr.length(); i++) {
+    boolStr[i] = std::tolower(boolStr[i]);
+  }
+  boolConv = (boolStr == "true") ? true : false;
+  return boolConv;
+}
 
 void print_help() {
   winsize w;
@@ -18,7 +30,7 @@ void print_help() {
 
 
 int main(int argc, char * argv[]) {
-  if (argc != 4) {
+  if (argc < 4) {
     print_help();
     return 0;
   }
@@ -27,82 +39,59 @@ int main(int argc, char * argv[]) {
     std::string threads = argv[2];
     std::string ram_gb = argv[3];
     std::vector<SRA> sras;
-    std::string localDataBoolStr = cfgIni["General"]["use_local_data"];
-    bool localDataBool;
-    for (int i = 0; i < localDataBoolStr.length(); i++) {
-      localDataBoolStr[i] = std::tolower(localDataBoolStr[i]);
+    std::vector<std::string> localDataFiles;
+    bool localDataBool = false;
+
+    // Create vector of SRA objects from SRA accessions, using NCBI web API
+    sras = get_sras(cfgIni);
+
+    if (!sras.empty()) {
+      retrieve_sra_data(sras, threads);
     }
-    localDataBool = (localDataBoolStr == "true") ? true : false;
-    // TODO: Add error message for value that isn't 'true' or 'false'
-    if (localDataBool) {
-      std::string localDataDirStr = cfgIni["General"]["local_data_directory"];
-      fs::path localDataDir(localDataDirStr.c_str());
-      fs::directory_iterator localDirIter{localDataDir};
-      std::vector<fs::path> filesSkip;
-      while (localDirIter != fs::directory_iterator{}) {
-        fs::path sraFile = localDirIter->path();
-        if (std::find(filesSkip.begin(), filesSkip.end(), sraFile) != filesSkip.end()) {
-          localDirIter++;
-          continue;
+    // Get single/paired filenames of local data
+    for (auto fqFileName : cfgIni.at("Local files")) {
+      localDataFiles.push_back(fqFileName.first);
+    }
+    std::pair<std::string, std::string> sraRunsLocal;
+    size_t pos;
+    for (auto sraRun : localDataFiles) {
+      sraRunsLocal.first = "";
+      sraRunsLocal.second = "";
+      pos = sraRun.find(" ");
+      sraRunsLocal.first = sraRun.substr(0, pos);
+      if (pos != std::string::npos) {
+        sraRun.erase(0, pos + 1);
+        pos = sraRun.find(" ");
+        sraRunsLocal.second = sraRun.substr(0, pos);
+      }
+      // Check if files in pair exist. If not, do not add to sras vector
+      if (fs::exists(cfgIni["General"]["local_data_directory"] + sraRunsLocal.first) &&
+          fs::exists(cfgIni["General"]["local_data_directory"] + sraRunsLocal.second)) {
+        sras.push_back(SRA(sraRunsLocal.first, sraRunsLocal.second, cfgIni));
+      }
+      else {
+        if (sraRunsLocal.first != "" &&
+            !fs::exists(cfgIni["General"]["local_data_directory"] + sraRunsLocal.first)) {
+          std::cout << "ERROR: Local run not found: \"" << sraRunsLocal.first << "\""
+                    << std::endl;
         }
-        std::string sraFileName = sraFile.filename().c_str();
-        std::string sraFileNameP = sraFileName;
-        std::string sraFile1;
-        std::string sraFile2;
-        if (std::string(sraFile.stem().c_str()).back() == '1' ||
-            std::string(sraFile.stem().c_str()).back() == '2') {
-          if (std::string(sraFile.stem().c_str()).back() == '1') {
-            sraFileNameP.replace(sraFileName.length() - 7, 1, "2");
-            sraFile1 = sraFileName;
-            sraFile2 = sraFileNameP;
-          }
-          else if (std::string(sraFile.stem().c_str()).back() == '2') {
-            sraFileNameP.replace(sraFileName.length() - 7, 1, "1");
-            sraFile1 = sraFileNameP;
-            sraFile2 = sraFileName;
-          }
-          else {
-            // File not paired-end
-            //   Construct UNPAIRED SRA object with filename
-            //   Add filename to filesskip
-            SRA currSra(sraFileName, "", cfgIni);
-            sras.push_back(currSra);
-            filesSkip.push_back(sraFile);
-            continue;
-          }
-          fs::path sraFileP = sraFile.parent_path() / fs::path(sraFileNameP);
-          if (fs::exists(sraFileP)) {
-            SRA currSra(sraFile1, sraFile2, cfgIni);
-            sras.push_back(currSra);
-            filesSkip.push_back(sraFile);
-            filesSkip.push_back(sraFileP);
-          }
-          else {
-            SRA currSra(sraFileName, "", cfgIni);
-            sras.push_back(currSra);
-            filesSkip.push_back(sraFile);
-          }
+        if (sraRunsLocal.second != "" &&
+            !fs::exists(cfgIni["General"]["local_data_directory"] + sraRunsLocal.second)) {
+          std::cout << "ERROR: Local run not found: \"" << sraRunsLocal.second << "\""
+                    << std::endl;
         }
-        else {
-          // File not paired-end
-          SRA currSra(sraFileName, "", cfgIni);
-          sras.push_back(currSra);
-          filesSkip.push_back(sraFile);
-        }
-        localDirIter++;
       }
     }
-    else {
-      // Not using local files, retrieve from NCBI instead
-      sras = get_sras(cfgIni);
-    }
+
+
     std::string fastqc_dir_1(sras[0].get_fastqc_dir_1().first.parent_path().parent_path().c_str());
     std::string fastqc_dir_2(sras[0].get_fastqc_dir_2().first.parent_path().parent_path().c_str());
     std::vector<std::string> kraken2Dbs = get_kraken2_dbs(cfgIni);
     std::string kraken2_conf = get_kraken2_conf(cfgIni);
     std::pair<std::vector<std::string>, std::vector<std::string>> overrepSeqs;
     make_proj_space(cfgIni);
-    retrieve_sra_data(sras, threads);
+
+
     run_fastqc_bulk(sras, threads, fastqc_dir_1);
     run_rcorr(sras, threads);
     rem_unfix_bulk(sras, ram_gb);

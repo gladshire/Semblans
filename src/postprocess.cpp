@@ -34,20 +34,53 @@ int main(int argc, char * argv[]) {
     std::string refProt = cfgIni["General"]["reference_proteome_path"];
 
     std::vector<SRA> sras;
+    std::vector<std::string> localDataFiles;
     sras = get_sras(cfgIni);
+    for (auto fqFileName : cfgIni.at("Local files")) {
+      localDataFiles.push_back(fqFileName.first);
+    }
+    std::pair<std::string, std::string> sraRunsLocal;
+    size_t pos;
+    for (auto sraRun : localDataFiles) {
+      sraRunsLocal.first = "";
+      sraRunsLocal.second = "";
+      pos = sraRun.find(" ");
+      sraRunsLocal.first = sraRun.substr(0, pos);
+      if (pos != std::string::npos) {
+        sraRun.erase(0, pos + 1);
+        pos = sraRun.find(" ");
+        sraRunsLocal.second = sraRun.substr(0, pos);
+      }
+      if (fs::exists(cfgIni["General"]["local_data_directory"] + sraRunsLocal.first) &&
+          fs::exists(cfgIni["General"]["local_data_directory"] + sraRunsLocal.second)) {
+        sras.push_back(SRA(sraRunsLocal.first, sraRunsLocal.second, cfgIni));
+      }
+      else {
+        if (sraRunsLocal.first != "" &&
+            !fs::exists(cfgIni["General"]["local_data_directory"] + sraRunsLocal.first)) {
+          std::cout << "ERROR: Local run not found: \"" << sraRunsLocal.first << "\""
+                    << std::endl;
+        }
+        if (sraRunsLocal.second != "" &&
+            !fs::exists(cfgIni["General"]["local_data_directory"] + sraRunsLocal.second)) {
+          std::cout << "ERROR: Local run not found: \"" << sraRunsLocal.second << "\""
+                    << std::endl;
+        }
+      }
+    }
     transcript trans = get_transcript_mult(sras[0]);
     // Get number of threads
     std::string threads = argv[2];
     // Get RAM in GB
     std::string ram_gb = argv[3];
     // Make blast db
-    makeBlastDb(refProt, projDir + stepDirs[8]);
+    makeDb(refProt, projDir + stepDirs[8]);
     // Run BlastX
     std::string blastDbName = refProt.substr(refProt.find_last_of("/"),
                                              refProt.find_last_of(".") -
                                              refProt.find_last_of("/"));
-    blastx(trans, projDir + stepDirs[8] + blastDbName, threads,
-           projDir + stepDirs[8]);
+    blastxDiam(trans, projDir + stepDirs[8] + blastDbName, threads,
+               projDir + stepDirs[8]);
     // Detect and remove chimeric transcripts
     detect_chimera(trans, std::string(trans.get_trans_path_blastx().c_str()),
                    projDir + stepDirs[8]);

@@ -3,8 +3,10 @@
 
 std::vector<SRA> get_sras(const INI_MAP &iniFile) {
   std::vector<SRA> sras;
-  for (auto sra : iniFile.at("SRA accessions")) {
-    sras.push_back(SRA(sra.first, iniFile));
+  if (!iniFile.at("SRA accessions").empty()) {
+    for (auto sra : iniFile.at("SRA accessions")) {
+      sras.push_back(SRA(sra.first, iniFile));
+    }
   }
   return sras;
 }
@@ -42,8 +44,11 @@ void fasterq_sra(std::vector<SRA> sras, std::string threads) {
       continue;
     }
     outFile = sra.make_file_str();
+    fs::path currDir = fs::current_path();
+    fs::current_path(fs::path(prefetchDir.c_str()));
     result = system((PATH_FASTERQ + " " + fasterqFlag + "/" + sra.get_accession() +
-                     " -o " + prefetchDir + "/" + outFile).c_str());
+                     " -o " + outFile).c_str());
+    fs::current_path(currDir);
     if (WIFSIGNALED(result)) {
       std::cout << "Exited with signal " << WTERMSIG(result) << std::endl;
       exit(1);

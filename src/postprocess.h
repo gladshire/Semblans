@@ -11,6 +11,7 @@
 #include "seq.h"
 #include "ini_parse.h"
 #include "ncbi_blast.h"
+#include "diamond.h"
 #include "rem_chimera.h"
 #include "salmon_wrap.h"
 #include "corset_wrap.h"

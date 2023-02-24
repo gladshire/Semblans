@@ -1,17 +1,20 @@
 #!/bin/sh
 
+echo "Initiating install of Paando ..."
+
 # Prepare Paando file structure
 mkdir include
 mkdir lib
 mkdir external
 
-
 #========================================================================
 #/////////////   INSTALLATION OF THIRD-PARTY LIBRARIES   \\\\\\\\\\\\\\\\
 #========================================================================
 
+echo "Now installing required libraries ..."
+
 # Install boost libraries
-echo "Installing Boost libraries ..."
+echo "  Installing Boost libraries ..."
 wget -q https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.gz
 tar -xf boost_1_81_0.tar.gz
 cd boost_1_81_0
@@ -22,7 +25,7 @@ cd ..
 rm -rf boost_1_81_0*
 
 # Install rapidXML
-echo "Installing rapidXML library ..."
+echo "  Installing rapidXML library ..."
 wget -q https://sourceforge.net/projects/rapidxml/files/rapidxml/rapidxml%201.13/rapidxml-1.13.zip
 unzip rapidxml-1.13.zip
 mv rapidxml-1.13 rapidxml
@@ -30,7 +33,7 @@ mv rapidxml include/
 rm rapidxml-1.13.zip
 
 # Install libconfini
-echo "Installing libconfini library ..."
+echo "  Installing libconfini library ..."
 wget -q https://github.com/madmurphy/libconfini/releases/download/1.16.4/libconfini-1.16.4-x86_64-bin.tar.xz
 tar -xf libconfini-1.16.4-x86_64-bin.tar.xz
 mkdir ./include/libconfini
@@ -44,6 +47,8 @@ rm -rf ./usr/
 #========================================================================
 #/////////////   INSTALLATION OF THIRD-PARTY PACKAGES    \\\\\\\\\\\\\\\\
 #========================================================================
+
+echo "Now installing required packages ..."
 
 cd ./external/
 
@@ -68,6 +73,9 @@ rm fastqc.zip
 echo "Installing Rcorrector ..."
 wget -q --output-document rcorrector.tar.gz https://github.com/mourisl/Rcorrector/archive/refs/tags/v1.0.5.tar.gz
 tar -xf rcorrector.tar.gz
+cd Rcorrector-1.0.5
+make
+cd ../
 rm rcorrector.tar.gz
 
 # Install Trimmomatic
@@ -104,6 +112,18 @@ wget -q --output-document ncbi-blast.tar.gz https://ftp.ncbi.nlm.nih.gov/blast/e
 tar -xf ncbi-blast.tar.gz
 rm ncbi-blast.tar.gz
 
+# Install Diamond
+echo "Installing Diamond ..."
+mkdir diamond-2.1.3
+wget -q --output-document diamond.tar.gz https://github.com/bbuchfink/diamond/releases/download/v2.1.3/diamond-linux64.tar.gz
+tar -xf diamond.tar.gz
+mv diamond diamond-2.1.3
+cd diamond-2.1.3
+wget -q https://raw.githubusercontent.com/bbuchfink/diamond/master/LICENSE
+cd ../
+rm diamond.tar.gz
+
+
 # Install Corset
 echo "Installing Corset ..."
 wget -q --output-document corset.tar.gz https://github.com/Oshlack/Corset/releases/download/version-1.09/corset-1.09-linux64.tar.gz
@@ -139,4 +159,6 @@ rm transdecoder.tar.gz
 cd ../
 mkdir ./bin/
 make
+
+echo "\nPaando has been installed successfully!\n"
 

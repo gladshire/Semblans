@@ -1,9 +1,17 @@
 #include "print_info.h"
 
 void summarize_sing_sra(SRA sra) {
-  std::cout << sra.get_accession() << " - "
-            << sra.get_org_name()  << " " 
-            << sra.get_tax_id()    << std::endl;
+  std::string filePrefix1 = sra.get_file_prefix().first;
+  std::string filePrefix2 = sra.get_file_prefix().second;
+  if (sra.is_paired()) {
+    std::cout << "Paired-end run:" << std::endl;
+    std::cout << filePrefix1 << std::endl;
+    std::cout << filePrefix2 << "\n" << std::endl;
+  }
+  else {
+    std::cout << "Single-end run:" << std::endl;
+    std::cout << filePrefix1 << "\n" << std::endl;
+  }
 }
 
 void summarize_all_sras(std::vector<SRA> sras) {

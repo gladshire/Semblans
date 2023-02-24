@@ -18,7 +18,7 @@ namespace dl = boost::dll;
 #define BLASTP (PATH_BLAST + "blastp")
 
 
-void makeBlastDb(std::string pathProfRef, std::string outDir);
+void makeBlastDb(std::string pathProtRef, std::string outDir);
 
 void blastx(transcript transcripts, std::string blastDb,
             std::string threads, std::string outDir);

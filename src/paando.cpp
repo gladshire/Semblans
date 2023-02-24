@@ -53,6 +53,7 @@ int main(int argc, char * argv[]) {
   std::string pathConfig;
   std::string command;
   bool multAssembly;
+  bool useLocalData;
 
   if (argc == 1 || 
       (argc == 2 && 
@@ -207,32 +208,50 @@ int main(int argc, char * argv[]) {
     std::string postCmd = PAANDO_DIR + "postprocess " + pathConfig + " " +
                           std::to_string(numThreads) + " " +
                           std::to_string(ram);
-
+    int result;
     // Case 1: preprocess
     if (command == "preprocess") {
       std::cout << "Performing preprocessing only ..." << std::endl;
-      system(preCmd.c_str());
+      result = system(preCmd.c_str());
+      if (WIFSIGNALED(result)) {
+        exit(1);
+      }
       exit(0);
     }
     // Case 2: assemble
     // TODO: Account for if there are no files for assembly
     if (command == "assemble") {
       std::cout << "Performing assembly only ..." << std::endl;
-      system(assCmd.c_str());
+      result = system(assCmd.c_str());
+      if (WIFSIGNALED(result)) {
+        exit(1);
+      }
       exit(0);
     }
     // Case 3: postprocess
     // TODO: Account for if there are no files for postprocess
     if (command == "postprocess") {
       std::cout << "Performing postprocess only ..." << std::endl;
-      system(postCmd.c_str());
+      result = system(postCmd.c_str());
+      if (WIFSIGNALED(result)) {
+        exit(1);
+      }
       exit(0);
     }
     // Case 4: all three
     if (command == "all") {
-      system(preCmd.c_str());
-      system(assCmd.c_str());
-      system(postCmd.c_str());
+      result = system(preCmd.c_str());
+      if (WIFSIGNALED(result)) {
+        exit(1);
+      }
+      result = system(assCmd.c_str());
+      if (WIFSIGNALED(result)) {
+        exit(1);
+      }
+      result = system(postCmd.c_str());
+      if (WIFSIGNALED(result)) {
+        exit(1);
+      }
       exit(0);
     }
   }

@@ -23,6 +23,8 @@ class SRA {
     int spots_m;
     long int bp;
     bool paired;
+    std::string file_prefix_1;
+    std::string file_prefix_2;
     fs::path fastqc_dir_1_1;
     fs::path fastqc_dir_2_1;
     fs::path sra_path_raw_1;
@@ -52,6 +54,7 @@ class SRA {
     int get_spots_m();
     long int get_bp();
     bool is_paired();
+    std::pair<std::string, std::string> get_file_prefix();
     std::pair<fs::path, fs::path> get_fastqc_dir_1();
     std::pair<fs::path, fs::path> get_sra_path_raw();
     std::pair<fs::path, fs::path> get_sra_path_corr();

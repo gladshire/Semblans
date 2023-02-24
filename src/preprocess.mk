@@ -32,4 +32,10 @@ rem_overrep.o: rem_overrep.cpp rem_overrep.h
 print_info.o: print_info.cpp print_info.h
 	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c print_info.cpp $(LIBS)
 clean:
-	rm $(OBJ_LINK)
+	rm preprocess.o
+	rm fastqc_wrap.o
+	rm rcorr_wrap.o
+	rm rem_unfixable.o
+	rm trimm_wrap.o
+	rm kraken_wrap.o
+	rm rem_overrep.o

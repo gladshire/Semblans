@@ -79,7 +79,7 @@ void run_transdecoder(transcript trans, std::string threads, uintmax_t ram_b,
       std::cout << "Skipping blastp" << std::endl;
     }
     else {
-      blastp(std::string(allpep.c_str()), dbPath, threads, outDir + blastpout);
+      blastpDiam(std::string(allpep.c_str()), dbPath, threads, outDir + blastpout);
     }
     if (fasta_ok(std::string(cdsFilePath.c_str()), ram_b) &&
         fasta_ok(std::string(pepFilePath.c_str()), ram_b)) {

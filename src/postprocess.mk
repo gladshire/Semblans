@@ -2,7 +2,7 @@ CC = g++
 CFLAGS = '-Wl,-rpath,$$ORIGIN/../lib/' -g -pthread
 LIBS = -L../lib -lboost_system -lboost_filesystem -ldl -lconfini
 INCLUDE_PATH = -I../lib/ -I../include
-OBJ_LINK = postprocess.o sra.o sra_toolkit.o ini_parse.o transcript.o seq.o seq_hash.o ncbi_blast.o rem_chimera.o salmon_wrap.o corset_wrap.o filter_corset.o transdecoder_wrap.o print_info.o thread_pool.o
+OBJ_LINK = postprocess.o sra.o sra_toolkit.o ini_parse.o transcript.o seq.o seq_hash.o ncbi_blast.o diamond.o rem_chimera.o salmon_wrap.o corset_wrap.o filter_corset.o transdecoder_wrap.o print_info.o thread_pool.o
 
 
 ../bin/postprocess: $(OBJ_LINK)
@@ -23,6 +23,8 @@ seq_hash.o: seq_hash.cpp seq_hash.h
 	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c seq_hash.cpp $(LIBS)
 ncbi_blast.o: ncbi_blast.cpp ncbi_blast.h
 	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c ncbi_blast.cpp $(LIBS)
+diamond.o: diamond.cpp diamond.h
+	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c diamond.cpp $(LIBS)
 rem_chimera.o: rem_chimera.cpp rem_chimera.h
 	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c rem_chimera.cpp $(LIBS)
 salmon_wrap.o: salmon_wrap.cpp salmon_wrap.h

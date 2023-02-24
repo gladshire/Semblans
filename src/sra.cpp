@@ -18,6 +18,8 @@ SRA::SRA() {
   spots_m = -1;
   bp = -1;
   paired = false;
+  file_prefix_1 = "";
+  file_prefix_2 = "";
 }
 
 // SRA accession number constructor for SRA object
@@ -98,6 +100,9 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni) {
   }
   
   std::string fileBase = make_file_str();
+  file_prefix_1 = fileBase;
+  file_prefix_2 = fileBase;
+
   std::string projPath = outDir + projName + "/";
   extern std::vector<std::string> stepDirs;
 
@@ -155,6 +160,9 @@ SRA::SRA(std::string fileName1, std::string fileName2, INI_MAP cfgIni) {
   std::string fileBase1(fs::path(fileName1.c_str()).stem().c_str());
   std::string fileBase2(fs::path(fileName2.c_str()).stem().c_str());
 
+  file_prefix_1 = fileBase1;
+  file_prefix_2 = fileBase2;
+
   sra_accession = "";
   org_name = "";
   tax_id = "";
@@ -163,7 +171,8 @@ SRA::SRA(std::string fileName1, std::string fileName2, INI_MAP cfgIni) {
   bp = -1;
   paired = (fileName2 == "") ? false : true;
   
-  sra_path_raw_1  = (projPath + stepDirs[0] + fileBase1 + ".fastq").c_str();
+  //sra_path_raw_1  = (projPath + stepDirs[0] + fileBase1 + ".fastq").c_str();
+  sra_path_raw_1 = (localDataDir + fileBase1 + ".fastq").c_str();
   fastqc_dir_1_1  = (projPath + stepDirs[1] + fileBase1 + "/" + fileBase1).c_str();
   sra_path_corr_1 = (projPath + stepDirs[2] + fileBase1 + ".cor.fq").c_str();
   sra_path_corr_fix_1 = (projPath + stepDirs[2] + fileBase1 + ".cor.fix.fq").c_str();
@@ -174,7 +183,8 @@ SRA::SRA(std::string fileName1, std::string fileName2, INI_MAP cfgIni) {
   sra_path_orep_filt_1 = (projPath + stepDirs[6] + fileBase1 + ".orep.filt.fq").c_str();
 
   if (paired) {
-    sra_path_raw_2 = (projPath + stepDirs[0] + fileBase2 + ".fastq").c_str();
+    //sra_path_raw_2 = (projPath + stepDirs[0] + fileBase2 + ".fastq").c_str();
+    sra_path_raw_2 = (localDataDir + fileBase2 + ".fastq").c_str();
     fastqc_dir_2_1 = (projPath + stepDirs[1] + fileBase2 + "/" + fileBase2).c_str();
     sra_path_corr_2 = (projPath + stepDirs[2] + fileBase2 + ".cor.fq").c_str();
     sra_path_corr_fix_2 = (projPath + stepDirs[2] + fileBase2 + ".cor.fix.fq").c_str();
@@ -220,6 +230,11 @@ bool SRA::is_paired() {
   return paired;
 }
 
+std::pair<std::string, std::string> SRA::get_file_prefix() {
+  std::pair<std::string, std::string> file_prefix(file_prefix_1, file_prefix_2);
+  return file_prefix;
+}
+
 // Getter function for path to SRA FastQC analysis directory
 std::pair<fs::path, fs::path> SRA::get_fastqc_dir_1() {
   std::pair<fs::path, fs::path> fastqc_dir_1(fastqc_dir_1_1, fastqc_dir_2_1);
@@ -261,6 +276,7 @@ std::pair<fs::path, fs::path> SRA::get_sra_path_for_filt() {
   return sra_path_for_filt;
 }
 
+// Getter function for fastqc directory 2
 std::pair<fs::path, fs::path> SRA::get_fastqc_dir_2() {
   std::pair<fs::path, fs::path> fastqc_dir_2(fastqc_dir_1_2, fastqc_dir_2_2);
   return fastqc_dir_2;
