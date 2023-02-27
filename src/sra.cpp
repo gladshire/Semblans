@@ -126,6 +126,7 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni) {
     std::string sra_path_for_filt_1_str(sra_path_for_filt_1.c_str());
     std::string fastqc_dir_1_2_str(fastqc_dir_1_2.c_str());
     std::string sra_path_orep_filt_1_str(sra_path_orep_filt_1.c_str());
+
     sra_path_raw_1 = (sra_path_raw_1_str.insert(sra_path_raw_1_str.length() - 6, "_1")).c_str();
     fastqc_dir_1_1 = (fastqc_dir_1_1_str.insert(fastqc_dir_1_1_str.length(), "_1")).c_str();
     sra_path_corr_1 = (sra_path_corr_1_str.insert(sra_path_corr_1_str.length() - 7, "_1")).c_str();
@@ -188,6 +189,8 @@ SRA::SRA(std::string fileName1, std::string fileName2, INI_MAP cfgIni) {
     fastqc_dir_2_1 = (projPath + stepDirs[1] + fileBase2 + "/" + fileBase2).c_str();
     sra_path_corr_2 = (projPath + stepDirs[2] + fileBase2 + ".cor.fq").c_str();
     sra_path_corr_fix_2 = (projPath + stepDirs[2] + fileBase2 + ".cor.fix.fq").c_str();
+    sra_path_trim_u1 = (projPath + stepDirs[3] + fileBase1 + ".unpaired.trim.fq").c_str();
+    sra_path_trim_p1 = (projPath + stepDirs[3] + fileBase1 + ".paired.trim.fq").c_str();
     sra_path_trim_u2 = (projPath + stepDirs[3] + fileBase2 + ".unpaired.trim.fq").c_str();
     sra_path_trim_p2 = (projPath + stepDirs[3] + fileBase2 + ".paired.trim.fq").c_str();
     sra_path_for_filt_2 = (projPath + stepDirs[4] + fileBase2 + ".filt.fq").c_str();

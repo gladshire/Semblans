@@ -1,10 +1,9 @@
 #include "trimm_wrap.h"
 
-void run_trimmomatic(std::vector<SRA> sras, std::string threads) {
+void run_trimmomatic(const std::vector<SRA> & sras, std::string threads) {
   std::cout << "\nTrimming adapter sequences for:\n" << std::endl;
   summarize_all_sras(sras);
 
-  std::string outDir(sras[0].get_sra_path_trim_u().first.parent_path().c_str());
   std::string inFile1;
   std::string inFile2;
   std::string outFileP1;
@@ -12,11 +11,12 @@ void run_trimmomatic(std::vector<SRA> sras, std::string threads) {
   std::string outFileU1;
   std::string outFileU2;
   std::string outFile;
-  std::string trimmCmd("java -jar " + PATH_TRIMM);
-  std::string trimmFlags("-threads " + threads + " " + "ILLUMINACLIP:" + TRUSEQ_ALL +
-                         ":2:30:10 SLIDINGWINDOW:4:5 LEADING:5 TRAILING:5 MINLEN:25");
   int result;
   for (auto sra : sras) {
+    std::string outDir(sra.get_sra_path_trim_u().first.parent_path().c_str());
+    std::string trimmCmd("java -jar " + PATH_TRIMM);
+    std::string trimmFlags("-threads " + threads + " " + "ILLUMINACLIP:" + TRUSEQ_ALL +
+                           ":2:30:10 SLIDINGWINDOW:4:5 LEADING:5 TRAILING:5 MINLEN:25");
     inFile1 = sra.get_sra_path_corr_fix().first.c_str();
     if (sra.is_paired()) {
       inFile2 = sra.get_sra_path_corr_fix().second.c_str();

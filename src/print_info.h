@@ -3,4 +3,4 @@
 
 void summarize_sing_sra(SRA sra);
 
-void summarize_all_sras(std::vector<SRA> sras);
+void summarize_all_sras(const std::vector<SRA> & sras);

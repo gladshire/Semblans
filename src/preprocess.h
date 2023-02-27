@@ -18,6 +18,6 @@
 #include "rem_overrep.h"
 #include "print_info.h"
 
-void retrieve_sra_data(std::vector<SRA> sras, std::string threads);
+void retrieve_sra_data(const std::vector<SRA> & sras, std::string threads);
 
 void print_help();

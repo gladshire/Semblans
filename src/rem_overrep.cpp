@@ -289,21 +289,28 @@ void rem_overrep_se(SRA sra, long long int ram_b, std::vector<std::string> overr
 }
 
 
-void rem_overrep_bulk(std::vector<SRA> sras, std::string ram_gb) {
+void rem_overrep_bulk(const std::vector<SRA> & sras, std::string ram_gb) {
   std::cout << "\nRemoving overrepresented reads for:\n" << std::endl;
   summarize_all_sras(sras);
   long long int ram_b = (long long int)stoi(ram_gb) * 1000000000;
   for (auto sra : sras) {
     if (fs::exists(sra.get_sra_path_orep_filt().first.c_str())) {
-      std::cout << "Fixed version found for: " << sra.get_accession() << std::endl;
+      std::cout << "Fixed version found for: " << sra.get_file_prefix().first << std::endl;
       continue;
     }
-    std::cout << "\nNow processing: " << sra.get_accession() << " ..." << std::endl;
+    std::cout << "\nNow processing:\n" << std::endl;
     if (sra.is_paired()) {
+      std::cout << "Paired-end run:" << std::endl;
+      std::cout << sra.get_file_prefix().first << std::endl;
+      std::cout << sra.get_file_prefix().second << std::endl;
+      std::cout << std::endl;
       std::pair<std::vector<std::string>, std::vector<std::string>> overrepSeqs = get_overrep_seqs_pe(sra);
       rem_overrep_pe(sra, ram_b, overrepSeqs);
     }
     else {
+      std::cout << "Single-end run:" << std::endl;
+      std::cout << sra.get_file_prefix().first << std::endl;
+      std::cout << std::endl;
       std::vector<std::string> overrepSeqs = get_overrep_seqs_se(sra);
       rem_overrep_se(sra, ram_b, overrepSeqs);
     }

@@ -16,4 +16,4 @@ void rem_overrep_pe(SRA sra, long long int ram_b,
 
 void rem_overrep_se(SRA sra, long long int ram_b, std::vector<std::string> overrepSeqs);
 
-void rem_overrep_bulk(std::vector<SRA> sras, std::string ram_gb);
+void rem_overrep_bulk(const std::vector<SRA> & sras, std::string ram_gb);

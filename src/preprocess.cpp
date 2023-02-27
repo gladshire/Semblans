@@ -4,7 +4,7 @@
 
 #include "preprocess.h"
 
-void retrieve_sra_data(std::vector<SRA> sras, std::string threads) {
+void retrieve_sra_data(const std::vector<SRA> & sras, std::string threads) {
   std::cout << "Retrieving SRA runs for:\n" << std::endl;
   summarize_all_sras(sras);
 

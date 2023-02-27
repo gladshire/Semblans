@@ -12,4 +12,4 @@ void rem_unfix_pe(SRA sra, long long int ram_b);
 
 void rem_unfix_se(SRA sra, long long int ram_b);
 
-void rem_unfix_bulk(std::vector<SRA> sras, std::string ram_gb);
+void rem_unfix_bulk(const std::vector<SRA> & sras, std::string ram_gb);
