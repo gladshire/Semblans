@@ -29,18 +29,20 @@ void print_intro() {
 void print_help() {
   std::cout << "USAGE:\n" << std::endl;
   std::cout << "  paando [--help/-h] [COMMAND] [--config/-cfg]\n"
-            << "         [--threads/-t] [--ram/-r] [--multi/-m]\n" << std::endl;
+            << "         [--threads/-t] [--ram/-r] [--multi/-m]\n"
+            << "         [--retain-intermediates/-i]\n" << std::endl;
   std::cout << "ARGUMENTS:\n" << std::endl;
   std::cout << "  [COMMAND]" << std::endl;
-  std::cout << "    preprocess       Performs pre-assembly steps only" << std::endl;
-  std::cout << "    assemble         Performs de novo assembly step only" << std::endl;
-  std::cout << "    postprocess      Performs post-assembly steps only" << std::endl;
-  std::cout << "    all (default)    Performs all steps in pipeline\n" << std::endl;
-  std::cout << "  -cfg, --config     Specifies path to configuration file (REQUIRED)" << std::endl;
-  std::cout << "  -t,   --threads    Specifies number of threads/CPU cores to employ" << std::endl;
-  std::cout << "  -r,   --ram        Specifies ammount of memory/RAM (GB) to dedicate" << std::endl;
-  std::cout << "  -m,   --multi      Perform assembly from multiple SRA runs" << std::endl;
-  std::cout << "  -h,   --help       Displays this help screen" << std::endl;
+  std::cout << "    preprocess                  Performs pre-assembly steps only" << std::endl;
+  std::cout << "    assemble                    Performs de novo assembly step only" << std::endl;
+  std::cout << "    postprocess                 Performs post-assembly steps only" << std::endl;
+  std::cout << "    all (default)               Performs all steps in pipeline\n" << std::endl;
+  std::cout << "  -cfg, --config                Specifies path to configuration file (REQUIRED)" << std::endl;
+  std::cout << "  -t,   --threads               Specifies number of threads/CPU cores to employ" << std::endl;
+  std::cout << "  -r,   --ram                   Specifies ammount of memory/RAM (GB) to dedicate" << std::endl;
+  std::cout << "  -m,   --multi                 Perform assembly from multiple SRA runs" << std::endl;
+  std::cout << "  -i,   --retain-intermediates  Prevents deletion of intermediate files in pipeline" << std::endl;
+  std::cout << "  -h,   --help                  Displays this help screen" << std::endl;
 
 }
 
