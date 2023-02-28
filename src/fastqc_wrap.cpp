@@ -8,7 +8,18 @@ void run_fastqc(SRA sra, std::string threads, std::string outDir) {
   std::string fastqcFlags = " --extract -t " + threads + " -o ";
   int result;
   if (fs::exists(fs::path(outFile.c_str()))) {
-    std::cout << "FastQC analysis found for: " << sra.get_accession() << std::endl;
+    std::cout << "FastQC analysis found for:\n" << std::endl;
+    if (sra.is_paired()) {
+      std::cout << "  Paired-end run:" << std::endl;
+      std::cout << "  " << sra.get_file_prefix().first << std::endl;
+      std::cout << "  " << sra.get_file_prefix().second << std::endl;
+      std::cout << std::endl; 
+    }
+    else {
+      std::cout << "  Single-end run:" << std::endl;
+      std::cout << "  " << sra.get_file_prefix().first << std::endl;
+      std::cout << std::endl;
+    }
     return;
   }
   system(("mkdir " + outFile).c_str());

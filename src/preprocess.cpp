@@ -38,9 +38,11 @@ int main(int argc, char * argv[]) {
     INI_MAP cfgIni = make_ini_map(argv[1]);
     std::string threads = argv[2];
     std::string ram_gb = argv[3];
+    std::string retainFiles = argv[4];
     std::vector<SRA> sras;
     std::vector<std::string> localDataFiles;
     bool localDataBool = false;
+    bool retainInterFiles = stringToBool(argv[4]);
 
     // Create vector of SRA objects from SRA accessions, using NCBI web API
     sras = get_sras(cfgIni);
@@ -93,12 +95,22 @@ int main(int argc, char * argv[]) {
 
 
     run_fastqc_bulk(sras, threads, fastqc_dir_1);
-    run_rcorr(sras, threads);
+    run_rcorr(sras, threads); 
     rem_unfix_bulk(sras, ram_gb);
     run_trimmomatic(sras, threads);
+    if (!retainInterFiles) {
+      system(("rm -rf " + std::string(sras[0].get_sra_path_corr_fix().first.parent_path().c_str())).c_str());
+    }
     run_kraken2_dbs(sras, threads, kraken2Dbs, kraken2_conf);
+    if (!retainInterFiles) {
+      system(("rm -rf " + std::string(sras[0].get_sra_path_trim_p().first.parent_path().c_str())).c_str());
+    }
     run_fastqc_bulk(sras, threads, fastqc_dir_2);
     rem_overrep_bulk(sras, ram_gb);
+    if (!retainInterFiles) {
+      system(("rm -rf " + std::string(sras[0].get_sra_path_for_filt().first.parent_path().c_str())).c_str());
+      system(("rm -rf " + fastqc_dir_2).c_str());
+    }
   }
 
   return 0;

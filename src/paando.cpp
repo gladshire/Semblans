@@ -54,6 +54,7 @@ int main(int argc, char * argv[]) {
   std::string command;
   bool multAssembly;
   bool useLocalData;
+  bool retainInterFiles;
 
   if (argc == 1 || 
       (argc == 2 && 
@@ -75,7 +76,8 @@ int main(int argc, char * argv[]) {
     std::string pathConfig = "";
     std::string command = "";
     multAssembly = false;
-    
+    retainInterFiles = false;    
+
     for (int i = 0; i < argc; i++) {
       // Check for paando command (preprocess/assemble/postprocess)
       // If none is given, will perform all
@@ -186,6 +188,15 @@ int main(int argc, char * argv[]) {
                strcmp("-M", argv[i]) == 0) {
         multAssembly = true;
       }
+
+      else if (strcmp("--retain-intermediates", argv[i]) == 0 ||
+               strcmp("--Retain-intermediates", argv[i]) == 0 ||
+               strcmp("--retain-Intermediates", argv[i]) == 0 ||
+               strcmp("--Retain-Intermediates", argv[i]) == 0 ||
+               strcmp("-i", argv[i]) == 0 ||
+               strcmp("-I", argv[i]) == 0) {
+        retainInterFiles = true;
+      }
     }
     if (command == "") {
       command = "all";
@@ -199,6 +210,12 @@ int main(int argc, char * argv[]) {
     std::string preCmd = PAANDO_DIR + "preprocess " + pathConfig + " " +
                          std::to_string(numThreads) + " " +
                          std::to_string(ram);
+    if (retainInterFiles) {
+      preCmd += " true";
+    }
+    else {
+      preCmd += " false";
+    }
     std::string assCmd = PAANDO_DIR + "assemble " + pathConfig + " " +
                          std::to_string(numThreads) + " " +
                          std::to_string(ram);
