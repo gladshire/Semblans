@@ -81,6 +81,14 @@ int main(int argc, char * argv[]) {
                                              refProt.find_last_of("/"));
     blastxDiam(trans, projDir + stepDirs[8] + blastDbName, threads,
                projDir + stepDirs[8]);
+
+    std::cout << "  POSTPROCESS started with following parameters:" << std::endl;
+    std::cout << "    Config file:     " << argv[1] << std::endl;
+    std::cout << "    Threads (Cores): " << threads << std::endl;
+    std::cout << "    Memory (GB):     " << ram_gb << std::endl;
+    std::cout << "    Reference Prot:  " << refProt << std::endl;
+    std::cout << "    SRAs" << std::endl;
+    summarize_all_sras(sras);
     // Detect and remove chimeric transcripts
     detect_chimera(trans, std::string(trans.get_trans_path_blastx().c_str()),
                    projDir + stepDirs[8]);

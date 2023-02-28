@@ -73,6 +73,13 @@ int main(int argc, char * argv[]) {
         mult_sra = true;
       }
     }
+
+    std::cout << "  ASSEMBLE started with following parameters:" << std::endl;
+    std::cout << "    Config file:     " << argv[1] << std::endl;
+    std::cout << "    Threads (Cores): " << threads << std::endl;
+    std::cout << "    Memory (GB):     " << ram_gb << std::endl;
+    std::cout << "    SRAs:" << std::endl;
+    summarize_all_sras(sras);
     // Perform assembly with Trinity
     std::vector<transcript> transcriptsSra = run_trinity_bulk(sras, threads, ram_gb, mult_sra);
   }

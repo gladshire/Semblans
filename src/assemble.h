@@ -7,6 +7,7 @@
 #include "transcript.h"
 #include "ini_parse.h"
 #include "trinity_wrap.h"
+#include "print_info.h"
 
 std::vector<transcript> get_transcript(std::vector<SRA> sras);
 

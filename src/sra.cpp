@@ -100,8 +100,8 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni) {
   }
   
   std::string fileBase = make_file_str();
-  file_prefix_1 = fileBase;
-  file_prefix_2 = fileBase;
+  file_prefix_1 = fileBase + "_1";
+  file_prefix_2 = fileBase + "_2";
 
   std::string projPath = outDir + projName + "/";
   extern std::vector<std::string> stepDirs;

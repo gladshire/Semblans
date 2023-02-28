@@ -85,6 +85,34 @@ int main(int argc, char * argv[]) {
       }
     }
 
+    // Summarize preprocess task
+    std::cout << "  PREPROCESS started with following parameters:" << std::endl;
+    std::cout << "    Config file:     " << argv[1] << std::endl;
+    std::cout << "    Threads (Cores): " << threads << std::endl;
+    std::cout << "    Memory (GB):     " << ram_gb << std::endl;
+    std::cout << "    SRAs (NCBI):\n      ";
+    for (auto sra : sras) {
+      if (sra.get_accession() != "") {
+        std::cout << sra.get_accession() << std::endl;
+      }
+    }
+    std::cout << "    SRAs (local):\n";
+    for (auto sra : sras) {
+      if (sra.get_accession() == "") {
+        if (sra.is_paired()) {
+          std::cout << "      Paired-end run:" << std::endl;
+          std::cout << "        " << sra.get_file_prefix().first << std::endl;
+          std::cout << "        " << sra.get_file_prefix().second << std::endl;
+          std::cout << std::endl;
+        }
+        else {
+          std::cout << "      Single-end run:" << std::endl;
+          std::cout << "        " << sra.get_file_prefix().first << std::endl;
+          std::cout << std::endl;
+        }
+      }
+    }
+    std::cout << "    Retain intermediate files: " << argv[4] << std::endl;
 
     std::string fastqc_dir_1(sras[0].get_fastqc_dir_1().first.parent_path().parent_path().c_str());
     std::string fastqc_dir_2(sras[0].get_fastqc_dir_2().first.parent_path().parent_path().c_str());
