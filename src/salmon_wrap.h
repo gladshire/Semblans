@@ -12,8 +12,10 @@ namespace dl = boost::dll;
 
 void combine_paired(std::vector<SRA> sras, long long int ram_b);
 
-void salmon_index(transcript trans, std::string threads);
+void salmon_index(transcript trans, std::string threads,
+                  bool dispOutput, std::string logFile);
 
-void salmon_quant(transcript trans, std::vector<SRA> sras, std::string threads);
+void salmon_quant(transcript trans, std::vector<SRA> sras, std::string threads,
+                  bool dispOutput, std::string logFile);
 
 

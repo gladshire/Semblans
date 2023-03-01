@@ -16,7 +16,7 @@ std::string get_kraken2_conf(const INI_MAP &iniFile);
 void pre_summary(SRA sra, std::string);
 
 void run_kraken2(const std::vector<SRA> & sras, std::string threads, std::string db,
-                 std::string conf_threshold, bool selfPass);
+                 std::string conf_threshold, bool selfPass, bool dispOutput, std::string logFile);
 
 void run_kraken2_dbs(const std::vector<SRA> & sras, std::string threads, std::vector<std::string> dbs,
-                     std::string conf_threshold);
+                     std::string conf_threshold, bool dispOutput, std::string logFile);

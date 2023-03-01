@@ -104,7 +104,7 @@ bool checkBlock(std::vector<std::vector<std::string>> & block, bool multiGene,
   std::vector<std::string> pos;
   std::vector<std::string> neg;
   for (auto hsp : block) {
-    if (std::stod(hsp[4]) < 0) {
+    if (hsp[4][0] == '-') {
       neg = expRange(neg, hsp);
     }
     else {

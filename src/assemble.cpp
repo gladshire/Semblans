@@ -13,6 +13,15 @@ std::vector<transcript> get_transcript(std::vector<SRA> sras) {
   return transcripts;
 }
 
+bool stringToBool(std::string boolStr) {
+  bool boolConv;
+  for (int i = 0; i < boolStr.length(); i++) {
+    boolStr[i] = std::tolower(boolStr[i]);
+  }
+  boolConv = (boolStr == "true") ? true : false;
+  return boolConv;
+}
+
 void print_help() {
   std::cout << "\n" << "NAME_OF_PROGRAM" << " - "
             << "A tool for bulk assemblies of de novo transcriptome data" << std::endl;
@@ -26,6 +35,8 @@ int main(int argc, char * argv[]) {
     std::vector<std::string> localDataFiles;
     // Retrieve SRA objects for trinity runs
     INI_MAP cfgIni = make_ini_map(argv[1]);
+    std::string logFilePath = cfgIni["General"]["log_file"];
+
     sras = get_sras(cfgIni);
     
     for (auto fqFileName : cfgIni.at("Local files")) {
@@ -60,20 +71,21 @@ int main(int argc, char * argv[]) {
         }
       }
     }
+
+    // Check if no SRAs specified
+    if (sras.empty()) {
+      std::cout << "ERROR: No SRA runs specified. Please check config file" << std::endl;
+    }
     // Get number of threads
     std::string threads = argv[2];
     // Get RAM in GB
     std::string ram_gb = argv[3];
     // Get boolean for multiple sra processing
     std::string mult_sra_str;
-    bool mult_sra = false;
-    if (argc == 5) {
-      mult_sra_str = argv[4];
-      if (mult_sra_str == "--mult") {
-        mult_sra = true;
-      }
-    }
-
+    mult_sra_str = argv[4];
+    bool mult_sra = stringToBool(argv[4]);
+    
+    bool dispOutput = stringToBool(argv[5]);
     std::cout << "  ASSEMBLE started with following parameters:" << std::endl;
     std::cout << "    Config file:     " << argv[1] << std::endl;
     std::cout << "    Threads (Cores): " << threads << std::endl;
@@ -81,7 +93,8 @@ int main(int argc, char * argv[]) {
     std::cout << "    SRAs:" << std::endl;
     summarize_all_sras(sras);
     // Perform assembly with Trinity
-    std::vector<transcript> transcriptsSra = run_trinity_bulk(sras, threads, ram_gb, mult_sra);
+    std::vector<transcript> transcriptsSra = run_trinity_bulk(sras, threads, ram_gb, mult_sra,
+                                                              dispOutput, logFilePath);
   }
   else {
     print_help();

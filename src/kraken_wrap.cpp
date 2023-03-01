@@ -23,7 +23,8 @@ void pre_summary(SRA sra, std::string db) {
 
 
 void run_kraken2(const std::vector<SRA> & sras, std::string threads, std::string db, 
-                 std::string conf_threshold, bool selfPass) {
+                 std::string conf_threshold, bool selfPass, bool dispOutput,
+                 std::string logFile) {
   std::string inFile1;
   std::string inFile2;
   std::string outFile;
@@ -32,13 +33,21 @@ void run_kraken2(const std::vector<SRA> & sras, std::string threads, std::string
 
   std::string krakCmd(PATH_KRAK2 + " --db " + db);
   std::string krakFlags("--threads " + threads + " --unclassified-out");
+  std::string printOut;
+  if (dispOutput) {
+    printOut = " |& tee -a " + logFile;
+  }
+  else {
+    printOut = " &>> " + logFile;
+  }
   int result;
   for (auto sra : sras) {
     std::string outDir(sra.get_sra_path_for_filt().first.parent_path().c_str());
     repFile = std::string(outDir + "/" + sra.get_file_prefix().first + "." +
                           dbPath.filename().c_str() + ".report");
     if (fs::exists(fs::path(repFile.c_str()))) {
-      std::cout << "Filtered version found for: " << sra.get_file_prefix().first << std::endl;
+      std::cout << "Filtered version found for: " << std::endl;
+      summarize_sing_sra(sra);
       continue;
     }
     pre_summary(sra, db);
@@ -66,12 +75,13 @@ void run_kraken2(const std::vector<SRA> & sras, std::string threads, std::string
       result = system((krakCmd + " " + krakFlags + " " + outFile + " --paired " + "--output - " +
                        inFile1 + " " + inFile2 + " --confidence " + conf_threshold + " --report " +
                        outDir + "/" + sra.get_file_prefix().first + "." + dbPath.filename().c_str() +
-                       ".report").c_str());
+                       ".report" + printOut).c_str());
     }
     else {
       result = system((krakCmd + " " + krakFlags + " " + outFile + "--output - " + inFile1 + " " +
                        " --confidence " + conf_threshold + " --report " + outDir + "/" +
-                       sra.get_file_prefix().first + "." + dbPath.filename().c_str() + ".report").c_str());
+                       sra.get_file_prefix().first + "." + dbPath.filename().c_str() + ".report" +
+                       printOut).c_str());
     }
     if (WIFSIGNALED(result)) {
       std::cout << "Exited with signal " << WTERMSIG(result) << std::endl;
@@ -88,17 +98,17 @@ void run_kraken2(const std::vector<SRA> & sras, std::string threads, std::string
 
 
 void run_kraken2_dbs(const std::vector<SRA> & sras, std::string threads, std::vector<std::string> dbs,
-                     std::string conf_threshold) {
+                     std::string conf_threshold, bool dispOutput, std::string logFile) {
   std::cout << "\nFiltering foreign reads for:\n" << std::endl;
   summarize_all_sras(sras);
   int i = 0;
   for (auto db : dbs) {
     std::cout << "\nNow filtering: " << fs::path(db.c_str()).filename().c_str() << std::endl;
     if (i == 0) {
-      run_kraken2(sras, threads, db, conf_threshold, false);
+      run_kraken2(sras, threads, db, conf_threshold, false, dispOutput, logFile);
     }
     else {
-      run_kraken2(sras, threads, db, conf_threshold, true);
+      run_kraken2(sras, threads, db, conf_threshold, true, dispOutput, logFile);
     }
     i++;
   }

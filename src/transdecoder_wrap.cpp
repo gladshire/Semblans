@@ -47,12 +47,20 @@ bool blastpout_ok(std::string blastpFile) {
 }
 
 void run_transdecoder(transcript trans, std::string threads, uintmax_t ram_b,
-                      std::string dbPath, std::string outDir) {
+                      std::string dbPath, std::string outDir,
+                      bool dispOutput, std::string logFile) {
   std::string transFilePath(trans.get_trans_path_largest().c_str());
   fs::path cdsFilePath = trans.get_trans_path_cds().c_str();
   fs::path pepFilePath = trans.get_trans_path_prot().c_str();
 
   std::string blastpout = trans.make_file_str() + ".blastp.outfmt6";
+  std::string printOut;
+  if (dispOutput) {
+    printOut = " |& tee -a " + logFile;
+  }
+  else {
+    printOut = " &>> " + logFile;
+  }
   if (fasta_ok(std::string(cdsFilePath.c_str()), ram_b) &&
       fasta_ok(std::string(pepFilePath.c_str()), ram_b)) {
     std::cout << "Skipping TransDecoder" << std::endl;
@@ -67,7 +75,7 @@ void run_transdecoder(transcript trans, std::string threads, uintmax_t ram_b,
     else {
       // Only operates on un-stranded. Implement stranded later
       std::string tdLongOrfs_cmd = PATH_TRANSD_LONGORFS + " -t " + transFilePath + " -O " +
-                                   std::string(allpep.parent_path().c_str());
+                                   std::string(allpep.parent_path().c_str()) + printOut;
       int resultLO;
       resultLO = system(tdLongOrfs_cmd.c_str());
       if (WIFSIGNALED(resultLO)) {
@@ -79,7 +87,8 @@ void run_transdecoder(transcript trans, std::string threads, uintmax_t ram_b,
       std::cout << "Skipping blastp" << std::endl;
     }
     else {
-      blastpDiam(std::string(allpep.c_str()), dbPath, threads, outDir + blastpout);
+      blastpDiam(std::string(allpep.c_str()), dbPath, threads, outDir + blastpout,
+                 dispOutput, logFile);
     }
     if (fasta_ok(std::string(cdsFilePath.c_str()), ram_b) &&
         fasta_ok(std::string(pepFilePath.c_str()), ram_b)) {
@@ -88,7 +97,7 @@ void run_transdecoder(transcript trans, std::string threads, uintmax_t ram_b,
     else {
       std::string tdPredict_cmd = PATH_TRANSD_PREDICT + " -t " + transFilePath +
                                   " --retain_blastp_hits " + outDir + blastpout + " --cpu " +
-                                  threads;
+                                  threads + printOut;
       fs::path currDir = fs::current_path();
       fs::current_path(fs::path(outDir.c_str()));
       int resultPD;

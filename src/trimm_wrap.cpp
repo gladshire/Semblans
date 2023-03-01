@@ -1,6 +1,7 @@
 #include "trimm_wrap.h"
 
-void run_trimmomatic(const std::vector<SRA> & sras, std::string threads) {
+void run_trimmomatic(const std::vector<SRA> & sras, std::string threads,
+                     bool dispOutput, std::string logFile) {
   std::cout << "\nTrimming adapter sequences for:\n" << std::endl;
   summarize_all_sras(sras);
 
@@ -11,6 +12,13 @@ void run_trimmomatic(const std::vector<SRA> & sras, std::string threads) {
   std::string outFileU1;
   std::string outFileU2;
   std::string outFile;
+  std::string printOut;
+  if (dispOutput) {
+    printOut = " |& tee -a " + logFile;
+  }
+  else {
+    printOut = " &>> " + logFile;
+  }
   int result;
   for (auto sra : sras) {
     std::string outDir(sra.get_sra_path_trim_u().first.parent_path().c_str());
@@ -26,19 +34,22 @@ void run_trimmomatic(const std::vector<SRA> & sras, std::string threads) {
       outFileU2 = sra.get_sra_path_trim_u().second.c_str();
       if (fs::exists(sra.get_sra_path_trim_p().first) &&
           fs::exists(sra.get_sra_path_trim_p().second)) {
-        std::cout << "Trimmed version found for: " << sra.get_accession() << std::endl;
+        std::cout << "Trimmed version found for: " << std::endl;
+        summarize_sing_sra(sra);
         continue;
       }
-      result = system((trimmCmd + " PE " + inFile1 + " " + inFile2 + " " + outFileP1 + " " + outFileU1 +
-                        " " + outFileP2 + " " + outFileU2 + " " + trimmFlags).c_str());
+      trimmCmd += " PE " + inFile1 + " " + inFile2 + " " + outFileP1 + " " + outFileU1 +
+                  " " + outFileP2 + " " + outFileU2 + " " + trimmFlags + printOut;
+      result = system(trimmCmd.c_str());
     }
     else {
       outFile = sra.get_sra_path_trim_u().first.c_str();
       if (fs::exists(sra.get_sra_path_trim_p().first)) {
         std::cout << "Trimmed version found for " << sra.get_accession() << std::endl;
         continue;
-      result = system((trimmCmd + " SE " + inFile1 + " " + outFile + " " + trimmFlags).c_str());
       }
+      trimmCmd += " SE " + inFile1 + " " + outFile + " " + trimmFlags + printOut;
+      result = system(trimmCmd.c_str());
     }
     if (WIFSIGNALED(result)) {
       std::cout << "Exited with signal " << WTERMSIG(result) << std::endl;

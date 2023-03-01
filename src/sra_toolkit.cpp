@@ -11,7 +11,7 @@ std::vector<SRA> get_sras(const INI_MAP &iniFile) {
   return sras;
 }
 
-void prefetch_sra(std::vector<SRA> sras) {
+void prefetch_sra(std::vector<SRA> sras, bool dispOutput, std::string logFile) {
   std::string outDir(sras[0].get_sra_path_raw().first.parent_path().native().c_str());
   std::string sra_accessions = "";
   std::string prefetchFlag = " --max-size u -p -O ";
@@ -25,7 +25,14 @@ void prefetch_sra(std::vector<SRA> sras) {
     sra_accessions += (sra.get_accession() + " ");
   }
   if (sra_accessions != "") {
-    result = system((PATH_PREFETCH + " " + sra_accessions + prefetchFlag + outDir).c_str());
+    std::string prefetchCmd = PATH_PREFETCH + " " + sra_accessions + prefetchFlag + outDir;
+    if (dispOutput) {
+      prefetchCmd += (" |& tee -a " + logFile);
+    }
+    else {
+      prefetchCmd += (" &>> " + logFile);
+    }
+    result = system(prefetchCmd.c_str());
     if (WIFSIGNALED(result)) {
       std::cout << "Exited with signal " << WTERMSIG(result) << std::endl;
       exit(1);
@@ -33,7 +40,8 @@ void prefetch_sra(std::vector<SRA> sras) {
   }
 }
 
-void fasterq_sra(std::vector<SRA> sras, std::string threads) {
+void fasterq_sra(std::vector<SRA> sras, std::string threads,
+                 bool dispOutput, std::string logFile) {
   std::string prefetchDir(sras[0].get_sra_path_raw().first.parent_path().native().c_str());
   std::string outFile;
   std::string fasterqFlag = " -p -e " + threads + " -t " + prefetchDir + " " + prefetchDir;
@@ -46,8 +54,15 @@ void fasterq_sra(std::vector<SRA> sras, std::string threads) {
     outFile = sra.make_file_str();
     fs::path currDir = fs::current_path();
     fs::current_path(fs::path(prefetchDir.c_str()));
-    result = system((PATH_FASTERQ + " " + fasterqFlag + "/" + sra.get_accession() +
-                     " -o " + outFile).c_str());
+    std::string fasterqCmd = PATH_FASTERQ + " " + fasterqFlag + "/" + sra.get_accession() +
+                             " -o " + outFile;
+    if (dispOutput) {
+      fasterqCmd += (" |& tee -a " + logFile);
+    }
+    else {
+      fasterqCmd += (" &>> " + logFile);
+    }
+    result = system(fasterqCmd.c_str());
     fs::current_path(currDir);
     if (WIFSIGNALED(result)) {
       std::cout << "Exited with signal " << WTERMSIG(result) << std::endl;

@@ -1,5 +1,9 @@
 #include "trinity_wrap.h"
 
+// TODO: Change condition by which multi-SRA assembly is determined
+//   NOW: SRAs with same organism name are combined
+//     - Problem if local files, without organism names are used
+
 std::vector<SRA> get_sra_to_combine(std::vector<SRA> sras, std::string org_name) {
   std::vector<SRA> sra_comb;
   for (auto &sra : sras) {
@@ -53,26 +57,34 @@ std::string combine_reads(std::vector<SRA> sras_comb, long long int ram_b) {
   return outFileStr;
 }
 
-transcript run_trinity(SRA sra, std::string threads, std::string ram_gb) {
+transcript run_trinity(SRA sra, std::string threads, std::string ram_gb,
+                       bool dispOutput, std::string logFile) {
   // Run Trinity for assembly using single SRA
   std::string inFile1;
   std::string inFile2;
   transcript sra_trans(sra);
   std::string outFile(sra.get_accession() + "_" + sra_trans.get_trans_path_trinity().c_str());
   std::string trin_cmd;
+  std::string printOut;
+  if (dispOutput) {
+    printOut = " |& tee -a " + logFile;
+  }
+  else {
+    printOut = " &>> " + logFile;
+  }
   int result;
   if (sra.is_paired()) {
     trin_cmd = PATH_TRINITY + " --seqType fq" + " --left " +
                sra.get_sra_path_orep_filt().first.c_str() + " --right " +
                sra.get_sra_path_orep_filt().second.c_str() + " --max_memory " + ram_gb + "G " +
                "--CPU " + threads + " --bflyCalculateCPU" + " --full_cleanup" +
-               " --no_normalize_reads" + " --output " + outFile;
+               " --no_normalize_reads" + " --output " + outFile + printOut;
   }
   else {
     trin_cmd = PATH_TRINITY + " --seqType fq" + " --single " +
                sra.get_sra_path_orep_filt().first.c_str() + " --max_memory " + ram_gb + "G " +
                "--CPU " + threads + " --bflyCalculateCPU" + " --full_cleanup" +
-               " --no_normalize_reads" + " --output " + outFile;
+               " --no_normalize_reads" + " --output " + outFile + printOut;
   }
   result = system(trin_cmd.c_str());
   if (WIFSIGNALED(result)) {
@@ -84,17 +96,25 @@ transcript run_trinity(SRA sra, std::string threads, std::string ram_gb) {
 }
 
 transcript run_trinity_comb(std::vector<SRA> sras_comb,
-                            std::string threads, std::string ram_gb) {
+                            std::string threads, std::string ram_gb,
+                            bool dispOutput, std::string logFile) {
   // Run Trinity for assembly using multiple SRAS
   long long int ram_b = (long long int)stoi(ram_gb) * 1000000000;
   std::string inFile = combine_reads(sras_comb, ram_b);
   transcript sra_trans(sras_comb[0]);
   std::string outFile(sra_trans.get_trans_path_trinity().c_str());
   std::string trin_cmd;
+  std::string printOut;
+  if (dispOutput) {
+    printOut = " |& tee -a " + logFile;
+  }
+  else {
+    printOut = " &>> " + logFile;
+  }
   int result;
   trin_cmd = PATH_TRINITY + " --seqType fq" + " --single " + inFile + " --max_memory " +
              ram_gb + "G " + "--CPU " + threads + " --bflyCalculateCPU" + " --full_cleanup" +
-             " --no_normalize_reads" + " --run_as_paired" + " --output " + outFile; 
+             " --no_normalize_reads" + " --run_as_paired" + " --output " + outFile + printOut; 
   result = system(trin_cmd.c_str());
   if (WIFSIGNALED(result)) {
     std::cout << "Exited with signal " << WTERMSIG(result) << std::endl;
@@ -106,21 +126,22 @@ transcript run_trinity_comb(std::vector<SRA> sras_comb,
 
 std::vector<transcript> run_trinity_bulk(std::vector<SRA> sras,
                                          std::string threads, std::string ram_gb,
-                                         bool mult_sra) {
+                                         bool mult_sra, bool dispOutput, std::string logFile) {
   // Iterate through SRAs, running Trinity for all
   std::vector<transcript> sra_transcripts;
   transcript currSraTrans;
   for (auto &sra : sras) {
     if (fs::exists(transcript(sra).get_trans_path_trinity().c_str())) {
-      std::cout << "Assembly found for: " << sra.get_accession() << ", " << sra.get_org_name() << std::endl;
+      std::cout << "Assembly found for: " << std::endl;
+      summarize_sing_sra(sra);
       continue;
     }
     if (mult_sra) {
       std::vector<SRA> sras_comb = get_sra_to_combine(sras, sra.get_org_name());
-      currSraTrans = run_trinity_comb(sras_comb, threads, ram_gb);
+      currSraTrans = run_trinity_comb(sras_comb, threads, ram_gb, dispOutput, logFile);
     }
     else {
-      currSraTrans = run_trinity(sra, threads, ram_gb);
+      currSraTrans = run_trinity(sra, threads, ram_gb, dispOutput, logFile);
     }
     sra_transcripts.push_back(currSraTrans);
   }

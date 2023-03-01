@@ -18,11 +18,14 @@ std::vector<SRA> get_sra_to_combine(std::vector<SRA> sras, std::string org_name)
 std::string combine_reads(std::vector<SRA> sras_comb, long long int ram_b);
 
 // Run Trinity for assembly of single SRA run
-transcript run_trinity(SRA sra, std::string threads, std::string ram_gb);
+transcript run_trinity(SRA sra, std::string threads, std::string ram_gb,
+                       bool dispOutput, std::string logFile);
 
 // Run Trinity for assembly of several SRA runs
-transcript run_trinity_comb(std::vector<SRA> sras_comb, std::string threads, std::string ram_gb);
+transcript run_trinity_comb(std::vector<SRA> sras_comb, std::string threads, std::string ram_gb,
+                            bool dispOutput, std::string logFile);
 
 // Run Trinity for all SRA accessions iteratively
 std::vector<transcript> run_trinity_bulk(std::vector<SRA> sras,
-                                         std::string threads, std::string ram_gb, bool mult_sra);
+                                         std::string threads, std::string ram_gb, bool mult_sra,
+                                         bool dispOutput, std::string logFile);

@@ -5,6 +5,8 @@
 #include <sys/ioctl.h>
 #include <boost/filesystem.hpp>
 #include <boost/dll.hpp>
+#include "ini_parse.h"
+#include "sra.h"
 
 namespace fs = boost::filesystem;
 namespace dl = boost::dll;

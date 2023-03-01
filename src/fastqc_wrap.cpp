@@ -1,10 +1,17 @@
 #include "fastqc_wrap.h"
 
 
-void run_fastqc(SRA sra, std::string threads, std::string outDir) {
+void run_fastqc(SRA sra, std::string threads, std::string outDir,
+                bool dispOutput, std::string logFile) {
   std::string inFile1;
   std::string inFile2;
-  std::string outFile = outDir + "/" + sra.get_file_prefix().first;
+  std::string outFile;
+  if (sra.get_accession() != "") {
+    outFile = outDir + "/" + sra.make_file_str();
+  }
+  else {
+    outFile = outDir + "/" + sra.get_file_prefix().first;
+  }
   std::string fastqcFlags = " --extract -t " + threads + " -o ";
   int result;
   if (fs::exists(fs::path(outFile.c_str()))) {
@@ -23,6 +30,7 @@ void run_fastqc(SRA sra, std::string threads, std::string outDir) {
     return;
   }
   system(("mkdir " + outFile).c_str());
+  std::string fastqcCmd;
   if (sra.is_paired()) {
     // This is not good. Fix at some point.
     if (outDir == std::string(sra.get_fastqc_dir_2().first.parent_path().parent_path().c_str())) {
@@ -33,7 +41,14 @@ void run_fastqc(SRA sra, std::string threads, std::string outDir) {
       inFile1 = sra.get_sra_path_raw().first.c_str();
       inFile2 = sra.get_sra_path_raw().second.c_str();
     }
-    result = system((PATH_FASTQC + fastqcFlags + outFile + " " + inFile1 + " " + inFile2).c_str());
+    fastqcCmd = PATH_FASTQC + fastqcFlags + outFile + " " + inFile1 + " " + inFile2;
+    if (dispOutput) {
+      fastqcCmd += (" |& tee -a " + logFile);
+    }
+    else {
+      fastqcCmd += (" &>> " + logFile);
+    }
+    result = system(fastqcCmd.c_str());
   }
   else {
     if (outDir == std::string(sra.get_fastqc_dir_2().first.parent_path().parent_path().c_str())) {
@@ -41,6 +56,13 @@ void run_fastqc(SRA sra, std::string threads, std::string outDir) {
     }
     else {
       inFile1 = sra.get_sra_path_raw().first.c_str();
+    }
+    fastqcCmd = PATH_FASTQC + fastqcFlags + outFile + " " + inFile1;
+    if (dispOutput) {
+      fastqcCmd += (" |& tee -a " + logFile);
+    }
+    else {
+      fastqcCmd += (" &>> " + logFile);
     }
     result = system((PATH_FASTQC + fastqcFlags + outFile + " " + inFile1).c_str());
   }
@@ -50,10 +72,11 @@ void run_fastqc(SRA sra, std::string threads, std::string outDir) {
   }
 }
 
-void run_fastqc_bulk(const std::vector<SRA> & sras, std::string threads, std::string outDir) {
+void run_fastqc_bulk(const std::vector<SRA> & sras, std::string threads, std::string outDir,
+                     bool dispOutput, std::string logFile) {
   std::cout << "\nRunning quality analysis for:\n" << std::endl;
   summarize_all_sras(sras);
   for (auto sra : sras) {
-    run_fastqc(sra, threads, outDir);
+    run_fastqc(sra, threads, outDir, dispOutput, logFile);
   }
 }

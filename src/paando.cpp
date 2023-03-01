@@ -30,19 +30,20 @@ void print_help() {
   std::cout << "USAGE:\n" << std::endl;
   std::cout << "  paando [--help/-h] [COMMAND] [--config/-cfg]\n"
             << "         [--threads/-t] [--ram/-r] [--multi/-m]\n"
-            << "         [--retain-intermediates/-i]\n" << std::endl;
+            << "         [--retain/-f] [--verbose/-v]\n" << std::endl;
   std::cout << "ARGUMENTS:\n" << std::endl;
   std::cout << "  [COMMAND]" << std::endl;
-  std::cout << "    preprocess                  Performs pre-assembly steps only" << std::endl;
-  std::cout << "    assemble                    Performs de novo assembly step only" << std::endl;
-  std::cout << "    postprocess                 Performs post-assembly steps only" << std::endl;
-  std::cout << "    all (default)               Performs all steps in pipeline\n" << std::endl;
-  std::cout << "  -cfg, --config                Specifies path to configuration file (REQUIRED)" << std::endl;
-  std::cout << "  -t,   --threads               Specifies number of threads/CPU cores to employ" << std::endl;
-  std::cout << "  -r,   --ram                   Specifies ammount of memory/RAM (GB) to dedicate" << std::endl;
-  std::cout << "  -m,   --multi                 Perform assembly from multiple SRA runs" << std::endl;
-  std::cout << "  -i,   --retain-intermediates  Prevents deletion of intermediate files in pipeline" << std::endl;
-  std::cout << "  -h,   --help                  Displays this help screen" << std::endl;
+  std::cout << "    preprocess       Performs pre-assembly steps only" << std::endl;
+  std::cout << "    assemble         Performs de novo assembly step only" << std::endl;
+  std::cout << "    postprocess      Performs post-assembly steps only" << std::endl;
+  std::cout << "    all (default)    Performs all steps in pipeline\n" << std::endl;
+  std::cout << "  -cfg, --config     Specifies path to configuration file (REQUIRED)" << std::endl;
+  std::cout << "  -t,   --threads    Specifies number of threads/CPU cores to employ" << std::endl;
+  std::cout << "  -r,   --ram        Specifies ammount of memory/RAM (GB) to dedicate" << std::endl;
+  std::cout << "  -m,   --multi      Perform assembly from multiple SRA runs" << std::endl;
+  std::cout << "  -f,   --retain     Prevents deletion of intermediate files in pipeline" << std::endl;
+  std::cout << "  -v,   --verbose    Prints all output from Paando and sub-programs" << std::endl;
+  std::cout << "  -h,   --help       Displays this help screen" << std::endl;
 
 }
 
@@ -57,6 +58,7 @@ int main(int argc, char * argv[]) {
   bool multAssembly;
   bool useLocalData;
   bool retainInterFiles;
+  bool verboseOutput;
 
   if (argc == 1 || 
       (argc == 2 && 
@@ -78,7 +80,8 @@ int main(int argc, char * argv[]) {
     std::string pathConfig = "";
     std::string command = "";
     multAssembly = false;
-    retainInterFiles = false;    
+    retainInterFiles = false;
+    verboseOutput = false;
 
     for (int i = 0; i < argc; i++) {
       // Check for paando command (preprocess/assemble/postprocess)
@@ -191,13 +194,17 @@ int main(int argc, char * argv[]) {
         multAssembly = true;
       }
 
-      else if (strcmp("--retain-intermediates", argv[i]) == 0 ||
-               strcmp("--Retain-intermediates", argv[i]) == 0 ||
-               strcmp("--retain-Intermediates", argv[i]) == 0 ||
-               strcmp("--Retain-Intermediates", argv[i]) == 0 ||
-               strcmp("-i", argv[i]) == 0 ||
-               strcmp("-I", argv[i]) == 0) {
+      else if (strcmp("--retain", argv[i]) == 0 ||
+               strcmp("--Retain", argv[i]) == 0 ||
+               strcmp("-f", argv[i]) == 0 ||
+               strcmp("-F", argv[i]) == 0) {
         retainInterFiles = true;
+      }
+      else if (strcmp("--verbose", argv[i]) == 0 ||
+               strcmp("--Verbose", argv[i]) == 0 ||
+               strcmp("-v", argv[i]) == 0 ||
+               strcmp("-V", argv[i]) == 0) {
+        verboseOutput = true;
       }
     }
     if (command == "") {
@@ -209,6 +216,17 @@ int main(int argc, char * argv[]) {
       std::cout << "  (example: --config path/to/config.ini)\n" << std::endl;
       exit(1);
     }
+    
+    INI_MAP cfgIni = make_ini_map(&pathConfig[0]);
+    std::string logFilePath = cfgIni["General"]["log_file"];
+    std::ofstream logFile(logFilePath, std::ofstream::trunc);
+    std::string verbose;
+    if (verboseOutput) {
+      verbose = " true";
+    }
+    else {
+      verbose = " false";
+    }
     std::string preCmd = PAANDO_DIR + "preprocess " + pathConfig + " " +
                          std::to_string(numThreads) + " " +
                          std::to_string(ram);
@@ -218,15 +236,21 @@ int main(int argc, char * argv[]) {
     else {
       preCmd += " false";
     }
+    preCmd += verbose;
     std::string assCmd = PAANDO_DIR + "assemble " + pathConfig + " " +
                          std::to_string(numThreads) + " " +
                          std::to_string(ram);
     if (multAssembly) {
-      assCmd += " --mult";
+      assCmd += " true";
     }
+    else {
+      assCmd += " false";
+    }
+    assCmd += verbose;
     std::string postCmd = PAANDO_DIR + "postprocess " + pathConfig + " " +
                           std::to_string(numThreads) + " " +
                           std::to_string(ram);
+    postCmd += verbose;
     int result;
     // Case 1: preprocess
     if (command == "preprocess") {
@@ -238,7 +262,6 @@ int main(int argc, char * argv[]) {
       exit(0);
     }
     // Case 2: assemble
-    // TODO: Account for if there are no files for assembly
     if (command == "assemble") {
       std::cout << "Performing assembly only ..." << std::endl;
       result = system(assCmd.c_str());
@@ -248,7 +271,6 @@ int main(int argc, char * argv[]) {
       exit(0);
     }
     // Case 3: postprocess
-    // TODO: Account for if there are no files for postprocess
     if (command == "postprocess") {
       std::cout << "Performing postprocess only ..." << std::endl;
       result = system(postCmd.c_str());

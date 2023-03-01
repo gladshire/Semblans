@@ -4,12 +4,13 @@
 
 #include "preprocess.h"
 
-void retrieve_sra_data(const std::vector<SRA> & sras, std::string threads) {
+void retrieve_sra_data(const std::vector<SRA> & sras, std::string threads,
+                       bool dispOutput, std::string logFile) {
   std::cout << "Retrieving SRA runs for:\n" << std::endl;
   summarize_all_sras(sras);
 
-  prefetch_sra(sras);
-  fasterq_sra(sras, threads);
+  prefetch_sra(sras, dispOutput, logFile);
+  fasterq_sra(sras, threads, dispOutput, logFile);
 }
 
 bool stringToBool(std::string boolStr) {
@@ -43,12 +44,13 @@ int main(int argc, char * argv[]) {
     std::vector<std::string> localDataFiles;
     bool localDataBool = false;
     bool retainInterFiles = stringToBool(argv[4]);
-
+    bool dispOutput = stringToBool(argv[5]);
+    std::string logFilePath = cfgIni["General"]["log_file"];
     // Create vector of SRA objects from SRA accessions, using NCBI web API
     sras = get_sras(cfgIni);
 
     if (!sras.empty()) {
-      retrieve_sra_data(sras, threads);
+      retrieve_sra_data(sras, threads, dispOutput, logFilePath);
     }
     // Get single/paired filenames of local data
     for (auto fqFileName : cfgIni.at("Local files")) {
@@ -84,6 +86,11 @@ int main(int argc, char * argv[]) {
         }
       }
     }
+    
+    // Check if no SRAs specified
+    if (sras.empty()) {
+      std::cout << "ERROR: No SRA runs specified. Please check config file" << std::endl;
+    }
 
     // Summarize preprocess task
     std::cout << "  PREPROCESS started with following parameters:" << std::endl;
@@ -93,7 +100,7 @@ int main(int argc, char * argv[]) {
     std::cout << "    SRAs (NCBI):\n      ";
     for (auto sra : sras) {
       if (sra.get_accession() != "") {
-        std::cout << sra.get_accession() << std::endl;
+        std::cout << "      " << sra.get_accession() << std::endl;
       }
     }
     std::cout << "    SRAs (local):\n";
@@ -122,18 +129,18 @@ int main(int argc, char * argv[]) {
     make_proj_space(cfgIni);
 
 
-    run_fastqc_bulk(sras, threads, fastqc_dir_1);
-    run_rcorr(sras, threads); 
+    run_fastqc_bulk(sras, threads, fastqc_dir_1, dispOutput, logFilePath);
+    run_rcorr(sras, threads, dispOutput, logFilePath); 
     rem_unfix_bulk(sras, ram_gb);
-    run_trimmomatic(sras, threads);
+    run_trimmomatic(sras, threads, dispOutput, logFilePath);
     if (!retainInterFiles) {
       system(("rm -rf " + std::string(sras[0].get_sra_path_corr_fix().first.parent_path().c_str())).c_str());
     }
-    run_kraken2_dbs(sras, threads, kraken2Dbs, kraken2_conf);
+    run_kraken2_dbs(sras, threads, kraken2Dbs, kraken2_conf, dispOutput, logFilePath);
     if (!retainInterFiles) {
       system(("rm -rf " + std::string(sras[0].get_sra_path_trim_p().first.parent_path().c_str())).c_str());
     }
-    run_fastqc_bulk(sras, threads, fastqc_dir_2);
+    run_fastqc_bulk(sras, threads, fastqc_dir_2, dispOutput, logFilePath);
     rem_overrep_bulk(sras, ram_gb);
     if (!retainInterFiles) {
       system(("rm -rf " + std::string(sras[0].get_sra_path_for_filt().first.parent_path().c_str())).c_str());

@@ -20,6 +20,15 @@ transcript get_transcript_mult(SRA sra) {
   return trans;
 }
 
+bool stringToBool(std::string boolStr) {
+  bool boolConv;
+  for (int i = 0; i < boolStr.length(); i++) {
+    boolStr[i] = std::tolower(boolStr[i]);
+  }
+  boolConv = (boolStr == "true") ? true : false;
+  return boolConv;
+}
+
 void print_help() {
 
 }
@@ -32,7 +41,7 @@ int main(int argc, char * argv[]) {
     std::string outputDir = cfgIni["General"]["output_directory"];
     std::string projDir = outputDir + cfgIni["General"]["project_name"] + "/";
     std::string refProt = cfgIni["General"]["reference_proteome_path"];
-
+    std::string logFilePath = cfgIni["General"]["log_file"];
     std::vector<SRA> sras;
     std::vector<std::string> localDataFiles;
     sras = get_sras(cfgIni);
@@ -68,20 +77,18 @@ int main(int argc, char * argv[]) {
         }
       }
     }
+    if (sras.empty()) {
+      std::cout << "ERROR: No SRA runs specified. Please check config file" << std::endl;
+    }
     transcript trans = get_transcript_mult(sras[0]);
     // Get number of threads
     std::string threads = argv[2];
     // Get RAM in GB
     std::string ram_gb = argv[3];
-    // Make blast db
-    makeDb(refProt, projDir + stepDirs[8]);
-    // Run BlastX
-    std::string blastDbName = refProt.substr(refProt.find_last_of("/"),
-                                             refProt.find_last_of(".") -
-                                             refProt.find_last_of("/"));
-    blastxDiam(trans, projDir + stepDirs[8] + blastDbName, threads,
-               projDir + stepDirs[8]);
+    // Determine whether to print output of programs
+    bool dispOutput = stringToBool(argv[4]);
 
+    // Summarize program execution parameters
     std::cout << "  POSTPROCESS started with following parameters:" << std::endl;
     std::cout << "    Config file:     " << argv[1] << std::endl;
     std::cout << "    Threads (Cores): " << threads << std::endl;
@@ -89,6 +96,16 @@ int main(int argc, char * argv[]) {
     std::cout << "    Reference Prot:  " << refProt << std::endl;
     std::cout << "    SRAs" << std::endl;
     summarize_all_sras(sras);
+
+    // Make blast db
+    makeDb(refProt, projDir + stepDirs[8], dispOutput, logFilePath);
+    // Run BlastX
+    std::string blastDbName = refProt.substr(refProt.find_last_of("/"),
+                                             refProt.find_last_of(".") -
+                                             refProt.find_last_of("/"));
+    blastxDiam(trans, projDir + stepDirs[8] + blastDbName, threads,
+               projDir + stepDirs[8], dispOutput, logFilePath);
+
     // Detect and remove chimeric transcripts
     detect_chimera(trans, std::string(trans.get_trans_path_blastx().c_str()),
                    projDir + stepDirs[8]);
@@ -97,21 +114,22 @@ int main(int argc, char * argv[]) {
                          (uintmax_t)(stoi(ram_gb) * 1000000000),
                          std::string(trans.get_trans_path_chimera().parent_path().c_str()));
     // Perform salmon index of transcripts
-    salmon_index(trans, threads);
+    salmon_index(trans, threads, dispOutput, logFilePath);
     // Perform salmon quant of transcripts / reads
-    salmon_quant(trans, sras, threads);
+    salmon_quant(trans, sras, threads, dispOutput, logFilePath);
     // Perform corset run to cluster transcripts
     corset_eq_classes(trans, std::string((trans.get_trans_path_quant() /
                                          fs::path("aux_info") /
                                          fs::path("eq_classes.txt.gz")).c_str()),
-                             std::string(projDir + stepDirs[9]));
+                             std::string(projDir + stepDirs[9]), dispOutput, logFilePath);
     // Filter corset output
     filterCorset(trans, std::string(trans.get_trans_path_clust().c_str()),
                  (uintmax_t)(stoi(ram_gb) * 1000000000),
                  std::string(projDir + stepDirs[9]));
     // Run transdecoder
     run_transdecoder(trans, threads, (uintmax_t)(stoi(ram_gb) * 1000000000),
-                     projDir + stepDirs[8] + blastDbName, projDir + stepDirs[10]);
+                     projDir + stepDirs[8] + blastDbName, projDir + stepDirs[10],
+                     dispOutput, logFilePath);
   }
   else {
     print_help();

@@ -295,7 +295,8 @@ void rem_overrep_bulk(const std::vector<SRA> & sras, std::string ram_gb) {
   long long int ram_b = (long long int)stoi(ram_gb) * 1000000000;
   for (auto sra : sras) {
     if (fs::exists(sra.get_sra_path_orep_filt().first.c_str())) {
-      std::cout << "Fixed version found for: " << sra.get_file_prefix().first << std::endl;
+      std::cout << "Fixed version found for: " << std::endl;
+      summarize_sing_sra(sra);
       continue;
     }
     std::cout << "\nNow processing:\n" << std::endl;
