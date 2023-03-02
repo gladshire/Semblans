@@ -35,10 +35,10 @@ void run_kraken2(const std::vector<SRA> & sras, std::string threads, std::string
   std::string krakFlags("--threads " + threads + " --unclassified-out");
   std::string printOut;
   if (dispOutput) {
-    printOut = " |& tee -a " + logFile;
+    printOut = " 2>&1 | tee -a " + logFile;
   }
   else {
-    printOut = " &>> " + logFile;
+    printOut = " >>" + logFile + " 2>&1";
   }
   int result;
   for (auto sra : sras) {

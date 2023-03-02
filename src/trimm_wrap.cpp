@@ -14,10 +14,10 @@ void run_trimmomatic(const std::vector<SRA> & sras, std::string threads,
   std::string outFile;
   std::string printOut;
   if (dispOutput) {
-    printOut = " |& tee -a " + logFile;
+    printOut = " 2>&1 | tee -a " + logFile;
   }
   else {
-    printOut = " &>> " + logFile;
+    printOut = " >>" + logFile + " 2>&1";
   }
   int result;
   for (auto sra : sras) {

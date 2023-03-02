@@ -43,10 +43,10 @@ void run_fastqc(SRA sra, std::string threads, std::string outDir,
     }
     fastqcCmd = PATH_FASTQC + fastqcFlags + outFile + " " + inFile1 + " " + inFile2;
     if (dispOutput) {
-      fastqcCmd += (" |& tee -a " + logFile);
+      fastqcCmd += (" 2>&1 | tee -a " + logFile);
     }
     else {
-      fastqcCmd += (" &>> " + logFile);
+      fastqcCmd += (" >>" + logFile + " 2>&1");
     }
     result = system(fastqcCmd.c_str());
   }
@@ -59,10 +59,10 @@ void run_fastqc(SRA sra, std::string threads, std::string outDir,
     }
     fastqcCmd = PATH_FASTQC + fastqcFlags + outFile + " " + inFile1;
     if (dispOutput) {
-      fastqcCmd += (" |& tee -a " + logFile);
+      fastqcCmd += (" 2>&1 | tee -a " + logFile);
     }
     else {
-      fastqcCmd += (" &>> " + logFile);
+      fastqcCmd += (" >>" + logFile + " 2>&1");
     }
     result = system((PATH_FASTQC + fastqcFlags + outFile + " " + inFile1).c_str());
   }

@@ -14,7 +14,7 @@ std::vector<SRA> get_sras(const INI_MAP &iniFile) {
 void prefetch_sra(std::vector<SRA> sras, bool dispOutput, std::string logFile) {
   std::string outDir(sras[0].get_sra_path_raw().first.parent_path().native().c_str());
   std::string sra_accessions = "";
-  std::string prefetchFlag = " --max-size u -p -O ";
+  std::string prefetchFlag = " --max-size u -O ";
   int result;
   for (auto sra : sras) {
     if (fs::exists(fs::path(std::string(sra.get_sra_path_raw().first.parent_path().c_str()) +
@@ -27,10 +27,10 @@ void prefetch_sra(std::vector<SRA> sras, bool dispOutput, std::string logFile) {
   if (sra_accessions != "") {
     std::string prefetchCmd = PATH_PREFETCH + " " + sra_accessions + prefetchFlag + outDir;
     if (dispOutput) {
-      prefetchCmd += (" |& tee -a " + logFile);
+      prefetchCmd += (" 2>&1 | tee -a " + logFile);
     }
     else {
-      prefetchCmd += (" &>> " + logFile);
+      prefetchCmd += (" >>" + logFile + " 2>&1");
     }
     result = system(prefetchCmd.c_str());
     if (WIFSIGNALED(result)) {
@@ -44,7 +44,7 @@ void fasterq_sra(std::vector<SRA> sras, std::string threads,
                  bool dispOutput, std::string logFile) {
   std::string prefetchDir(sras[0].get_sra_path_raw().first.parent_path().native().c_str());
   std::string outFile;
-  std::string fasterqFlag = " -p -e " + threads + " -t " + prefetchDir + " " + prefetchDir;
+  std::string fasterqFlag = " -e " + threads + " -t " + prefetchDir + " " + prefetchDir;
   int result;
   for (auto sra : sras) {
     if (fs::exists(sra.get_sra_path_raw().first)) {
@@ -57,10 +57,10 @@ void fasterq_sra(std::vector<SRA> sras, std::string threads,
     std::string fasterqCmd = PATH_FASTERQ + " " + fasterqFlag + "/" + sra.get_accession() +
                              " -o " + outFile;
     if (dispOutput) {
-      fasterqCmd += (" |& tee -a " + logFile);
+      fasterqCmd += (" 2>&1 | tee -a " + logFile);
     }
     else {
-      fasterqCmd += (" &>> " + logFile);
+      fasterqCmd += (" >>" + logFile + " 2>&1");
     }
     result = system(fasterqCmd.c_str());
     fs::current_path(currDir);

@@ -3,7 +3,7 @@
 
 void run_rcorr(const std::vector<SRA> & sras, std::string threads,
                bool dispOutput, std::string logFile) {
-  std::cout << "\nRunning error correction for:\n" << std::endl;
+  std::cout << "\nRunning error correction for:\n" << std::endl;;
   summarize_all_sras(sras);
 
   std::string inFile1;
@@ -15,10 +15,10 @@ void run_rcorr(const std::vector<SRA> & sras, std::string threads,
 
   std::string printOut;
   if (dispOutput) {
-    printOut = " |& tee -a " + logFile;
+    printOut = " 2>&1 | tee -a " + logFile;
   }
   else {
-    printOut = " &>> " + logFile;
+    printOut = " >>" + logFile + " 2>&1";
   }
 
   int result;

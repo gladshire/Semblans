@@ -1,5 +1,7 @@
 #pragma once
 #include "sra.h"
+#include "logstream.h"
+#include <fstream>
 #include <boost/filesystem.hpp>
 #include <boost/dll.hpp>
 

@@ -67,10 +67,10 @@ transcript run_trinity(SRA sra, std::string threads, std::string ram_gb,
   std::string trin_cmd;
   std::string printOut;
   if (dispOutput) {
-    printOut = " |& tee -a " + logFile;
+    printOut = " 2>&1 | tee -a " + logFile;
   }
   else {
-    printOut = " &>> " + logFile;
+    printOut = " >>" + logFile + " 2>&1";
   }
   int result;
   if (sra.is_paired()) {
@@ -106,10 +106,10 @@ transcript run_trinity_comb(std::vector<SRA> sras_comb,
   std::string trin_cmd;
   std::string printOut;
   if (dispOutput) {
-    printOut = " |& tee -a " + logFile;
+    printOut = " 2>&1 | tee -a " + logFile;
   }
   else {
-    printOut = " &>> " + logFile;
+    printOut = " >>" + logFile + " 2>&1";
   }
   int result;
   trin_cmd = PATH_TRINITY + " --seqType fq" + " --single " + inFile + " --max_memory " +

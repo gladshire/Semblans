@@ -56,10 +56,10 @@ void run_transdecoder(transcript trans, std::string threads, uintmax_t ram_b,
   std::string blastpout = trans.make_file_str() + ".blastp.outfmt6";
   std::string printOut;
   if (dispOutput) {
-    printOut = " |& tee -a " + logFile;
+    printOut = " 2>&1 | tee -a " + logFile;
   }
   else {
-    printOut = " &>> " + logFile;
+    printOut = " >>" + logFile + " 2>&1";
   }
   if (fasta_ok(std::string(cdsFilePath.c_str()), ram_b) &&
       fasta_ok(std::string(pepFilePath.c_str()), ram_b)) {

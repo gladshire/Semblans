@@ -7,10 +7,10 @@ void makeDb(std::string pathProtRef, std::string outDir,
   fs::path outDbFile((outDir + "/" + protRefStr).c_str());
   std::string printOut;
   if (dispOutput) {
-    printOut = " |& tee -a " + logFile;
+    printOut = " 2>&1 | tee -a " + logFile;
   }
   else {
-    printOut = " &>> " + logFile;
+    printOut = " >>" + logFile + " 2>&1";
   }
   int result;
   if (fs::exists(outDbFile)) {
@@ -37,10 +37,10 @@ void blastxDiam(transcript transcripts, std::string blastDb,
   std::string outBlastxStr(outBlastxFile.c_str());
   std::string printOut;
   if (dispOutput) {
-    printOut = " |& tee -a " + logFile;
+    printOut = " 2>&1 | tee -a " + logFile;
   }
   else {
-    printOut = " &>> " + logFile;
+    printOut = " >>" + logFile + " 2>&1";
   }
   int result;
   if (fs::exists(outBlastxFile)) {
@@ -67,10 +67,10 @@ void blastpDiam(std::string pepFilePath, std::string blastDb,
   fs::path outBlastpFile(outFile.c_str());
   std::string printOut;
   if (dispOutput) {
-    printOut = " |& tee -a " + logFile;
+    printOut = " 2>&1 | tee -a " + logFile;
   }
   else {
-    printOut = " &>> " + logFile;
+    printOut = " >>" + logFile + " 2>&1";
   }
   int result;
   if (fs::exists(outBlastpFile)) {

@@ -49,10 +49,10 @@ void salmon_index(transcript trans, std::string threads,
   std::string indexFilePath(trans.get_trans_path_index().c_str());
   std::string printOut;
   if (dispOutput) {
-    printOut = " |& tee -a " + logFile;
+    printOut = " 2>&1 | tee -a " + logFile;
   }
   else {
-    printOut = " &>> " + logFile;
+    printOut = " >>" + logFile + " 2>&1";
   }
   int result;
   std::cout << "Generating index for transcript ..." << std::endl;
@@ -115,10 +115,10 @@ void salmon_quant(transcript trans, std::vector<SRA> sras, std::string threads,
   }
   std::string printOut;
   if (dispOutput) {
-    printOut = " |& tee -a " + logFile;
+    printOut = " 2>&1 | tee -a " + logFile;
   }
   else {
-    printOut = " &>> " + logFile;
+    printOut = " >>" + logFile + " 2>&1";
   }
   int result;
   if (fs::exists(trans.get_trans_path_quant())) {

@@ -129,7 +129,7 @@ int main(int argc, char * argv[]) {
     make_proj_space(cfgIni);
 
 
-    run_fastqc_bulk(sras, threads, fastqc_dir_1, dispOutput, logFilePath);
+    //run_fastqc_bulk(sras, threads, fastqc_dir_1, dispOutput, logFilePath);
     run_rcorr(sras, threads, dispOutput, logFilePath); 
     rem_unfix_bulk(sras, ram_gb);
     run_trimmomatic(sras, threads, dispOutput, logFilePath);

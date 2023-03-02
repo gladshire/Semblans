@@ -14,10 +14,10 @@ void corset_eq_classes(transcript trans, std::string pathEqClassFile, std::strin
   }
   std::string printOut;
   if (dispOutput) {
-    printOut = " |& tee -a " + logFile;
+    printOut = " 2>&1 | tee -a " + logFile;
   }
   else {
-    printOut = " &>> " + logFile;
+    printOut = " >>" + logFile + " 2>&1";
   }
   int result;
   std::string cors_cmd = PATH_CORSET + " -i" + " salmon_eq_classes " +

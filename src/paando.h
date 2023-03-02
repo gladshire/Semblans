@@ -7,6 +7,7 @@
 #include <boost/dll.hpp>
 #include "ini_parse.h"
 #include "sra.h"
+#include "logstream.h"
 
 namespace fs = boost::filesystem;
 namespace dl = boost::dll;

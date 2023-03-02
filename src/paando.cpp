@@ -22,7 +22,6 @@ void print_intro() {
   std::cout << std::left << std::setw(w.ws_col) << "assembly, and analysis of de novo transcriptomes" << std::endl;
   std::cout << std::left << std::setw(w.ws_col) << "from multiple individuals\n" << std::endl;
   std::cout << std::left << std::setw(w.ws_col) << "  ────────────────────────────────────────\n" << std::endl;
-
 }
 
 
@@ -59,6 +58,7 @@ int main(int argc, char * argv[]) {
   bool useLocalData;
   bool retainInterFiles;
   bool verboseOutput;
+  std::ofstream logFile("log.txt", std::ofstream::trunc);
 
   if (argc == 1 || 
       (argc == 2 && 
@@ -217,9 +217,9 @@ int main(int argc, char * argv[]) {
       exit(1);
     }
     
-    INI_MAP cfgIni = make_ini_map(&pathConfig[0]);
-    std::string logFilePath = cfgIni["General"]["log_file"];
-    std::ofstream logFile(logFilePath, std::ofstream::trunc);
+    //INI_MAP cfgIni = make_ini_map(&pathConfig[0]);
+    //std::string logFilePath = cfgIni["General"]["log_file"];
+    //std::ofstream logFile(logFilePath, std::ofstream::trunc);
     std::string verbose;
     if (verboseOutput) {
       verbose = " true";
