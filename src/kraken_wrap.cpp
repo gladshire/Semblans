@@ -47,7 +47,7 @@ void run_kraken2(const std::vector<SRA> & sras, std::string threads, std::string
                           dbPath.filename().c_str() + ".report");
     if (fs::exists(fs::path(repFile.c_str()))) {
       logOutput("Filtered version found for: ", logFile);
-      summarize_sing_sra(sra, logFile);
+      summarize_sing_sra(sra, logFile, 2);
       continue;
     }
     pre_summary(sra, db, logFile);
@@ -100,7 +100,7 @@ void run_kraken2(const std::vector<SRA> & sras, std::string threads, std::string
 void run_kraken2_dbs(const std::vector<SRA> & sras, std::string threads, std::vector<std::string> dbs,
                      std::string conf_threshold, bool dispOutput, std::string logFile) {
   logOutput("\nFiltering foreign reads for:\n", logFile);
-  summarize_all_sras(sras, logFile);
+  summarize_all_sras(sras, logFile, 2);
   int i = 0;
   for (auto db : dbs) {
     logOutput("\nNow filtering: " + std::string(fs::path(db.c_str()).filename().c_str()),

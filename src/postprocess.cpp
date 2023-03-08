@@ -90,13 +90,13 @@ int main(int argc, char * argv[]) {
     bool dispOutput = stringToBool(argv[4]);
 
     // Summarize program execution parameters
-    logOutput("  POSTPROCESS started with following parameters:", logFilePath);
-    logOutput("    Config file:     " + std::string(argv[1]), logFilePath);
-    logOutput("    Threads (Cores): " + threads, logFilePath);
-    logOutput("    Memory (GB):     " + ram_gb, logFilePath);
-    logOutput("    Reference Prot:  " + refProt, logFilePath);
-    logOutput("    SRAs", logFilePath);
-    summarize_all_sras(sras, logFilePath);
+    logOutput("Paando Postprocess started with following parameters:", logFilePath);
+    logOutput("  Config file:     " + std::string(argv[1]), logFilePath);
+    logOutput("  Threads (Cores): " + threads, logFilePath);
+    logOutput("  Memory (GB):     " + ram_gb, logFilePath);
+    logOutput("  Reference Prot:  " + refProt, logFilePath);
+    logOutput("  SRA runs:\n", logFilePath);
+    summarize_all_sras(sras, logFilePath, 6);
 
     // Make blast db
     makeDb(refProt, projDir + stepDirs[8], dispOutput, logFilePath);

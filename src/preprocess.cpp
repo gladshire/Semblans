@@ -12,7 +12,7 @@ void retrieve_sra_data(const std::vector<SRA> & sras, std::string threads,
   teeStream loggerStream(logger);
   loggerStream << "Retrieving SRA runs for:\n" << std::endl;
   logStream.close();
-  summarize_all_sras(sras, logFile);
+  summarize_all_sras(sras, logFile, 2);
 
   prefetch_sra(sras, dispOutput, logFile);
   fasterq_sra(sras, threads, dispOutput, logFile);
@@ -98,34 +98,13 @@ int main(int argc, char * argv[]) {
     }
 
     // Summarize preprocess task
-    logOutput("  PREPROCESS started with following parameters:", logFilePath);
-    logOutput("    Config file:     " + std::string(argv[1]), logFilePath);
-    logOutput("    Threads (Cores): " + threads, logFilePath);
-    logOutput("    Memory (GB):     " + ram_gb, logFilePath);
-    logOutput("    SRAs (NCBI):\n      ", logFilePath);
-    /*for (auto sra : sras) {
-      if (sra.get_accession() != "") {
-        std::cout << "      " << sra.get_accession() << std::endl;
-      }
-    }
-    std::cout << "    SRAs (local):\n";
-    for (auto sra : sras) {
-      if (sra.get_accession() == "") {
-        if (sra.is_paired()) {
-          std::cout << "      Paired-end run:" << std::endl;
-          std::cout << "        " << sra.get_file_prefix().first << std::endl;
-          std::cout << "        " << sra.get_file_prefix().second << std::endl;
-          std::cout << std::endl;
-        }
-        else {
-          std::cout << "      Single-end run:" << std::endl;
-          std::cout << "        " << sra.get_file_prefix().first << std::endl;
-          std::cout << std::endl;
-        }
-      }
-    }*/
-    summarize_all_sras(sras, logFilePath);
-    logOutput("    Retain intermediate files: " + std::string(argv[4]), logFilePath);
+    logOutput("Paando Preprocess started with following parameters:", logFilePath);
+    logOutput("  Config file:     " + std::string(argv[1]), logFilePath);
+    logOutput("  Threads (Cores): " + threads, logFilePath);
+    logOutput("  Memory (GB):     " + ram_gb, logFilePath);
+    logOutput("  SRA runs:\n", logFilePath); 
+    summarize_all_sras(sras, logFilePath, 6);
+    logOutput("  Retain intermediate files: " + std::string(argv[4]), logFilePath);
 
     std::string fastqc_dir_1(sras[0].get_fastqc_dir_1().first.parent_path().parent_path().c_str());
     std::string fastqc_dir_2(sras[0].get_fastqc_dir_2().first.parent_path().parent_path().c_str());

@@ -133,7 +133,7 @@ std::vector<transcript> run_trinity_bulk(std::vector<SRA> sras,
   for (auto &sra : sras) {
     if (fs::exists(transcript(sra).get_trans_path_trinity().c_str())) {
       logOutput("Assembly found for: ", logFile);
-      summarize_sing_sra(sra, logFile);
+      summarize_sing_sra(sra, logFile, 2);
       continue;
     }
     if (mult_sra) {

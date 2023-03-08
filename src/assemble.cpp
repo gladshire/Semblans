@@ -86,12 +86,12 @@ int main(int argc, char * argv[]) {
     bool mult_sra = stringToBool(argv[4]);
     
     bool dispOutput = stringToBool(argv[5]);
-    logOutput("  ASSEMBLE started with following parameters:", logFilePath);
-    logOutput("    Config file:     " + std::string(argv[1]), logFilePath);;
-    logOutput("    Threads (Cores): " + threads, logFilePath);
-    logOutput("    Memory (GB):     " + ram_gb, logFilePath);
-    logOutput("    SRAs:", logFilePath);
-    summarize_all_sras(sras, logFilePath);
+    logOutput("Paando Assemble started with following parameters:", logFilePath);
+    logOutput("  Config file:     " + std::string(argv[1]), logFilePath);;
+    logOutput("  Threads (Cores): " + threads, logFilePath);
+    logOutput("  Memory (GB):     " + ram_gb, logFilePath);
+    logOutput("  SRA Runs:\n", logFilePath);
+    summarize_all_sras(sras, logFilePath, 6);
     // Perform assembly with Trinity
     std::vector<transcript> transcriptsSra = run_trinity_bulk(sras, threads, ram_gb, mult_sra,
                                                               dispOutput, logFilePath);

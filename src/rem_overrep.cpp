@@ -291,22 +291,22 @@ void rem_overrep_se(SRA sra, long long int ram_b, std::vector<std::string> overr
 
 void rem_overrep_bulk(const std::vector<SRA> & sras, std::string ram_gb, std::string logFile) {
   logOutput("\nRemoving overrepresented reads for:\n", logFile);
-  summarize_all_sras(sras, logFile);
+  summarize_all_sras(sras, logFile, 2);
   long long int ram_b = (long long int)stoi(ram_gb) * 1000000000;
   for (auto sra : sras) {
     if (fs::exists(sra.get_sra_path_orep_filt().first.c_str())) {
       logOutput("Fixed version found for: ", logFile);
-      summarize_sing_sra(sra, logFile);
+      summarize_sing_sra(sra, logFile, 2);
       continue;
     }
     logOutput("\nNow processing:\n", logFile);
     if (sra.is_paired()) {
-      summarize_sing_sra(sra, logFile);
+      summarize_sing_sra(sra, logFile, 2);
       std::pair<std::vector<std::string>, std::vector<std::string>> overrepSeqs = get_overrep_seqs_pe(sra);
       rem_overrep_pe(sra, ram_b, overrepSeqs);
     }
     else {
-      summarize_sing_sra(sra, logFile);
+      summarize_sing_sra(sra, logFile, 2);
       std::vector<std::string> overrepSeqs = get_overrep_seqs_se(sra);
       rem_overrep_se(sra, ram_b, overrepSeqs);
     }

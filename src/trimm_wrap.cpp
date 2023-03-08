@@ -3,7 +3,7 @@
 void run_trimmomatic(const std::vector<SRA> & sras, std::string threads,
                      bool dispOutput, std::string logFile) {
   logOutput("\nTrimming adapter sequences for:\n", logFile);
-  summarize_all_sras(sras, logFile);
+  summarize_all_sras(sras, logFile, 2);
 
   std::string inFile1;
   std::string inFile2;
@@ -35,7 +35,7 @@ void run_trimmomatic(const std::vector<SRA> & sras, std::string threads,
       if (fs::exists(sra.get_sra_path_trim_p().first) &&
           fs::exists(sra.get_sra_path_trim_p().second)) {
         logOutput("Trimmed version found for: ", logFile);
-        summarize_sing_sra(sra, logFile);
+        summarize_sing_sra(sra, logFile, 2);
         continue;
       }
       trimmCmd += " PE " + inFile1 + " " + inFile2 + " " + outFileP1 + " " + outFileU1 +

@@ -32,10 +32,30 @@ Retrieving SRA runs for:
   SRR21719548_7227_Drosophila_melanogaster_1
   SRR21719548_7227_Drosophila_melanogaster_2
 
-Prefetch found for: SRR21719547
-Prefetch found for: SRR21719548
-Raw reads found for: SRR21719547
-Raw reads found for: SRR21719548
+
+2023-03-08T19:16:31 prefetch.3.0.1: Current preference is set to retrieve SRA Normalized Format files with full base quality scores.
+2023-03-08T19:16:31 prefetch.3.0.1: 1) Downloading 'SRR21719547'...
+2023-03-08T19:16:31 prefetch.3.0.1: SRA Normalized Format file is being retrieved, if this is different from your preference, it may be due to current file availability.
+2023-03-08T19:16:31 prefetch.3.0.1:  Downloading via HTTPS...
+2023-03-08T19:17:58 prefetch.3.0.1:  HTTPS download succeed
+2023-03-08T19:18:01 prefetch.3.0.1:  'SRR21719547' is valid
+2023-03-08T19:18:01 prefetch.3.0.1: 1) 'SRR21719547' was downloaded successfully
+2023-03-08T19:18:01 prefetch.3.0.1: 'SRR21719547' has 0 unresolved dependencies
+
+2023-03-08T19:18:01 prefetch.3.0.1: Current preference is set to retrieve SRA Normalized Format files with full base quality scores.
+2023-03-08T19:18:02 prefetch.3.0.1: 2) Downloading 'SRR21719548'...
+2023-03-08T19:18:02 prefetch.3.0.1: SRA Normalized Format file is being retrieved, if this is different from your preference, it may be due to current file availability.
+2023-03-08T19:18:02 prefetch.3.0.1:  Downloading via HTTPS...
+2023-03-08T19:19:28 prefetch.3.0.1:  HTTPS download succeed
+2023-03-08T19:19:31 prefetch.3.0.1:  'SRR21719548' is valid
+2023-03-08T19:19:31 prefetch.3.0.1: 2) 'SRR21719548' was downloaded successfully
+2023-03-08T19:19:31 prefetch.3.0.1: 'SRR21719548' has 0 unresolved dependencies
+spots read      : 27,695,000
+reads read      : 55,390,000
+reads written   : 55,390,000
+spots read      : 26,507,360
+reads read      : 53,014,720
+reads written   : 53,014,720
   PREPROCESS started with following parameters:
     Config file:     config.ini
     Threads (Cores): 14
@@ -62,237 +82,14 @@ Running error correction for:
   SRR21719548_7227_Drosophila_melanogaster_1
   SRR21719548_7227_Drosophila_melanogaster_2
 
-Error-corrected version found for: 
-  Paired-end run:
-  SRR21719547_7227_Drosophila_melanogaster_1
-  SRR21719547_7227_Drosophila_melanogaster_2
-
-Error-corrected version found for: 
-  Paired-end run:
-  SRR21719548_7227_Drosophila_melanogaster_1
-  SRR21719548_7227_Drosophila_melanogaster_2
-
-  Paired-end run:
-  SRR21719547_7227_Drosophila_melanogaster_1
-  SRR21719547_7227_Drosophila_melanogaster_2
-
-  Paired-end run:
-  SRR21719548_7227_Drosophila_melanogaster_1
-  SRR21719548_7227_Drosophila_melanogaster_2
-
-
-Trimming adapter sequences for:
-
-  Paired-end run:
-  SRR21719547_7227_Drosophila_melanogaster_1
-  SRR21719547_7227_Drosophila_melanogaster_2
-
-  Paired-end run:
-  SRR21719548_7227_Drosophila_melanogaster_1
-  SRR21719548_7227_Drosophila_melanogaster_2
-
-Trimmed version found for: 
-  Paired-end run:
-  SRR21719547_7227_Drosophila_melanogaster_1
-  SRR21719547_7227_Drosophila_melanogaster_2
-
-Trimmed version found for: 
-  Paired-end run:
-  SRR21719548_7227_Drosophila_melanogaster_1
-  SRR21719548_7227_Drosophila_melanogaster_2
-
-
-Filtering foreign reads for:
-
-  Paired-end run:
-  SRR21719547_7227_Drosophila_melanogaster_1
-  SRR21719547_7227_Drosophila_melanogaster_2
-
-  Paired-end run:
-  SRR21719548_7227_Drosophila_melanogaster_1
-  SRR21719548_7227_Drosophila_melanogaster_2
-
-
-Now filtering: archaea
-Filtered version found for: 
-  Paired-end run:
-  SRR21719547_7227_Drosophila_melanogaster_1
-  SRR21719547_7227_Drosophila_melanogaster_2
-
-Filtered version found for: 
-  Paired-end run:
-  SRR21719548_7227_Drosophila_melanogaster_1
-  SRR21719548_7227_Drosophila_melanogaster_2
-
-
-Now filtering: bacteria
-Filtered version found for: 
-  Paired-end run:
-  SRR21719547_7227_Drosophila_melanogaster_1
-  SRR21719547_7227_Drosophila_melanogaster_2
-
-Filtered version found for: 
-  Paired-end run:
-  SRR21719548_7227_Drosophila_melanogaster_1
-  SRR21719548_7227_Drosophila_melanogaster_2
-
-
-Now filtering: fungi
-Filtered version found for: 
-  Paired-end run:
-  SRR21719547_7227_Drosophila_melanogaster_1
-  SRR21719547_7227_Drosophila_melanogaster_2
-
-Filtered version found for: 
-  Paired-end run:
-  SRR21719548_7227_Drosophila_melanogaster_1
-  SRR21719548_7227_Drosophila_melanogaster_2
-
-
-Now filtering: human
-Filtered version found for: 
-  Paired-end run:
-  SRR21719547_7227_Drosophila_melanogaster_1
-  SRR21719547_7227_Drosophila_melanogaster_2
-
-Filtered version found for: 
-  Paired-end run:
-  SRR21719548_7227_Drosophila_melanogaster_1
-  SRR21719548_7227_Drosophila_melanogaster_2
-
-
-Now filtering: plant
-Filtered version found for: 
-  Paired-end run:
-  SRR21719547_7227_Drosophila_melanogaster_1
-  SRR21719547_7227_Drosophila_melanogaster_2
-
-Filtered version found for: 
-  Paired-end run:
-  SRR21719548_7227_Drosophila_melanogaster_1
-  SRR21719548_7227_Drosophila_melanogaster_2
-
-
-Now filtering: viral
-Filtered version found for: 
-  Paired-end run:
-  SRR21719547_7227_Drosophila_melanogaster_1
-  SRR21719547_7227_Drosophila_melanogaster_2
-
-Filtered version found for: 
-  Paired-end run:
-  SRR21719548_7227_Drosophila_melanogaster_1
-  SRR21719548_7227_Drosophila_melanogaster_2
-
-  Paired-end run:
-  SRR21719547_7227_Drosophila_melanogaster_1
-  SRR21719547_7227_Drosophila_melanogaster_2
-
-  Paired-end run:
-  SRR21719548_7227_Drosophila_melanogaster_1
-  SRR21719548_7227_Drosophila_melanogaster_2
-
-
-Removing overrepresented reads for:
-
-  Paired-end run:
-  SRR21719547_7227_Drosophila_melanogaster_1
-  SRR21719547_7227_Drosophila_melanogaster_2
-
-  Paired-end run:
-  SRR21719548_7227_Drosophila_melanogaster_1
-  SRR21719548_7227_Drosophila_melanogaster_2
-
-Fixed version found for: 
-  Paired-end run:
-  SRR21719547_7227_Drosophila_melanogaster_1
-  SRR21719547_7227_Drosophila_melanogaster_2
-
-Fixed version found for: 
-  Paired-end run:
-  SRR21719548_7227_Drosophila_melanogaster_1
-  SRR21719548_7227_Drosophila_melanogaster_2
-
-  ASSEMBLE started with following parameters:
-    Config file:     config.ini
-    Threads (Cores): 14
-    Memory (GB):     80
-    SRAs:
-  Paired-end run:
-  SRR21719547_7227_Drosophila_melanogaster_1
-  SRR21719547_7227_Drosophila_melanogaster_2
-
-  Paired-end run:
-  SRR21719548_7227_Drosophila_melanogaster_1
-  SRR21719548_7227_Drosophila_melanogaster_2
-
-Assembly found for: 
-  Paired-end run:
-  SRR21719547_7227_Drosophila_melanogaster_1
-  SRR21719547_7227_Drosophila_melanogaster_2
-
-Assembly found for: 
-  Paired-end run:
-  SRR21719548_7227_Drosophila_melanogaster_1
-  SRR21719548_7227_Drosophila_melanogaster_2
-
-  POSTPROCESS started with following parameters:
-    Config file:     config.ini
-    Threads (Cores): 14
-    Memory (GB):     80
-    Reference Prot:  /scratch/miles/Paando/uniprot-compressed_true_download_true_format_fasta_query__28_28prote-2023.02.24-22.27.20.59.fasta
-    SRAs
-  Paired-end run:
-  SRR21719547_7227_Drosophila_melanogaster_1
-  SRR21719547_7227_Drosophila_melanogaster_2
-
-  Paired-end run:
-  SRR21719548_7227_Drosophila_melanogaster_1
-  SRR21719548_7227_Drosophila_melanogaster_2
-
-diamond v2.1.3.157 (C) Max Planck Society for the Advancement of Science
-Documentation, support and updates available at http://www.diamondsearch.org
-Please cite: http://dx.doi.org/10.1038/s41592-021-01101-x Nature Methods (2021)
-
-#CPU threads: 32
-Scoring parameters: (Matrix=BLOSUM62 Lambda=0.267 K=0.041 Penalties=11/1)
-Database input file: /scratch/miles/Paando/uniprot-compressed_true_download_true_format_fasta_query__28_28prote-2023.02.24-22.27.20.59.fasta
-Opening the database file...  [0.002s]
-Loading sequences...  [0.017s]
-Masking sequences...  [0.025s]
-Writing sequences...  [0.003s]
-Hashing sequences...  [0.001s]
-Loading sequences...  [0s]
-Writing trailer...  [0s]
-Closing the input file...  [0s]
-Closing the database file...  [0.01s]
-
-Database sequences  15361
-  Database letters  6324348
-     Database hash  dd2848e19c4e36e9ca25ffe3b476f240
-        Total time  0.060000s
-Diamond BLASTX output found for: 7227_Drosophila_melanogaster.Trinity
-Filtered transcripts found for: 7227_Drosophila_melanogaster.Trinity
-Generating index for transcript ...
-Salmon index found for: 7227_Drosophila_melanogaster
-Generating quant for transcript ...
-Quant found for: 7227_Drosophila_melanogaster
-Cluster/count files found for: 7227_Drosophila_melanogaster
-Skipping search for long orfs
-Skipping blastp
--- Skipping CMD: /scratch/miles/Paando/external/TransDecoder-5.7.0/util/get_top_longest_fasta_entries.pl 7227_Drosophila_melanogaster.lc.fasta.transdecoder_dir/longest_orfs.cds 5000 5000 > 7227_Drosophila_melanogaster.lc.fasta.transdecoder_dir/longest_orfs.cds.top_longest_5000, checkpoint [/scratch/miles/Paando/dev-proj/10-Final_cds_pep/7227_Drosophila_melanogaster.lc.fasta.transdecoder_dir/__checkpoints_TDpredict/get_longest_orfs.ok] exists.
--- Skipping CMD: /scratch/miles/Paando/external/TransDecoder-5.7.0/util/exclude_similar_proteins.pl 7227_Drosophila_melanogaster.lc.fasta.transdecoder_dir/longest_orfs.cds.top_longest_5000 > 7227_Drosophila_melanogaster.lc.fasta.transdecoder_dir/longest_orfs.cds.top_longest_5000.nr, checkpoint [/scratch/miles/Paando/dev-proj/10-Final_cds_pep/7227_Drosophila_melanogaster.lc.fasta.transdecoder_dir/__checkpoints_TDpredict/nr.ok] exists.
--- Skipping CMD: /scratch/miles/Paando/external/TransDecoder-5.7.0/util/get_top_longest_fasta_entries.pl 7227_Drosophila_melanogaster.lc.fasta.transdecoder_dir/longest_orfs.cds.top_longest_5000.nr 500 > 7227_Drosophila_melanogaster.lc.fasta.transdecoder_dir/longest_orfs.cds.top_500_longest, checkpoint [/scratch/miles/Paando/dev-proj/10-Final_cds_pep/7227_Drosophila_melanogaster.lc.fasta.transdecoder_dir/__checkpoints_TDpredict/top_train_select.ok] exists.
-PCT_GC: 47.4
--- Skipping CMD: /scratch/miles/Paando/external/TransDecoder-5.7.0/util/seq_n_baseprobs_to_loglikelihood_vals.pl 7227_Drosophila_melanogaster.lc.fasta.transdecoder_dir/longest_orfs.cds.top_500_longest 7227_Drosophila_melanogaster.lc.fasta.transdecoder_dir/base_freqs.dat > 7227_Drosophila_melanogaster.lc.fasta.transdecoder_dir/hexamer.scores, checkpoint [/scratch/miles/Paando/dev-proj/10-Final_cds_pep/7227_Drosophila_melanogaster.lc.fasta.transdecoder_dir/__checkpoints_TDpredict/hexamer_scores.ok] exists.
--- Skipping CMD: /scratch/miles/Paando/external/TransDecoder-5.7.0/util/score_CDS_likelihood_all_6_frames.pl 7227_Drosophila_melanogaster.lc.fasta.transdecoder_dir/longest_orfs.cds 7227_Drosophila_melanogaster.lc.fasta.transdecoder_dir/hexamer.scores > 7227_Drosophila_melanogaster.lc.fasta.transdecoder_dir/longest_orfs.cds.scores, checkpoint [/scratch/miles/Paando/dev-proj/10-Final_cds_pep/7227_Drosophila_melanogaster.lc.fasta.transdecoder_dir/__checkpoints_TDpredict/score_cdss.ok] exists.
--- Skipping CMD: /scratch/miles/Paando/external/TransDecoder-5.7.0/util/select_best_ORFs_per_transcript.pl --gff3_file 7227_Drosophila_melanogaster.lc.fasta.transdecoder_dir/longest_orfs.gff3 --cds_scores 7227_Drosophila_melanogaster.lc.fasta.transdecoder_dir/longest_orfs.cds.scores  --min_length_auto_accept 749  --blast_hits /scratch/miles/Paando/dev-proj/10-Final_cds_pep/7227_Drosophila_melanogaster.blastp.outfmt6  > 7227_Drosophila_melanogaster.lc.fasta.transdecoder_dir/longest_orfs.cds.best_candidates.gff3 , checkpoint [/scratch/miles/Paando/dev-proj/10-Final_cds_pep/7227_Drosophila_melanogaster.lc.fasta.transdecoder_dir/__checkpoints_TDpredict/select_best_orfs.8aaa858dac4c15a651e8180fffae6d5f.ok] exists.
--- Skipping CMD: /scratch/miles/Paando/external/TransDecoder-5.7.0/util/train_start_PWM.pl --transcripts /scratch/miles/Paando/dev-proj/09-Clustering/7227_Drosophila_melanogaster.lc.fasta --selected_orfs 7227_Drosophila_melanogaster.lc.fasta.transdecoder_dir/longest_orfs.cds.top_500_longest --out_prefix 7227_Drosophila_melanogaster.lc.fasta.transdecoder_dir/start_refinement, checkpoint [/scratch/miles/Paando/dev-proj/10-Final_cds_pep/7227_Drosophila_melanogaster.lc.fasta.transdecoder_dir/__checkpoints_TDpredict/train_start_PWM.8aaa858dac4c15a651e8180fffae6d5f.ok] exists.
--- Skipping CMD: /scratch/miles/Paando/external/TransDecoder-5.7.0/util/start_codon_refinement.pl --transcripts /scratch/miles/Paando/dev-proj/09-Clustering/7227_Drosophila_melanogaster.lc.fasta --gff3_file 7227_Drosophila_melanogaster.lc.fasta.transdecoder_dir/longest_orfs.cds.best_candidates.gff3 --workdir 7227_Drosophila_melanogaster.lc.fasta.transdecoder_dir > 7227_Drosophila_melanogaster.lc.fasta.transdecoder_dir/longest_orfs.cds.best_candidates.gff3.revised_starts.gff3, checkpoint [/scratch/miles/Paando/dev-proj/10-Final_cds_pep/7227_Drosophila_melanogaster.lc.fasta.transdecoder_dir/__checkpoints_TDpredict/revise_starts.8aaa858dac4c15a651e8180fffae6d5f.ok] exists.
--- Skipping CMD: cp 7227_Drosophila_melanogaster.lc.fasta.transdecoder_dir/longest_orfs.cds.best_candidates.gff3.revised_starts.gff3 7227_Drosophila_melanogaster.lc.fasta.transdecoder.gff3, checkpoint [/scratch/miles/Paando/dev-proj/10-Final_cds_pep/7227_Drosophila_melanogaster.lc.fasta.transdecoder_dir/__checkpoints_TDpredict/copy_to_final_outputfile.8aaa858dac4c15a651e8180fffae6d5f.ok] exists.
--- Skipping CMD: /scratch/miles/Paando/external/TransDecoder-5.7.0/util/gff3_file_to_bed.pl 7227_Drosophila_melanogaster.lc.fasta.transdecoder.gff3 > 7227_Drosophila_melanogaster.lc.fasta.transdecoder.bed, checkpoint [/scratch/miles/Paando/dev-proj/10-Final_cds_pep/7227_Drosophila_melanogaster.lc.fasta.transdecoder_dir/__checkpoints_TDpredict/make_final_bed.8aaa858dac4c15a651e8180fffae6d5f.ok] exists.
--- Skipping CMD: /scratch/miles/Paando/external/TransDecoder-5.7.0/util/gff3_file_to_proteins.pl --gff3 7227_Drosophila_melanogaster.lc.fasta.transdecoder.gff3 --fasta /scratch/miles/Paando/dev-proj/09-Clustering/7227_Drosophila_melanogaster.lc.fasta  --genetic_code Universal > 7227_Drosophila_melanogaster.lc.fasta.transdecoder.pep, checkpoint [/scratch/miles/Paando/dev-proj/10-Final_cds_pep/7227_Drosophila_melanogaster.lc.fasta.transdecoder_dir/__checkpoints_TDpredict/make_final_pep.8aaa858dac4c15a651e8180fffae6d5f.ok] exists.
--- Skipping CMD: /scratch/miles/Paando/external/TransDecoder-5.7.0/util/gff3_file_to_proteins.pl --gff3 7227_Drosophila_melanogaster.lc.fasta.transdecoder.gff3 --fasta /scratch/miles/Paando/dev-proj/09-Clustering/7227_Drosophila_melanogaster.lc.fasta --seqType CDS  --genetic_code Universal > 7227_Drosophila_melanogaster.lc.fasta.transdecoder.cds, checkpoint [/scratch/miles/Paando/dev-proj/10-Final_cds_pep/7227_Drosophila_melanogaster.lc.fasta.transdecoder_dir/__checkpoints_TDpredict/make_final_cds.8aaa858dac4c15a651e8180fffae6d5f.ok] exists.
-transdecoder is finished.  See output files 7227_Drosophila_melanogaster.lc.fasta.transdecoder.*
-
-
+Put the kmers into bloom filter
+jellyfish bc -m 23 -s 100000000 -C -t 14 -o tmp_089b7e0476c099b05e3ac7b70b88c71e.bc /scratch/miles/Paando/dev-proj/00-Raw_reads/SRR21719547_7227_Drosophila_melanogaster_1.fastq /scratch/miles/Paando/dev-proj/00-Raw_reads/SRR21719547_7227_Drosophila_melanogaster_2.fastq 
+Count the kmers in the bloom filter
+jellyfish count -m 23 -s 100000 -C -t 14 --bc tmp_089b7e0476c099b05e3ac7b70b88c71e.bc -o tmp_089b7e0476c099b05e3ac7b70b88c71e.mer_counts /scratch/miles/Paando/dev-proj/00-Raw_reads/SRR21719547_7227_Drosophila_melanogaster_1.fastq /scratch/miles/Paando/dev-proj/00-Raw_reads/SRR21719547_7227_Drosophila_melanogaster_2.fastq 
+Dump the kmers
+jellyfish dump -L 2 tmp_089b7e0476c099b05e3ac7b70b88c71e.mer_counts > tmp_089b7e0476c099b05e3ac7b70b88c71e.jf_dump
+Error correction
+/scratch/miles/Paando/external/Rcorrector-1.0.5/rcorrector -t 14 -od /scratch/miles/Paando/dev-proj/02-Error_correction  -p /scratch/miles/Paando/dev-proj/00-Raw_reads/SRR21719547_7227_Drosophila_melanogaster_1.fastq /scratch/miles/Paando/dev-proj/00-Raw_reads/SRR21719547_7227_Drosophila_melanogaster_2.fastq -c tmp_089b7e0476c099b05e3ac7b70b88c71e.jf_dump
+Stored 78178730 kmers
+Weak kmer threshold rate: 0.006560 (estimated from 0.950/1 of the chosen kmers)
+Bad quality threshold is ':'
