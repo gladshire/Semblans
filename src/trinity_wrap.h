@@ -15,7 +15,7 @@ namespace dl = boost::dll;
 std::vector<SRA> get_sra_to_combine(std::vector<SRA> sras, std::string org_name);
 
 // Concatenate read files for assembly of multiple SRA runs
-std::string combine_reads(std::vector<SRA> sras_comb, long long int ram_b);
+std::string combine_reads(std::vector<SRA> sras_comb, long long int ram_b, std::string logFile);
 
 // Run Trinity for assembly of single SRA run
 transcript run_trinity(SRA sra, std::string threads, std::string ram_gb,

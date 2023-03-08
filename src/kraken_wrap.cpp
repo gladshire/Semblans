@@ -17,8 +17,8 @@ std::string get_kraken2_conf(const INI_MAP &iniFile) {
 }
 
 
-void pre_summary(SRA sra, std::string db) {
-  std::cout << "\nFor SRA accession: " << sra.get_accession() << std::endl;
+void pre_summary(SRA sra, std::string db, std::string logFile) {
+  logOutput("\nFor SRA accession: " + sra.get_accession(), logFile);
 }
 
 
@@ -46,11 +46,11 @@ void run_kraken2(const std::vector<SRA> & sras, std::string threads, std::string
     repFile = std::string(outDir + "/" + sra.get_file_prefix().first + "." +
                           dbPath.filename().c_str() + ".report");
     if (fs::exists(fs::path(repFile.c_str()))) {
-      std::cout << "Filtered version found for: " << std::endl;
-      summarize_sing_sra(sra);
+      logOutput("Filtered version found for: ", logFile);
+      summarize_sing_sra(sra, logFile);
       continue;
     }
-    pre_summary(sra, db);
+    pre_summary(sra, db, logFile);
     if (selfPass) {
       std::string tmpIn1 = std::string(sra.get_sra_path_for_filt().first.parent_path().c_str()) +
                            "/INPUT1.fq";
@@ -84,7 +84,7 @@ void run_kraken2(const std::vector<SRA> & sras, std::string threads, std::string
                        printOut).c_str());
     }
     if (WIFSIGNALED(result)) {
-      std::cout << "Exited with signal " << WTERMSIG(result) << std::endl;
+      logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
       exit(1);
     }
   }
@@ -99,11 +99,12 @@ void run_kraken2(const std::vector<SRA> & sras, std::string threads, std::string
 
 void run_kraken2_dbs(const std::vector<SRA> & sras, std::string threads, std::vector<std::string> dbs,
                      std::string conf_threshold, bool dispOutput, std::string logFile) {
-  std::cout << "\nFiltering foreign reads for:\n" << std::endl;
-  summarize_all_sras(sras);
+  logOutput("\nFiltering foreign reads for:\n", logFile);
+  summarize_all_sras(sras, logFile);
   int i = 0;
   for (auto db : dbs) {
-    std::cout << "\nNow filtering: " << fs::path(db.c_str()).filename().c_str() << std::endl;
+    logOutput("\nNow filtering: " + std::string(fs::path(db.c_str()).filename().c_str()),
+              logFile);
     if (i == 0) {
       run_kraken2(sras, threads, db, conf_threshold, false, dispOutput, logFile);
     }

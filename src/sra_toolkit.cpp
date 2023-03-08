@@ -19,7 +19,7 @@ void prefetch_sra(std::vector<SRA> sras, bool dispOutput, std::string logFile) {
   for (auto sra : sras) {
     if (fs::exists(fs::path(std::string(sra.get_sra_path_raw().first.parent_path().c_str()) +
                    "/" + sra.get_accession()))) {
-      std::cout << "Prefetch found for: " << sra.get_accession() << std::endl;
+      logOutput("Prefetch found for: " + sra.get_accession(), logFile);
       continue;
     }
     sra_accessions += (sra.get_accession() + " ");
@@ -34,7 +34,7 @@ void prefetch_sra(std::vector<SRA> sras, bool dispOutput, std::string logFile) {
     }
     result = system(prefetchCmd.c_str());
     if (WIFSIGNALED(result)) {
-      std::cout << "Exited with signal " << WTERMSIG(result) << std::endl;
+      logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
       exit(1);
     }
   }
@@ -48,7 +48,7 @@ void fasterq_sra(std::vector<SRA> sras, std::string threads,
   int result;
   for (auto sra : sras) {
     if (fs::exists(sra.get_sra_path_raw().first)) {
-      std::cout << "Raw reads found for: " << sra.get_accession() << std::endl;
+      logOutput("Raw reads found for: " + sra.get_accession(), logFile);
       continue;
     }
     outFile = sra.make_file_str();
@@ -65,7 +65,7 @@ void fasterq_sra(std::vector<SRA> sras, std::string threads,
     result = system(fasterqCmd.c_str());
     fs::current_path(currDir);
     if (WIFSIGNALED(result)) {
-      std::cout << "Exited with signal " << WTERMSIG(result) << std::endl;
+      logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
       exit(1);
     }
   }

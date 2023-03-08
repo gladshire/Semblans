@@ -4,7 +4,6 @@
 #include <fstream>
 #include "sra.h"
 #include "print_info.h"
-#include "logstream.h"
 
 namespace fs = boost::filesystem;
 namespace dl = boost::dll;

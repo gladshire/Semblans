@@ -14,14 +14,14 @@ void makeBlastDb(std::string pathProtRef, std::string outDir,
   }
   int result;
   if (fs::exists(outDbFile)) {
-    std::cout << "BLAST database found for: " + protRefStr << std::endl;
+    logOutput("BLAST database found for: " + protRefStr, logFile);
     return;
   }
   std::string makeblastdbCmd = MAKEBLASTDB + " -in " + pathProtRef + " -dbtype prot -out " +
                                outDbFile.c_str() + printOut;
   result = system(makeblastdbCmd.c_str());
   if (WIFSIGNALED(result)) {
-    std::cout << "Exited with signal " << WTERMSIG(result) << std::endl;
+    logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
     exit(1);
   }
 }
@@ -45,7 +45,7 @@ void blastx(transcript transcripts, std::string blastDb,
   }
   int result;
   if (fs::exists(outBlastxFile)) {
-    std::cout << "BLASTX output found for: " + transStr << std::endl;
+    logOutput("BLASTX output found for: " + transStr, logFile);
     return;
   }
   std::string blastxCmd = BLASTX + " -db " + blastDb + " -query " + pathTransStr +
@@ -56,7 +56,7 @@ void blastx(transcript transcripts, std::string blastDb,
                           " -max_target_seqs 100" + printOut;
   result = system(blastxCmd.c_str());
   if (WIFSIGNALED(result)) {
-    std::cout << "Exited with signal " << WTERMSIG(result) << std::endl;
+    logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
     exit(1);
   }
 }
@@ -75,7 +75,7 @@ void blastp(std::string pepFilePath, std::string blastDb,
   }
   int result;
   if (fs::exists(outBlastpFile)) {
-    std::cout << "BLASTP output found for: " + pepFilePath << std::endl;
+    logOutput("BLASTP output found for: " + pepFilePath, logFile);
     return;
   }
   std::string blastpCmd = BLASTP + " -query " + pepFilePath + " -db " + blastDb +
@@ -83,7 +83,7 @@ void blastp(std::string pepFilePath, std::string blastDb,
                           threads + " > " + outFile + printOut;
   result = system(blastpCmd.c_str());
   if (WIFSIGNALED(result)) {
-    std::cout << "Exited with signal " << WTERMSIG(result) << std::endl;
+    logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
     exit(1);
   }
 }

@@ -14,7 +14,7 @@ std::vector<SRA> get_sra_to_combine(std::vector<SRA> sras, std::string org_name)
   return sra_comb;
 }
 
-std::string combine_reads(std::vector<SRA> sras_comb, long long int ram_b) {
+std::string combine_reads(std::vector<SRA> sras_comb, long long int ram_b, std::string logFile) {
   std::string inFileStr1;
   std::string outDirStr(sras_comb[0].get_sra_path_orep_filt().first.parent_path().c_str());
   std::string outFileStr(outDirStr + "/" + sras_comb[0].get_tax_id() + "_" +
@@ -27,10 +27,10 @@ std::string combine_reads(std::vector<SRA> sras_comb, long long int ram_b) {
 
   std::ofstream outFile;
   std::ifstream inFile;
-  std::cout << "Combined assembly chosen" << std::endl;
-  std::cout << "Now combining files for assembly with Trinity ..." << std::endl;
+  logOutput("Combined assembly chosen", logFile);
+  logOutput("Now combining files for assembly with Trinity ...", logFile);
   if (fs::exists(outFileStr)) {
-    std::cout << "Combined FASTA file found for: " << sras_comb[0].get_org_name() << std::endl;
+    logOutput("Combined FASTA file found for: " + sras_comb[0].get_org_name(), logFile);
     return outFileStr;
   }
   for (auto &sra : sras_comb) {
@@ -53,7 +53,7 @@ std::string combine_reads(std::vector<SRA> sras_comb, long long int ram_b) {
     }
     outFile.close();
   }
-  std::cout << "Complete!\nNow initiating Trinity assembly ..." << std::endl;
+  logOutput("Complete!\nNow initiating Trinity assembly ...", logFile);
   return outFileStr;
 }
 
@@ -88,7 +88,7 @@ transcript run_trinity(SRA sra, std::string threads, std::string ram_gb,
   }
   result = system(trin_cmd.c_str());
   if (WIFSIGNALED(result)) {
-    std::cout << "Exited with signal " << WTERMSIG(result) << std::endl;
+    logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
     exit(1);
   }
   std::rename((outFile + ".Trinity.fasta").c_str(), outFile.c_str());
@@ -100,7 +100,7 @@ transcript run_trinity_comb(std::vector<SRA> sras_comb,
                             bool dispOutput, std::string logFile) {
   // Run Trinity for assembly using multiple SRAS
   long long int ram_b = (long long int)stoi(ram_gb) * 1000000000;
-  std::string inFile = combine_reads(sras_comb, ram_b);
+  std::string inFile = combine_reads(sras_comb, ram_b, logFile);
   transcript sra_trans(sras_comb[0]);
   std::string outFile(sra_trans.get_trans_path_trinity().c_str());
   std::string trin_cmd;
@@ -117,7 +117,7 @@ transcript run_trinity_comb(std::vector<SRA> sras_comb,
              " --no_normalize_reads" + " --run_as_paired" + " --output " + outFile + printOut; 
   result = system(trin_cmd.c_str());
   if (WIFSIGNALED(result)) {
-    std::cout << "Exited with signal " << WTERMSIG(result) << std::endl;
+    logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
     exit(1);
   }
   std::rename((outFile + ".Trinity.fasta").c_str(), outFile.c_str());
@@ -132,8 +132,8 @@ std::vector<transcript> run_trinity_bulk(std::vector<SRA> sras,
   transcript currSraTrans;
   for (auto &sra : sras) {
     if (fs::exists(transcript(sra).get_trans_path_trinity().c_str())) {
-      std::cout << "Assembly found for: " << std::endl;
-      summarize_sing_sra(sra);
+      logOutput("Assembly found for: ", logFile);
+      summarize_sing_sra(sra, logFile);
       continue;
     }
     if (mult_sra) {

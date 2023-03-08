@@ -1,27 +1,27 @@
 #include "paando.h"
 
 
-void print_intro() {
+void print_intro(std::string logFile) {
   winsize w;
   ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-  std::cout << std::left << std::setw(w.ws_col) << "\n  ┌──────────────────────────────────────┐" << std::endl;
-  std::cout << std::left << std::setw(w.ws_col) << "  │  _____                      _        │" << std::endl;
-  std::cout << std::left << std::setw(w.ws_col) << "  │ |  __ \\                    | |       │" << std::endl;
-  std::cout << std::left << std::setw(w.ws_col) << "  │ | |__) |_ _  __ _ _ __   __| | ___   │" << std::endl;
-  std::cout << std::left << std::setw(w.ws_col) << "  │ |  ___/ _` |/ _` | '_ \\ / _` |/ _ \\  │ " << std::endl;
-  std::cout << std::left << std::setw(w.ws_col) << "  │ | |  | (_| | (_| | | | | (_| | (_) | │" << std::endl;
-  std::cout << std::left << std::setw(w.ws_col) << "  │ |_|   \\__,_|\\__,_|_| |_|\\__,_|\\___/  │" << std::endl;
-  std::cout << std::left << std::setw(w.ws_col) << "  └──────────────────────────────────────┘\n" << std::endl;
-  std::cout << std::left << std::setw(w.ws_col) << "                    P  -ipeline for the       " << std::endl;
-  std::cout << std::left << std::setw(w.ws_col) << "                    A  -ssembly and           " << std::endl;
-  std::cout << std::left << std::setw(w.ws_col) << "                    An -alysis of            " << std::endl;
-  std::cout << std::left << std::setw(w.ws_col) << "                    D  -e novo                " << std::endl;
-  std::cout << std::left << std::setw(w.ws_col) << "       transcript-  O  -mics datasets         " << std::endl;
-  std::cout << std::left << std::setw(w.ws_col) << "  ────────────────────────────────────────\n" << std::endl;
-  std::cout << std::left << std::setw(w.ws_col) << "A C++ package enabling the bulk retrieval," << std::endl;
-  std::cout << std::left << std::setw(w.ws_col) << "assembly, and analysis of de novo transcriptomes" << std::endl;
-  std::cout << std::left << std::setw(w.ws_col) << "from multiple individuals\n" << std::endl;
-  std::cout << std::left << std::setw(w.ws_col) << "  ────────────────────────────────────────\n" << std::endl;
+  logOutput("\n  ┌──────────────────────────────────────┐", logFile);
+  logOutput("  │  _____                      _        │", logFile);
+  logOutput("  │ |  __ \\                    | |       │", logFile);
+  logOutput("  │ | |__) |_ _  __ _ _ __   __| | ___   │", logFile);
+  logOutput("  │ |  ___/ _` |/ _` | '_ \\ / _` |/ _ \\  │ ", logFile);
+  logOutput("  │ | |  | (_| | (_| | | | | (_| | (_) | │", logFile);
+  logOutput("  │ |_|   \\__,_|\\__,_|_| |_|\\__,_|\\___/  │", logFile);
+  logOutput("  └──────────────────────────────────────┘\n", logFile);
+  logOutput("                    P  -ipeline for the       ", logFile);
+  logOutput("                    A  -ssembly and           ", logFile);
+  logOutput("                    An -alysis of            ", logFile);
+  logOutput("                    D  -e novo                ", logFile);
+  logOutput("       transcript-  O  -mics datasets         ", logFile);
+  logOutput("  ────────────────────────────────────────\n", logFile);
+  logOutput("A C++ package enabling the bulk retrieval,", logFile);
+  logOutput("assembly, and analysis of de novo transcriptomes", logFile);
+  logOutput("from multiple individuals\n", logFile);
+  logOutput("  ────────────────────────────────────────\n", logFile);
 }
 
 
@@ -47,7 +47,7 @@ void print_help() {
 }
 
 int main(int argc, char * argv[]) {
-  print_intro();
+  //print_intro();
   std::string threadStr;
   std::string ramStr;
   int numThreads;
@@ -58,7 +58,6 @@ int main(int argc, char * argv[]) {
   bool useLocalData;
   bool retainInterFiles;
   bool verboseOutput;
-  std::ofstream logFile("log.txt", std::ofstream::trunc);
 
   if (argc == 1 || 
       (argc == 2 && 
@@ -207,6 +206,7 @@ int main(int argc, char * argv[]) {
         verboseOutput = true;
       }
     }
+
     if (command == "") {
       command = "all";
     }
@@ -216,10 +216,11 @@ int main(int argc, char * argv[]) {
       std::cout << "  (example: --config path/to/config.ini)\n" << std::endl;
       exit(1);
     }
-    
-    //INI_MAP cfgIni = make_ini_map(&pathConfig[0]);
-    //std::string logFilePath = cfgIni["General"]["log_file"];
-    //std::ofstream logFile(logFilePath, std::ofstream::trunc);
+
+    INI_MAP cfgIni = make_ini_map(pathConfig.c_str());
+    std::string logFilePath = cfgIni["General"]["log_file"];
+    std::ofstream logFile(logFilePath, std::ios_base::trunc);
+ 
     std::string verbose;
     if (verboseOutput) {
       verbose = " true";
@@ -252,9 +253,12 @@ int main(int argc, char * argv[]) {
                           std::to_string(ram);
     postCmd += verbose;
     int result;
+
+    print_intro(logFilePath);
+
     // Case 1: preprocess
     if (command == "preprocess") {
-      std::cout << "Performing preprocessing only ..." << std::endl;
+      logOutput("Performing preprocessing only ...", logFilePath);
       result = system(preCmd.c_str());
       if (WIFSIGNALED(result)) {
         exit(1);
@@ -263,7 +267,7 @@ int main(int argc, char * argv[]) {
     }
     // Case 2: assemble
     if (command == "assemble") {
-      std::cout << "Performing assembly only ..." << std::endl;
+      logOutput("Performing assembly only ...", logFilePath);
       result = system(assCmd.c_str());
       if (WIFSIGNALED(result)) {
         exit(1);
@@ -272,7 +276,7 @@ int main(int argc, char * argv[]) {
     }
     // Case 3: postprocess
     if (command == "postprocess") {
-      std::cout << "Performing postprocess only ..." << std::endl;
+      logOutput("Performing postprocess only ...", logFilePath);
       result = system(postCmd.c_str());
       if (WIFSIGNALED(result)) {
         exit(1);
@@ -281,6 +285,7 @@ int main(int argc, char * argv[]) {
     }
     // Case 4: all three
     if (command == "all") {
+      logOutput("Performing entire assembly ...", logFilePath);
       result = system(preCmd.c_str());
       if (WIFSIGNALED(result)) {
         exit(1);

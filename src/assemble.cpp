@@ -86,12 +86,12 @@ int main(int argc, char * argv[]) {
     bool mult_sra = stringToBool(argv[4]);
     
     bool dispOutput = stringToBool(argv[5]);
-    std::cout << "  ASSEMBLE started with following parameters:" << std::endl;
-    std::cout << "    Config file:     " << argv[1] << std::endl;
-    std::cout << "    Threads (Cores): " << threads << std::endl;
-    std::cout << "    Memory (GB):     " << ram_gb << std::endl;
-    std::cout << "    SRAs:" << std::endl;
-    summarize_all_sras(sras);
+    logOutput("  ASSEMBLE started with following parameters:", logFilePath);
+    logOutput("    Config file:     " + std::string(argv[1]), logFilePath);;
+    logOutput("    Threads (Cores): " + threads, logFilePath);
+    logOutput("    Memory (GB):     " + ram_gb, logFilePath);
+    logOutput("    SRAs:", logFilePath);
+    summarize_all_sras(sras, logFilePath);
     // Perform assembly with Trinity
     std::vector<transcript> transcriptsSra = run_trinity_bulk(sras, threads, ram_gb, mult_sra,
                                                               dispOutput, logFilePath);

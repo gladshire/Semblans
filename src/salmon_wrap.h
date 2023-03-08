@@ -2,6 +2,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/dll.hpp>
 #include "ini_parse.h"
+#include "print_info.h"
 #include "sra.h"
 #include "transcript.h"
 

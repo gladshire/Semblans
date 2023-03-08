@@ -55,10 +55,10 @@ void salmon_index(transcript trans, std::string threads,
     printOut = " >>" + logFile + " 2>&1";
   }
   int result;
-  std::cout << "Generating index for transcript ..." << std::endl;
+  logOutput("Generating index for transcript ...", logFile);
 
   if (fs::exists(trans.get_trans_path_index().c_str())) {
-    std::cout << "Salmon index found for: " << trans.make_file_str() << std::endl;
+    logOutput("Salmon index found for: " + trans.make_file_str(), logFile);
     return;
   }
   std::string salm_cmd = PATH_SALMON + " index" + " -t " + transFilePath +
@@ -66,7 +66,7 @@ void salmon_index(transcript trans, std::string threads,
                          printOut;
   result = system(salm_cmd.c_str());
   if (WIFSIGNALED(result)) {
-    std::cout << "Exited with signal " << WTERMSIG(result) << std::endl;
+    logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
     exit(1);
   }
 }
@@ -100,7 +100,7 @@ void salmon_quant(transcript trans, std::vector<SRA> sras, std::string threads,
   std::string sras1 = "";
   std::string sras2 = "";
 
-  std::cout << "Generating quant for transcript ..." << std::endl;
+  logOutput("Generating quant for transcript ...", logFile);
   for (auto sraIter = sras.begin(); sraIter != sras.end(); sraIter++) {
     if (sraIter != sras.begin()) {
       sras1 += " ";
@@ -122,7 +122,7 @@ void salmon_quant(transcript trans, std::vector<SRA> sras, std::string threads,
   }
   int result;
   if (fs::exists(trans.get_trans_path_quant())) {
-    std::cout << "Quant found for: " << trans.get_org_name() << std::endl;
+    logOutput("Quant found for: " + trans.make_file_str(), logFile);
     return;
   }
   bool morePaired = false;
@@ -142,7 +142,7 @@ void salmon_quant(transcript trans, std::vector<SRA> sras, std::string threads,
     result = system(salm_cmd.c_str());
   }
   if (WIFSIGNALED(result)) {
-    std::cout << "Exited with signal " << WTERMSIG(result) << std::endl;
+    logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
     exit(1);
   }
 }

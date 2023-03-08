@@ -18,15 +18,15 @@ std::set<std::string> makeClusterSet(std::ifstream & clustFile) {
 }
 
 void filterCorset(transcript trans, std::string clusterPath, uintmax_t ram_b,
-                  std::string out_dir) {
+                  std::string out_dir, std::string logFile) {
   fs::path transPath = trans.get_trans_path_chimera();
   std::string clustPath(trans.get_trans_path_clust().c_str());
   std::string largestClust(trans.get_trans_path_largest().c_str());
   std::string redundTrans(trans.get_trans_path_redund().c_str());
 
   if (fs::exists(largestClust) && fs::exists(redundTrans)) {
-    std::cout << "Largest cluster and redundant transcripts found for: " << transPath
-              << std::endl;
+    logOutput("Largest cluster and redundant transcripts found for: " +
+              std::string(transPath.c_str()), logFile);
     return;
   }
   // Read largest corset clusters into set
@@ -59,7 +59,7 @@ void filterCorset(transcript trans, std::string clusterPath, uintmax_t ram_b,
       seqRemovedHash.deleteHash(head);
     }
     else {
-      std::cout << "Not found in hash table! Something failed" << std::endl;
+      logOutput("Not found in hash table! Something failed", logFile);
       return;
     }
   }

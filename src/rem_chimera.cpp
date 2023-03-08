@@ -253,7 +253,7 @@ std::set<std::string> makeChimeraSet(std::ifstream & chimFile) {
 
 void removeChimera(transcript trans, std::string infoFilePath,
                    std::string cutFilePath, uintmax_t ram_b,
-                   std::string outDir) {
+                   std::string outDir, std::string logFile) {
   fs::path transPath = trans.get_trans_path_trinity();
   std::string transPathStr(transPath.c_str());
   std::string transFileStr(transPath.stem().c_str());
@@ -262,7 +262,7 @@ void removeChimera(transcript trans, std::string infoFilePath,
   std::string filtTrans(trans.get_trans_path_chimera().c_str());
 
   if (fs::exists(trans.get_trans_path_chimera())) {
-    std::cout << "Filtered transcripts found for: " << transFileStr << std::endl;
+    logOutput("Filtered transcripts found for: " + transFileStr, logFile);
     return;
   }
 
@@ -273,6 +273,7 @@ void removeChimera(transcript trans, std::string infoFilePath,
   // Determine size of hash table
   uintmax_t numBytesTrans = fs::file_size(transPath);
   uintmax_t lenHashTable = numBytesTrans / 160;
+
   seqHash fastaHashTable(lenHashTable, transPath, ram_b);
   // Fill hash table with all transcripts
   // Iterate over chimera set
@@ -287,22 +288,22 @@ void removeChimera(transcript trans, std::string infoFilePath,
       fastaHashTable.deleteHash(head);
       foundInHashTable = fastaHashTable.inHashTable(head);
       if (foundInHashTable) {
-        std::cout << "Could not remove chimera. Something failed" << std::endl;
+        logOutput("Could not remove chimera. Something failed", logFile);
         return;
       }
       numRemoved++;
     }
     else {
-      std::cout << "Not found in hash table! Something failed" << std::endl;
+      logOutput("Not found in hash table! Something failed", logFile);
       return;
     }
   }
-  std::cout << "Chimeric removal successful!\n" << std::endl;
-  std::cout << "====================" << std::endl;
-  std::cout << "  SUMMARY:" << std::endl;
-  std::cout << "    Removed:  " << numRemoved << std::endl;
-  std::cout << "    Retained: " << fastaHashTable.getSize() << std::endl;
-  std::cout << "====================\n" << std::endl;
+  logOutput("Chimeric removal successful!\n", logFile);
+  logOutput("====================", logFile);
+  logOutput("  SUMMARY:", logFile);
+  logOutput("    Removed:  " + std::to_string(numRemoved), logFile);
+  logOutput("    Retained: " + std::to_string(fastaHashTable.getSize()), logFile);
+  logOutput("====================\n", logFile);
   fastaHashTable.dump(filtTrans);
 }
 

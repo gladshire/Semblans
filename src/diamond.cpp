@@ -14,14 +14,14 @@ void makeDb(std::string pathProtRef, std::string outDir,
   }
   int result;
   if (fs::exists(outDbFile)) {
-    std::cout << "BLAST database found for: " + protRefStr << std::endl;
+    logOutput("BLAST database found for: " + protRefStr, logFile);
     return;
   }
   std::string makeDbCmd = DMAKEDB + " --in " + pathProtRef + " --db " +
                           outDbFile.c_str() + printOut;
   result = system(makeDbCmd.c_str());
   if (WIFSIGNALED(result)) {
-    std::cout << "Existed with signal " << WTERMSIG(result) << std::endl;
+    logOutput("Existed with signal " + std::to_string(WTERMSIG(result)), logFile);
     exit(1);
   } 
 }
@@ -44,7 +44,7 @@ void blastxDiam(transcript transcripts, std::string blastDb,
   }
   int result;
   if (fs::exists(outBlastxFile)) {
-    std::cout << "Diamond BLASTX output found for: " << transStr << std::endl;
+    logOutput("Diamond BLASTX output found for: " + transStr, logFile);
     return;
   }
   std::string blastxDiamCmd = DBLASTX + " --db " + blastDb + " --query " + pathTransStr +
@@ -56,7 +56,7 @@ void blastxDiam(transcript transcripts, std::string blastDb,
                               printOut;
   result = system(blastxDiamCmd.c_str());
   if (WIFSIGNALED(result)) {
-    std::cout << "Exited with signal " << WTERMSIG(result) << std::endl;
+    logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
     exit(1);
   }
 }
@@ -74,7 +74,7 @@ void blastpDiam(std::string pepFilePath, std::string blastDb,
   }
   int result;
   if (fs::exists(outBlastpFile)) {
-    std::cout << "Diamond BLASTP output found for: " << pepFilePath << std::endl;
+    logOutput("Diamond BLASTP output found for: " + pepFilePath, logFile);
     return;
   }
   std::string  blastpDiamCmd = DBLASTP + " --query " + pepFilePath + " --db " + blastDb +
@@ -82,7 +82,7 @@ void blastpDiam(std::string pepFilePath, std::string blastDb,
                                " --threads " + threads + " --out " + outFile + printOut;
   result = system(blastpDiamCmd.c_str());
   if (WIFSIGNALED(result)) {
-    std::cout << "Exited with signal " << WTERMSIG(result) << std::endl;
+    logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
     exit(1);
   }
 }

@@ -75,7 +75,7 @@ void run_fastqc(SRA sra, std::string threads, std::string outDir,
 void run_fastqc_bulk(const std::vector<SRA> & sras, std::string threads, std::string outDir,
                      bool dispOutput, std::string logFile) {
   std::cout << "\nRunning quality analysis for:\n" << std::endl;
-  summarize_all_sras(sras);
+  summarize_all_sras(sras, logFile);
   for (auto sra : sras) {
     run_fastqc(sra, threads, outDir, dispOutput, logFile);
   }

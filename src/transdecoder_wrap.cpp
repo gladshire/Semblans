@@ -63,28 +63,29 @@ void run_transdecoder(transcript trans, std::string threads, uintmax_t ram_b,
   }
   if (fasta_ok(std::string(cdsFilePath.c_str()), ram_b) &&
       fasta_ok(std::string(pepFilePath.c_str()), ram_b)) {
-    std::cout << "Skipping TransDecoder" << std::endl;
+    logOutput("Skipping TransDecoder", logFile);
   }
   else {
     std::string transFileName = std::string(fs::path(transFilePath.c_str()).filename().c_str());
     fs::path allpep(std::string(outDir + transFileName +
                     ".transdecoder_dir/longest_orfs.pep").c_str());
     if (fs::exists(allpep)) {
-      std::cout << "Skipping search for long orfs" << std::endl;
+      logOutput("Skipping search for long orfs", logFile);
     }
     else {
       // Only operates on un-stranded. Implement stranded later
       std::string tdLongOrfs_cmd = PATH_TRANSD_LONGORFS + " -t " + transFilePath + " -O " +
                                    std::string(allpep.parent_path().c_str()) + printOut;
+      std::cout << tdLongOrfs_cmd << std::endl;
       int resultLO;
       resultLO = system(tdLongOrfs_cmd.c_str());
       if (WIFSIGNALED(resultLO)) {
-        std::cout << "Exited with signal " << WTERMSIG(resultLO) << std::endl;
+        logOutput("Exited with signal " + std::to_string(WTERMSIG(resultLO)), logFile);
         exit(1);
       }
     }
     if (blastpout_ok(outDir + blastpout)) {
-      std::cout << "Skipping blastp" << std::endl;
+      logOutput("Skipping blastp", logFile);
     }
     else {
       blastpDiam(std::string(allpep.c_str()), dbPath, threads, outDir + blastpout,
@@ -92,7 +93,7 @@ void run_transdecoder(transcript trans, std::string threads, uintmax_t ram_b,
     }
     if (fasta_ok(std::string(cdsFilePath.c_str()), ram_b) &&
         fasta_ok(std::string(pepFilePath.c_str()), ram_b)) {
-      std::cout << "Skip finding final CDS and PEP" << std::endl;
+      logOutput("Skip finding final CDS and PEP", logFile);
     }
     else {
       std::string tdPredict_cmd = PATH_TRANSD_PREDICT + " -t " + transFilePath +
@@ -103,7 +104,7 @@ void run_transdecoder(transcript trans, std::string threads, uintmax_t ram_b,
       int resultPD;
       resultPD = system(tdPredict_cmd.c_str());
       if (WIFSIGNALED(resultPD)) {
-        std::cout << "Exited with signal " << WTERMSIG(resultPD) << std::endl;
+        logOutput("Exited with signal " + std::to_string(WTERMSIG(resultPD)), logFile);
         exit(1);
       }
       fs::current_path(currDir);

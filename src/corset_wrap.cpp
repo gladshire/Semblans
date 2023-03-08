@@ -5,7 +5,7 @@ void corset_eq_classes(transcript trans, std::string pathEqClassFile, std::strin
   fs::path eqClassFile(pathEqClassFile);
   if (fs::exists(trans.get_trans_path_clust()) &&
       fs::exists(trans.get_trans_path_counts())) {
-    std::cout << "Cluster/count files found for: " << trans.get_org_name() << std::endl;
+    logOutput("Cluster/count files found for: " + trans.make_file_str(), logFile);
     return;
   }
   if (eqClassFile.extension() == fs::path(".gz")) {
@@ -26,7 +26,7 @@ void corset_eq_classes(transcript trans, std::string pathEqClassFile, std::strin
                          printOut;
   result = system(cors_cmd.c_str());
   if (WIFSIGNALED(result)) {
-    std::cout << "Exited with signal " << WTERMSIG(result) << std::endl;
+    logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
     exit(1);
   }
 }

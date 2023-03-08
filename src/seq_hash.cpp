@@ -22,6 +22,7 @@ seqHash::seqHash(uintmax_t lenTable, fs::path transFilePath, uintmax_t ram_b) {
   std::string inFileStr(transFilePath.c_str());
   std::ifstream inFile(inFileStr);
   std::string inFileData;
+
   inFileData.reserve(ram_b);
   std::streamsize s;
 

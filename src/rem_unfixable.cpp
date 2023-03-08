@@ -135,9 +135,9 @@ void rem_unfix_se(SRA sra, long long int ram_b) {
 }
 
 
-void rem_unfix_bulk(const std::vector<SRA> & sras, std::string ram_gb) {
+void rem_unfix_bulk(const std::vector<SRA> & sras, std::string ram_gb, std::string logFile) {
   std::cout << "\nRemoving unfixable reads for:\n" << std::endl;
-  summarize_all_sras(sras);
+  summarize_all_sras(sras, logFile);
   long long int ram_b = (long long int)stoi(ram_gb) * 1000000000;
   for (auto sra : sras) {
     if (fs::exists(sra.get_sra_path_corr_fix().first.c_str())) {

@@ -34,4 +34,4 @@ void detect_chimera(transcript trans, std::string blastxFile, std::string outDir
 std::set<std::string> makeChimeraSet(std::ifstream & chimFile);
 
 void removeChimera(transcript trans, std::string infoFilePath, std::string cutFilePath,
-                   uintmax_t ram_b, std::string outDir);
+                   uintmax_t ram_b, std::string outDir, std::string logFile);

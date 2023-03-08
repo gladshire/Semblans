@@ -2,8 +2,8 @@
 
 void run_trimmomatic(const std::vector<SRA> & sras, std::string threads,
                      bool dispOutput, std::string logFile) {
-  std::cout << "\nTrimming adapter sequences for:\n" << std::endl;
-  summarize_all_sras(sras);
+  logOutput("\nTrimming adapter sequences for:\n", logFile);
+  summarize_all_sras(sras, logFile);
 
   std::string inFile1;
   std::string inFile2;
@@ -34,8 +34,8 @@ void run_trimmomatic(const std::vector<SRA> & sras, std::string threads,
       outFileU2 = sra.get_sra_path_trim_u().second.c_str();
       if (fs::exists(sra.get_sra_path_trim_p().first) &&
           fs::exists(sra.get_sra_path_trim_p().second)) {
-        std::cout << "Trimmed version found for: " << std::endl;
-        summarize_sing_sra(sra);
+        logOutput("Trimmed version found for: ", logFile);
+        summarize_sing_sra(sra, logFile);
         continue;
       }
       trimmCmd += " PE " + inFile1 + " " + inFile2 + " " + outFileP1 + " " + outFileU1 +
@@ -45,14 +45,14 @@ void run_trimmomatic(const std::vector<SRA> & sras, std::string threads,
     else {
       outFile = sra.get_sra_path_trim_u().first.c_str();
       if (fs::exists(sra.get_sra_path_trim_p().first)) {
-        std::cout << "Trimmed version found for " << sra.get_accession() << std::endl;
+        logOutput("Trimmed version found for " + sra.get_accession(), logFile);
         continue;
       }
       trimmCmd += " SE " + inFile1 + " " + outFile + " " + trimmFlags + printOut;
       result = system(trimmCmd.c_str());
     }
     if (WIFSIGNALED(result)) {
-      std::cout << "Exited with signal " << WTERMSIG(result) << std::endl;
+      logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
       exit(1);
     }
   }

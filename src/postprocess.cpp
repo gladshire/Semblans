@@ -85,17 +85,18 @@ int main(int argc, char * argv[]) {
     std::string threads = argv[2];
     // Get RAM in GB
     std::string ram_gb = argv[3];
+    uintmax_t ram_b = (uintmax_t)(stoi(ram_gb)) * 1000000000;
     // Determine whether to print output of programs
     bool dispOutput = stringToBool(argv[4]);
 
     // Summarize program execution parameters
-    std::cout << "  POSTPROCESS started with following parameters:" << std::endl;
-    std::cout << "    Config file:     " << argv[1] << std::endl;
-    std::cout << "    Threads (Cores): " << threads << std::endl;
-    std::cout << "    Memory (GB):     " << ram_gb << std::endl;
-    std::cout << "    Reference Prot:  " << refProt << std::endl;
-    std::cout << "    SRAs" << std::endl;
-    summarize_all_sras(sras);
+    logOutput("  POSTPROCESS started with following parameters:", logFilePath);
+    logOutput("    Config file:     " + std::string(argv[1]), logFilePath);
+    logOutput("    Threads (Cores): " + threads, logFilePath);
+    logOutput("    Memory (GB):     " + ram_gb, logFilePath);
+    logOutput("    Reference Prot:  " + refProt, logFilePath);
+    logOutput("    SRAs", logFilePath);
+    summarize_all_sras(sras, logFilePath);
 
     // Make blast db
     makeDb(refProt, projDir + stepDirs[8], dispOutput, logFilePath);
@@ -111,8 +112,9 @@ int main(int argc, char * argv[]) {
                    projDir + stepDirs[8]);
     removeChimera(trans, std::string(trans.get_trans_path_cinfo().c_str()),
                          std::string(trans.get_trans_path_ccut().c_str()),
-                         (uintmax_t)(stoi(ram_gb) * 1000000000),
-                         std::string(trans.get_trans_path_chimera().parent_path().c_str()));
+                         ram_b,
+                         std::string(trans.get_trans_path_chimera().parent_path().c_str()),
+                         logFilePath);
     // Perform salmon index of transcripts
     salmon_index(trans, threads, dispOutput, logFilePath);
     // Perform salmon quant of transcripts / reads
@@ -124,10 +126,11 @@ int main(int argc, char * argv[]) {
                              std::string(projDir + stepDirs[9]), dispOutput, logFilePath);
     // Filter corset output
     filterCorset(trans, std::string(trans.get_trans_path_clust().c_str()),
-                 (uintmax_t)(stoi(ram_gb) * 1000000000),
-                 std::string(projDir + stepDirs[9]));
+                 ram_b,
+                 std::string(projDir + stepDirs[9]),
+                 logFilePath);
     // Run transdecoder
-    run_transdecoder(trans, threads, (uintmax_t)(stoi(ram_gb) * 1000000000),
+    run_transdecoder(trans, threads, ram_b,
                      projDir + stepDirs[8] + blastDbName, projDir + stepDirs[10],
                      dispOutput, logFilePath);
   }
