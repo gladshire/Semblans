@@ -33,44 +33,44 @@ Retrieving SRA runs for:
   SRR21719548_7227_Drosophila_melanogaster_2
 
 
-2023-03-08T19:16:31 prefetch.3.0.1: Current preference is set to retrieve SRA Normalized Format files with full base quality scores.
-2023-03-08T19:16:31 prefetch.3.0.1: 1) Downloading 'SRR21719547'...
-2023-03-08T19:16:31 prefetch.3.0.1: SRA Normalized Format file is being retrieved, if this is different from your preference, it may be due to current file availability.
-2023-03-08T19:16:31 prefetch.3.0.1:  Downloading via HTTPS...
-2023-03-08T19:17:58 prefetch.3.0.1:  HTTPS download succeed
-2023-03-08T19:18:01 prefetch.3.0.1:  'SRR21719547' is valid
-2023-03-08T19:18:01 prefetch.3.0.1: 1) 'SRR21719547' was downloaded successfully
-2023-03-08T19:18:01 prefetch.3.0.1: 'SRR21719547' has 0 unresolved dependencies
+2023-03-08T22:22:10 prefetch.3.0.1: Current preference is set to retrieve SRA Normalized Format files with full base quality scores.
+2023-03-08T22:22:10 prefetch.3.0.1: 1) Downloading 'SRR21719547'...
+2023-03-08T22:22:10 prefetch.3.0.1: SRA Normalized Format file is being retrieved, if this is different from your preference, it may be due to current file availability.
+2023-03-08T22:22:10 prefetch.3.0.1:  Downloading via HTTPS...
+2023-03-08T22:23:45 prefetch.3.0.1:  HTTPS download succeed
+2023-03-08T22:23:49 prefetch.3.0.1:  'SRR21719547' is valid
+2023-03-08T22:23:49 prefetch.3.0.1: 1) 'SRR21719547' was downloaded successfully
+2023-03-08T22:23:49 prefetch.3.0.1: 'SRR21719547' has 0 unresolved dependencies
 
-2023-03-08T19:18:01 prefetch.3.0.1: Current preference is set to retrieve SRA Normalized Format files with full base quality scores.
-2023-03-08T19:18:02 prefetch.3.0.1: 2) Downloading 'SRR21719548'...
-2023-03-08T19:18:02 prefetch.3.0.1: SRA Normalized Format file is being retrieved, if this is different from your preference, it may be due to current file availability.
-2023-03-08T19:18:02 prefetch.3.0.1:  Downloading via HTTPS...
-2023-03-08T19:19:28 prefetch.3.0.1:  HTTPS download succeed
-2023-03-08T19:19:31 prefetch.3.0.1:  'SRR21719548' is valid
-2023-03-08T19:19:31 prefetch.3.0.1: 2) 'SRR21719548' was downloaded successfully
-2023-03-08T19:19:31 prefetch.3.0.1: 'SRR21719548' has 0 unresolved dependencies
+2023-03-08T22:23:49 prefetch.3.0.1: Current preference is set to retrieve SRA Normalized Format files with full base quality scores.
+2023-03-08T22:23:49 prefetch.3.0.1: 2) Downloading 'SRR21719548'...
+2023-03-08T22:23:49 prefetch.3.0.1: SRA Normalized Format file is being retrieved, if this is different from your preference, it may be due to current file availability.
+2023-03-08T22:23:49 prefetch.3.0.1:  Downloading via HTTPS...
+2023-03-08T22:25:19 prefetch.3.0.1:  HTTPS download succeed
+2023-03-08T22:25:23 prefetch.3.0.1:  'SRR21719548' is valid
+2023-03-08T22:25:23 prefetch.3.0.1: 2) 'SRR21719548' was downloaded successfully
+2023-03-08T22:25:23 prefetch.3.0.1: 'SRR21719548' has 0 unresolved dependencies
 spots read      : 27,695,000
 reads read      : 55,390,000
 reads written   : 55,390,000
 spots read      : 26,507,360
 reads read      : 53,014,720
 reads written   : 53,014,720
-  PREPROCESS started with following parameters:
-    Config file:     config.ini
-    Threads (Cores): 14
-    Memory (GB):     80
-    SRAs (NCBI):
-      
-  Paired-end run:
-  SRR21719547_7227_Drosophila_melanogaster_1
-  SRR21719547_7227_Drosophila_melanogaster_2
+Paando Preprocess started with following parameters:
+  Config file:     config.ini
+  Threads (Cores): 14
+  Memory (GB):     80
+  SRA runs:
 
-  Paired-end run:
-  SRR21719548_7227_Drosophila_melanogaster_1
-  SRR21719548_7227_Drosophila_melanogaster_2
+      Paired-end run:
+      SRR21719547_7227_Drosophila_melanogaster_1
+      SRR21719547_7227_Drosophila_melanogaster_2
 
-    Retain intermediate files: true
+      Paired-end run:
+      SRR21719548_7227_Drosophila_melanogaster_1
+      SRR21719548_7227_Drosophila_melanogaster_2
+
+  Retain intermediate files: true
 
 Running error correction for:
 

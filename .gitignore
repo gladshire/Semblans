@@ -12,6 +12,7 @@
 *.blastp*
 *.p*
 *.tmp
+config.ini
 dev-proj/*
 lib/*
 include/*
