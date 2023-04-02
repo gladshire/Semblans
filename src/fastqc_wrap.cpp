@@ -14,21 +14,6 @@ void run_fastqc(SRA sra, std::string threads, std::string outDir,
   }
   std::string fastqcFlags = " --extract -t " + threads + " -o ";
   int result;
-  if (fs::exists(fs::path(outFile.c_str()))) {
-    std::cout << "FastQC analysis found for:\n" << std::endl;
-    if (sra.is_paired()) {
-      std::cout << "  Paired-end run:" << std::endl;
-      std::cout << "  " << sra.get_file_prefix().first << std::endl;
-      std::cout << "  " << sra.get_file_prefix().second << std::endl;
-      std::cout << std::endl; 
-    }
-    else {
-      std::cout << "  Single-end run:" << std::endl;
-      std::cout << "  " << sra.get_file_prefix().first << std::endl;
-      std::cout << std::endl;
-    }
-    return;
-  }
   system(("mkdir " + outFile).c_str());
   std::string fastqcCmd;
   if (sra.is_paired()) {
@@ -77,6 +62,14 @@ void run_fastqc_bulk(const std::vector<SRA> & sras, std::string threads, std::st
   std::cout << "\nRunning quality analysis for:\n" << std::endl;
   summarize_all_sras(sras, logFile, 2);
   for (auto sra : sras) {
+    // Check if checkpoint exists
+    if (sra.checkpointExists(".fastqc")) {
+      logOutput("FastQC analysis found for:", logFile);
+      summarize_sing_sra(sra, logFile, 2);
+      continue;
+    }
     run_fastqc(sra, threads, outDir, dispOutput, logFile);
+    // Make checkpoint file
+    sra.makeCheckpoint(".fastqc");
   }
 }

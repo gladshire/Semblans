@@ -29,6 +29,9 @@ void make_proj_space(const INI_MAP &iniFile) {
   if (!fs::exists(fs::path(projDir.c_str()))) {
     system(("mkdir " + projDir).c_str());
   }
+  if (!fs::exists(fs::path(projDir.c_str()) / "checkpoints")) {
+    system(("mkdir " + projDir + "/checkpoints/").c_str());
+  }
   for (auto dir : stepDirs) {
     if (fs::exists(fs::path((projDir + dir).c_str()))) {
       continue;

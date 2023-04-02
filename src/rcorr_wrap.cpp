@@ -25,7 +25,8 @@ void run_rcorr(const std::vector<SRA> & sras, std::string threads,
   for (auto sra : sras) {
     std::string outDir(sra.get_sra_path_corr().first.parent_path().c_str());
     inFile1 = sra.get_sra_path_raw().first.c_str();
-    if (fs::exists(sra.get_sra_path_corr().first)) {
+    // Check for checkpoint file
+    if (sra.checkpointExists(".corr")) {
       logOutput("Error-corrected version found for: ", logFile);
       summarize_sing_sra(sra, logFile, 2);
       continue;
@@ -44,5 +45,7 @@ void run_rcorr(const std::vector<SRA> & sras, std::string threads,
       logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
       exit(1);
     }
+    // Create checkpoint
+    sra.makeCheckpoint(".corr");
   }
 } 

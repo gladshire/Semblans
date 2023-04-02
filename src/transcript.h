@@ -49,4 +49,7 @@ class transcript {
     fs::path get_trans_path_cds();
     fs::path get_trans_path_prot();
     std::string make_file_str();
+    std::string makeCheckpointName(std::string ext);
+    void makeCheckpoint(std::string ext);
+    bool checkpointExists(std::string ext);
 };

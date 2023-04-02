@@ -140,8 +140,10 @@ void rem_unfix_bulk(const std::vector<SRA> & sras, std::string ram_gb, std::stri
   summarize_all_sras(sras, logFile, 2);
   long long int ram_b = (long long int)stoi(ram_gb) * 1000000000;
   for (auto sra : sras) {
-    if (fs::exists(sra.get_sra_path_corr_fix().first.c_str())) {
-      std::cout << "Fixed version found for: " << sra.get_accession() << std::endl;
+    // Check for checkpoint
+    if (sra.checkpointExists(".corr.fix")) {
+      logOutput("Fixed version found for:", logFile);
+      summarize_sing_sra(sra, logFile, 2);
       continue;
     }
     if (sra.is_paired()) {
@@ -150,5 +152,7 @@ void rem_unfix_bulk(const std::vector<SRA> & sras, std::string ram_gb, std::stri
     else {
       rem_unfix_se(sra, ram_b);
     }
+    // Create checkpoint
+    sra.makeCheckpoint(".corr.fix");
   }
 }

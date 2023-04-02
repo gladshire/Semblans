@@ -115,3 +115,26 @@ std::string transcript::make_file_str() {
   filename = get_tax_id() + "_" + get_org_name().replace(get_org_name().find(" "), 1, "_");
   return filename;
 }
+
+std::string transcript::makeCheckpointName(std::string ext) {
+  fs::path outDir = get_trans_path_trinity().parent_path() / "checkpoints";
+  std::string cpFileName = std::string(outDir.c_str()) + "/" + make_file_str() + "." + ext + ".ok";
+  return cpFileName;
+}
+
+void transcript::makeCheckpoint(std::string ext) {
+  std::string cpFileName = makeCheckpointName(ext);
+  std::ofstream cpFile;
+  cpFile.open(cpFileName);
+  cpFile.close();
+}
+
+bool transcript::checkpointExists(std::string ext) {
+  fs::path cpFilePath(makeCheckpointName(ext).c_str());
+  if (fs::exists(cpFilePath)) {
+    return true;
+  }
+  else {
+    return false;
+  }
+}

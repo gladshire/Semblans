@@ -267,7 +267,7 @@ std::pair<fs::path, fs::path> SRA::get_sra_path_trim_u() {
   return sra_path_trim_u;
 }
 
-// Getter functio nfor path to trimmed paired SRA sequence
+// Getter function for path to trimmed paired SRA sequence
 std::pair<fs::path, fs::path> SRA::get_sra_path_trim_p() {
   std::pair<fs::path, fs::path> sra_path_trim_p(sra_path_trim_p1, sra_path_trim_p2);
   return sra_path_trim_p;
@@ -299,3 +299,31 @@ std::string SRA::make_file_str() {
   return filename;
 }
 
+std::string SRA::makeCheckpointName(std::string ext) {
+  fs::path outDir = get_sra_path_raw().first.parent_path() / "checkpoints";
+  std::string cpFileName;
+  if (get_accession() == "") {
+    cpFileName = std::string(outDir.c_str()) + "/" + get_file_prefix().first + "." + ext + ".ok";
+  }
+  else {
+    cpFileName = std::string(outDir.c_str()) + "/" + make_file_str() + "." + ext + ".ok";
+  }
+  return cpFileName;
+}
+
+void SRA::makeCheckpoint(std::string ext) {
+  std::string cpFileName = makeCheckpointName(ext);
+  std::ofstream cpFile;
+  cpFile.open(cpFileName);
+  cpFile.close();
+}
+
+bool SRA::checkpointExists(std::string ext) {
+  fs::path cpFilePath(makeCheckpointName(ext).c_str());
+  if (fs::exists(cpFilePath)) {
+    return true;
+  }
+  else {
+    return false;
+  }
+}

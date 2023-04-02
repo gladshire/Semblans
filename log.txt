@@ -93,3 +93,16 @@ Error correction
 Stored 78178730 kmers
 Weak kmer threshold rate: 0.006560 (estimated from 0.950/1 of the chosen kmers)
 Bad quality threshold is ':'
+Put the kmers into bloom filter
+jellyfish bc -m 23 -s 100000000 -C -t 14 -o tmp_ce45168fbe80eccfcb580a9f2bb99c04.bc /scratch/miles/Paando/dev-proj/00-Raw_reads/SRR21719548_7227_Drosophila_melanogaster_1.fastq /scratch/miles/Paando/dev-proj/00-Raw_reads/SRR21719548_7227_Drosophila_melanogaster_2.fastq 
+Count the kmers in the bloom filter
+jellyfish count -m 23 -s 100000 -C -t 14 --bc tmp_ce45168fbe80eccfcb580a9f2bb99c04.bc -o tmp_ce45168fbe80eccfcb580a9f2bb99c04.mer_counts /scratch/miles/Paando/dev-proj/00-Raw_reads/SRR21719548_7227_Drosophila_melanogaster_1.fastq /scratch/miles/Paando/dev-proj/00-Raw_reads/SRR21719548_7227_Drosophila_melanogaster_2.fastq 
+Dump the kmers
+jellyfish dump -L 2 tmp_ce45168fbe80eccfcb580a9f2bb99c04.mer_counts > tmp_ce45168fbe80eccfcb580a9f2bb99c04.jf_dump
+Error correction
+/scratch/miles/Paando/external/Rcorrector-1.0.5/rcorrector -t 14 -od /scratch/miles/Paando/dev-proj/02-Error_correction  -p /scratch/miles/Paando/dev-proj/00-Raw_reads/SRR21719548_7227_Drosophila_melanogaster_1.fastq /scratch/miles/Paando/dev-proj/00-Raw_reads/SRR21719548_7227_Drosophila_melanogaster_2.fastq -c tmp_ce45168fbe80eccfcb580a9f2bb99c04.jf_dump
+Stored 78958314 kmers
+Weak kmer threshold rate: 0.007299 (estimated from 0.950/1 of the chosen kmers)
+Bad quality threshold is ':'
+Failed at stage 3.
+Exited with signal 2

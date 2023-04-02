@@ -113,23 +113,66 @@ int main(int argc, char * argv[]) {
     std::pair<std::vector<std::string>, std::vector<std::string>> overrepSeqs;
     make_proj_space(cfgIni);
 
-
+    // Run initial fastqc on reads
     //run_fastqc_bulk(sras, threads, fastqc_dir_1, dispOutput, logFilePath);
+    
+    // Run rcorrector on reads
     run_rcorr(sras, threads, dispOutput, logFilePath); 
+    
+    // Remove reads with unfixable errors
     rem_unfix_bulk(sras, ram_gb, logFilePath);
+    
+    // If not keeping intermediate files, remove error-corrected files
+    if (!retainInterFiles) {
+      for (auto sra : sras) {
+        fs::remove(fs::path(sra.get_sra_path_corr().first.c_str()));
+        if (sra.is_paired()) {
+          fs::remove(fs::path(sra.get_sra_path_corr().second.c_str()));
+        }
+      }
+    }
+
+    // Run trimmomatic to remove adapter seqs
     run_trimmomatic(sras, threads, dispOutput, logFilePath);
+
+    // If not keeping intermediate files, remove fixed error-corrected files
     if (!retainInterFiles) {
-      system(("rm -rf " + std::string(sras[0].get_sra_path_corr_fix().first.parent_path().c_str())).c_str());
+      for (auto sra : sras) {
+        fs::remove(fs::path(sra.get_sra_path_corr_fix().first.c_str()));
+        if (sra.is_paired()) {
+          fs::remove(fs::path(sra.get_sra_path_corr_fix().second.c_str()));
+        }
+      }
     }
+   
+    // Run kraken2 to remove foreign reads
     run_kraken2_dbs(sras, threads, kraken2Dbs, kraken2_conf, dispOutput, logFilePath);
+
+    // If not keeping intermediate files, remove trimmomatic output files
     if (!retainInterFiles) {
-      system(("rm -rf " + std::string(sras[0].get_sra_path_trim_p().first.parent_path().c_str())).c_str());
+      for (auto sra : sras) {
+        fs::remove(fs::path(sra.get_sra_path_trim_p().first.c_str()));
+        if (sra.is_paired()) {
+          fs::remove(fs::path(sra.get_sra_path_trim_p().second.c_str()));
+        }
+      }
     }
+
+    // Run fastqc on all runs
     run_fastqc_bulk(sras, threads, fastqc_dir_2, dispOutput, logFilePath);
+
+    // Remove reads with over-represented sequences
     rem_overrep_bulk(sras, ram_gb, logFilePath);
+
+    // If not keeping intermediate files, remove kraken2 output files
     if (!retainInterFiles) {
-      system(("rm -rf " + std::string(sras[0].get_sra_path_for_filt().first.parent_path().c_str())).c_str());
-      system(("rm -rf " + fastqc_dir_2).c_str());
+      for (auto sra : sras) {
+        fs::remove(fs::path(sra.get_sra_path_for_filt().first.c_str()));
+        fs::remove(fs::path(fastqc_dir_2.c_str()));
+        if (sra.is_paired()) {
+          fs::remove(fs::path(sra.get_sra_path_for_filt().second.c_str()));
+        }
+      }
     }
   }
 

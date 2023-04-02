@@ -45,7 +45,9 @@ void run_kraken2(const std::vector<SRA> & sras, std::string threads, std::string
     std::string outDir(sra.get_sra_path_for_filt().first.parent_path().c_str());
     repFile = std::string(outDir + "/" + sra.get_file_prefix().first + "." +
                           dbPath.filename().c_str() + ".report");
-    if (fs::exists(fs::path(repFile.c_str()))) {
+    // Check for checkpoint
+    if (sra.checkpointExists(std::string(dbPath.stem().c_str()) + ".filt.")) {
+      logOutput("With database: " + db, logFile);
       logOutput("Filtered version found for: ", logFile);
       summarize_sing_sra(sra, logFile, 2);
       continue;
@@ -87,13 +89,9 @@ void run_kraken2(const std::vector<SRA> & sras, std::string threads, std::string
       logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
       exit(1);
     }
+    // Create checkpoint
+    sra.makeCheckpoint(std::string(dbPath.stem().c_str()) + ".filt.");
   }
-/*
-  std::string tmpIn1 = std::string(sras[0].get_sra_path_for_filt().first.parent_path().c_str()) + "/INPUT1.fq";
-  std::string tmpIn2 = std::string(sras[0].get_sra_path_for_filt().first.parent_path().c_str()) + "/INPUT2.fq";
-  std::remove(tmpIn1.c_str());
-  std::remove(tmpIn2.c_str());
-*/
 }
 
 

@@ -294,7 +294,8 @@ void rem_overrep_bulk(const std::vector<SRA> & sras, std::string ram_gb, std::st
   summarize_all_sras(sras, logFile, 2);
   long long int ram_b = (long long int)stoi(ram_gb) * 1000000000;
   for (auto sra : sras) {
-    if (fs::exists(sra.get_sra_path_orep_filt().first.c_str())) {
+    // Check for checkpoint
+    if (sra.checkpointExists(".orep.fix")) {
       logOutput("Fixed version found for: ", logFile);
       summarize_sing_sra(sra, logFile, 2);
       continue;
@@ -310,6 +311,6 @@ void rem_overrep_bulk(const std::vector<SRA> & sras, std::string ram_gb, std::st
       std::vector<std::string> overrepSeqs = get_overrep_seqs_se(sra);
       rem_overrep_se(sra, ram_b, overrepSeqs);
     }
-    logOutput("Processing of file complete", logFile);
+    sra.makeCheckpoint(".orep.fix");
   }
 }

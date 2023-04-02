@@ -57,8 +57,8 @@ std::string combine_reads(std::vector<SRA> sras_comb, long long int ram_b, std::
   return outFileStr;
 }
 
-transcript run_trinity(SRA sra, std::string threads, std::string ram_gb,
-                       bool dispOutput, std::string logFile) {
+void run_trinity(SRA sra, std::string threads, std::string ram_gb,
+                 bool dispOutput, std::string logFile) {
   // Run Trinity for assembly using single SRA
   std::string inFile1;
   std::string inFile2;
@@ -92,12 +92,11 @@ transcript run_trinity(SRA sra, std::string threads, std::string ram_gb,
     exit(1);
   }
   std::rename((outFile + ".Trinity.fasta").c_str(), outFile.c_str());
-  return sra_trans;
 }
 
-transcript run_trinity_comb(std::vector<SRA> sras_comb,
-                            std::string threads, std::string ram_gb,
-                            bool dispOutput, std::string logFile) {
+void run_trinity_comb(std::vector<SRA> sras_comb,
+                      std::string threads, std::string ram_gb,
+                      bool dispOutput, std::string logFile) {
   // Run Trinity for assembly using multiple SRAS
   long long int ram_b = (long long int)stoi(ram_gb) * 1000000000;
   std::string inFile = combine_reads(sras_comb, ram_b, logFile);
@@ -121,7 +120,6 @@ transcript run_trinity_comb(std::vector<SRA> sras_comb,
     exit(1);
   }
   std::rename((outFile + ".Trinity.fasta").c_str(), outFile.c_str());
-  return sra_trans;
 }
 
 std::vector<transcript> run_trinity_bulk(std::vector<SRA> sras,
@@ -129,8 +127,10 @@ std::vector<transcript> run_trinity_bulk(std::vector<SRA> sras,
                                          bool mult_sra, bool dispOutput, std::string logFile) {
   // Iterate through SRAs, running Trinity for all
   std::vector<transcript> sra_transcripts;
-  transcript currSraTrans;
+  std::string outDir;
   for (auto &sra : sras) {
+    transcript currSraTrans(sra);
+    outDir = currSraTrans.get_trans_path_trinity().parent_path().c_str();
     if (fs::exists(transcript(sra).get_trans_path_trinity().c_str())) {
       logOutput("Assembly found for: ", logFile);
       summarize_sing_sra(sra, logFile, 2);
@@ -138,10 +138,10 @@ std::vector<transcript> run_trinity_bulk(std::vector<SRA> sras,
     }
     if (mult_sra) {
       std::vector<SRA> sras_comb = get_sra_to_combine(sras, sra.get_org_name());
-      currSraTrans = run_trinity_comb(sras_comb, threads, ram_gb, dispOutput, logFile);
+      run_trinity_comb(sras_comb, threads, ram_gb, dispOutput, logFile);
     }
     else {
-      currSraTrans = run_trinity(sra, threads, ram_gb, dispOutput, logFile);
+      run_trinity(sra, threads, ram_gb, dispOutput, logFile);
     }
     sra_transcripts.push_back(currSraTrans);
   }

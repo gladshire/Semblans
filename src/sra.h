@@ -65,4 +65,7 @@ class SRA {
     std::pair<fs::path, fs::path> get_fastqc_dir_2();
     std::pair<fs::path, fs::path> get_sra_path_orep_filt();
     std::string make_file_str();
+    std::string makeCheckpointName(std::string ext);
+    void makeCheckpoint(std::string ext);
+    bool checkpointExists(std::string ext);
 };

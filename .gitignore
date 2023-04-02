@@ -13,6 +13,7 @@
 *.p*
 *.tmp
 config.ini
+log.txt
 dev-proj/*
 lib/*
 include/*
