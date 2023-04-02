@@ -33,23 +33,23 @@ Retrieving SRA runs for:
   SRR21719548_7227_Drosophila_melanogaster_2
 
 
-2023-03-08T22:22:10 prefetch.3.0.1: Current preference is set to retrieve SRA Normalized Format files with full base quality scores.
-2023-03-08T22:22:10 prefetch.3.0.1: 1) Downloading 'SRR21719547'...
-2023-03-08T22:22:10 prefetch.3.0.1: SRA Normalized Format file is being retrieved, if this is different from your preference, it may be due to current file availability.
-2023-03-08T22:22:10 prefetch.3.0.1:  Downloading via HTTPS...
-2023-03-08T22:23:45 prefetch.3.0.1:  HTTPS download succeed
-2023-03-08T22:23:49 prefetch.3.0.1:  'SRR21719547' is valid
-2023-03-08T22:23:49 prefetch.3.0.1: 1) 'SRR21719547' was downloaded successfully
-2023-03-08T22:23:49 prefetch.3.0.1: 'SRR21719547' has 0 unresolved dependencies
+2023-04-02T20:46:42 prefetch.3.0.1: Current preference is set to retrieve SRA Normalized Format files with full base quality scores.
+2023-04-02T20:46:42 prefetch.3.0.1: 1) Downloading 'SRR21719547'...
+2023-04-02T20:46:42 prefetch.3.0.1: SRA Normalized Format file is being retrieved, if this is different from your preference, it may be due to current file availability.
+2023-04-02T20:46:42 prefetch.3.0.1:  Downloading via HTTPS...
+2023-04-02T20:48:02 prefetch.3.0.1:  HTTPS download succeed
+2023-04-02T20:48:05 prefetch.3.0.1:  'SRR21719547' is valid
+2023-04-02T20:48:05 prefetch.3.0.1: 1) 'SRR21719547' was downloaded successfully
+2023-04-02T20:48:05 prefetch.3.0.1: 'SRR21719547' has 0 unresolved dependencies
 
-2023-03-08T22:23:49 prefetch.3.0.1: Current preference is set to retrieve SRA Normalized Format files with full base quality scores.
-2023-03-08T22:23:49 prefetch.3.0.1: 2) Downloading 'SRR21719548'...
-2023-03-08T22:23:49 prefetch.3.0.1: SRA Normalized Format file is being retrieved, if this is different from your preference, it may be due to current file availability.
-2023-03-08T22:23:49 prefetch.3.0.1:  Downloading via HTTPS...
-2023-03-08T22:25:19 prefetch.3.0.1:  HTTPS download succeed
-2023-03-08T22:25:23 prefetch.3.0.1:  'SRR21719548' is valid
-2023-03-08T22:25:23 prefetch.3.0.1: 2) 'SRR21719548' was downloaded successfully
-2023-03-08T22:25:23 prefetch.3.0.1: 'SRR21719548' has 0 unresolved dependencies
+2023-04-02T20:48:05 prefetch.3.0.1: Current preference is set to retrieve SRA Normalized Format files with full base quality scores.
+2023-04-02T20:48:05 prefetch.3.0.1: 2) Downloading 'SRR21719548'...
+2023-04-02T20:48:05 prefetch.3.0.1: SRA Normalized Format file is being retrieved, if this is different from your preference, it may be due to current file availability.
+2023-04-02T20:48:05 prefetch.3.0.1:  Downloading via HTTPS...
+2023-04-02T20:49:08 prefetch.3.0.1:  HTTPS download succeed
+2023-04-02T20:49:12 prefetch.3.0.1:  'SRR21719548' is valid
+2023-04-02T20:49:12 prefetch.3.0.1: 2) 'SRR21719548' was downloaded successfully
+2023-04-02T20:49:12 prefetch.3.0.1: 'SRR21719548' has 0 unresolved dependencies
 spots read      : 27,695,000
 reads read      : 55,390,000
 reads written   : 55,390,000
@@ -70,7 +70,7 @@ Paando Preprocess started with following parameters:
       SRR21719548_7227_Drosophila_melanogaster_1
       SRR21719548_7227_Drosophila_melanogaster_2
 
-  Retain intermediate files: true
+  Retain intermediate files: false
 
 Running error correction for:
 
@@ -93,16 +93,3 @@ Error correction
 Stored 78178730 kmers
 Weak kmer threshold rate: 0.006560 (estimated from 0.950/1 of the chosen kmers)
 Bad quality threshold is ':'
-Put the kmers into bloom filter
-jellyfish bc -m 23 -s 100000000 -C -t 14 -o tmp_ce45168fbe80eccfcb580a9f2bb99c04.bc /scratch/miles/Paando/dev-proj/00-Raw_reads/SRR21719548_7227_Drosophila_melanogaster_1.fastq /scratch/miles/Paando/dev-proj/00-Raw_reads/SRR21719548_7227_Drosophila_melanogaster_2.fastq 
-Count the kmers in the bloom filter
-jellyfish count -m 23 -s 100000 -C -t 14 --bc tmp_ce45168fbe80eccfcb580a9f2bb99c04.bc -o tmp_ce45168fbe80eccfcb580a9f2bb99c04.mer_counts /scratch/miles/Paando/dev-proj/00-Raw_reads/SRR21719548_7227_Drosophila_melanogaster_1.fastq /scratch/miles/Paando/dev-proj/00-Raw_reads/SRR21719548_7227_Drosophila_melanogaster_2.fastq 
-Dump the kmers
-jellyfish dump -L 2 tmp_ce45168fbe80eccfcb580a9f2bb99c04.mer_counts > tmp_ce45168fbe80eccfcb580a9f2bb99c04.jf_dump
-Error correction
-/scratch/miles/Paando/external/Rcorrector-1.0.5/rcorrector -t 14 -od /scratch/miles/Paando/dev-proj/02-Error_correction  -p /scratch/miles/Paando/dev-proj/00-Raw_reads/SRR21719548_7227_Drosophila_melanogaster_1.fastq /scratch/miles/Paando/dev-proj/00-Raw_reads/SRR21719548_7227_Drosophila_melanogaster_2.fastq -c tmp_ce45168fbe80eccfcb580a9f2bb99c04.jf_dump
-Stored 78958314 kmers
-Weak kmer threshold rate: 0.007299 (estimated from 0.950/1 of the chosen kmers)
-Bad quality threshold is ':'
-Failed at stage 3.
-Exited with signal 2
