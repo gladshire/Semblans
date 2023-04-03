@@ -11,8 +11,10 @@ namespace dl = boost::dll;
 
 namespace fs = boost::filesystem;
 
-void run_fastqc(SRA sra, std::string threads, std::string outDir,
+void run_fastqc(std::pair<std::string, std::string> sraRunFiles,
+                std::string threads, std::string outFile,
                 bool dispOutput, std::string logFile);
 
-void run_fastqc_bulk(const std::vector<SRA> & sras, std::string threads, std::string outDir,
+void run_fastqc_bulk(std::vector<std::pair<std::string, std::string>> sraRunsInput,
+                     std::vector<std::string> outFiles, std::string threads,
                      bool dispOutput, std::string logFile);

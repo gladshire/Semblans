@@ -114,7 +114,17 @@ int main(int argc, char * argv[]) {
     make_proj_space(cfgIni);
 
     // Run initial fastqc on reads
-    run_fastqc_bulk(sras, threads, fastqc_dir_1, dispOutput, logFilePath);
+    std::vector<std::pair<std::string, std::string>> fastqcIn1;
+    std::pair<std::string, std::string> currFastqcIn1;
+    std::vector<std::string> fastqcOut1;
+    for (auto sra : sras) {
+      currFastqcIn1.first = sra.get_sra_path_raw().first.c_str();
+      currFastqcIn1.second = sra.get_sra_path_raw().second.c_str();
+      fastqcIn1.push_back(currFastqcIn1);
+
+      fastqcOut1.push_back(sra.get_fastqc_dir_1().first.parent_path().c_str());
+    }
+    run_fastqc_bulk(fastqcIn1, fastqcOut1, threads, dispOutput, logFilePath);
     
     // Error-correction stage
     bool runErrorCorrect;
@@ -168,7 +178,17 @@ int main(int argc, char * argv[]) {
     }
 
     // Run fastqc on all runs
-    run_fastqc_bulk(sras, threads, fastqc_dir_2, dispOutput, logFilePath);
+    std::vector<std::pair<std::string, std::string>> fastqcIn2;
+    std::pair<std::string, std::string> currFastqcIn2;
+    std::vector<std::string> fastqcOut2;
+    for (auto sra : sras) {
+      currFastqcIn2.first = sra.get_sra_path_for_filt().first.c_str();
+      currFastqcIn2.second = sra.get_sra_path_for_filt().second.c_str();
+      fastqcIn2.push_back(currFastqcIn1);
+
+      fastqcOut2.push_back(sra.get_fastqc_dir_2().first.parent_path().c_str());
+    }
+    run_fastqc_bulk(fastqcIn2, fastqcOut2, threads, dispOutput, logFilePath);
 
     // Remove reads with over-represented sequences
     rem_overrep_bulk(sras, ram_gb, logFilePath);
