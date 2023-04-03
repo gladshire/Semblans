@@ -1,5 +1,5 @@
-// TODO: Allow use of local data
-//   - Process input as comma-separated pairs ending with .fastq / .fq
+// TODO:
+//   - Customize input file locations according to pipeline parameters in config.ini
 
 
 #include "preprocess.h"
@@ -116,31 +116,40 @@ int main(int argc, char * argv[]) {
     // Run initial fastqc on reads
     run_fastqc_bulk(sras, threads, fastqc_dir_1, dispOutput, logFilePath);
     
-    // Run rcorrector on reads
-    run_rcorr(sras, threads, dispOutput, logFilePath); 
+    // Error-correction stage
+    bool runErrorCorrect;
+    runErrorCorrect = stringToBool(cfgIni["Pipeline"]["error_correction"]);
+    if (runErrorCorrect) {
+      // Run rcorrector on reads
+      run_rcorr(sras, threads, dispOutput, logFilePath);
+      // Remove reads with unfixable errors
+      rem_unfix_bulk(sras, ram_gb, logFilePath);
     
-    // Remove reads with unfixable errors
-    rem_unfix_bulk(sras, ram_gb, logFilePath);
-    
-    // If not keeping intermediate files, remove error-corrected files
-    if (!retainInterFiles) {
-      for (auto sra : sras) {
-        fs::remove(fs::path(sra.get_sra_path_corr().first.c_str()));
-        if (sra.is_paired()) {
-          fs::remove(fs::path(sra.get_sra_path_corr().second.c_str()));
+      // If not keeping intermediate files, remove error-corrected files
+      if (!retainInterFiles) {
+        for (auto sra : sras) {
+          fs::remove(fs::path(sra.get_sra_path_corr().first.c_str()));
+          if (sra.is_paired()) {
+            fs::remove(fs::path(sra.get_sra_path_corr().second.c_str()));
+          }
         }
       }
     }
 
-    // Run trimmomatic to remove adapter seqs
-    run_trimmomatic(sras, threads, dispOutput, logFilePath);
+    // Adapter sequence trimming stage
+    bool runAdapterTrimming;
+    runAdapterTrimming = stringToBool(cfgIni["Pipeline"]["trim_adapter_seqs"]);
+    if (runAdapterTrimming) {
+      // Run trimmomatic to remove adapter seqs
+      run_trimmomatic(sras, threads, dispOutput, logFilePath);
 
-    // If not keeping intermediate files, remove fixed error-corrected files
-    if (!retainInterFiles) {
-      for (auto sra : sras) {
-        fs::remove(fs::path(sra.get_sra_path_corr_fix().first.c_str()));
-        if (sra.is_paired()) {
-          fs::remove(fs::path(sra.get_sra_path_corr_fix().second.c_str()));
+      // If not keeping intermediate files, remove fixed error-corrected files
+      if (!retainInterFiles) {
+        for (auto sra : sras) {
+          fs::remove(fs::path(sra.get_sra_path_corr_fix().first.c_str()));
+          if (sra.is_paired()) {
+            fs::remove(fs::path(sra.get_sra_path_corr_fix().second.c_str()));
+          }
         }
       }
     }

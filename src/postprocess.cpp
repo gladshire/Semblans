@@ -1,8 +1,9 @@
 #include "postprocess.h"
 
 // TODO:
-//   Allow postprocessing of local transcripts
-//   Otherwise retrieve from Trinity folder of project
+//   Implemente bulk postprocess of multiple transcripts
+//   Currently, only performs for single transcript
+//   Retrieve from Trinity folder of project
 
 extern std::vector<std::string> stepDirs;
 
@@ -80,7 +81,12 @@ int main(int argc, char * argv[]) {
     if (sras.empty()) {
       std::cout << "ERROR: No SRA runs specified. Please check config file" << std::endl;
     }
+    // TODO: Pipeline only performs postprocess on one transcript
+    //   Make it instantiate transcript object for each file in trinity folder
     transcript trans = get_transcript_mult(sras[0]);
+
+
+
     // Get number of threads
     std::string threads = argv[2];
     // Get RAM in GB

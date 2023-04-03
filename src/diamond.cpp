@@ -86,3 +86,19 @@ void blastpDiam(std::string pepFilePath, std::string blastDb,
     exit(1);
   }
 }
+
+void blastxDiamBulk(const std::vector<transcript> & transVec, std::string blastDb,
+                    std::string threads, std::string outDir, bool dispOutput,
+                    std::string logFile) {
+  for (auto trans : transVec) {
+    blastxDiam(trans, blastDb, threads, outDir, dispOutput, logFile);
+  }
+}
+
+void blastpDiamBulk(std::vector<std::string> pepFilePathVec, std::string blastDb,
+                    std::string threads, std::string outDir, bool dispOutput,
+                    std::string logFile) {
+  for (auto pepFile : pepFilePathVec) {
+    blastpDiam(pepFile, blastDb, threads, outDir, dispOutput, logFile);
+  }
+}

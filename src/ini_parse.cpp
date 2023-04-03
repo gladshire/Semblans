@@ -22,6 +22,7 @@ static int ini_callback(IniDispatch * const dispatch, void * map_pt) {
 
 
 // Create directory space for project
+// TODO: Create project space according to pipeline parameters in config.ini
 void make_proj_space(const INI_MAP &iniFile) {
   std::string projDir = iniFile.at("General").at("output_directory") +
                         iniFile.at("General").at("project_name") + "/";

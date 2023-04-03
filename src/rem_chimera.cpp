@@ -307,3 +307,23 @@ void removeChimera(transcript trans, std::string infoFilePath,
   fastaHashTable.dump(filtTrans);
 }
 
+
+void detectChimeraBulk(const std::vector<transcript> & transVec,
+                       std::vector<std::string> blastxFileVec,
+                       std::string outDir) {
+  for (int i = 0; i < transVec.size(); i++) {
+    detect_chimera(transVec[i], blastxFileVec[i], outDir);
+  }
+}
+
+
+void removeChimeraBulk(const std::vector<transcript> & transVec,
+                       std::vector<std::string> infoFilePathVec,
+                       std::vector<std::string> cutFilePathVec,
+                       uintmax_t ram_b, std::string outDir,
+                       std::string logFile) {
+  for (int i = 0; i < transVec.size(); i++) {
+    removeChimera(transVec[i], infoFilePathVec[i], cutFilePathVec[i],
+                  ram_b, outDir, logFile);
+  }
+}

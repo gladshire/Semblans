@@ -1,6 +1,7 @@
 #include "sra.h"
 
 
+
 std::vector<std::string> stepDirs = {"00-Raw_reads/", "01-Quality_analysis_1/",
                                      "02-Error_correction/", "03-Trimming/",
                                      "04-Filter_foreign/", "05-Quality_analysis_2/",
