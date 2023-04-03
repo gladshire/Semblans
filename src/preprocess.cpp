@@ -114,7 +114,7 @@ int main(int argc, char * argv[]) {
     make_proj_space(cfgIni);
 
     // Run initial fastqc on reads
-    //run_fastqc_bulk(sras, threads, fastqc_dir_1, dispOutput, logFilePath);
+    run_fastqc_bulk(sras, threads, fastqc_dir_1, dispOutput, logFilePath);
     
     // Run rcorrector on reads
     run_rcorr(sras, threads, dispOutput, logFilePath); 

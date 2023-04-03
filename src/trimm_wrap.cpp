@@ -22,7 +22,7 @@ void run_trimmomatic(const std::vector<SRA> & sras, std::string threads,
   int result;
   for (auto sra : sras) {
     // Check for checkpoint
-    if (sra.checkpointExists(".trim")) {
+    if (sra.checkpointExists("trim")) {
       logOutput("Trimmed version found for: ", logFile);
       summarize_sing_sra(sra, logFile, 2);
       continue;
@@ -52,6 +52,6 @@ void run_trimmomatic(const std::vector<SRA> & sras, std::string threads,
       exit(1);
     }
     // Create checkpoint
-    sra.makeCheckpoint(".trim");
+    sra.makeCheckpoint("trim");
   }
 }

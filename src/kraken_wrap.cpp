@@ -46,7 +46,7 @@ void run_kraken2(const std::vector<SRA> & sras, std::string threads, std::string
     repFile = std::string(outDir + "/" + sra.get_file_prefix().first + "." +
                           dbPath.filename().c_str() + ".report");
     // Check for checkpoint
-    if (sra.checkpointExists(std::string(dbPath.stem().c_str()) + ".filt.")) {
+    if (sra.checkpointExists(std::string(dbPath.stem().c_str()) + ".filt")) {
       logOutput("With database: " + db, logFile);
       logOutput("Filtered version found for: ", logFile);
       summarize_sing_sra(sra, logFile, 2);
@@ -90,7 +90,7 @@ void run_kraken2(const std::vector<SRA> & sras, std::string threads, std::string
       exit(1);
     }
     // Create checkpoint
-    sra.makeCheckpoint(std::string(dbPath.stem().c_str()) + ".filt.");
+    sra.makeCheckpoint(std::string(dbPath.stem().c_str()) + ".filt");
   }
 }
 

@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = '-Wl,-rpath,$$ORIGIN/../lib/' -g -pthread
+CFLAGS = '-Wl,-rpath,$$ORIGIN/../lib/' -pthread
 
 # Change these to $home/.local/share/Paando/
 LIBS = -L../lib -lboost_system -lboost_filesystem -ldl -lconfini

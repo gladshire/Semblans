@@ -63,13 +63,13 @@ void run_fastqc_bulk(const std::vector<SRA> & sras, std::string threads, std::st
   summarize_all_sras(sras, logFile, 2);
   for (auto sra : sras) {
     // Check if checkpoint exists
-    if (sra.checkpointExists(".fastqc")) {
+    if (sra.checkpointExists("fastqc")) {
       logOutput("FastQC analysis found for:", logFile);
       summarize_sing_sra(sra, logFile, 2);
       continue;
     }
     run_fastqc(sra, threads, outDir, dispOutput, logFile);
     // Make checkpoint file
-    sra.makeCheckpoint(".fastqc");
+    sra.makeCheckpoint("fastqc");
   }
 }

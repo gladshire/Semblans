@@ -300,7 +300,7 @@ std::string SRA::make_file_str() {
 }
 
 std::string SRA::makeCheckpointName(std::string ext) {
-  fs::path outDir = get_sra_path_raw().first.parent_path() / "checkpoints";
+  fs::path outDir = get_sra_path_raw().first.parent_path().parent_path() / "checkpoints";
   std::string cpFileName;
   if (get_accession() == "") {
     cpFileName = std::string(outDir.c_str()) + "/" + get_file_prefix().first + "." + ext + ".ok";

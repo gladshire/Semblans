@@ -33,23 +33,23 @@ Retrieving SRA runs for:
   SRR21719548_7227_Drosophila_melanogaster_2
 
 
-2023-04-02T20:46:42 prefetch.3.0.1: Current preference is set to retrieve SRA Normalized Format files with full base quality scores.
-2023-04-02T20:46:42 prefetch.3.0.1: 1) Downloading 'SRR21719547'...
-2023-04-02T20:46:42 prefetch.3.0.1: SRA Normalized Format file is being retrieved, if this is different from your preference, it may be due to current file availability.
-2023-04-02T20:46:42 prefetch.3.0.1:  Downloading via HTTPS...
-2023-04-02T20:48:02 prefetch.3.0.1:  HTTPS download succeed
-2023-04-02T20:48:05 prefetch.3.0.1:  'SRR21719547' is valid
-2023-04-02T20:48:05 prefetch.3.0.1: 1) 'SRR21719547' was downloaded successfully
-2023-04-02T20:48:05 prefetch.3.0.1: 'SRR21719547' has 0 unresolved dependencies
+2023-04-03T00:16:52 prefetch.3.0.1: Current preference is set to retrieve SRA Normalized Format files with full base quality scores.
+2023-04-03T00:16:52 prefetch.3.0.1: 1) Downloading 'SRR21719547'...
+2023-04-03T00:16:52 prefetch.3.0.1: SRA Normalized Format file is being retrieved, if this is different from your preference, it may be due to current file availability.
+2023-04-03T00:16:52 prefetch.3.0.1:  Downloading via HTTPS...
+2023-04-03T00:18:34 prefetch.3.0.1:  HTTPS download succeed
+2023-04-03T00:18:38 prefetch.3.0.1:  'SRR21719547' is valid
+2023-04-03T00:18:38 prefetch.3.0.1: 1) 'SRR21719547' was downloaded successfully
+2023-04-03T00:18:38 prefetch.3.0.1: 'SRR21719547' has 0 unresolved dependencies
 
-2023-04-02T20:48:05 prefetch.3.0.1: Current preference is set to retrieve SRA Normalized Format files with full base quality scores.
-2023-04-02T20:48:05 prefetch.3.0.1: 2) Downloading 'SRR21719548'...
-2023-04-02T20:48:05 prefetch.3.0.1: SRA Normalized Format file is being retrieved, if this is different from your preference, it may be due to current file availability.
-2023-04-02T20:48:05 prefetch.3.0.1:  Downloading via HTTPS...
-2023-04-02T20:49:08 prefetch.3.0.1:  HTTPS download succeed
-2023-04-02T20:49:12 prefetch.3.0.1:  'SRR21719548' is valid
-2023-04-02T20:49:12 prefetch.3.0.1: 2) 'SRR21719548' was downloaded successfully
-2023-04-02T20:49:12 prefetch.3.0.1: 'SRR21719548' has 0 unresolved dependencies
+2023-04-03T00:18:38 prefetch.3.0.1: Current preference is set to retrieve SRA Normalized Format files with full base quality scores.
+2023-04-03T00:18:38 prefetch.3.0.1: 2) Downloading 'SRR21719548'...
+2023-04-03T00:18:38 prefetch.3.0.1: SRA Normalized Format file is being retrieved, if this is different from your preference, it may be due to current file availability.
+2023-04-03T00:18:38 prefetch.3.0.1:  Downloading via HTTPS...
+2023-04-03T00:20:09 prefetch.3.0.1:  HTTPS download succeed
+2023-04-03T00:20:13 prefetch.3.0.1:  'SRR21719548' is valid
+2023-04-03T00:20:13 prefetch.3.0.1: 2) 'SRR21719548' was downloaded successfully
+2023-04-03T00:20:13 prefetch.3.0.1: 'SRR21719548' has 0 unresolved dependencies
 spots read      : 27,695,000
 reads read      : 55,390,000
 reads written   : 55,390,000
@@ -70,10 +70,7 @@ Paando Preprocess started with following parameters:
       SRR21719548_7227_Drosophila_melanogaster_1
       SRR21719548_7227_Drosophila_melanogaster_2
 
-  Retain intermediate files: false
-
-Running error correction for:
-
+  Retain intermediate files: true
   Paired-end run:
   SRR21719547_7227_Drosophila_melanogaster_1
   SRR21719547_7227_Drosophila_melanogaster_2
@@ -82,14 +79,75 @@ Running error correction for:
   SRR21719548_7227_Drosophila_melanogaster_1
   SRR21719548_7227_Drosophila_melanogaster_2
 
-Put the kmers into bloom filter
-jellyfish bc -m 23 -s 100000000 -C -t 14 -o tmp_089b7e0476c099b05e3ac7b70b88c71e.bc /scratch/miles/Paando/dev-proj/00-Raw_reads/SRR21719547_7227_Drosophila_melanogaster_1.fastq /scratch/miles/Paando/dev-proj/00-Raw_reads/SRR21719547_7227_Drosophila_melanogaster_2.fastq 
-Count the kmers in the bloom filter
-jellyfish count -m 23 -s 100000 -C -t 14 --bc tmp_089b7e0476c099b05e3ac7b70b88c71e.bc -o tmp_089b7e0476c099b05e3ac7b70b88c71e.mer_counts /scratch/miles/Paando/dev-proj/00-Raw_reads/SRR21719547_7227_Drosophila_melanogaster_1.fastq /scratch/miles/Paando/dev-proj/00-Raw_reads/SRR21719547_7227_Drosophila_melanogaster_2.fastq 
-Dump the kmers
-jellyfish dump -L 2 tmp_089b7e0476c099b05e3ac7b70b88c71e.mer_counts > tmp_089b7e0476c099b05e3ac7b70b88c71e.jf_dump
-Error correction
-/scratch/miles/Paando/external/Rcorrector-1.0.5/rcorrector -t 14 -od /scratch/miles/Paando/dev-proj/02-Error_correction  -p /scratch/miles/Paando/dev-proj/00-Raw_reads/SRR21719547_7227_Drosophila_melanogaster_1.fastq /scratch/miles/Paando/dev-proj/00-Raw_reads/SRR21719547_7227_Drosophila_melanogaster_2.fastq -c tmp_089b7e0476c099b05e3ac7b70b88c71e.jf_dump
-Stored 78178730 kmers
-Weak kmer threshold rate: 0.006560 (estimated from 0.950/1 of the chosen kmers)
-Bad quality threshold is ':'
+Started analysis of SRR21719547_7227_Drosophila_melanogaster_1.fastq
+Started analysis of SRR21719547_7227_Drosophila_melanogaster_2.fastq
+Approx 5% complete for SRR21719547_7227_Drosophila_melanogaster_1.fastq
+Approx 5% complete for SRR21719547_7227_Drosophila_melanogaster_2.fastq
+Approx 10% complete for SRR21719547_7227_Drosophila_melanogaster_1.fastq
+Approx 10% complete for SRR21719547_7227_Drosophila_melanogaster_2.fastq
+Approx 15% complete for SRR21719547_7227_Drosophila_melanogaster_1.fastq
+Approx 15% complete for SRR21719547_7227_Drosophila_melanogaster_2.fastq
+Approx 20% complete for SRR21719547_7227_Drosophila_melanogaster_1.fastq
+Approx 20% complete for SRR21719547_7227_Drosophila_melanogaster_2.fastq
+Approx 25% complete for SRR21719547_7227_Drosophila_melanogaster_1.fastq
+Approx 25% complete for SRR21719547_7227_Drosophila_melanogaster_2.fastq
+Approx 30% complete for SRR21719547_7227_Drosophila_melanogaster_1.fastq
+Approx 30% complete for SRR21719547_7227_Drosophila_melanogaster_2.fastq
+Approx 35% complete for SRR21719547_7227_Drosophila_melanogaster_1.fastq
+Approx 35% complete for SRR21719547_7227_Drosophila_melanogaster_2.fastq
+Approx 40% complete for SRR21719547_7227_Drosophila_melanogaster_1.fastq
+Approx 40% complete for SRR21719547_7227_Drosophila_melanogaster_2.fastq
+Approx 45% complete for SRR21719547_7227_Drosophila_melanogaster_1.fastq
+Approx 45% complete for SRR21719547_7227_Drosophila_melanogaster_2.fastq
+Approx 50% complete for SRR21719547_7227_Drosophila_melanogaster_1.fastq
+Approx 50% complete for SRR21719547_7227_Drosophila_melanogaster_2.fastq
+Approx 55% complete for SRR21719547_7227_Drosophila_melanogaster_1.fastq
+Approx 55% complete for SRR21719547_7227_Drosophila_melanogaster_2.fastq
+Approx 60% complete for SRR21719547_7227_Drosophila_melanogaster_1.fastq
+Approx 60% complete for SRR21719547_7227_Drosophila_melanogaster_2.fastq
+Approx 65% complete for SRR21719547_7227_Drosophila_melanogaster_1.fastq
+Approx 65% complete for SRR21719547_7227_Drosophila_melanogaster_2.fastq
+Approx 70% complete for SRR21719547_7227_Drosophila_melanogaster_1.fastq
+Approx 70% complete for SRR21719547_7227_Drosophila_melanogaster_2.fastq
+Approx 75% complete for SRR21719547_7227_Drosophila_melanogaster_1.fastq
+Approx 75% complete for SRR21719547_7227_Drosophila_melanogaster_2.fastq
+Approx 80% complete for SRR21719547_7227_Drosophila_melanogaster_1.fastq
+Approx 80% complete for SRR21719547_7227_Drosophila_melanogaster_2.fastq
+Approx 85% complete for SRR21719547_7227_Drosophila_melanogaster_1.fastq
+Approx 85% complete for SRR21719547_7227_Drosophila_melanogaster_2.fastq
+Approx 90% complete for SRR21719547_7227_Drosophila_melanogaster_1.fastq
+Approx 90% complete for SRR21719547_7227_Drosophila_melanogaster_2.fastq
+Approx 95% complete for SRR21719547_7227_Drosophila_melanogaster_1.fastq
+Approx 95% complete for SRR21719547_7227_Drosophila_melanogaster_2.fastq
+Approx 100% complete for SRR21719547_7227_Drosophila_melanogaster_1.fastq
+Analysis complete for SRR21719547_7227_Drosophila_melanogaster_1.fastq
+Approx 100% complete for SRR21719547_7227_Drosophila_melanogaster_2.fastq
+Analysis complete for SRR21719547_7227_Drosophila_melanogaster_2.fastq
+Started analysis of SRR21719548_7227_Drosophila_melanogaster_1.fastq
+Started analysis of SRR21719548_7227_Drosophila_melanogaster_2.fastq
+Approx 5% complete for SRR21719548_7227_Drosophila_melanogaster_1.fastq
+Approx 5% complete for SRR21719548_7227_Drosophila_melanogaster_2.fastq
+Approx 10% complete for SRR21719548_7227_Drosophila_melanogaster_1.fastq
+Approx 10% complete for SRR21719548_7227_Drosophila_melanogaster_2.fastq
+Approx 15% complete for SRR21719548_7227_Drosophila_melanogaster_1.fastq
+Approx 15% complete for SRR21719548_7227_Drosophila_melanogaster_2.fastq
+Approx 20% complete for SRR21719548_7227_Drosophila_melanogaster_1.fastq
+Approx 20% complete for SRR21719548_7227_Drosophila_melanogaster_2.fastq
+Approx 25% complete for SRR21719548_7227_Drosophila_melanogaster_1.fastq
+Approx 25% complete for SRR21719548_7227_Drosophila_melanogaster_2.fastq
+Approx 30% complete for SRR21719548_7227_Drosophila_melanogaster_1.fastq
+Approx 30% complete for SRR21719548_7227_Drosophila_melanogaster_2.fastq
+Approx 35% complete for SRR21719548_7227_Drosophila_melanogaster_1.fastq
+Approx 35% complete for SRR21719548_7227_Drosophila_melanogaster_2.fastq
+Approx 40% complete for SRR21719548_7227_Drosophila_melanogaster_1.fastq
+Approx 40% complete for SRR21719548_7227_Drosophila_melanogaster_2.fastq
+Approx 45% complete for SRR21719548_7227_Drosophila_melanogaster_1.fastq
+Approx 45% complete for SRR21719548_7227_Drosophila_melanogaster_2.fastq
+Approx 50% complete for SRR21719548_7227_Drosophila_melanogaster_1.fastq
+Approx 50% complete for SRR21719548_7227_Drosophila_melanogaster_2.fastq
+Approx 55% complete for SRR21719548_7227_Drosophila_melanogaster_1.fastq
+Approx 55% complete for SRR21719548_7227_Drosophila_melanogaster_2.fastq
+Approx 60% complete for SRR21719548_7227_Drosophila_melanogaster_1.fastq
+Approx 60% complete for SRR21719548_7227_Drosophila_melanogaster_2.fastq
+Approx 65% complete for SRR21719548_7227_Drosophila_melanogaster_1.fastq
+Approx 65% complete for SRR21719548_7227_Drosophila_melanogaster_2.fastq
