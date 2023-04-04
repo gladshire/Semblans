@@ -8,8 +8,13 @@
 #include "sra_toolkit.h"
 #include "sra.h"
 
-void rem_unfix_pe(SRA sra, long long int ram_b);
+void rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
+                  std::pair<std::string, std::string> sraRunOut,
+                  long long int ram_b);
 
-void rem_unfix_se(SRA sra, long long int ram_b);
+void rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
+                  long long int ram_b);
 
-void rem_unfix_bulk(const std::vector<SRA> & sras, std::string ram_gb, std::string logFile);
+void rem_unfix_bulk(std::vector<std::pair<std::string, std::string>> sraRunsIn,
+                    std::vector<std::pair<std::string, std::string>> sraRunsOut,
+                    std::string ram_gb, std::string logFile);

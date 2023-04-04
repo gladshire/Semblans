@@ -124,24 +124,42 @@ int main(int argc, char * argv[]) {
 
       fastqcOut1.push_back(sra.get_fastqc_dir_1().first.parent_path().c_str());
     }
-    run_fastqc_bulk(fastqcIn1, fastqcOut1, threads, dispOutput, logFilePath);
+    //run_fastqc_bulk(fastqcIn1, fastqcOut1, threads, dispOutput, logFilePath);
     
     // Error-correction stage
-    bool runErrorCorrect;
-    runErrorCorrect = stringToBool(cfgIni["Pipeline"]["error_correction"]);
-    if (runErrorCorrect) {
-      // Run rcorrector on reads
-      run_rcorr(sras, threads, dispOutput, logFilePath);
-      // Remove reads with unfixable errors
-      rem_unfix_bulk(sras, ram_gb, logFilePath);
-    
-      // If not keeping intermediate files, remove error-corrected files
-      if (!retainInterFiles) {
-        for (auto sra : sras) {
-          fs::remove(fs::path(sra.get_sra_path_corr().first.c_str()));
-          if (sra.is_paired()) {
-            fs::remove(fs::path(sra.get_sra_path_corr().second.c_str()));
-          }
+    std::vector<std::pair<std::string, std::string>> rcorrIn;
+    std::pair<std::string, std::string> currRcorrIn;
+    std::string rcorrOutDir = sras[0].get_sra_path_corr().first.parent_path().c_str();
+    for (auto sra : sras) {
+      currRcorrIn.first = sra.get_sra_path_raw().first.c_str();
+      currRcorrIn.second = sra.get_sra_path_raw().second.c_str();
+      rcorrIn.push_back(currRcorrIn);
+    }
+    run_rcorr(rcorrIn, rcorrOutDir, threads, dispOutput, logFilePath);
+
+    // Remove reads with unfixable errors
+    std::vector<std::pair<std::string, std::string>> corrFixIn;
+    std::pair<std::string, std::string> currCorrFixIn;
+    std::vector<std::pair<std::string, std::string>> corrFixOut;
+    std::pair<std::string, std::string> currCorrFixOut;
+    for (auto sra : sras) {
+      currCorrFixIn.first = sra.get_sra_path_corr().first.c_str();
+      currCorrFixIn.second = sra.get_sra_path_corr().second.c_str();
+
+      currCorrFixOut.first = sra.get_sra_path_corr_fix().first.c_str();
+      currCorrFixOut.second = sra.get_sra_path_corr_fix().second.c_str();
+
+      corrFixIn.push_back(currCorrFixIn);
+      corrFixOut.push_back(currCorrFixOut);
+    }
+    rem_unfix_bulk(corrFixIn, corrFixOut, ram_gb, logFilePath);
+  
+    // If not keeping intermediate files, remove error-corrected files
+    if (!retainInterFiles) {
+      for (auto sra : sras) {
+        fs::remove(fs::path(sra.get_sra_path_corr().first.c_str()));
+        if (sra.is_paired()) {
+          fs::remove(fs::path(sra.get_sra_path_corr().second.c_str()));
         }
       }
     }

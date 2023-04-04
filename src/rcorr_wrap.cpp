@@ -1,14 +1,15 @@
 #include "rcorr_wrap.h"
 
 
-void run_rcorr(const std::vector<SRA> & sras, std::string threads,
-               bool dispOutput, std::string logFile) {
-  logOutput("\nRunning error correction for:\n", logFile);
+void run_rcorr(std::vector<std::pair<std::string, std::string>> sraRunFiles,
+               std::string outDir, std::string threads, bool dispOutput,
+               std::string logFile) {
+  /*logOutput("\nRunning error correction for:\n", logFile);
   summarize_all_sras(sras, logFile, 2);
-
+  */
   std::string inFile1;
   std::string inFile2;
-  
+
   std::string maxCor;
   std::string maxCorK;
   std::string wkProp;
@@ -21,19 +22,25 @@ void run_rcorr(const std::vector<SRA> & sras, std::string threads,
     printOut = " >>" + logFile + " 2>&1";
   }
 
+  bool isPaired;
   int result;
-  for (auto sra : sras) {
-    std::string outDir(sra.get_sra_path_corr().first.parent_path().c_str());
-    inFile1 = sra.get_sra_path_raw().first.c_str();
+  for (auto sraRun : sraRunFiles) {
+    if (sraRun.second != "") {
+      isPaired = true;
+    }
+    else {
+      isPaired = false;
+    }
+    inFile1 = sraRun.first;
     // Check for checkpoint file
-    if (sra.checkpointExists("corr")) {
+    /*if (sra.checkpointExists("corr")) {
       logOutput("Error-corrected version found for: ", logFile);
       summarize_sing_sra(sra, logFile, 2);
       continue;
-    }
+    }*/
     std::string rcorrCmd = "perl " + PATH_RCORR + " -t " + threads + " -od " + outDir;
-    if (sra.is_paired()) {
-      inFile2 = sra.get_sra_path_raw().second.c_str();
+    if (isPaired) {
+      inFile2 = sraRun.second;
       rcorrCmd += " -1 " + inFile1 + " -2 " + inFile2;
       result = system((rcorrCmd + printOut).c_str()); 
     }
@@ -46,6 +53,6 @@ void run_rcorr(const std::vector<SRA> & sras, std::string threads,
       exit(1);
     }
     // Create checkpoint
-    sra.makeCheckpoint("corr");
+    //sra.makeCheckpoint("corr");
   }
 } 

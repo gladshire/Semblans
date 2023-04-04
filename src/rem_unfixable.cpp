@@ -1,15 +1,13 @@
 #include "rem_unfixable.h"
 
 
-void rem_unfix_pe(SRA sra, long long int ram_b) {
-  std::string inFile1Str(sra.get_sra_path_corr().first.c_str());
-  std::string inFile2Str(sra.get_sra_path_corr().second.c_str());
-  std::string outFile1Str(std::string(sra.get_sra_path_corr().first.replace_extension("fix.fq").c_str()));
-  std::string outFile2Str(std::string(sra.get_sra_path_corr().second.replace_extension("fix.fq").c_str()));
-  std::ifstream inFile1(inFile1Str);
-  std::ifstream inFile2(inFile2Str);
-  std::ofstream outFile1(outFile1Str);
-  std::ofstream outFile2(outFile2Str);
+void rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
+                  std::pair<std::string, std::string> sraRunOut,
+                  long long int ram_b) {
+  std::ifstream inFile1(sraRunIn.first);
+  std::ifstream inFile2(sraRunIn.second);
+  std::ofstream outFile1(sraRunOut.first);
+  std::ofstream outFile2(sraRunOut.second);
 
   long long int ram_b_per_file = ram_b / 2;
 
@@ -80,12 +78,11 @@ void rem_unfix_pe(SRA sra, long long int ram_b) {
 }
 
 
-void rem_unfix_se(SRA sra, long long int ram_b) {
-  std::string inFileStr(sra.get_sra_path_corr().first.c_str());
-  std::string outFileStr(std::string(sra.get_sra_path_corr().first.replace_extension("fix.fq").c_str()));
+void rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
+                  long long int ram_b) {
 
-  std::ifstream inFile(inFileStr);
-  std::ofstream outFile(outFileStr);
+  std::ifstream inFile(sraRunIn);
+  std::ofstream outFile(sraRunOut);
 
   inFile.seekg(0, inFile.end);
   long int lenFile = inFile.tellg();
@@ -135,24 +132,33 @@ void rem_unfix_se(SRA sra, long long int ram_b) {
 }
 
 
-void rem_unfix_bulk(const std::vector<SRA> & sras, std::string ram_gb, std::string logFile) {
-  std::cout << "\nRemoving unfixable reads for:\n" << std::endl;
-  summarize_all_sras(sras, logFile, 2);
+void rem_unfix_bulk(std::vector<std::pair<std::string, std::string>> sraRunsIn,
+                    std::vector<std::pair<std::string, std::string>> sraRunsOut,
+                    std::string ram_gb, std::string logFile) {
+  //std::cout << "\nRemoving unfixable reads for:\n" << std::endl;
+  //summarize_all_sras(sras, logFile, 2);
   long long int ram_b = (long long int)stoi(ram_gb) * 1000000000;
-  for (auto sra : sras) {
+  bool isPaired;
+  for (int i = 0; i < sraRunsIn.size(); i++) {
     // Check for checkpoint
-    if (sra.checkpointExists("corr.fix")) {
+    /*if (sra.checkpointExists("corr.fix")) {
       logOutput("Fixed version found for:", logFile);
       summarize_sing_sra(sra, logFile, 2);
       continue;
-    }
-    if (sra.is_paired()) {
-      rem_unfix_pe(sra, ram_b);
+    }*/
+    if (sraRunsIn[i].second != "") {
+      isPaired = true;
     }
     else {
-      rem_unfix_se(sra, ram_b);
+      isPaired = false;
+    }
+    if (isPaired) {
+      rem_unfix_pe(sraRunsIn[i], sraRunsOut[i], ram_b);
+    }
+    else {
+      rem_unfix_se(sraRunsIn[i].first, sraRunsOut[i].first, ram_b);
     }
     // Create checkpoint
-    sra.makeCheckpoint("corr.fix");
+    //sra.makeCheckpoint("corr.fix");
   }
 }
