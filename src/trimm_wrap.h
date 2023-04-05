@@ -13,5 +13,7 @@ namespace dl = boost::dll;
 #define TRUSEQ_ALL std::string(PATH_TRIMM_DIR + "/adapters/TruSeq_all.fa")
 
 
-void run_trimmomatic(const std::vector<SRA> & sras, std::string threads,
-                     bool dispOutput, std::string logFile);
+void run_trimmomatic(std::pair<std::string, std::string> sraRunIn,
+                     std::pair<std::string, std::string> sraRunOutP,
+                     std::pair<std::string, std::string> sraRunOutU,
+                     std::string threads, bool dispOutput, std::string logFile);

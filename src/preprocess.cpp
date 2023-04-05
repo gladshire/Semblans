@@ -1,6 +1,6 @@
 // TODO:
 //   - Customize input file locations according to pipeline parameters in config.ini
-
+//   - Alter wrappers to take filenames as input/output rather than SRA objects (modularity)
 
 #include "preprocess.h"
 
@@ -114,34 +114,45 @@ int main(int argc, char * argv[]) {
     make_proj_space(cfgIni);
 
     // Run initial fastqc on reads
-    std::vector<std::pair<std::string, std::string>> fastqcIn1;
     std::pair<std::string, std::string> currFastqcIn1;
-    std::vector<std::string> fastqcOut1;
+    std::string currFastqcOut1;
     for (auto sra : sras) {
       currFastqcIn1.first = sra.get_sra_path_raw().first.c_str();
       currFastqcIn1.second = sra.get_sra_path_raw().second.c_str();
-      fastqcIn1.push_back(currFastqcIn1);
-
-      fastqcOut1.push_back(sra.get_fastqc_dir_1().first.parent_path().c_str());
+      currFastqcOut1 = sra.get_fastqc_dir_1().first.parent_path().c_str();
+      // Check for checkpoint file
+      if (sra.checkpointExists("fastqc1")) {
+        logOutput("FastQC analysis found for:", logFilePath);
+        summarize_sing_sra(sra, logFilePath, 2);
+        continue;
+      }
+      run_fastqc(currFastqcIn1, threads, currFastqcOut1, dispOutput, logFilePath);
+      // Make checkpoint file
+      sra.makeCheckpoint("fastqc1");
     }
-    //run_fastqc_bulk(fastqcIn1, fastqcOut1, threads, dispOutput, logFilePath);
     
     // Error-correction stage
-    std::vector<std::pair<std::string, std::string>> rcorrIn;
     std::pair<std::string, std::string> currRcorrIn;
     std::string rcorrOutDir = sras[0].get_sra_path_corr().first.parent_path().c_str();
     for (auto sra : sras) {
       currRcorrIn.first = sra.get_sra_path_raw().first.c_str();
       currRcorrIn.second = sra.get_sra_path_raw().second.c_str();
-      rcorrIn.push_back(currRcorrIn);
+      
+      // Check for checkpoint file
+      if (sra.checkpointExists("corr")) {
+        logOutput("Error-corrected version found for:", logFilePath);
+        summarize_sing_sra(sra, logFilePath, 2);
+        continue;
+      }
+      run_rcorr(currRcorrIn, rcorrOutDir, threads, dispOutput, logFilePath);
+      // Make checkpoint file
+      sra.makeCheckpoint("corr");
     }
-    run_rcorr(rcorrIn, rcorrOutDir, threads, dispOutput, logFilePath);
 
     // Remove reads with unfixable errors
-    std::vector<std::pair<std::string, std::string>> corrFixIn;
     std::pair<std::string, std::string> currCorrFixIn;
-    std::vector<std::pair<std::string, std::string>> corrFixOut;
     std::pair<std::string, std::string> currCorrFixOut;
+    uintmax_t ram_b = (uintmax_t)stoi(ram_gb) * 1000000000;
     for (auto sra : sras) {
       currCorrFixIn.first = sra.get_sra_path_corr().first.c_str();
       currCorrFixIn.second = sra.get_sra_path_corr().second.c_str();
@@ -149,10 +160,21 @@ int main(int argc, char * argv[]) {
       currCorrFixOut.first = sra.get_sra_path_corr_fix().first.c_str();
       currCorrFixOut.second = sra.get_sra_path_corr_fix().second.c_str();
 
-      corrFixIn.push_back(currCorrFixIn);
-      corrFixOut.push_back(currCorrFixOut);
+      // Check for checkpoint file
+      if (sra.checkpointExists("corr.fix")) {
+        logOutput("Unfixable error-fixed version found for:", logFilePath);
+        summarize_sing_sra(sra, logFilePath, 2);
+        continue;
+      }
+      if (sra.is_paired()) {
+        rem_unfix_pe(currCorrFixIn, currCorrFixOut, ram_b); 
+      }
+      else {
+        rem_unfix_se(currCorrFixIn.first, currCorrFixOut.first, ram_b);
+      }
+      // Make checkpoint file
+      sra.makeCheckpoint("corr");
     }
-    rem_unfix_bulk(corrFixIn, corrFixOut, ram_gb, logFilePath);
   
     // If not keeping intermediate files, remove error-corrected files
     if (!retainInterFiles) {
@@ -165,24 +187,60 @@ int main(int argc, char * argv[]) {
     }
 
     // Adapter sequence trimming stage
-    bool runAdapterTrimming;
-    runAdapterTrimming = stringToBool(cfgIni["Pipeline"]["trim_adapter_seqs"]);
-    if (runAdapterTrimming) {
-      // Run trimmomatic to remove adapter seqs
-      run_trimmomatic(sras, threads, dispOutput, logFilePath);
+    std::pair<std::string, std::string> currTrimIn;
+    std::pair<std::string, std::string> currTrimOutP;
+    std::pair<std::string, std::string> currTrimOutU;
+    for (auto sra : sras) {
+      currTrimIn.first = sra.get_sra_path_corr_fix().first.c_str();
+      currTrimIn.second = sra.get_sra_path_corr_fix().second.c_str();
 
-      // If not keeping intermediate files, remove fixed error-corrected files
-      if (!retainInterFiles) {
-        for (auto sra : sras) {
-          fs::remove(fs::path(sra.get_sra_path_corr_fix().first.c_str()));
-          if (sra.is_paired()) {
-            fs::remove(fs::path(sra.get_sra_path_corr_fix().second.c_str()));
-          }
+      currTrimOutU.first = sra.get_sra_path_trim_u().first.c_str();
+      currTrimOutU.second = "";
+
+      currTrimOutP.first = "";
+      currTrimOutP.second = "";
+      if (sra.is_paired()) {
+        currTrimOutU.second = sra.get_sra_path_trim_u().second.c_str();
+
+        currTrimOutP.first = sra.get_sra_path_trim_p().first.c_str();
+        currTrimOutP.second = sra.get_sra_path_trim_p().second.c_str();
+      }
+      // Check for checkpoint file
+      if (sra.checkpointExists("trim")) {
+        logOutput("Adapter-trimmed version found for:", logFilePath);
+        summarize_sing_sra(sra, logFilePath, 2);
+        continue;
+      }
+      run_trimmomatic(currTrimIn, currTrimOutP, currTrimOutU, threads,
+                      dispOutput, logFilePath);
+      // Make checkpoint file
+      sra.makeCheckpoint("trim");
+    }
+    // If not keeping intermediate files, remove fixed error-corrected files
+    if (!retainInterFiles) {
+      for (auto sra : sras) {
+        fs::remove(fs::path(sra.get_sra_path_corr_fix().first.c_str()));
+        if (sra.is_paired()) {
+          fs::remove(fs::path(sra.get_sra_path_corr_fix().second.c_str()));
         }
       }
     }
    
     // Run kraken2 to remove foreign reads
+    // for all db in dbs
+    //   for all sra in sras
+    //     if db == dbs.first
+    //       run_kraken2(sra.from_last, db)
+    //     if db != dbs.first
+    //       run_kraken2(sra.from_filt, db)
+    //       
+    //       
+    std::pair<std::string, std::string> currKrakIn;
+    std::string krakOutDir;
+    std::string currKrakOut;
+    std::string currRepStem;
+    std::string currRepFile;
+
     run_kraken2_dbs(sras, threads, kraken2Dbs, kraken2_conf, dispOutput, logFilePath);
 
     // If not keeping intermediate files, remove trimmomatic output files

@@ -3,7 +3,7 @@
 
 void rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
                   std::pair<std::string, std::string> sraRunOut,
-                  long long int ram_b) {
+                  uintmax_t ram_b) {
   std::ifstream inFile1(sraRunIn.first);
   std::ifstream inFile2(sraRunIn.second);
   std::ofstream outFile1(sraRunOut.first);
@@ -79,7 +79,7 @@ void rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
 
 
 void rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
-                  long long int ram_b) {
+                  uintmax_t ram_b) {
 
   std::ifstream inFile(sraRunIn);
   std::ofstream outFile(sraRunOut);
@@ -137,7 +137,7 @@ void rem_unfix_bulk(std::vector<std::pair<std::string, std::string>> sraRunsIn,
                     std::string ram_gb, std::string logFile) {
   //std::cout << "\nRemoving unfixable reads for:\n" << std::endl;
   //summarize_all_sras(sras, logFile, 2);
-  long long int ram_b = (long long int)stoi(ram_gb) * 1000000000;
+  uintmax_t ram_b = (uintmax_t)stoi(ram_gb) * 1000000000;
   bool isPaired;
   for (int i = 0; i < sraRunsIn.size(); i++) {
     // Check for checkpoint

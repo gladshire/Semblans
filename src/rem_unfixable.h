@@ -10,10 +10,10 @@
 
 void rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
                   std::pair<std::string, std::string> sraRunOut,
-                  long long int ram_b);
+                  uintmax_t ram_b);
 
 void rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
-                  long long int ram_b);
+                  uintmax_t ram_b);
 
 void rem_unfix_bulk(std::vector<std::pair<std::string, std::string>> sraRunsIn,
                     std::vector<std::pair<std::string, std::string>> sraRunsOut,

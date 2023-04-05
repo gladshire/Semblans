@@ -46,33 +46,6 @@ void run_fastqc(std::pair<std::string, std::string> sraRunFiles,
 void run_fastqc_bulk(std::vector<std::pair<std::string, std::string>> sraRunsInput,
                      std::vector<std::string> outFiles, std::string threads,
                      bool dispOutput, std::string logFile) {
-  //std::cout << "\nRunning quality analysis for:\n" << std::endl;
-  //summarize_all_sras(sras, logFile, 2);
-  /*for (auto sra : sras) {
-    // Check if checkpoint exists
-    if (outDir == std::string(sra.get_fastqc_dir_1().first.parent_path().parent_path().c_str())) {
-      if (sra.checkpointExists("fastqc1")) {
-        logOutput("FastQC analysis found for:", logFile);
-        summarize_sing_sra(sra, logFile, 2);
-        continue;
-      }
-    }
-    else {
-      if (sra.checkpointExists("fastqc2")) {
-        logOutput("FastQC analysis found for:", logFile);
-        summarize_sing_sra(sra, logFile, 2);
-        continue;
-      }
-    }
-    run_fastqc(sra, threads, outDir, dispOutput, logFile);
-    // Make checkpoint file
-    if (outDir == std::string(sra.get_fastqc_dir_1().first.parent_path().parent_path().c_str())) {
-      sra.makeCheckpoint("fastqc1");
-    }
-    else {
-      sra.makeCheckpoint("fastqc2");
-    }
-  }*/
   for (int i = 0; i < sraRunsInput.size(); i++) {
     run_fastqc(sraRunsInput[i], threads, outFiles[i], dispOutput, logFile);
   }
