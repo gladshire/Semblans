@@ -29,7 +29,7 @@ void run_trimmomatic(std::pair<std::string, std::string> sraRunIn,
   }
   std::string trimmCmd("java -jar " + PATH_TRIMM);
   std::string trimmFlags("-threads " + threads + " " + "ILLUMINACLIP:" + TRUSEQ_ALL +
-                         ":2:30:10 SLIDINGWINDOWE:4:5 LEADING:5 TRAILING:5 MINLEN:25");
+                         ":2:30:10 SLIDINGWINDOW:4:5 LEADING:5 TRAILING:5 MINLEN:25");
 
   if (isPaired) {
     trimmCmd += " PE " + inFile1 + " " + inFile2 + " " + outFileP1 + " " + outFileU1 +

@@ -74,12 +74,14 @@ std::vector<std::string> get_overrep_seqs_se(SRA sra) {
 }
 
 
-void rem_overrep_pe(SRA sra, long long int ram_b,
+void rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
+                    std::pair<std::string, std::string> sraRunOut,
+                    uintmax_t ram_b,
                     std::pair<std::vector<std::string>, std::vector<std::string>> overrepSeqs) {
-  std::string inFile1Str(sra.get_sra_path_for_filt().first.c_str());
-  std::string inFile2Str(sra.get_sra_path_for_filt().second.c_str());
-  std::string outFile1Str(sra.get_sra_path_orep_filt().first.c_str());
-  std::string outFile2Str(sra.get_sra_path_orep_filt().second.c_str());
+  std::string inFile1Str(sraRunIn.first);
+  std::string inFile2Str(sraRunIn.second);
+  std::string outFile1Str(sraRunOut.first);
+  std::string outFile2Str(sraRunOut.second);
   std::ifstream inFile1(inFile1Str);
   std::ifstream inFile2(inFile2Str);
   std::ofstream outFile1(outFile1Str);
@@ -97,7 +99,7 @@ void rem_overrep_pe(SRA sra, long long int ram_b,
     lenOverReps2 = overrepSeqs.second.front().size();
   }
 
-  long long int ram_b_per_file = ram_b / 2;
+  uintmax_t ram_b_per_file = ram_b / 2;
 
   std::string inFile1Data;
   std::string inFile2Data;
@@ -157,18 +159,6 @@ void rem_overrep_pe(SRA sra, long long int ram_b,
               overRep = true;
               goto checkOverrep;
             }
-            /*for (int j = 0; j < lenOverReps1; j++) {
-              if (*(nlPos1Head + 1 + i + j) != *(&seq[0] + j)) {
-                // Overrepresented NOT in read frame
-                //   try next sequence
-                goto seqiter1;
-              }
-            }
-            // Overrepresented IS in read frame
-            //   go to removal of read
-            overRep = true;
-            goto checkOverrep;
-            seqiter1: ;*/
           }
         }
       }
@@ -179,14 +169,6 @@ void rem_overrep_pe(SRA sra, long long int ram_b,
               overRep = true;
               goto checkOverrep;
             }
-            /*for (int j = 0; j < lenOverReps2; j++) {
-              if (*(nlPos2Head + 1 + i + j) != *(&seq[0] + j)) {
-                goto seqiter2;
-              }
-            }
-            overRep = true;
-            goto checkOverrep;
-            seqiter2: ;*/
           }
         }
       }
@@ -220,11 +202,11 @@ void rem_overrep_pe(SRA sra, long long int ram_b,
 }
 
 
-void rem_overrep_se(SRA sra, long long int ram_b, std::vector<std::string> overrepSeqs) {
-  std::string inFileStr(sra.get_sra_path_for_filt().first.c_str());
-  std::string outFileStr(sra.get_sra_path_orep_filt().first.c_str());
-  std::ifstream inFile(inFileStr);
-  std::ofstream outFile(outFileStr);
+void rem_overrep_se(std::string sraRunIn, std::string sraRunOut,
+                    uintmax_t ram_b,
+                    std::vector<std::string> overrepSeqs) {
+  std::ifstream inFile(sraRunIn);
+  std::ofstream outFile(sraRunOut);
 
   int lenOverReps = overrepSeqs.front().size();
 
@@ -289,20 +271,19 @@ void rem_overrep_se(SRA sra, long long int ram_b, std::vector<std::string> overr
 }
 
 
-void rem_overrep_bulk(const std::vector<SRA> & sras, std::string ram_gb, std::string logFile) {
-  logOutput("\nRemoving overrepresented reads for:\n", logFile);
-  summarize_all_sras(sras, logFile, 2);
-  long long int ram_b = (long long int)stoi(ram_gb) * 1000000000;
-  for (auto sra : sras) {
+/*void rem_overrep_bulk(std::vector<std::pair<std::string, std::string>> sraRunsIn,
+                      std::string ram_gb, std::string logFile) {
+  uintmax_t ram_b = (uintmax_t)stoi(ram_gb) * 1000000000;
+  for (auto sraRun : sraRunsIn) {
     // Check for checkpoint
     if (sra.checkpointExists("orep.fix")) {
       logOutput("Fixed version found for: ", logFile);
       summarize_sing_sra(sra, logFile, 2);
       continue;
     }
-    logOutput("\nNow processing:\n", logFile);
+    //logOutput("\nNow processing:\n", logFile);
     if (sra.is_paired()) {
-      summarize_sing_sra(sra, logFile, 2);
+      //summarize_sing_sra(sra, logFile, 2);
       std::pair<std::vector<std::string>, std::vector<std::string>> overrepSeqs = get_overrep_seqs_pe(sra);
       rem_overrep_pe(sra, ram_b, overrepSeqs);
     }
@@ -313,4 +294,4 @@ void rem_overrep_bulk(const std::vector<SRA> & sras, std::string ram_gb, std::st
     }
     sra.makeCheckpoint("orep.fix");
   }
-}
+}*/

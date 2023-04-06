@@ -108,12 +108,12 @@ int main(int argc, char * argv[]) {
 
     std::string fastqc_dir_1(sras[0].get_fastqc_dir_1().first.parent_path().parent_path().c_str());
     std::string fastqc_dir_2(sras[0].get_fastqc_dir_2().first.parent_path().parent_path().c_str());
-    std::vector<std::string> kraken2Dbs = get_kraken2_dbs(cfgIni);
-    std::string kraken2_conf = get_kraken2_conf(cfgIni);
-    std::pair<std::vector<std::string>, std::vector<std::string>> overrepSeqs;
+
     make_proj_space(cfgIni);
 
     // Run initial fastqc on reads
+    logOutput("Running quality analysis for:", logFilePath);
+    summarize_all_sras(sras, logFilePath, 2);
     std::pair<std::string, std::string> currFastqcIn1;
     std::string currFastqcOut1;
     for (auto sra : sras) {
@@ -132,6 +132,8 @@ int main(int argc, char * argv[]) {
     }
     
     // Error-correction stage
+    logOutput("Running error correction for:", logFilePath);
+    summarize_all_sras(sras, logFilePath, 2);
     std::pair<std::string, std::string> currRcorrIn;
     std::string rcorrOutDir = sras[0].get_sra_path_corr().first.parent_path().c_str();
     for (auto sra : sras) {
@@ -150,6 +152,8 @@ int main(int argc, char * argv[]) {
     }
 
     // Remove reads with unfixable errors
+    logOutput("Removing unfixable errors for:", logFilePath);
+    summarize_all_sras(sras, logFilePath, 2);
     std::pair<std::string, std::string> currCorrFixIn;
     std::pair<std::string, std::string> currCorrFixOut;
     uintmax_t ram_b = (uintmax_t)stoi(ram_gb) * 1000000000;
@@ -173,7 +177,7 @@ int main(int argc, char * argv[]) {
         rem_unfix_se(currCorrFixIn.first, currCorrFixOut.first, ram_b);
       }
       // Make checkpoint file
-      sra.makeCheckpoint("corr");
+      sra.makeCheckpoint("corr.fix");
     }
   
     // If not keeping intermediate files, remove error-corrected files
@@ -187,6 +191,8 @@ int main(int argc, char * argv[]) {
     }
 
     // Adapter sequence trimming stage
+    logOutput("Trimming adapter sequences for:", logFilePath);
+    summarize_all_sras(sras, logFilePath, 2);
     std::pair<std::string, std::string> currTrimIn;
     std::pair<std::string, std::string> currTrimOutP;
     std::pair<std::string, std::string> currTrimOutU;
@@ -227,21 +233,69 @@ int main(int argc, char * argv[]) {
     }
    
     // Run kraken2 to remove foreign reads
-    // for all db in dbs
-    //   for all sra in sras
-    //     if db == dbs.first
-    //       run_kraken2(sra.from_last, db)
-    //     if db != dbs.first
-    //       run_kraken2(sra.from_filt, db)
-    //       
-    //       
+    logOutput("Filtering foreign sequences for:", logFilePath);
+    summarize_all_sras(sras, logFilePath, 2);
+    std::vector<std::string> krakDbs = get_kraken2_dbs(cfgIni);
+    std::string kraken2_conf = get_kraken2_conf(cfgIni);
     std::pair<std::string, std::string> currKrakIn;
     std::string krakOutDir;
+    std::string repFile;
     std::string currKrakOut;
     std::string currRepStem;
     std::string currRepFile;
 
-    run_kraken2_dbs(sras, threads, kraken2Dbs, kraken2_conf, dispOutput, logFilePath);
+    for (int i = 0; i < krakDbs.size(); i++) {
+      logOutput("Now filtering with database: " +
+                std::string(fs::path(krakDbs[i].c_str()).filename().c_str()) + "\n",
+                logFilePath);
+      for (auto sra : sras) {
+        // Check for checkpoint file
+        if (sra.checkpointExists(std::string(fs::path(krakDbs[i]).stem().c_str()) + ".filt")) {
+          logOutput("With database: " + krakDbs[i], logFilePath);
+          logOutput("Filtered version found for: ", logFilePath);
+          summarize_sing_sra(sra, logFilePath, 2);
+          continue;
+        }
+        logOutput("  Processing:", logFilePath);
+        summarize_sing_sra(sra, logFilePath, 4);
+        krakOutDir = sra.get_sra_path_for_filt().first.parent_path().c_str();
+        if (sra.get_accession() == "") {
+          repFile = krakOutDir + "/" + sra.get_file_prefix().first + "." +
+                    std::string(fs::path(krakDbs[i]).filename().c_str()) + ".report";
+        }
+        else {
+          repFile = krakOutDir + "/" + sra.make_file_str() + "." +
+                    std::string(fs::path(krakDbs[i]).filename().c_str()) + ".report";
+        }
+        if (i == 0) {
+          currKrakIn.first = sra.get_sra_path_trim_p().first.c_str();
+          currKrakIn.second = sra.get_sra_path_trim_p().second.c_str();
+        }
+        else {
+          currKrakIn.first = sra.get_sra_path_for_filt().first.c_str();
+          currKrakIn.second = sra.get_sra_path_for_filt().second.c_str();
+        }
+        if (sra.is_paired()) {
+          currKrakOut = krakOutDir + "/TMP#.fq";
+        }
+        else {
+          currKrakOut = krakOutDir + "TMP.fq";
+        }
+        run_kraken2(currKrakIn, currKrakOut, repFile, threads, krakDbs[i],
+                    kraken2_conf, dispOutput, logFilePath);
+        if (sra.is_paired()) {
+          std::rename((krakOutDir + "/TMP_1.fq").c_str(),
+                      sra.get_sra_path_for_filt().first.c_str());
+          std::rename((krakOutDir + "/TMP_2.fq").c_str(),
+                      sra.get_sra_path_for_filt().second.c_str());
+        }
+        else {
+          std::rename((krakOutDir + "/TMP.fq").c_str(),
+                      sra.get_sra_path_for_filt().first.c_str());
+        }
+        sra.makeCheckpoint(std::string(fs::path(krakDbs[i]).stem().c_str()) + ".filt");
+      }
+    }
 
     // If not keeping intermediate files, remove trimmomatic output files
     if (!retainInterFiles) {
@@ -254,20 +308,57 @@ int main(int argc, char * argv[]) {
     }
 
     // Run fastqc on all runs
+    logOutput("Performing second quality analysis for:", logFilePath);
+    summarize_all_sras(sras, logFilePath, 2);
     std::vector<std::pair<std::string, std::string>> fastqcIn2;
     std::pair<std::string, std::string> currFastqcIn2;
-    std::vector<std::string> fastqcOut2;
+    std::string fastqcOut2;
     for (auto sra : sras) {
       currFastqcIn2.first = sra.get_sra_path_for_filt().first.c_str();
       currFastqcIn2.second = sra.get_sra_path_for_filt().second.c_str();
-      fastqcIn2.push_back(currFastqcIn1);
 
-      fastqcOut2.push_back(sra.get_fastqc_dir_2().first.parent_path().c_str());
+      fastqcOut2 = sra.get_fastqc_dir_2().first.parent_path().c_str();
+      // Check for checkpoint file
+      if (sra.checkpointExists("fastqc2")) {
+        logOutput("FastQC analysis found for:", logFilePath);
+        summarize_sing_sra(sra, logFilePath, 2);
+        continue;
+      }
+      run_fastqc(currFastqcIn2, threads, fastqcOut2, dispOutput, logFilePath);
+      // Make checkpoint file
+      sra.makeCheckpoint("fastqc2");
     }
-    run_fastqc_bulk(fastqcIn2, fastqcOut2, threads, dispOutput, logFilePath);
 
     // Remove reads with over-represented sequences
-    rem_overrep_bulk(sras, ram_gb, logFilePath);
+    logOutput("Removing overrepresented reads for:", logFilePath);
+    summarize_all_sras(sras, logFilePath, 2);
+    std::pair<std::vector<std::string>, std::vector<std::string>> currOrepSeqsPe;
+    std::vector<std::string> currOrepSeqsSe;
+    std::pair<std::string, std::string> currOrepIn;
+    std::pair<std::string, std::string> currOrepOut;
+    for (auto sra : sras) {
+      // Check for checkpoint file
+      if (sra.checkpointExists("orep.fix")) {
+        logOutput("Overrepresented-filtered version found for: ", logFilePath);
+        summarize_sing_sra(sra, logFilePath, 2);
+        continue;
+      }
+      currOrepIn.first = sra.get_sra_path_for_filt().first.c_str();
+      currOrepIn.second = sra.get_sra_path_for_filt().second.c_str();
+
+      currOrepOut.first = sra.get_sra_path_orep_filt().first.c_str();
+      currOrepOut.second = sra.get_sra_path_orep_filt().second.c_str();
+      if (sra.is_paired()) {
+        currOrepSeqsPe = get_overrep_seqs_pe(sra);
+        rem_overrep_pe(currOrepIn, currOrepOut, ram_b, currOrepSeqsPe);
+      }
+      else {
+        currOrepSeqsSe = get_overrep_seqs_se(sra);
+        rem_overrep_se(currOrepIn.first, currOrepOut.first, ram_b, currOrepSeqsSe);
+      }
+      // Make checkpoint file
+      sra.makeCheckpoint("orep.fix");
+    }
 
     // If not keeping intermediate files, remove kraken2 output files
     if (!retainInterFiles) {
