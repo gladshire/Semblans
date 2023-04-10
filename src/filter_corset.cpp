@@ -17,14 +17,14 @@ std::set<std::string> makeClusterSet(std::ifstream & clustFile) {
   return clustSet;
 }
 
-void filterCorset(transcript trans, std::string clusterPath, uintmax_t ram_b,
-                  std::string out_dir, std::string logFile) {
-  fs::path transPath = trans.get_trans_path_chimera();
-  std::string clustPath(trans.get_trans_path_clust().c_str());
-  std::string largestClust(trans.get_trans_path_largest().c_str());
-  std::string redundTrans(trans.get_trans_path_redund().c_str());
+void filterCorset(std::string transIn, std::string transClust,
+                  std::string transLargestClust, std::string transRedund,
+                  uintmax_t ram_b, std::string outDir, std::string logFile) {
+  fs::path transPath(transIn.c_str());
+  std::string largestClust(transLargestClust);
+  std::string redundTrans(transRedund);
 
-  if (fs::exists(largestClust) && fs::exists(redundTrans)) {
+  if (fs::exists(fs::path(largestClust)) && fs::exists(fs::path(redundTrans))) {
     logOutput("Largest cluster and redundant transcripts found for: " +
               std::string(transPath.c_str()), logFile);
     return;
@@ -35,7 +35,7 @@ void filterCorset(transcript trans, std::string clusterPath, uintmax_t ram_b,
   //   Retrieve seq from hash table
   //   Place into new hash table
   //   Remove from original hash table
-  std::ifstream clustFile(clusterPath);
+  std::ifstream clustFile(transClust);
 
   uintmax_t numBytesTrans = fs::file_size(transPath);
   uintmax_t lenHashTable = numBytesTrans / 160;

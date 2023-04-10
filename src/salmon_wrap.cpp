@@ -43,10 +43,10 @@ void combine_paired(std::vector<SRA> sras, long long int ram_b) {
 }
 
 // Index reads from sequence data
-void salmon_index(transcript trans, std::string threads,
-                  bool dispOutput, std::string logFile) {
-  std::string transFilePath(trans.get_trans_path_chimera().c_str());
-  std::string indexFilePath(trans.get_trans_path_index().c_str());
+void salmon_index(std::string transIn, std::string transIndex,
+                  std::string threads, bool dispOutput, std::string logFile) {
+  std::string transFilePath(transIn);
+  std::string indexFilePath(transIndex);
   std::string printOut;
   if (dispOutput) {
     printOut = " 2>&1 | tee -a " + logFile;
@@ -57,8 +57,7 @@ void salmon_index(transcript trans, std::string threads,
   int result;
   logOutput("Generating index for transcript ...", logFile);
 
-  if (fs::exists(trans.get_trans_path_index().c_str())) {
-    logOutput("Salmon index found for: " + trans.make_file_str(), logFile);
+  if (fs::exists(fs::path(transIndex.c_str()))) {
     return;
   }
   std::string salm_cmd = PATH_SALMON + " index" + " -t " + transFilePath +
@@ -71,11 +70,11 @@ void salmon_index(transcript trans, std::string threads,
   }
 }
 
-bool runPaired(std::vector<SRA> sras) {
+bool runPaired(std::vector<std::pair<std::string, std::string>> sraRunsIn) {
   int numSingle = 0;
   int numPaired = 0;
-  for (auto sra : sras) {
-    if (sra.is_paired()) {
+  for (auto sraRun : sraRunsIn) {
+    if (sraRun.second != "") {
       numPaired++;
     }
     else {
@@ -91,27 +90,26 @@ bool runPaired(std::vector<SRA> sras) {
 }
 
 // Quantify reads from sequence data. Assumes all reads are either single or paired-end
-void salmon_quant(transcript trans, std::vector<SRA> sras, std::string threads,
-                  bool dispOutput, std::string logFile) {
-  std::string transFilePath(trans.get_trans_path_chimera().c_str());
-  std::string indexFilePath(trans.get_trans_path_index().c_str());
-  std::string quantFilePath(trans.get_trans_path_quant().c_str());
+void salmon_quant(std::string transIn, std::string transIndex, std::string transQuant,
+                  std::vector<std::pair<std::string, std::string>> sraRunsIn,
+                  std::string threads, bool dispOutput, std::string logFile) {
+  std::string transFilePath(transIn);
+  std::string indexFilePath(transIndex);
+  std::string quantFilePath(transQuant);
   
   std::string sras1 = "";
   std::string sras2 = "";
 
   logOutput("Generating quant for transcript ...", logFile);
-  for (auto sraIter = sras.begin(); sraIter != sras.end(); sraIter++) {
-    if (sraIter != sras.begin()) {
+  for (int i = 0; i < sraRunsIn.size(); i++) {
+    if (i != 0) {
       sras1 += " ";
-      if (sraIter->is_paired()) {
+      if (sraRunsIn[i].second != "") {
         sras2 += " ";
       }
     }
-    sras1 += sraIter->get_sra_path_orep_filt().first.c_str();
-    if (sraIter->is_paired()) {
-      sras2 += sraIter->get_sra_path_orep_filt().second.c_str();
-    }
+    sras1 += sraRunsIn[i].first;
+    sras2 += sraRunsIn[i].second;
   }
   std::string printOut;
   if (dispOutput) {
@@ -121,12 +119,12 @@ void salmon_quant(transcript trans, std::vector<SRA> sras, std::string threads,
     printOut = " >>" + logFile + " 2>&1";
   }
   int result;
-  if (fs::exists(trans.get_trans_path_quant())) {
-    logOutput("Quant found for: " + trans.make_file_str(), logFile);
+  if (fs::exists(fs::path(transQuant.c_str()))) {
+    //logOutput("Quant found for: " + trans.make_file_str(), logFile);
     return;
   }
   bool morePaired = false;
-  morePaired = runPaired(sras);
+  morePaired = runPaired(sraRunsIn);
   if (morePaired) {
     std::string salm_cmd = PATH_SALMON + " quant" + " -i " + indexFilePath + " --dumpEq" +
                            " --libType" + " A" + " -p " + threads +

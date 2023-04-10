@@ -46,14 +46,17 @@ bool blastpout_ok(std::string blastpFile) {
   }
 }
 
-void run_transdecoder(transcript trans, std::string threads, uintmax_t ram_b,
+void run_transdecoder(std::string transIn, std::string transCds, std::string transPep,
+                      std::string threads, uintmax_t ram_b,
                       std::string dbPath, std::string outDir,
                       bool dispOutput, std::string logFile) {
-  std::string transFilePath(trans.get_trans_path_largest().c_str());
-  fs::path cdsFilePath = trans.get_trans_path_cds().c_str();
-  fs::path pepFilePath = trans.get_trans_path_prot().c_str();
+  std::string transFilePath(transIn);
+  fs::path cdsFilePath(transCds);
+  fs::path pepFilePath(transPep);
 
-  std::string blastpout = trans.make_file_str() + ".blastp.outfmt6";
+  std::string transPrefix = fs::path(transIn.c_str()).filename().stem().stem().c_str();
+
+  std::string blastpout = transPrefix + ".blastp.outfmt6";
   std::string printOut;
   if (dispOutput) {
     printOut = " 2>&1 | tee -a " + logFile;

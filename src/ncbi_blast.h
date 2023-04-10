@@ -21,7 +21,7 @@ namespace dl = boost::dll;
 void makeBlastDb(std::string pathProtRef, std::string outDir,
                  bool dispOutput, std::string logFile);
 
-void blastx(transcript transcripts, std::string blastDb,
+void blastx(std::string transIn, std::string blastDb,
             std::string threads, std::string outDir,
             bool dispOutput, std::string logFile);
 
