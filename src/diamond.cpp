@@ -26,10 +26,10 @@ void makeDb(std::string pathProtRef, std::string outDir,
   } 
 }
 
-void blastxDiam(transcript transcripts, std::string blastDb,
+void blastxDiam(std::string transIn, std::string blastDb,
                 std::string threads, std::string outDir,
                 bool dispOutput, std::string logFile) {
-  fs::path pathTrans = transcripts.get_trans_path_trinity();
+  fs::path pathTrans(transIn.c_str());
   std::string pathTransStr(pathTrans.c_str());
   std::string transStr(pathTrans.stem().c_str());
 
@@ -84,21 +84,5 @@ void blastpDiam(std::string pepFilePath, std::string blastDb,
   if (WIFSIGNALED(result)) {
     logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
     exit(1);
-  }
-}
-
-void blastxDiamBulk(const std::vector<transcript> & transVec, std::string blastDb,
-                    std::string threads, std::string outDir, bool dispOutput,
-                    std::string logFile) {
-  for (auto trans : transVec) {
-    blastxDiam(trans, blastDb, threads, outDir, dispOutput, logFile);
-  }
-}
-
-void blastpDiamBulk(std::vector<std::string> pepFilePathVec, std::string blastDb,
-                    std::string threads, std::string outDir, bool dispOutput,
-                    std::string logFile) {
-  for (auto pepFile : pepFilePathVec) {
-    blastpDiam(pepFile, blastDb, threads, outDir, dispOutput, logFile);
   }
 }

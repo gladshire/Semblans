@@ -20,7 +20,7 @@ namespace dl = boost::dll;
 void makeDb(std::string pathProtRef, std::string outDir,
             bool dispOutput, std::string logFile);
 
-void blastxDiam(transcript transcripts, std::string blastDb,
+void blastxDiam(std::string transIn, std::string blastDb,
                 std::string threads, std::string outDir,
                 bool dispOutput, std::string logFile);
 
@@ -28,12 +28,3 @@ void blastpDiam(std::string pepFilePath, std::string blastDb,
                 std::string threads, std::string outFile,
                 bool dispOutput, std::string logFile);
 
-void blastxDiamBulk(const std::vector<transcript> & transVec,
-                    std::string blastDb, std::string threads,
-                    std::string outDir, bool dispOutput,
-                    std::string logFile);
-
-void blastpDiamBulk(std::vector<std::string> pepFilePathVec,
-                    std::string blastDb, std::string threads,
-                    std::string outDir, bool dispOutput,
-                    std::string logFile);

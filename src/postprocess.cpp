@@ -84,6 +84,8 @@ int main(int argc, char * argv[]) {
     // TODO: Pipeline only performs postprocess on one transcript
     //   Make it instantiate transcript object for each file in trinity folder
     transcript trans = get_transcript_mult(sras[0]);
+    std::vector<transcript> transVec;
+    transVec.push_back(trans);
 
 
 
@@ -104,23 +106,45 @@ int main(int argc, char * argv[]) {
     logOutput("  SRA runs:\n", logFilePath);
     summarize_all_sras(sras, logFilePath, 6);
 
-    // Make blast db
-    makeDb(refProt, projDir + stepDirs[8], dispOutput, logFilePath);
-    // Run BlastX
+
+    // BlastX alignment of transcript to reference proteome
+    std::string currTransInDiam;
+    std::string currBlastDbName;
+
     std::string blastDbName = refProt.substr(refProt.find_last_of("/"),
                                              refProt.find_last_of(".") -
                                              refProt.find_last_of("/"));
-    blastxDiam(trans, projDir + stepDirs[8] + blastDbName, threads,
-               projDir + stepDirs[8], dispOutput, logFilePath);
+    for (auto trans : transVec) {
+      currTransInDiam = trans.get_trans_path_trinity().c_str();
+
+      makeDb(refProt, projDir + stepDirs[8], dispOutput, logFilePath);
+      // Run BlastX
+      currBlastDbName = refProt.substr(refProt.find_last_of("/"),
+                                       refProt.find_last_of(".") -
+                                       refProt.find_last_of("/"));
+      blastxDiam(currTransInDiam, projDir + stepDirs[8] + currBlastDbName, threads,
+                 projDir + stepDirs[8], dispOutput, logFilePath);
+    }
 
     // Detect and remove chimeric transcripts
-    detect_chimera(trans, std::string(trans.get_trans_path_blastx().c_str()),
-                   projDir + stepDirs[8]);
-    removeChimera(trans, std::string(trans.get_trans_path_cinfo().c_str()),
-                         std::string(trans.get_trans_path_ccut().c_str()),
-                         ram_b,
-                         std::string(trans.get_trans_path_chimera().parent_path().c_str()),
-                         logFilePath);
+    std::string currTransIn;
+    std::string currTransOut;
+    std::string currBlastx;
+    std::string currTransInfo;
+    std::string currTransCut;
+    std::string chimOutDir = projDir + stepDirs[8];
+    for (auto trans : transVec) {
+      currTransIn = trans.get_trans_path_trinity().c_str();
+      currTransOut = trans.get_trans_path_chimera().c_str();
+
+      currBlastx = trans.get_trans_path_blastx().c_str();
+      currTransInfo = trans.get_trans_path_cinfo().c_str();
+      currTransCut = trans.get_trans_path_ccut().c_str();
+
+      detect_chimera(currBlastx, chimOutDir);
+      removeChimera(currTransIn, currTransOut, currTransInfo, currTransCut, ram_gb,
+                    logFilePath);
+    }
     // Perform salmon index of transcripts
     salmon_index(trans, threads, dispOutput, logFilePath);
     // Perform salmon quant of transcripts / reads

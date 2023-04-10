@@ -148,8 +148,8 @@ bool checkBlock(std::vector<std::vector<std::string>> & block, bool multiGene,
   return true;
 }
 
-void detect_chimera(transcript trans, std::string pathBlastxFile, std::string outDir) {
-  fs::path blastxFilePath(pathBlastxFile.c_str());
+void detect_chimera(std::string blastxFile, std::string outDir) {
+  fs::path blastxFilePath(blastxFile.c_str());
   std::string blastxFileStr(blastxFilePath.stem().c_str());
 
   std::string cutFile = blastxFileStr + ".cut";
@@ -161,7 +161,7 @@ void detect_chimera(transcript trans, std::string pathBlastxFile, std::string ou
     std::cout << "Chimera detection files found for: " + blastxFileStr << std::endl;
     return;
   }
-  std::ifstream blastxFile(pathBlastxFile);
+  std::ifstream fileBlastx(blastxFile);
   std::ofstream fileCut(cutFilePath.c_str());
   std::ofstream fileInfo(infoFilePath.c_str());
 
@@ -178,7 +178,7 @@ void detect_chimera(transcript trans, std::string pathBlastxFile, std::string ou
   double qend;
   double qcov;
   bool seqG;
-  while (std::getline(blastxFile, currLine)) {
+  while (std::getline(fileBlastx, currLine)) {
     if (currLine.length() < 3) {
       continue;
     }
@@ -229,7 +229,7 @@ void detect_chimera(transcript trans, std::string pathBlastxFile, std::string ou
     seqG = checkBlock(qryB, true, fileCut, fileInfo);
   }
   
-  blastxFile.close();
+  fileBlastx.close();
   fileCut.close();
   fileInfo.close();
 }
@@ -251,20 +251,22 @@ std::set<std::string> makeChimeraSet(std::ifstream & chimFile) {
 }
 
 
-void removeChimera(transcript trans, std::string infoFilePath,
-                   std::string cutFilePath, uintmax_t ram_b,
-                   std::string outDir, std::string logFile) {
-  fs::path transPath = trans.get_trans_path_trinity();
+void removeChimera(std::string transIn, std::string transOut,
+                   std::string infoFilePath, std::string cutFilePath,
+                   std::string ram_gb, std::string logFile) {
+  fs::path transPath(transIn.c_str());
   std::string transPathStr(transPath.c_str());
   std::string transFileStr(transPath.stem().c_str());
   std::set<std::string> chimeraSet;
 
-  std::string filtTrans(trans.get_trans_path_chimera().c_str());
+  std::string filtTrans = transOut;
 
-  if (fs::exists(trans.get_trans_path_chimera())) {
+  if (fs::exists(fs::path(filtTrans))) {
     logOutput("Filtered transcripts found for: " + transFileStr, logFile);
     return;
   }
+
+  uintmax_t ram_b = (uintmax_t)stoi(ram_gb) * 1000000000;
 
   std::ifstream cutFile(cutFilePath);
   std::ifstream infoFile(infoFilePath);
@@ -307,23 +309,3 @@ void removeChimera(transcript trans, std::string infoFilePath,
   fastaHashTable.dump(filtTrans);
 }
 
-
-void detectChimeraBulk(const std::vector<transcript> & transVec,
-                       std::vector<std::string> blastxFileVec,
-                       std::string outDir) {
-  for (int i = 0; i < transVec.size(); i++) {
-    detect_chimera(transVec[i], blastxFileVec[i], outDir);
-  }
-}
-
-
-void removeChimeraBulk(const std::vector<transcript> & transVec,
-                       std::vector<std::string> infoFilePathVec,
-                       std::vector<std::string> cutFilePathVec,
-                       uintmax_t ram_b, std::string outDir,
-                       std::string logFile) {
-  for (int i = 0; i < transVec.size(); i++) {
-    removeChimera(transVec[i], infoFilePathVec[i], cutFilePathVec[i],
-                  ram_b, outDir, logFile);
-  }
-}

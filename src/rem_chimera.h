@@ -29,19 +29,10 @@ bool isSeparate(std::vector<std::string> hsp1, std::vector<std::string> hsp2);
 bool checkBlock(std::vector<std::vector<std::string>> & block, bool multiGene,
                 std::ofstream & outFile1, std::ofstream & outFile2);
 
-void detect_chimera(transcript trans, std::string blastxFile, std::string outDir);
+void detect_chimera(std::string blastxFile, std::string outDir);
 
 std::set<std::string> makeChimeraSet(std::ifstream & chimFile);
 
-void removeChimera(transcript trans, std::string infoFilePath, std::string cutFilePath,
-                   uintmax_t ram_b, std::string outDir, std::string logFile);
-
-void detectChimeraBulk(const std::vector<transcript> & transVec,
-                       std::vector<std::string> blastxFileVec,
-                       std::string outDir);
-
-void removeChimeraBulk(const std::vector<transcript> & transVec,
-                       std::vector<std::string> infoFilePathVec,
-                       std::vector<std::string> cutFilePathVec,
-                       uintmax_t ram_b, std::string outDir,
-                       std::string logFile);
+void removeChimera(std::string transIn, std::string transOut,
+                   std::string infoFilePath, std::string cutFilePath,
+                   std::string ram_gb, std::string logFile);
