@@ -301,12 +301,14 @@ std::string SRA::make_file_str() {
 }
 
 std::string SRA::makeCheckpointName(std::string ext) {
-  fs::path outDir = get_sra_path_raw().first.parent_path().parent_path() / "checkpoints";
+  fs::path outDir;
   std::string cpFileName;
   if (get_accession() == "") {
+    outDir = get_sra_path_corr().first.parent_path().parent_path() / "checkpoints";
     cpFileName = std::string(outDir.c_str()) + "/" + get_file_prefix().first + "." + ext + ".ok";
   }
   else {
+    outDir = get_sra_path_raw().first.parent_path().parent_path() / "checkpoints";
     cpFileName = std::string(outDir.c_str()) + "/" + make_file_str() + "." + ext + ".ok";
   }
   return cpFileName;
