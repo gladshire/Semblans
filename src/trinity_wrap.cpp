@@ -138,6 +138,8 @@ std::vector<transcript> run_trinity_bulk(std::vector<SRA> sras,
       continue;
     }
     sraInfoFileStr = outDir + "/" + sra.make_file_str() + ".sra";
+    // TODO: When pipeline is dynamic, retrieve from files used in trinity assembly
+    //       DO NOT retrieve from hard-coded overrepresented filtered files
     if (mult_sra) {
       std::vector<SRA> sras_comb = get_sra_to_combine(sras, sra.get_org_name());
       run_trinity_comb(sras_comb, threads, ram_gb, dispOutput, logFile);
