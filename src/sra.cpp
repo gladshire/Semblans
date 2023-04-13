@@ -292,6 +292,60 @@ std::pair<fs::path, fs::path> SRA::get_sra_path_orep_filt() {
   return sra_path_orep_filt;
 }
 
+// Setter function for path to SRA FastQC analysis directory
+void SRA::set_fastqc_dir_1(std::pair<fs::path, fs::path> fastqcFiles1) {
+  fastqc_dir_1_1 = fastqcFiles1.first;
+  fastqc_dir_2_1 = fastqcFiles1.second;
+}
+
+// Setter function for path to raw SRA reads sequence
+void SRA::set_sra_path_raw(std::pair<fs::path, fs::path> sraRawFiles) {
+  sra_path_raw_1 = sraRawFiles.first;
+  sra_path_raw_2 = sraRawFiles.second;
+}
+
+// Setter function for path to error-corrected SRA sequence
+void SRA::set_sra_path_corr(std::pair<fs::path, fs::path> sraCorrFiles) {
+  sra_path_corr_1 = sraCorrFiles.first;
+  sra_path_corr_2 = sraCorrFiles.second;
+}
+
+// Setter function for path to unfixable error-fixed SRA sequence
+void SRA::set_sra_path_corr_fix(std::pair<fs::path, fs::path> sraCorrFixFiles) {
+  sra_path_corr_fix_1 = sraCorrFixFiles.first;
+  sra_path_corr_fix_2 = sraCorrFixFiles.second;
+}
+
+// Setter function for path to trimmed unpaired SRA sequence
+void SRA::set_sra_path_trim_u(std::pair<fs::path, fs::path> sraTrimFilesU) {
+  sra_path_trim_u1 = sraTrimFilesU.first;
+  sra_path_trim_u2 = sraTrimFilesU.second;
+}
+
+// Setter function for path to trimmed paired SRA sequence
+void SRA::set_sra_path_trim_p(std::pair<fs::path, fs::path> sraTrimFilesP) {
+  sra_path_trim_p1 = sraTrimFilesP.first;
+  sra_path_trim_p2 = sraTrimFilesP.second;
+}
+
+// Setter function for foreign-filtered SRA sequence
+void SRA::set_sra_path_for_filt(std::pair<fs::path, fs::path> sraForFiltFiles) {
+  sra_path_for_filt_1 = sraForFiltFiles.first;
+  sra_path_for_filt_2 = sraForFiltFiles.second;
+}
+
+// Setter function for fastqc directory 2
+void SRA::set_fastqc_dir_2(std::pair<fs::path, fs::path> fastqcFiles2) {
+  fastqc_dir_1_2 = fastqcFiles2.first;
+  fastqc_dir_2_2 = fastqcFiles2.second;
+}
+
+// Setter function for path to overrep-filtered SRA sequence
+void SRA::set_sra_path_orep_filt(std::pair<fs::path, fs::path> sraOrepFiltFiles) {
+  sra_path_orep_filt_1 = sraOrepFiltFiles.first;
+  sra_path_orep_filt_2 = sraOrepFiltFiles.second;
+}
+
 // Utility function to construct filename for SRA
 std::string SRA::make_file_str() {
   std::string filename;

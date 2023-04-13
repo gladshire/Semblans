@@ -1,6 +1,5 @@
 // TODO:
 //   - Customize input file locations according to pipeline parameters in config.ini
-//   - Alter wrappers to take filenames as input/output rather than SRA objects (modularity)
 
 #include "preprocess.h"
 

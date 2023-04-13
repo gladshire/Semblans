@@ -81,13 +81,20 @@ int main(int argc, char * argv[]) {
     if (sras.empty()) {
       std::cout << "ERROR: No SRA runs specified. Please check config file" << std::endl;
     }
-    // TODO: Pipeline only performs postprocess on one transcript
-    //   Make it instantiate transcript object for each file in trinity folder
-    transcript trans = get_transcript_mult(sras[0]);
+    
     std::vector<transcript> transVec;
-    transVec.push_back(trans);
-
-
+    fs::path currFile = transcript(sras[0]).get_trans_path_trinity().parent_path();
+    fs::directory_iterator fileIter{currFile};
+    while (fileIter != fs::directory_iterator{}) {
+      // Iterate through files in transcript directory
+      // Push transcript to transcript vector
+      if (fileIter->path().extension() == ".fasta") {
+        transcript currTrans(fileIter->path().c_str(), cfgIni);
+        transVec.push_back(currTrans);
+      }
+      fileIter++;
+    }
+ 
 
     // Get number of threads
     std::string threads = argv[2];

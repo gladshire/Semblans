@@ -32,6 +32,7 @@ class transcript {
   public:
     transcript();
     transcript(SRA sra);
+    transcript(std::string filename, INI_MAP cfgIni);
     std::string get_org_name();
     std::string get_tax_id();
     fs::path get_trans_path_trinity();

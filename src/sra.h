@@ -64,6 +64,15 @@ class SRA {
     std::pair<fs::path, fs::path> get_sra_path_for_filt();
     std::pair<fs::path, fs::path> get_fastqc_dir_2();
     std::pair<fs::path, fs::path> get_sra_path_orep_filt();
+    void set_fastqc_dir_1(std::pair<fs::path, fs::path> fastqcFiles1);
+    void set_sra_path_raw(std::pair<fs::path, fs::path> sraRawFiles);
+    void set_sra_path_corr(std::pair<fs::path, fs::path> sraCorrFiles);
+    void set_sra_path_corr_fix(std::pair<fs::path, fs::path> sraCorrFixFiles);
+    void set_sra_path_trim_u(std::pair<fs::path, fs::path> sraTrimFilesU);
+    void set_sra_path_trim_p(std::pair<fs::path, fs::path> sraTrimFilesP);
+    void set_sra_path_for_filt(std::pair<fs::path, fs::path> sraForFiltFiles);
+    void set_fastqc_dir_2(std::pair<fs::path, fs::path> fastqcFiles2);
+    void set_sra_path_orep_filt(std::pair<fs::path, fs::path> sraOrepFiltFiles);
     std::string make_file_str();
     std::string makeCheckpointName(std::string ext);
     void makeCheckpoint(std::string ext);

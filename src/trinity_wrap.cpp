@@ -128,6 +128,7 @@ std::vector<transcript> run_trinity_bulk(std::vector<SRA> sras,
   // Iterate through SRAs, running Trinity for all
   std::vector<transcript> sra_transcripts;
   std::string outDir;
+  std::string sraInfoFileStr;
   for (auto &sra : sras) {
     transcript currSraTrans(sra);
     outDir = currSraTrans.get_trans_path_trinity().parent_path().c_str();
@@ -136,12 +137,32 @@ std::vector<transcript> run_trinity_bulk(std::vector<SRA> sras,
       summarize_sing_sra(sra, logFile, 2);
       continue;
     }
+    sraInfoFileStr = outDir + "/" + sra.make_file_str() + ".sra";
     if (mult_sra) {
       std::vector<SRA> sras_comb = get_sra_to_combine(sras, sra.get_org_name());
       run_trinity_comb(sras_comb, threads, ram_gb, dispOutput, logFile);
+      // Make file for transcript containing its associated SRAs
+      std::ofstream sraInfoFile;
+      sraInfoFile.open(sraInfoFileStr);
+      for (auto &sra : sras_comb) {
+        sraInfoFile << std::string(sra.get_sra_path_orep_filt().first.c_str());
+        if (sra.is_paired()) {
+          sraInfoFile << " ";
+          sraInfoFile << std::string(sra.get_sra_path_orep_filt().second.c_str());
+        }
+        sraInfoFile << std::endl;
+      }
     }
     else {
       run_trinity(sra, threads, ram_gb, dispOutput, logFile);
+      // Make file for transcript containing its associated SRA
+      std::ofstream sraInfoFile;
+      sraInfoFile.open(sraInfoFileStr);
+      sraInfoFile << std::string(sra.get_sra_path_orep_filt().first.c_str());
+      if (sra.is_paired()) {
+        sraInfoFile << " ";
+        sraInfoFile << std::string(sra.get_sra_path_orep_filt().second.c_str());
+      }
     }
     sra_transcripts.push_back(currSraTrans);
   }

@@ -1,8 +1,5 @@
 #include "assemble.h"
 
-// TODO:
-//   Allow assembly of local short reads
-//   Otherwise retrieve from overrepresented folder
 
 std::vector<transcript> get_transcript(std::vector<SRA> sras) {
   std::vector<transcript> transcripts;
