@@ -3,13 +3,6 @@
 
 #include "preprocess.h"
 
-std::vector<std::string> stepDirs = {"00-Raw_reads/", "01-Quality_analysis_1/",
-                                     "02-Error_correction/", "03-Trimming/",
-                                     "04-Filter_foreign/", "05-Quality_analysis_2/",
-                                     "06-Filter_overrepresented/", "07-Trinity_assembly/",
-                                     "08-Filter_chimera/", "09-Clustering/",
-                                     "10-Final_cds_pep/"};
-
 
 void retrieve_sra_data(const std::vector<SRA> & sras, std::string threads,
                        bool dispOutput, std::string logFile) {
@@ -353,7 +346,10 @@ int main(int argc, char * argv[]) {
 
     std::string fastqc_dir_1(sras[0].get_fastqc_dir_1().first.parent_path().parent_path().c_str());
     std::string fastqc_dir_2(sras[0].get_fastqc_dir_2().first.parent_path().parent_path().c_str());
+    
 
+    // Make project file structure
+    // TODO: Iterate through booleans in config file
     make_proj_space(cfgIni);
 
     // Run initial fastqc on reads

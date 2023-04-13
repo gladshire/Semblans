@@ -21,7 +21,7 @@
 
 static int ini_callback(IniDispatch * const dispatch, void * map_pt);
 
-std::vector<std::string> make_proj_space(const INI_MAP &iniFile);
+void make_proj_space(const INI_MAP &iniFile);
 
 INI_MAP make_ini_map(const char * configPath);
 
