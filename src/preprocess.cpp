@@ -3,6 +3,14 @@
 
 #include "preprocess.h"
 
+std::vector<std::string> stepDirs = {"00-Raw_reads/", "01-Quality_analysis_1/",
+                                     "02-Error_correction/", "03-Trimming/",
+                                     "04-Filter_foreign/", "05-Quality_analysis_2/",
+                                     "06-Filter_overrepresented/", "07-Trinity_assembly/",
+                                     "08-Filter_chimera/", "09-Clustering/",
+                                     "10-Final_cds_pep/"};
+
+
 void retrieve_sra_data(const std::vector<SRA> & sras, std::string threads,
                        bool dispOutput, std::string logFile) {
   std::ofstream logStream;

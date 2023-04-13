@@ -10,6 +10,8 @@ std::vector<std::string> stepDirs = {"00-Raw_reads/", "01-Quality_analysis_1/",
                                      "10-Final_cds_pep/"};
 
 
+extern std::vector<std::string> stepDirs;
+
 // Default constructor for SRA object
 SRA::SRA() {
   sra_accession = "";
