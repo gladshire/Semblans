@@ -148,6 +148,58 @@ fs::path transcript::get_trans_path_prot() {
   return trans_path_prot;
 }
 
+void transcript::set_trans_path_trinity(fs::path transTrinity) {
+  trans_path_trinity = transTrinity;
+}
+
+void transcript::set_trans_path_blastx(fs::path transBlastx) {
+  trans_path_blastx = transBlastx;
+}
+
+void transcript::set_trans_path_ccut(fs::path transCcut) {
+  trans_path_ccut = transCcut;
+}
+
+void transcript::set_trans_path_cinfo(fs::path transCinfo) {
+  trans_path_cinfo = transCinfo;
+}
+
+void transcript::set_trans_path_chimera(fs::path transChimera) {
+  trans_path_chimera = transChimera;
+}
+
+void transcript::set_trans_path_index(fs::path transIndex) {
+  trans_path_index = transIndex;
+}
+
+void transcript::set_trans_path_quant(fs::path transQuant) {
+  trans_path_quant = transQuant;
+}
+
+void transcript::set_trans_path_clust(fs::path transClust) {
+  trans_path_clust = transClust;
+}
+
+void transcript::set_trans_path_largest(fs::path transLargest) {
+  trans_path_largest = transLargest;
+}
+
+void transcript::set_trans_path_redund(fs::path transRedund) {
+  trans_path_redund = transRedund;
+}
+
+void transcript::set_trans_path_counts(fs::path transCounts) {
+  trans_path_counts = transCounts;
+}
+
+void transcript::set_trans_path_cds(fs::path transCds) {
+  trans_path_cds = transCds;
+}
+
+void transcript::set_trans_path_prot(fs::path transProt) {
+  trans_path_prot = transProt;
+}
+
 std::string transcript::make_file_str() {
   std::string filename;
   filename = get_tax_id() + "_" + get_org_name().replace(get_org_name().find(" "), 1, "_");
