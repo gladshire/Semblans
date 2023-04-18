@@ -1,6 +1,15 @@
 #include "ini_parse.h"
 
 
+// Define output directory names in steps of pipeline
+/*std::vector<std::string> stepDirs = {"Raw_reads/", "Quality_analysis_1/",
+                                     "Error_correction/", "Trimming/",
+                                     "Filter_foreign/", "Quality_analysis_2/",
+                                     "Filter_overrepresented/", "Transcript_assembly/",
+                                     "Filter_chimera/", "Clustering/",
+                                     "Final_cds_pep/"};
+*/
+
 namespace fs = boost::filesystem;
 
 // Dispatch INI data to a map, indexable by sections, then by keys
@@ -39,6 +48,7 @@ void make_proj_space(const INI_MAP &iniFile) {
     }
     system(("mkdir " + projDir + dir).c_str());
   }
+  
 }
 
 

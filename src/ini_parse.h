@@ -13,6 +13,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/variant.hpp>
 
+
 // Create short aliases which represent the map for the INI file
 #define INI_MAP_ENTRY std::map<std::string, std::string>
 #define INI_MAP std::map<std::string, INI_MAP_ENTRY>

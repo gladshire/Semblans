@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"  ?>
+<SraRunInfo>
+<Row>
+<Run>SRR21719548</Run>
+<ReleaseDate>2022-09-29 00:01:32</ReleaseDate>
+<LoadDate>2022-09-26 22:19:08</LoadDate>
+<spots>26507360</spots>
+<bases>8005222720</bases>
+<spots_with_mates>26507360</spots_with_mates>
+<avgLength>302</avgLength>
+<size_MB>2431</size_MB>
+<download_path>https://sra-downloadb.be-md.ncbi.nlm.nih.gov/sos4/sra-pub-run-30/SRR021/21719/SRR21719548/SRR21719548.1</download_path>
+<Experiment>SRX17716654</Experiment>
+<LibraryName>GSM6602001</LibraryName>
+<LibraryStrategy>RNA-Seq</LibraryStrategy>
+<LibrarySelection>cDNA</LibrarySelection>
+<LibrarySource>TRANSCRIPTOMIC</LibrarySource>
+<LibraryLayout>PAIRED</LibraryLayout>
+<InsertSize>0</InsertSize>
+<InsertDev>0</InsertDev>
+<Platform>ILLUMINA</Platform>
+<Model>Illumina NovaSeq 6000</Model>
+<SRAStudy>SRP399749</SRAStudy>
+<BioProject>PRJNA884433</BioProject>
+<ProjectID>884433</ProjectID>
+<Sample>SRS15247006</Sample>
+<BioSample>SAMN31026948</BioSample>
+<SampleType>simple</SampleType>
+<TaxID>7227</TaxID>
+<ScientificName>Drosophila melanogaster</ScientificName>
+<SampleName>GSM6602001</SampleName>
+<Tumor>no</Tumor>
+<CenterName>MIA LEVINE, BIOLOGY, UNIVERSITY OF PENNSYLVANIA</CenterName>
+<Submission>SRA1507696</Submission>
+<Consent>public</Consent>
+<RunHash>AF8347E9AA0D80244E29BB5F9D6A1CDA</RunHash>
+<ReadHash>2F32E89DB136A4701A4E493100218A73</ReadHash>
+</Row>
+</SraRunInfo>
