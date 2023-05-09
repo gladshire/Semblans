@@ -29,20 +29,25 @@ void fastqcBulk1(const std::vector<SRA> & sras, std::string threads, bool dispOu
                  std::string logFilePath);
 
 void fastqcBulk2(const std::vector<SRA> & sras, std::string threads, bool dispOutput,
-                 std::string logFilePath);
+                 std::string logFilePath, const INI_MAP & cfgIni);
 
-void errorCorrBulk(const std::vector<SRA> & sras, std::string threads, bool dispOutput,
-                   std::string logFilePath);
+void errorCorrBulk(const std::vector<SRA> & sras, std::string threads,
+                   bool dispOutput, bool retainInterFiles,
+                   std::string logFilePath, const INI_MAP & cfgIni);
 
 void remUnfixBulk(const std::vector<SRA> & sras, std::string threads, std::string ram_gb,
-                  bool dispOutput, std::string logFilePath);
+                  bool dispOutput, bool retainInterFiles,
+                  std::string logFilePath, const INI_MAP & cfgIni);
 
-void trimBulk(const std::vector<SRA> & sras, std::string threads, bool dispOutput,
-              std::string logFilePath);
+void trimBulk(const std::vector<SRA> & sras, std::string threads,
+              bool dispOutput, bool retainInterFiles,
+              std::string logFilePath, const INI_MAP & cfgIni);
 
 void filtForeignBulk(const std::vector<SRA> & sras, std::vector<std::string> krakenDbs,
-                     std::string krakenConf, std::string threads, bool dispOutput,
-                     std::string logFilePath);
+                     std::string krakenConf, std::string threads,
+                     bool dispOutput, bool retainInterFiles,
+                     std::string logFilePath, const INI_MAP & cfgIni);
 
 void remOverrepBulk(const std::vector<SRA> & sras, std::string threads, std::string ram_gb,
-                    bool dispOutput, std::string logFilePath);
+                    bool dispOutput, bool retainInterFiles,
+                    std::string logFilePath, const INI_MAP & cfgIni);

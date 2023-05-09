@@ -11,63 +11,49 @@ std::vector<SRA> get_sras(const INI_MAP &iniFile) {
   return sras;
 }
 
-void prefetch_sra(std::vector<SRA> sras, bool dispOutput, std::string logFile) {
-  std::string outDir(sras[0].get_sra_path_raw().first.parent_path().native().c_str());
-  std::string sra_accessions = "";
+void prefetch_sra(SRA sra, bool dispOutput, std::string logFile) {
+  std::string outDir(sra.get_sra_path_raw().first.parent_path().c_str());
   std::string prefetchFlag = " --max-size u -O ";
+  std::string sraAccession = sra.get_accession();
   int result;
-  for (auto sra : sras) {
-    if (fs::exists(fs::path(std::string(sra.get_sra_path_raw().first.parent_path().c_str()) +
-                   "/" + sra.get_accession()))) {
-      logOutput("Prefetch found for: " + sra.get_accession(), logFile);
-      continue;
-    }
-    sra_accessions += (sra.get_accession() + " ");
+  std::string prefetchCmd = PATH_PREFETCH + " " + sraAccession + prefetchFlag + outDir;
+  if (dispOutput) {
+    prefetchCmd += (" 2>&1 | tee -a " + logFile);
   }
-  if (sra_accessions != "") {
-    std::string prefetchCmd = PATH_PREFETCH + " " + sra_accessions + prefetchFlag + outDir;
-    if (dispOutput) {
-      prefetchCmd += (" 2>&1 | tee -a " + logFile);
-    }
-    else {
-      prefetchCmd += (" >>" + logFile + " 2>&1");
-    }
-    result = system(prefetchCmd.c_str());
-    if (WIFSIGNALED(result)) {
-      logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
-      exit(1);
-    }
+  else {
+    prefetchCmd += (" >>" + logFile + " 2>&1");
+  }
+  result = system(prefetchCmd.c_str());
+  if (WIFSIGNALED(result)) {
+    logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
+    exit(1);
   }
 }
 
-void fasterq_sra(std::vector<SRA> sras, std::string threads,
-                 bool dispOutput, std::string logFile) {
-  std::string prefetchDir(sras[0].get_sra_path_raw().first.parent_path().native().c_str());
+
+void fasterq_sra(SRA sra, std::string threads, bool dispOutput,
+                 std::string logFile) {
+  std::string prefetchDir(sra.get_sra_path_raw().first.parent_path().c_str());
   std::string outFile;
   std::string fasterqFlag = " -e " + threads + " -t " + prefetchDir + " " + prefetchDir;
+  std::string sraAccession = sra.get_accession();
   int result;
-  for (auto sra : sras) {
-    if (fs::exists(sra.get_sra_path_raw().first)) {
-      logOutput("Raw reads found for: " + sra.get_accession(), logFile);
-      continue;
-    }
-    outFile = sra.make_file_str();
-    fs::path currDir = fs::current_path();
-    fs::current_path(fs::path(prefetchDir.c_str()));
-    std::string fasterqCmd = PATH_FASTERQ + " " + fasterqFlag + "/" + sra.get_accession() +
-                             " -o " + outFile;
-    if (dispOutput) {
-      fasterqCmd += (" 2>&1 | tee -a " + logFile);
-    }
-    else {
-      fasterqCmd += (" >>" + logFile + " 2>&1");
-    }
-    result = system(fasterqCmd.c_str());
-    fs::current_path(currDir);
-    if (WIFSIGNALED(result)) {
-      logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
-      exit(1);
-    }
+  outFile = sra.make_file_str();
+  fs::path currDir = fs::current_path();
+  fs::current_path(fs::path(prefetchDir.c_str()));
+  std::string fasterqCmd = PATH_FASTERQ + " " + fasterqFlag + "/" + sraAccession +
+                           " -o " + outFile;
+  if (dispOutput) {
+    fasterqCmd += (" 2>&1 | tee -a " + logFile);
+  }
+  else {
+    fasterqCmd += (" >>" + logFile + " 2>&1");
+  }
+  result = system(fasterqCmd.c_str());
+  fs::current_path(currDir);
+  if (WIFSIGNALED(result)) {
+    logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
+    exit(1);
   }
 }
 

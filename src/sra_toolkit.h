@@ -14,9 +14,10 @@ namespace fs = boost::filesystem;
 
 std::vector<SRA> get_sras(const INI_MAP & iniFile);
 
-void prefetch_sra(std::vector<SRA> sras, bool dispOutput, std::string logFile);
+void prefetch_sra(SRA sra, bool dispOutput,
+                  std::string logFile);
 
-void fasterq_sra(std::vector<SRA> sras, std::string threads,
+void fasterq_sra(SRA sra, std::string threads,
                  bool dispOutput, std::string logFile);
 
 void align_file_buffer(std::ifstream & inFile1, std::ifstream & inFile2,
