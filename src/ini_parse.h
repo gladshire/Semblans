@@ -22,7 +22,7 @@
 
 static int ini_callback(IniDispatch * const dispatch, void * map_pt);
 
-void make_proj_space(const INI_MAP &iniFile);
+void make_proj_space(const INI_MAP &iniFile, std::string pipeStage);
 
 INI_MAP make_ini_map(const char * configPath);
 

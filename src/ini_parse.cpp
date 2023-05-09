@@ -41,7 +41,7 @@ std::string getStepNum(int stepNum) {
 }
 
 // Create directory space for project
-void make_proj_space(const INI_MAP &iniFile) {
+void make_proj_space(const INI_MAP &iniFile, std::string pipeStage) {
   std::string projDir = iniFile.at("General").at("output_directory") +
                         iniFile.at("General").at("project_name") + "/";
   INI_MAP_ENTRY pipeSteps = iniFile.at("Pipeline");
@@ -57,25 +57,25 @@ void make_proj_space(const INI_MAP &iniFile) {
 
   // Add directory for raw reads
   stepDirs.push_back(currNum + "-" + allSteps[0]);
-  system(("mkdir " + projDir + currNum + "-" + allSteps[0]).c_str());
+  system(("mkdir " + projDir + currNum + "-" + allSteps[0] + " > /dev/null 2>&1").c_str());
   stepNum++;
 
   // If pipeline running pre-quality check, create its directory
   currNum = getStepNum(stepNum);
   if (ini_get_bool(pipeSteps.at("pre_quality_check").c_str(), -1)) {
     stepDirs.push_back(currNum + "-" + allSteps[1]);
-    system(("mkdir " + projDir + currNum + "-" + allSteps[1]).c_str());
+    system(("mkdir " + projDir + currNum + "-" + allSteps[1] + " > /dev/null 2>&1").c_str());
     stepNum++;
   }
   else {
     stepDirs.push_back(allSteps[1]);
   }
-
+  
   // If pipeline running error correction, create its directory
   currNum = getStepNum(stepNum);
   if (ini_get_bool(pipeSteps.at("error_correction").c_str(), -1)) {
     stepDirs.push_back(currNum + "-" + allSteps[2]);
-    system(("mkdir " + projDir + currNum + "-" + allSteps[2]).c_str());
+    system(("mkdir " + projDir + currNum + "-" + allSteps[2] + " > /dev/null 2>&1").c_str());
     stepNum++;
   }
   else {
@@ -86,7 +86,7 @@ void make_proj_space(const INI_MAP &iniFile) {
   currNum = getStepNum(stepNum);
   if (ini_get_bool(pipeSteps.at("trim_adapter_seqs").c_str(), -1)) {
     stepDirs.push_back(currNum + "-" + allSteps[3]);
-    system(("mkdir " + projDir + currNum + "-" + allSteps[3]).c_str());
+    system(("mkdir " + projDir + currNum + "-" + allSteps[3] + " > /dev/null 2>&1").c_str());
     stepNum++;
   }
   else {
@@ -97,7 +97,7 @@ void make_proj_space(const INI_MAP &iniFile) {
   currNum = getStepNum(stepNum);
   if (ini_get_bool(pipeSteps.at("filter_foreign_reads").c_str(), -1)) {
     stepDirs.push_back(currNum + "-" + allSteps[4]);
-    system(("mkdir " + projDir + currNum + "-" + allSteps[4]).c_str());
+    system(("mkdir " + projDir + currNum + "-" + allSteps[4] + " > /dev/null 2>&1").c_str());
     stepNum++;
   }
   else {
@@ -107,14 +107,14 @@ void make_proj_space(const INI_MAP &iniFile) {
   // Create directory for second quality check
   currNum = getStepNum(stepNum);
   stepDirs.push_back(currNum + "-" + allSteps[5]);
-  system(("mkdir " + projDir + currNum + "-" + allSteps[5]).c_str());
+  system(("mkdir " + projDir + currNum + "-" + allSteps[5] + " > /dev/null 2>&1").c_str());
   stepNum++;
 
   // If pipeline running removal of overrepresented, create its directory
   currNum = getStepNum(stepNum);
   if (ini_get_bool(pipeSteps.at("remove_overrepresented").c_str(), -1)) {
     stepDirs.push_back(currNum + "-" + allSteps[6]);
-    system(("mkdir " + projDir + currNum + "-" + allSteps[6]).c_str());
+    system(("mkdir " + projDir + currNum + "-" + allSteps[6] + " > /dev/null 2>&1").c_str());
     stepNum++;
   }
   else {
@@ -124,35 +124,35 @@ void make_proj_space(const INI_MAP &iniFile) {
   // Create directory for transcriptome assembly
   currNum = getStepNum(stepNum);
   stepDirs.push_back(currNum + "-" + allSteps[7]);
-  system(("mkdir " + projDir + currNum + "-" + allSteps[7]).c_str());
+  system(("mkdir " + projDir + currNum + "-" + allSteps[7] + " > /dev/null 2>&1").c_str());
   stepNum++;
 
   // If pipeline running removal of chimeras, create its directory
   currNum = getStepNum(stepNum);
   if (ini_get_bool(pipeSteps.at("remove_chimera_reads").c_str(), -1)) {
     stepDirs.push_back(currNum + "-" + allSteps[8]);
-    system(("mkdir " + projDir + currNum + "-" + allSteps[8]).c_str());
+    system(("mkdir " + projDir + currNum + "-" + allSteps[8] + " > /dev/null 2>&1").c_str());
     stepNum++;
   }
   else {
     stepDirs.push_back(allSteps[8]);
   }
-
+  
   // If pipeline running cluster-based filtration, create its directory
   currNum = getStepNum(stepNum);
   if (ini_get_bool(pipeSteps.at("cluster_filtering").c_str(), -1)) {
     stepDirs.push_back(currNum + "-" + allSteps[9]);
-    system(("mkdir " + projDir + currNum + "-" + allSteps[9]).c_str());
+    system(("mkdir " + projDir + currNum + "-" + allSteps[9] + " > /dev/null 2>&1").c_str());
     stepNum++;
-  }
+    }
   else {
     stepDirs.push_back(allSteps[9]);
   }
-
+  
   // Create directory for final transcripts coding seqs, proteins
   currNum = getStepNum(stepNum);
   stepDirs.push_back(currNum + "-" + allSteps[10]);
-  system(("mkdir " + projDir + currNum + "-" + allSteps[10]).c_str());
+  system(("mkdir " + projDir + currNum + "-" + allSteps[10] + " > /dev/null 2>&1").c_str());
   stepNum++;
 }
 

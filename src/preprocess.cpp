@@ -427,7 +427,7 @@ int main(int argc, char * argv[]) {
     std::string logFilePath = cfgIni["General"]["log_file"];
 
     // Make project file structure
-    make_proj_space(cfgIni);
+    make_proj_space(cfgIni, "preprocess");
 
     // Create vector of SRA objects from SRA accessions, using NCBI web API
     sras = get_sras(cfgIni);

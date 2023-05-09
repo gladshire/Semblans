@@ -1,6 +1,6 @@
 #include "assemble.h"
 
-
+// TODO: Error while performing assembly of multiple SRA runs. 
 std::vector<transcript> get_transcript(std::vector<SRA> sras) {
   std::vector<transcript> transcripts;
   for (auto &sra : sras) {
@@ -19,6 +19,116 @@ bool stringToBool(std::string boolStr) {
   return boolConv;
 }
 
+std::vector<transcript> run_trinity_bulk(std::vector<SRA> sras,
+                                         std::string threads, std::string ram_gb,
+                                         bool mult_sra, bool dispOutput, bool retainInterFiles,
+                                         std::string logFile, const INI_MAP & cfgIni) {
+  INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
+  std::vector<transcript> sra_transcripts;
+  std::string outDir;
+  std::string sraInfoFileStr;
+  std::vector<std::pair<std::string, std::string>> sraRunsInTrin;
+  std::pair<std::string, std::string> currTrinIn;
+  std::string currTrinOut;
+  for (auto sra : sras) {
+    transcript currSraTrans(sra);
+    // Check for checkpoint file
+    if (sra.checkpointExists("trinity")) {
+      logOutput("Assembly checkpoint found for: ", logFile);
+      summarize_sing_sra(sra, logFile, 2);
+      continue;
+    }
+
+    currTrinIn.first = sra.get_sra_path_orep_filt().first.c_str();
+    currTrinIn.second = sra.get_sra_path_orep_filt().second.c_str();
+    
+    if (!ini_get_bool(cfgPipeline.at("remove_overrepresented").c_str(), 0)) {
+      if (!ini_get_bool(cfgPipeline.at("filter_foreign_reads").c_str(), 0)) {
+        if (!ini_get_bool(cfgPipeline.at("trim_adapter_seqs").c_str(), 0)) {
+          if (!ini_get_bool(cfgPipeline.at("error_correction").c_str(), 0)) {
+            currTrinIn.first = sra.get_sra_path_raw().first.c_str();
+            currTrinIn.second = sra.get_sra_path_raw().second.c_str();
+          }
+          else {
+            currTrinIn.first = sra.get_sra_path_corr_fix().first.c_str();
+            currTrinIn.second = sra.get_sra_path_corr_fix().second.c_str();
+          }
+        }
+        else {
+          currTrinIn.first = sra.get_sra_path_trim_p().first.c_str();
+          currTrinIn.second = sra.get_sra_path_trim_p().second.c_str();
+        }
+      }
+      else {
+        currTrinIn.first = sra.get_sra_path_for_filt().first.c_str();
+        currTrinIn.second = sra.get_sra_path_for_filt().second.c_str();
+      }
+    }
+
+    currTrinOut = currSraTrans.get_trans_path_trinity().c_str();
+    if (mult_sra) {
+      std::vector<std::pair<std::string, std::string>> sraTrinInComb;
+      std::vector<SRA> sras_comb = get_sra_to_combine(sras, sra.get_org_name());
+      for (auto sra : sras_comb) {
+        currTrinIn.first = sra.get_sra_path_orep_filt().first.c_str();
+        currTrinIn.second = sra.get_sra_path_orep_filt().second.c_str();
+    
+        if (!ini_get_bool(cfgPipeline.at("remove_overrepresented").c_str(), 0)) {
+          if (!ini_get_bool(cfgPipeline.at("filter_foreign_reads").c_str(), 0)) {
+            if (!ini_get_bool(cfgPipeline.at("trim_adapter_seqs").c_str(), 0)) {
+              if (!ini_get_bool(cfgPipeline.at("error_correction").c_str(), 0)) {
+                currTrinIn.first = sra.get_sra_path_raw().first.c_str();
+                currTrinIn.second = sra.get_sra_path_raw().second.c_str();
+              }
+              else {
+                currTrinIn.first = sra.get_sra_path_corr_fix().first.c_str();
+                currTrinIn.second = sra.get_sra_path_corr_fix().second.c_str();
+              }
+            }
+            else {
+              currTrinIn.first = sra.get_sra_path_trim_p().first.c_str();
+              currTrinIn.second = sra.get_sra_path_trim_p().second.c_str();
+            }
+          }
+          else {
+            currTrinIn.first = sra.get_sra_path_for_filt().first.c_str();
+            currTrinIn.second = sra.get_sra_path_for_filt().second.c_str();
+          }
+        }
+        sraTrinInComb.push_back(currTrinIn);
+      }
+      run_trinity_comb(sraTrinInComb, currTrinOut, threads, ram_gb, dispOutput, logFile);
+      // Make file for transcript containing its associated SRAs
+      std::ofstream sraInfoFile;
+      sraInfoFile.open(sraInfoFileStr);
+      /*
+      for (auto &sra : sras_comb) {
+        sraInfoFile << std::string(sra.get_sra_path_orep_filt().first.c_str());
+        if (sra.is_paired()) {
+          sraInfoFile << " ";
+          sraInfoFile << std::string(sra.get_sra_path_orep_filt().second.c_str());
+        }
+        sraInfoFile << std::endl;
+      }*/
+    }   
+    else {
+      run_trinity(currTrinIn, currTrinOut, threads, ram_gb, dispOutput, logFile);
+      // Make file for transcript containing its associated SRA
+      std::ofstream sraInfoFile;
+      sraInfoFile.open(sraInfoFileStr);
+      /*
+      sraInfoFile << std::string(sra.get_sra_path_orep_filt().first.c_str());
+      if (sra.is_paired()) {
+        sraInfoFile << " ";
+        sraInfoFile << std::string(sra.get_sra_path_orep_filt().second.c_str());
+      }*/
+    }
+    sra_transcripts.push_back(currSraTrans);
+  }
+  return sra_transcripts;
+}
+
+
 void print_help() {
   std::cout << "\n" << "NAME_OF_PROGRAM" << " - "
             << "A tool for bulk assemblies of de novo transcriptome data" << std::endl;
@@ -34,6 +144,10 @@ int main(int argc, char * argv[]) {
     INI_MAP cfgIni = make_ini_map(argv[1]);
     std::string logFilePath = cfgIni["General"]["log_file"];
 
+    // Create file space
+    make_proj_space(cfgIni, "assemble");
+
+    // Obtain SRAs
     sras = get_sras(cfgIni);
     
     for (auto fqFileName : cfgIni.at("Local files")) {
@@ -81,8 +195,13 @@ int main(int argc, char * argv[]) {
     std::string mult_sra_str;
     mult_sra_str = argv[4];
     bool mult_sra = stringToBool(argv[4]);
-    
-    bool dispOutput = stringToBool(argv[5]);
+    // Get boolean for intermediate file fate
+    std::string retainInterFilesStr = argv[5];
+    bool retainInterFiles = stringToBool(argv[5]);
+    // Get boolean for verbose printing
+    bool dispOutput = stringToBool(argv[6]);
+
+
     logOutput("Paando Assemble started with following parameters:", logFilePath);
     logOutput("  Config file:     " + std::string(argv[1]), logFilePath);;
     logOutput("  Threads (Cores): " + threads, logFilePath);
@@ -91,7 +210,8 @@ int main(int argc, char * argv[]) {
     summarize_all_sras(sras, logFilePath, 6);
     // Perform assembly with Trinity
     std::vector<transcript> transcriptsSra = run_trinity_bulk(sras, threads, ram_gb, mult_sra,
-                                                              dispOutput, logFilePath);
+                                                              dispOutput, retainInterFiles,
+                                                              logFilePath, cfgIni);
   }
   else {
     print_help();

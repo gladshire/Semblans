@@ -12,7 +12,7 @@ namespace fs = boost::filesystem;
 #define PATH_PREFETCH std::string(PATH_SRA_BIN + "prefetch")
 #define PATH_FASTERQ std::string(PATH_SRA_BIN + "fasterq-dump")
 
-std::vector<SRA> get_sras(const INI_MAP & iniFile);
+std::vector<SRA> get_sras(const INI_MAP &iniFile);
 
 void prefetch_sra(SRA sra, bool dispOutput,
                   std::string logFile);

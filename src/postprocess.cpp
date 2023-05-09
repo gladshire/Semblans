@@ -38,7 +38,7 @@ int main(int argc, char * argv[]) {
   if (argc > 1) {
     // Retrieve SRA objects, convert to transcripts
     INI_MAP cfgIni = make_ini_map(argv[1]);
-    make_proj_space(cfgIni);
+    make_proj_space(cfgIni, "postprocess");
     std::string outputDir = cfgIni["General"]["output_directory"];
     std::string projDir = outputDir + cfgIni["General"]["project_name"] + "/";
     std::string refProt = cfgIni["General"]["reference_proteome_path"];
@@ -100,8 +100,10 @@ int main(int argc, char * argv[]) {
     std::string threads = argv[2];
     // Get RAM in GB
     std::string ram_gb = argv[3];
+    // Determine whether to keep intermediate files
+    bool retainInterFiles = stringToBool(argv[4]);
     // Determine whether to print output of programs
-    bool dispOutput = stringToBool(argv[4]);
+    bool dispOutput = stringToBool(argv[5]);
 
     // Summarize program execution parameters
     logOutput("Paando Postprocess started with following parameters:", logFilePath);

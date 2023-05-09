@@ -222,21 +222,23 @@ int main(int argc, char * argv[]) {
     std::ofstream logFile(logFilePath, std::ios_base::trunc);
  
     std::string verbose;
+    std::string retain;
     if (verboseOutput) {
       verbose = " true";
     }
     else {
       verbose = " false";
     }
+    if (retainInterFiles) {
+      retain = " true";
+    }
+    else {
+      retain = " false";
+    }
     std::string preCmd = PAANDO_DIR + "preprocess " + pathConfig + " " +
                          std::to_string(numThreads) + " " +
                          std::to_string(ram);
-    if (retainInterFiles) {
-      preCmd += " true";
-    }
-    else {
-      preCmd += " false";
-    }
+    preCmd += retain;
     preCmd += verbose;
     std::string assCmd = PAANDO_DIR + "assemble " + pathConfig + " " +
                          std::to_string(numThreads) + " " +
@@ -247,10 +249,12 @@ int main(int argc, char * argv[]) {
     else {
       assCmd += " false";
     }
+    assCmd += retain;
     assCmd += verbose;
     std::string postCmd = PAANDO_DIR + "postprocess " + pathConfig + " " +
                           std::to_string(numThreads) + " " +
                           std::to_string(ram);
+    postCmd += retain;
     postCmd += verbose;
     int result;
 

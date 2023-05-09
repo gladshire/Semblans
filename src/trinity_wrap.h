@@ -15,17 +15,16 @@ namespace dl = boost::dll;
 std::vector<SRA> get_sra_to_combine(std::vector<SRA> sras, std::string org_name);
 
 // Concatenate read files for assembly of multiple SRA runs
-std::string combine_reads(std::vector<SRA> sras_comb, long long int ram_b, std::string logFile);
+std::string combine_reads(std::vector<std::pair<std::string, std::string>> sraRuns,
+                          std::string outFile, long long int ram_b, std::string logFile);
 
 // Run Trinity for assembly of single SRA run
-void run_trinity(SRA sra, std::string threads, std::string ram_gb,
+void run_trinity(std::pair<std::string, std::string> sraRun, std::string outFile,
+                 std::string threads, std::string ram_gb,
                  bool dispOutput, std::string logFile);
 
 // Run Trinity for assembly of several SRA runs
-void run_trinity_comb(std::vector<SRA> sras_comb, std::string threads, std::string ram_gb,
+void run_trinity_comb(std::vector<std::pair<std::string, std::string>> sraRuns,
+                      std::string outFile,
+                      std::string threads, std::string ram_gb,
                       bool dispOutput, std::string logFile);
-
-// Run Trinity for all SRA accessions iteratively
-std::vector<transcript> run_trinity_bulk(std::vector<SRA> sras,
-                                         std::string threads, std::string ram_gb, bool mult_sra,
-                                         bool dispOutput, std::string logFile);
