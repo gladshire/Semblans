@@ -1,6 +1,5 @@
 #include "assemble.h"
 
-// TODO: Error while performing assembly of multiple SRA runs. 
 std::vector<transcript> get_transcript(std::vector<SRA> sras) {
   std::vector<transcript> transcripts;
   for (auto &sra : sras) {
