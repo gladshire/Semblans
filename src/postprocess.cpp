@@ -125,13 +125,13 @@ int main(int argc, char * argv[]) {
     for (auto trans : transVec) {
       currTransInDiam = trans.get_trans_path_trinity().c_str();
 
-      makeDb(refProt, projDir + stepDirs[8], dispOutput, logFilePath);
+      makeDb(refProt, projDir + "/" + stepDirs[8], dispOutput, logFilePath);
       // Run BlastX
       currBlastDbName = refProt.substr(refProt.find_last_of("/"),
                                        refProt.find_last_of(".") -
                                        refProt.find_last_of("/"));
-      blastxDiam(currTransInDiam, projDir + stepDirs[8] + currBlastDbName, threads,
-                 projDir + stepDirs[8], dispOutput, logFilePath);
+      blastxDiam(currTransInDiam, projDir + "/" + stepDirs[8] + currBlastDbName, threads,
+                 projDir + "/" + stepDirs[8], dispOutput, logFilePath);
     }
 
     // Detect and remove chimeric transcripts
@@ -140,7 +140,7 @@ int main(int argc, char * argv[]) {
     std::string currBlastx;
     std::string currTransInfo;
     std::string currTransCut;
-    std::string chimOutDir = projDir + stepDirs[8];
+    std::string chimOutDir = projDir + "/" + stepDirs[8];
     for (auto trans : transVec) {
       currTransInChim = trans.get_trans_path_trinity().c_str();
       currTransOutChim = trans.get_trans_path_chimera().c_str();
@@ -198,7 +198,7 @@ int main(int argc, char * argv[]) {
       currTransClust = trans.get_trans_path_clust().c_str();
       currTransLargestClust = trans.get_trans_path_largest().c_str();
       currTransRedund = trans.get_trans_path_redund().c_str();
-      currOutDir = projDir + stepDirs[9];
+      currOutDir = projDir + "/" + stepDirs[9];
 
 
       corset_eq_classes(currTransPrefix, currEqClassFile, currOutDir, dispOutput, logFilePath);
@@ -220,8 +220,8 @@ int main(int argc, char * argv[]) {
       currDb = refProt.substr(refProt.find_last_of("/"),
                               refProt.find_last_of(".") -
                               refProt.find_last_of("/"));
-      currDb = projDir + stepDirs[8] + currDb;
-      currOutDirTD = projDir + stepDirs[10];
+      currDb = projDir + "/" + stepDirs[8] + currDb;
+      currOutDirTD = projDir + "/" + stepDirs[10];
 
       run_transdecoder(currTransInTD, currTransCds, currTransPep, threads, ram_b,
                        currDb, currOutDirTD, dispOutput, logFilePath);
