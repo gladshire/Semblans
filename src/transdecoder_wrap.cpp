@@ -79,7 +79,6 @@ void run_transdecoder(std::string transIn, std::string transCds, std::string tra
       // Only operates on un-stranded. Implement stranded later
       std::string tdLongOrfs_cmd = PATH_TRANSD_LONGORFS + " -t " + transFilePath + " -O " +
                                    std::string(allpep.parent_path().c_str()) + printOut;
-      std::cout << tdLongOrfs_cmd << std::endl;
       int resultLO;
       resultLO = system(tdLongOrfs_cmd.c_str());
       if (WIFSIGNALED(resultLO)) {

@@ -15,6 +15,7 @@ class transcript {
   private:
     std::string org_name;
     std::string tax_id;
+    std::string file_prefix;
     fs::path trans_path_trinity;
     fs::path trans_path_gene_map;
     fs::path trans_path_blastx;
@@ -49,6 +50,7 @@ class transcript {
     fs::path get_trans_path_counts();
     fs::path get_trans_path_cds();
     fs::path get_trans_path_prot();
+    std::string get_file_prefix();
     void set_trans_path_trinity(fs::path transTrinity);
     void set_trans_path_blastx(fs::path transBlastx);
     void set_trans_path_ccut(fs::path transCcut);

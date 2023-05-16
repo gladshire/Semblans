@@ -13,6 +13,7 @@ transcript::transcript(SRA sra) {
   org_name = sra.get_org_name();
   tax_id = sra.get_tax_id();
   std::string fileBase = make_file_str();
+  file_prefix = fileBase;
  
   // Define trinity assembly path
   trans_path_trinity = (projPath + stepDirs[7] + fileBase + ".Trinity.fasta").c_str();
@@ -56,6 +57,7 @@ transcript::transcript(std::string filename, INI_MAP cfgIni) {
   while (fileBase.find(".") != std::string::npos) {
     fileBase = std::string(fs::path(fileBase).stem().c_str());
   }
+  file_prefix = fileBase;
   
   // Define trinity assembly path
   trans_path_trinity = (projPath + stepDirs[7] + fileBase + ".Trinity.fasta").c_str();
@@ -150,6 +152,10 @@ fs::path transcript::get_trans_path_cds() {
 
 fs::path transcript::get_trans_path_prot() {
   return trans_path_prot;
+}
+
+std::string transcript::get_file_prefix() {
+  return file_prefix;
 }
 
 void transcript::set_trans_path_trinity(fs::path transTrinity) {

@@ -13,6 +13,8 @@ std::vector<transcript> get_transcript(std::vector<SRA> sras);
 
 bool stringToBool(std::string boolStr);
 
+void makeTransInfoFile(const std::vector<SRA> & sras, std::string transInfoFileStr);
+
 std::vector<transcript> run_trinity_bulk(std::vector<SRA> sras,
                                          std::string threads, std::string ram_gb,
                                          bool mult_sra, bool dispOutput, bool retainInterFiles,

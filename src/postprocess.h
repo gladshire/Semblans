@@ -21,4 +21,11 @@
 
 std::vector<transcript> get_transcript(std::vector<SRA> sras);
 
-void print_help();
+void blastxDiamBulk(const std::vector<transcript> & transVec, std::string threads,
+                    bool dispOutput, std::string logFilePath, const INI_MAP & cfgIni);
+
+void remChimeraBulk(const std::vector<transcript> & transVec, std::string ram_gb,
+                    std::string logFilePath);
+
+void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
+                bool dispOutput, std::string logFilePath);

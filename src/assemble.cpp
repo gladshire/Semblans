@@ -18,6 +18,19 @@ bool stringToBool(std::string boolStr) {
   return boolConv;
 }
 
+void makeTransInfoFile(const std::vector<SRA> & sras, std::string transInfoFileStr) {
+  std::ofstream transInfoFile;
+  transInfoFile.open(transInfoFileStr);
+  for (auto sra : sras) {
+    transInfoFile << std::string(sra.get_sra_path_orep_filt().first.c_str());
+    if (sra.is_paired()) {
+      transInfoFile << " " << std::string(sra.get_sra_path_orep_filt().second.c_str());
+    }
+    transInfoFile << std::endl;
+  }
+  transInfoFile.close();
+}
+
 std::vector<transcript> run_trinity_bulk(std::vector<SRA> sras,
                                          std::string threads, std::string ram_gb,
                                          bool mult_sra, bool dispOutput, bool retainInterFiles,
@@ -25,7 +38,6 @@ std::vector<transcript> run_trinity_bulk(std::vector<SRA> sras,
   INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
   std::vector<transcript> sra_transcripts;
   std::string outDir;
-  std::string sraInfoFileStr;
   std::vector<std::pair<std::string, std::string>> sraRunsInTrin;
   std::pair<std::string, std::string> currTrinIn;
   std::string currTrinOut;
@@ -98,29 +110,15 @@ std::vector<transcript> run_trinity_bulk(std::vector<SRA> sras,
       }
       run_trinity_comb(sraTrinInComb, currTrinOut, threads, ram_gb, dispOutput, logFile);
       // Make file for transcript containing its associated SRAs
-      std::ofstream sraInfoFile;
-      sraInfoFile.open(sraInfoFileStr);
-      /*
-      for (auto &sra : sras_comb) {
-        sraInfoFile << std::string(sra.get_sra_path_orep_filt().first.c_str());
-        if (sra.is_paired()) {
-          sraInfoFile << " ";
-          sraInfoFile << std::string(sra.get_sra_path_orep_filt().second.c_str());
-        }
-        sraInfoFile << std::endl;
-      }*/
+      std::string transInfoFileStr(currSraTrans.get_trans_path_trinity().replace_extension(".transInfo").c_str());
+      makeTransInfoFile(sras_comb, transInfoFileStr);
     }   
     else {
       run_trinity(currTrinIn, currTrinOut, threads, ram_gb, dispOutput, logFile);
       // Make file for transcript containing its associated SRA
-      std::ofstream sraInfoFile;
-      sraInfoFile.open(sraInfoFileStr);
-      /*
-      sraInfoFile << std::string(sra.get_sra_path_orep_filt().first.c_str());
-      if (sra.is_paired()) {
-        sraInfoFile << " ";
-        sraInfoFile << std::string(sra.get_sra_path_orep_filt().second.c_str());
-      }*/
+      std::string sraInfoFileStr(currSraTrans.get_trans_path_trinity().replace_extension(".transInfo").c_str());
+      std::vector<SRA> singSra{sra};
+      makeTransInfoFile(singSra, sraInfoFileStr);
     }
     sra_transcripts.push_back(currSraTrans);
   }

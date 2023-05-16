@@ -117,6 +117,7 @@ void run_trinity_comb(std::vector<std::pair<std::string, std::string>> sraRuns,
              ram_gb + "G " + "--CPU " + threads + " --bflyCalculateCPU" + " --full_cleanup" +
              " --no_normalize_reads" + " --run_as_paired" + " --output " + outFile + printOut; 
   result = system(trin_cmd.c_str());
+
   if (WIFSIGNALED(result)) {
     logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
     exit(1);

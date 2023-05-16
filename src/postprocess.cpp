@@ -16,11 +16,6 @@ std::vector<transcript> get_transcript(std::vector<SRA> sras) {
   return transcripts;
 }
 
-transcript get_transcript_mult(SRA sra) {
-  transcript trans(sra);
-  return trans;
-}
-
 bool stringToBool(std::string boolStr) {
   bool boolConv;
   for (int i = 0; i < boolStr.length(); i++) {
@@ -30,8 +25,100 @@ bool stringToBool(std::string boolStr) {
   return boolConv;
 }
 
-void print_help() {
+void blastxDiamBulk(const std::vector<transcript> & transVec, std::string threads,
+                    bool dispOutput, std::string logFilePath, const INI_MAP & cfgIni) {
+  std::string currTransInDiam;
+  std::string currBlastDbName;
+  std::string refProt = cfgIni.at("General").at("reference_proteome_path");
+  std::string blastDbDir = cfgIni.at("General").at("output_directory") + "/" +
+                           cfgIni.at("General").at("project_name") + "/" +
+                           stepDirs[8] + "/";
+  std::string blastDbName = refProt.substr(refProt.find_last_of("/"),
+                                           refProt.find_last_of(".") -
+                                           refProt.find_last_of("/"));
+  for (auto trans : transVec) {
+    currTransInDiam = trans.get_trans_path_trinity().c_str();
 
+    makeDb(refProt, blastDbDir, dispOutput, logFilePath);
+    // Run BlastX
+    currBlastDbName = refProt.substr(refProt.find_last_of("/"),
+                                     refProt.find_last_of(".") -
+                                     refProt.find_last_of("/"));
+    blastxDiam(currTransInDiam, blastDbDir + currBlastDbName, threads,
+               blastDbDir, dispOutput, logFilePath);
+  }
+}
+
+void remChimeraBulk(const std::vector<transcript> & transVec, std::string ram_gb,
+                    std::string logFilePath) {
+  std::string currTransInChim;
+  std::string currTransOutChim;
+  std::string currBlastx;
+  std::string currTransInfo;
+  std::string currTransCut;
+  std::string chimOutDir;
+  for (auto trans : transVec) {
+    currTransInChim = trans.get_trans_path_trinity().c_str();
+    currTransOutChim = trans.get_trans_path_chimera().c_str();
+    currBlastx = trans.get_trans_path_blastx().c_str();
+    currTransInfo = trans.get_trans_path_cinfo().c_str();
+    currTransCut = trans.get_trans_path_ccut().c_str();
+    chimOutDir = trans.get_trans_path_chimera().parent_path().c_str();
+
+    detect_chimera(currBlastx, chimOutDir);
+    removeChimera(currTransInChim, currTransOutChim, currTransInfo, currTransCut, ram_gb,
+                  logFilePath);
+  }
+}
+
+void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
+                bool dispOutput, std::string logFilePath) {
+  std::string currTransInSalm;
+  std::string currIndex;
+  std::string currQuant;
+  std::string currTransInfoFileStr;
+  std::ifstream currTransInfoFile;
+  std::string currLineInfo;
+  size_t spacePos;
+  size_t nlPos;
+  std::vector<std::pair<std::string, std::string>> currSraRunsIn;
+  std::pair<std::string, std::string> currSraRun;
+  for (auto trans : transVec) {
+    currTransInSalm = trans.get_trans_path_chimera().c_str();
+    currIndex = trans.get_trans_path_index().c_str();
+    currQuant = trans.get_trans_path_quant().c_str();
+    
+    currTransInfoFileStr = std::string(trans.get_trans_path_trinity().replace_extension(".transInfo").c_str());
+    currTransInfoFile.open(currTransInfoFileStr);
+    while(getline(currTransInfoFile, currLineInfo)) {
+      spacePos = currLineInfo.find(" ");
+      nlPos = currLineInfo.find("\n");
+      // If line corresponds to paired
+      if (spacePos != std::string::npos) {
+        // Assign everything up to space as currSraRun.first
+        currSraRun.first = currLineInfo.substr(0, spacePos + 1);
+        // Assign everything from space to endline as currSraRun.second
+        currSraRun.second = currLineInfo.substr(spacePos + 1, nlPos - spacePos);
+      }
+      else {
+        currSraRun.first = currLineInfo;
+      }
+      currSraRunsIn.push_back(currSraRun);
+    }
+    /*for (auto sra : sras) {
+      currSraRun.first = sra.get_sra_path_orep_filt().first.c_str();
+      currSraRun.second = sra.get_sra_path_orep_filt().second.c_str();
+
+      currSraRunsIn.push_back(currSraRun);
+    }*/
+
+    // Perform salmon index of transcript
+    salmon_index(currTransInSalm, currIndex, threads, dispOutput, logFilePath);
+
+    // Perform salmon quant of transcript
+    salmon_quant(currTransInSalm, currIndex, currQuant, currSraRunsIn, threads,
+                 dispOutput, logFilePath);
+  }
 }
 
 int main(int argc, char * argv[]) {
@@ -116,7 +203,8 @@ int main(int argc, char * argv[]) {
 
 
     // BlastX alignment of transcript to reference proteome
-    std::string currTransInDiam;
+  
+    /*std::string currTransInDiam;
     std::string currBlastDbName;
 
     std::string blastDbName = refProt.substr(refProt.find_last_of("/"),
@@ -132,10 +220,12 @@ int main(int argc, char * argv[]) {
                                        refProt.find_last_of("/"));
       blastxDiam(currTransInDiam, projDir + "/" + stepDirs[8] + currBlastDbName, threads,
                  projDir + "/" + stepDirs[8], dispOutput, logFilePath);
-    }
+    }*/
+    blastxDiamBulk(transVec, threads, dispOutput, logFilePath, cfgIni);
 
     // Detect and remove chimeric transcripts
-    std::string currTransInChim;
+  
+   /* std::string currTransInChim;
     std::string currTransOutChim;
     std::string currBlastx;
     std::string currTransInfo;
@@ -152,7 +242,8 @@ int main(int argc, char * argv[]) {
       detect_chimera(currBlastx, chimOutDir);
       removeChimera(currTransInChim, currTransOutChim, currTransInfo, currTransCut, ram_gb,
                     logFilePath);
-    }
+    }*/
+    remChimeraBulk(transVec, ram_gb, logFilePath);
 
     // Perform salmon index of transcripts
     std::string currTransInSalm;
@@ -191,7 +282,12 @@ int main(int argc, char * argv[]) {
     uintmax_t ram_b = (uintmax_t)stoi(ram_gb) * 1000000000;
     for (auto trans : transVec) {
       currTransInCors = trans.get_trans_path_chimera().c_str();
-      currTransPrefix = trans.make_file_str();
+      if (trans.get_org_name() == "") {
+        currTransPrefix = trans.get_file_prefix();
+      }
+      else {
+        currTransPrefix = trans.make_file_str();
+      }
       currEqClassFile = std::string((trans.get_trans_path_quant() /
                                      fs::path("aux_info") /
                                      fs::path("eq_classes.txt.gz")).c_str());
@@ -228,6 +324,6 @@ int main(int argc, char * argv[]) {
     }
   }
   else {
-    print_help();
+  
   }
 }
