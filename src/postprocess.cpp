@@ -1,9 +1,5 @@
 #include "postprocess.h"
 
-// TODO:
-//   Implemente bulk postprocess of multiple transcripts
-//   Currently, only performs for single transcript
-//   Retrieve from Trinity folder of project
 
 extern std::vector<std::string> stepDirs;
 
@@ -27,6 +23,7 @@ bool stringToBool(std::string boolStr) {
 
 void blastxDiamBulk(const std::vector<transcript> & transVec, std::string threads,
                     bool dispOutput, std::string logFilePath, const INI_MAP & cfgIni) {
+  // TODO: Print message for initiating diamond
   std::string currTransInDiam;
   std::string currBlastDbName;
   std::string refProt = cfgIni.at("General").at("reference_proteome_path");
@@ -51,6 +48,7 @@ void blastxDiamBulk(const std::vector<transcript> & transVec, std::string thread
 
 void remChimeraBulk(const std::vector<transcript> & transVec, std::string ram_gb,
                     std::string logFilePath) {
+  // TODO: Print message for initiating chimera removal
   std::string currTransInChim;
   std::string currTransOutChim;
   std::string currBlastx;
@@ -73,6 +71,7 @@ void remChimeraBulk(const std::vector<transcript> & transVec, std::string ram_gb
 
 void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
                 bool dispOutput, std::string logFilePath) {
+  // TODO: Print message for initiating salmon
   std::string currTransInSalm;
   std::string currIndex;
   std::string currQuant;
@@ -105,12 +104,6 @@ void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
       }
       currSraRunsIn.push_back(currSraRun);
     }
-    /*for (auto sra : sras) {
-      currSraRun.first = sra.get_sra_path_orep_filt().first.c_str();
-      currSraRun.second = sra.get_sra_path_orep_filt().second.c_str();
-
-      currSraRunsIn.push_back(currSraRun);
-    }*/
 
     // Perform salmon index of transcript
     salmon_index(currTransInSalm, currIndex, threads, dispOutput, logFilePath);
@@ -118,6 +111,71 @@ void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
     // Perform salmon quant of transcript
     salmon_quant(currTransInSalm, currIndex, currQuant, currSraRunsIn, threads,
                  dispOutput, logFilePath);
+  }
+}
+
+void corsetBulk(const std::vector<transcript> & transVec, std::string ram_gb,
+                bool dispOutput, std::string logFilePath) {
+  // TODO: Print message for initiating corset
+  std::string currTransInCors;
+  std::string currTransPrefix;
+  std::string currEqClassFile;
+  std::string currTransClust;
+  std::string currTransLargestClust;
+  std::string currTransRedund;
+  std::string currOutDir;
+  uintmax_t ram_b = (uintmax_t)stoi(ram_gb) * 1000000000;
+  for (auto trans : transVec) {
+    currTransInCors = trans.get_trans_path_chimera().c_str();
+    if (trans.get_org_name() == "") {
+      currTransPrefix = trans.get_file_prefix();
+    }
+    else {
+      currTransPrefix = trans.make_file_str();
+    }
+    currEqClassFile = std::string((trans.get_trans_path_quant() /
+                                   fs::path("aux_info") /
+                                   fs::path("eq_classes.txt.gz")).c_str());
+    currTransClust = trans.get_trans_path_clust().c_str();
+    currTransLargestClust = trans.get_trans_path_largest().c_str();
+    currTransRedund = trans.get_trans_path_redund().c_str();
+    currOutDir = trans.get_trans_path_clust().parent_path().c_str();
+
+    corset_eq_classes(currTransPrefix, currEqClassFile, currOutDir, dispOutput, logFilePath);
+      
+    // Filter corset output
+    filterCorset(currTransInCors, currTransClust, currTransLargestClust, currTransRedund,
+                 ram_b, currOutDir, logFilePath);
+  }
+}
+
+void transdecBulk(const std::vector<transcript> & transVec, std::string threads,
+                  std::string ram_gb, bool dispOutput, std::string logFilePath,
+                  const INI_MAP & cfgIni) {
+  // TODO: Print message for initiating transdecoder
+  std::string currTransInTD;
+  std::string currTransCds;
+  std::string currTransPep;
+  std::string currDb;
+  std::string currOutDirTD;
+  std::string refProt = cfgIni.at("General").at("reference_proteome_path");
+  std::string blastDbDir = cfgIni.at("General").at("output_directory") + "/" +
+                           cfgIni.at("General").at("project_name") + "/" +
+                           stepDirs[8] + "/";
+  std::string blastDbName = refProt.substr(refProt.find_last_of("/"),
+                                           refProt.find_last_of(".") -
+                                           refProt.find_last_of("/"));
+  uintmax_t ram_b = (uintmax_t)stoi(ram_gb) * 1000000000;
+  for (auto trans : transVec) {
+    currTransInTD = trans.get_trans_path_largest().c_str();
+    currTransCds = trans.get_trans_path_cds().c_str();
+    currTransPep = trans.get_trans_path_prot().c_str();
+    
+    currDb = blastDbDir + "/" + blastDbName;
+    currOutDirTD = trans.get_trans_path_cds().parent_path().c_str();
+
+    run_transdecoder(currTransInTD, currTransCds, currTransPep, threads, ram_b,
+                     currDb, currOutDirTD, dispOutput, logFilePath);
   }
 }
 
@@ -203,125 +261,19 @@ int main(int argc, char * argv[]) {
 
 
     // BlastX alignment of transcript to reference proteome
-  
-    /*std::string currTransInDiam;
-    std::string currBlastDbName;
-
-    std::string blastDbName = refProt.substr(refProt.find_last_of("/"),
-                                             refProt.find_last_of(".") -
-                                             refProt.find_last_of("/"));
-    for (auto trans : transVec) {
-      currTransInDiam = trans.get_trans_path_trinity().c_str();
-
-      makeDb(refProt, projDir + "/" + stepDirs[8], dispOutput, logFilePath);
-      // Run BlastX
-      currBlastDbName = refProt.substr(refProt.find_last_of("/"),
-                                       refProt.find_last_of(".") -
-                                       refProt.find_last_of("/"));
-      blastxDiam(currTransInDiam, projDir + "/" + stepDirs[8] + currBlastDbName, threads,
-                 projDir + "/" + stepDirs[8], dispOutput, logFilePath);
-    }*/
     blastxDiamBulk(transVec, threads, dispOutput, logFilePath, cfgIni);
 
     // Detect and remove chimeric transcripts
-  
-   /* std::string currTransInChim;
-    std::string currTransOutChim;
-    std::string currBlastx;
-    std::string currTransInfo;
-    std::string currTransCut;
-    std::string chimOutDir = projDir + "/" + stepDirs[8];
-    for (auto trans : transVec) {
-      currTransInChim = trans.get_trans_path_trinity().c_str();
-      currTransOutChim = trans.get_trans_path_chimera().c_str();
-
-      currBlastx = trans.get_trans_path_blastx().c_str();
-      currTransInfo = trans.get_trans_path_cinfo().c_str();
-      currTransCut = trans.get_trans_path_ccut().c_str();
-
-      detect_chimera(currBlastx, chimOutDir);
-      removeChimera(currTransInChim, currTransOutChim, currTransInfo, currTransCut, ram_gb,
-                    logFilePath);
-    }*/
     remChimeraBulk(transVec, ram_gb, logFilePath);
 
     // Perform salmon index of transcripts
-    std::string currTransInSalm;
-    std::string currIndex;
-    std::string currQuant;
-    std::vector<std::pair<std::string, std::string>> currSraRunsIn;
-    std::pair<std::string, std::string> currSraRun;
-    for (auto trans : transVec) {
-      currTransInSalm = trans.get_trans_path_chimera().c_str();
-      currIndex = trans.get_trans_path_index().c_str();
-      currQuant = trans.get_trans_path_quant().c_str();
-      // FIXME: Each transcript should be associated with one or more SRA runs
-      for (auto sra : sras) {
-        currSraRun.first = sra.get_sra_path_orep_filt().first.c_str();
-        currSraRun.second = sra.get_sra_path_orep_filt().second.c_str();
-
-        currSraRunsIn.push_back(currSraRun);
-      }
-
-      // Perform salmon index of transcript
-      salmon_index(currTransInSalm, currIndex, threads, dispOutput, logFilePath);
-
-      // Perform salmon quant of transcript
-      salmon_quant(currTransInSalm, currIndex, currQuant, currSraRunsIn, threads,
-                   dispOutput, logFilePath);
-    }
+    salmonBulk(transVec, threads, dispOutput, logFilePath);
    
     // Perform corset run to cluster transcripts
-    std::string currTransInCors;
-    std::string currTransPrefix;
-    std::string currEqClassFile;
-    std::string currTransClust;
-    std::string currTransLargestClust;
-    std::string currTransRedund;
-    std::string currOutDir;
-    uintmax_t ram_b = (uintmax_t)stoi(ram_gb) * 1000000000;
-    for (auto trans : transVec) {
-      currTransInCors = trans.get_trans_path_chimera().c_str();
-      if (trans.get_org_name() == "") {
-        currTransPrefix = trans.get_file_prefix();
-      }
-      else {
-        currTransPrefix = trans.make_file_str();
-      }
-      currEqClassFile = std::string((trans.get_trans_path_quant() /
-                                     fs::path("aux_info") /
-                                     fs::path("eq_classes.txt.gz")).c_str());
-      currTransClust = trans.get_trans_path_clust().c_str();
-      currTransLargestClust = trans.get_trans_path_largest().c_str();
-      currTransRedund = trans.get_trans_path_redund().c_str();
-      currOutDir = projDir + "/" + stepDirs[9];
-
-
-      corset_eq_classes(currTransPrefix, currEqClassFile, currOutDir, dispOutput, logFilePath);
-      
-      // Filter corset output
-      filterCorset(currTransInCors, currTransClust, currTransLargestClust, currTransRedund,
-                   ram_b, currOutDir, logFilePath);
-    }
+    corsetBulk(transVec, ram_gb, dispOutput, logFilePath);
+    
     // Run transdecoder
-    std::string currTransInTD;
-    std::string currTransCds;
-    std::string currTransPep;
-    std::string currDb;
-    std::string currOutDirTD;
-    for (auto trans : transVec) {
-      currTransInTD = trans.get_trans_path_largest().c_str();
-      currTransCds = trans.get_trans_path_cds().c_str();
-      currTransPep = trans.get_trans_path_prot().c_str();
-      currDb = refProt.substr(refProt.find_last_of("/"),
-                              refProt.find_last_of(".") -
-                              refProt.find_last_of("/"));
-      currDb = projDir + "/" + stepDirs[8] + currDb;
-      currOutDirTD = projDir + "/" + stepDirs[10];
-
-      run_transdecoder(currTransInTD, currTransCds, currTransPep, threads, ram_b,
-                       currDb, currOutDirTD, dispOutput, logFilePath);
-    }
+    transdecBulk(transVec, threads, ram_gb, dispOutput, logFilePath, cfgIni);
   }
   else {
   

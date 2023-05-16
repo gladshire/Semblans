@@ -25,9 +25,7 @@ std::string combine_reads(std::vector<std::pair<std::string, std::string>> sraRu
   std::ofstream outFile;
   std::ifstream inFile;
   logOutput("Combined assembly chosen", logFile);
-  logOutput("Now combining files for assembly with Trinity ...", logFile);
   if (fs::exists(fs::path(outFileStr.c_str()))) {
-    logOutput("Combined FASTA file found for: " + outFileStr, logFile);
     return outFileStr;
   }
   //for (auto &sra : sras_comb) {
@@ -53,7 +51,7 @@ std::string combine_reads(std::vector<std::pair<std::string, std::string>> sraRu
     outFile << std::endl;
     outFile.close();
   }
-  logOutput("Complete!\nNow initiating Trinity assembly ...", logFile);
+  logOutput("Initiating Trinity assembly ...", logFile);
   return outFileStr;
 }
 

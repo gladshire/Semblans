@@ -55,7 +55,6 @@ void salmon_index(std::string transIn, std::string transIndex,
     printOut = " >>" + logFile + " 2>&1";
   }
   int result;
-  logOutput("Generating index for transcript ...", logFile);
 
   if (fs::exists(fs::path(transIndex.c_str()))) {
     return;
@@ -100,7 +99,6 @@ void salmon_quant(std::string transIn, std::string transIndex, std::string trans
   std::string sras1 = "";
   std::string sras2 = "";
 
-  logOutput("Generating quant for transcript ...", logFile);
   for (int i = 0; i < sraRunsIn.size(); i++) {
     if (i != 0) {
       sras1 += " ";

@@ -70,7 +70,7 @@ void run_transdecoder(std::string transIn, std::string transCds, std::string tra
   }
   else {
     std::string transFileName = std::string(fs::path(transFilePath.c_str()).filename().c_str());
-    fs::path allpep(std::string(outDir + transFileName +
+    fs::path allpep(std::string(outDir + "/" + transFileName +
                     ".transdecoder_dir/longest_orfs.pep").c_str());
     if (fs::exists(allpep)) {
       logOutput("Skipping search for long orfs", logFile);
@@ -86,11 +86,11 @@ void run_transdecoder(std::string transIn, std::string transCds, std::string tra
         exit(1);
       }
     }
-    if (blastpout_ok(outDir + blastpout)) {
+    if (blastpout_ok(outDir + "/" +  blastpout)) {
       logOutput("Skipping blastp", logFile);
     }
     else {
-      blastpDiam(std::string(allpep.c_str()), dbPath, threads, outDir + blastpout,
+      blastpDiam(std::string(allpep.c_str()), dbPath, threads, outDir + "/" + blastpout,
                  dispOutput, logFile);
     }
     if (fasta_ok(std::string(cdsFilePath.c_str()), ram_b) &&
@@ -99,7 +99,7 @@ void run_transdecoder(std::string transIn, std::string transCds, std::string tra
     }
     else {
       std::string tdPredict_cmd = PATH_TRANSD_PREDICT + " -t " + transFilePath +
-                                  " --retain_blastp_hits " + outDir + blastpout + " --cpu " +
+                                  " --retain_blastp_hits " + outDir + "/" + blastpout + " --cpu " +
                                   threads + printOut;
       fs::path currDir = fs::current_path();
       fs::current_path(fs::path(outDir.c_str()));

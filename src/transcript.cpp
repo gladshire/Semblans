@@ -16,34 +16,34 @@ transcript::transcript(SRA sra) {
   file_prefix = fileBase;
  
   // Define trinity assembly path
-  trans_path_trinity = (projPath + stepDirs[7] + fileBase + ".Trinity.fasta").c_str();
+  trans_path_trinity = (projPath + stepDirs[7] + "/" + fileBase + ".Trinity.fasta").c_str();
   // Define trinity gene map path
-  trans_path_gene_map = (projPath + stepDirs[7] + fileBase + ".Trinity.fasta" + 
+  trans_path_gene_map = (projPath + stepDirs[7] + "/" + fileBase + ".Trinity.fasta" + 
                          ".gene_trans_map").c_str();
   // Define chimera cut file path
-  trans_path_ccut = (projPath + stepDirs[8] + fileBase + ".Trinity.cut").c_str();
+  trans_path_ccut = (projPath + stepDirs[8] + "/" + fileBase + ".Trinity.cut").c_str();
   // Define chimera info file path
-  trans_path_cinfo = (projPath + stepDirs[8] + fileBase + ".Trinity.info").c_str();
+  trans_path_cinfo = (projPath + stepDirs[8] + "/" + fileBase + ".Trinity.info").c_str();
   // Define chimera-filtered transcript path
-  trans_path_chimera = (projPath + stepDirs[8] + fileBase + ".chim_filt.fasta").c_str();
+  trans_path_chimera = (projPath + stepDirs[8] + "/" + fileBase + ".chim_filt.fasta").c_str();
   // Define blastx output path
-  trans_path_blastx = (projPath + stepDirs[8] + fileBase + ".Trinity.blastx").c_str();
+  trans_path_blastx = (projPath + stepDirs[8] + "/" + fileBase + ".Trinity.blastx").c_str();
   // Define salmon index path
-  trans_path_index = (projPath + stepDirs[9] + fileBase + "_salmon_index").c_str();
+  trans_path_index = (projPath + stepDirs[9] + "/" + fileBase + "_salmon_index").c_str();
   // Define salmon quant path
-  trans_path_quant = (projPath + stepDirs[9] + fileBase + "_salmon_quant").c_str();
+  trans_path_quant = (projPath + stepDirs[9] + "/" + fileBase + "_salmon_quant").c_str();
   // Define corset cluster path
-  trans_path_clust = (projPath + stepDirs[9] + fileBase + "_salmon-clusters.txt").c_str();
+  trans_path_clust = (projPath + stepDirs[9] + "/" + fileBase + "_salmon-clusters.txt").c_str();
   // Define largest cluster transcripts path
-  trans_path_largest = (projPath + stepDirs[9] + fileBase + ".lc.fasta").c_str();
+  trans_path_largest = (projPath + stepDirs[9] + "/" + fileBase + ".lc.fasta").c_str();
   // Define redundant transcripts path
-  trans_path_redund = (projPath + stepDirs[9] + fileBase + ".rd.fasta").c_str();
+  trans_path_redund = (projPath + stepDirs[9] + "/" + fileBase + ".rd.fasta").c_str();
   // Define corset counts path
-  trans_path_counts = (projPath + stepDirs[9] + fileBase + "_salmon-counts.txt").c_str();
+  trans_path_counts = (projPath + stepDirs[9] + "/" + fileBase + "_salmon-counts.txt").c_str();
   // Define transdecoder cds path
-  trans_path_cds = (projPath + stepDirs[10] + ".transdecoder.cds").c_str();
+  trans_path_cds = (projPath + stepDirs[10] + "/" + fileBase + ".transdecoder.cds").c_str();
   // Define transdecoder prot path 
-  trans_path_prot = (projPath + stepDirs[10] + ".transdecoder.pep").c_str();
+  trans_path_prot = (projPath + stepDirs[10] + "/" + fileBase + ".transdecoder.pep").c_str();
 
 } 
 
@@ -60,34 +60,34 @@ transcript::transcript(std::string filename, INI_MAP cfgIni) {
   file_prefix = fileBase;
   
   // Define trinity assembly path
-  trans_path_trinity = (projPath + stepDirs[7] + fileBase + ".Trinity.fasta").c_str();
+  trans_path_trinity = (projPath + stepDirs[7] + "/" + fileBase + ".Trinity.fasta").c_str();
   // Define trinity gene map path
-  trans_path_gene_map = (projPath + stepDirs[7] + fileBase + ".Trinity.fasta" + 
+  trans_path_gene_map = (projPath + stepDirs[7] + "/" + fileBase + ".Trinity.fasta" + 
                          ".gene_trans_map").c_str();
   // Define chimera cut file path
-  trans_path_ccut = (projPath + stepDirs[8] + fileBase + ".Trinity.cut").c_str();
+  trans_path_ccut = (projPath + stepDirs[8] + "/" + fileBase + ".Trinity.cut").c_str();
   // Define chimera info file path
-  trans_path_cinfo = (projPath + stepDirs[8] + fileBase + ".Trinity.info").c_str();
+  trans_path_cinfo = (projPath + stepDirs[8] + "/" + fileBase + ".Trinity.info").c_str();
   // Define chimera-filtered transcript path
-  trans_path_chimera = (projPath + stepDirs[8] + fileBase + ".chim_filt.fasta").c_str();
+  trans_path_chimera = (projPath + stepDirs[8] + "/" + fileBase + ".chim_filt.fasta").c_str();
   // Define blastx output path
-  trans_path_blastx = (projPath + stepDirs[8] + fileBase + ".Trinity.blastx").c_str();
+  trans_path_blastx = (projPath + stepDirs[8] + "/" + fileBase + ".Trinity.blastx").c_str();
   // Define salmon index path
-  trans_path_index = (projPath + stepDirs[9] + fileBase + "_salmon_index").c_str();
+  trans_path_index = (projPath + stepDirs[9] + "/" + fileBase + "_salmon_index").c_str();
   // Define salmon quant path
-  trans_path_quant = (projPath + stepDirs[9] + fileBase + "_salmon_quant").c_str();
+  trans_path_quant = (projPath + stepDirs[9] + "/" + fileBase + "_salmon_quant").c_str();
   // Define corset cluster path
-  trans_path_clust = (projPath + stepDirs[9] + fileBase + "_salmon-clusters.txt").c_str();
+  trans_path_clust = (projPath + stepDirs[9] + "/" + fileBase + "_salmon-clusters.txt").c_str();
   // Define largest cluster transcripts path
-  trans_path_largest = (projPath + stepDirs[9] + fileBase + ".lc.fasta").c_str();
+  trans_path_largest = (projPath + stepDirs[9] + "/" + fileBase + ".lc.fasta").c_str();
   // Define redundant transcripts path
-  trans_path_redund = (projPath + stepDirs[9] + fileBase + ".rd.fasta").c_str();
+  trans_path_redund = (projPath + stepDirs[9] + "/" + fileBase + ".rd.fasta").c_str();
   // Define corset counts path
-  trans_path_counts = (projPath + stepDirs[9] + fileBase + "_salmon-counts.txt").c_str();
+  trans_path_counts = (projPath + stepDirs[9] + "/" + fileBase + "_salmon-counts.txt").c_str();
   // Define transdecoder cds path
-  trans_path_cds = (projPath + stepDirs[10] + ".transdecoder.cds").c_str();
+  trans_path_cds = (projPath + stepDirs[10] + "/" + fileBase + ".transdecoder.cds").c_str();
   // Define transdecoder prot path 
-  trans_path_prot = (projPath + stepDirs[10] + ".transdecoder.pep").c_str();
+  trans_path_prot = (projPath + stepDirs[10] + "/" + fileBase + ".transdecoder.pep").c_str();
 }
 
 std::string transcript::get_org_name() {
