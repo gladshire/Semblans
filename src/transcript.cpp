@@ -12,7 +12,13 @@ transcript::transcript(SRA sra) {
   projPath += "/";
   org_name = sra.get_org_name();
   tax_id = sra.get_tax_id();
-  std::string fileBase = make_file_str();
+  std::string fileBase;
+  if (sra.get_accession() != "") {
+    fileBase = sra.make_file_str();
+  }
+  else {
+    fileBase = sra.get_file_prefix().first;
+  }
   file_prefix = fileBase;
  
   // Define trinity assembly path
