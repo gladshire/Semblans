@@ -1,3 +1,5 @@
+// TODO: Implement post-filter summary
+
 #include "kraken_wrap.h"
 
 std::vector<std::string> get_kraken2_dbs(const INI_MAP &iniFile) {

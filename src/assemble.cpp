@@ -169,13 +169,11 @@ int main(int argc, char * argv[]) {
       else {
         if (sraRunsLocal.first != "" &&
             !fs::exists(cfgIni["General"]["local_data_directory"] + sraRunsLocal.first)) {
-          std::cout << "ERROR: Local run not found: \"" << sraRunsLocal.first << "\""
-                    << std::endl;
+          logOutput("ERROR: Local run not found: \"" + sraRunsLocal.first + "\"", logFilePath);
         }
         if (sraRunsLocal.second != "" &&
             !fs::exists(cfgIni["General"]["local_data_directory"] + sraRunsLocal.second)) {
-          std::cout << "ERROR: Local run not found: \"" << sraRunsLocal.second << "\""
-                    << std::endl;
+          logOutput("ERROR: Local run not found: \"" + sraRunsLocal.second + "\"", logFilePath);
         }
       }
     }
