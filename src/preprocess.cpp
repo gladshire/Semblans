@@ -1,5 +1,3 @@
-//   - Customize input file locations according to pipeline parameters in config.ini
-
 #include "preprocess.h"
 
 
@@ -415,23 +413,40 @@ int main(int argc, char * argv[]) {
     return 0;
   }
   else {
+    // Obtain contents of .INI configuration file
     INI_MAP cfgIni = make_ini_map(argv[1]);
-    std::string threads = argv[2];
-    std::string ram_gb = argv[3];
-    std::string retainFiles = argv[4];
-    std::vector<SRA> sras;
-    std::vector<std::string> localDataFiles;
-    bool localDataBool = false;
-    bool retainInterFiles = stringToBool(argv[4]);
-    bool dispOutput = stringToBool(argv[5]);
-    std::string logFilePath = cfgIni["General"]["log_file"];
 
+    // Obtain the number of CPU threads/cores specified
+    std::string threads = argv[2];
+
+    // Obtain the amount of RAM/memory specified
+    std::string ram_gb = argv[3];
+
+    // Obtain specification for retention of intermediate files in pipeline
+    bool retainInterFiles = stringToBool(argv[4]);
+
+    // Obtain specification for verbose printing to terminal
+    bool dispOutput = stringToBool(argv[5]);
+
+    // Obtain path to log file from config file
+    std::string logFilePath = cfgIni["General"]["log_file"];
+ 
     // Make project file structure
     make_proj_space(cfgIni, "preprocess");
+
+    // Declare vector for SRA objects
+    std::vector<SRA> sras;
+
+    // Declare vector for local run paths
+    std::vector<std::string> localDataFiles;
 
     // Create vector of SRA objects from SRA accessions, using NCBI web API
     sras = get_sras(cfgIni);
 
+    // Obtain terminal window size for printing purposes
+    struct winsize w;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+    
     if (!sras.empty()) {
       retrieveSraData(sras, threads, dispOutput, logFilePath);
       logOutput("Successfully downloaded sequence data", logFilePath);
@@ -491,6 +506,7 @@ int main(int argc, char * argv[]) {
     logOutput("  SRA runs:\n", logFilePath); 
     summarize_all_sras(sras, logFilePath, 6);
     logOutput("  Retain intermediate files: " + std::string(argv[4]), logFilePath);
+
 
     std::string fastqc_dir_1(sras[0].get_fastqc_dir_1().first.parent_path().parent_path().c_str());
     std::string fastqc_dir_2(sras[0].get_fastqc_dir_2().first.parent_path().parent_path().c_str());

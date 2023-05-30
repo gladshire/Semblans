@@ -50,6 +50,20 @@ rm -rf ./usr/
 
 echo "Now installing required packages ..."
 
+# sudo apt install bowtie2
+# sudo apt install jellyfish
+# sudo apt install libbz2-dev
+# sudo apt install libcurl-dev
+# sudo apt install liblzma
+# sudo apt install zlib
+# sudo apt install libcrypto
+
+# Install samtools
+# echo "Installing samtools ..."
+# wget -q --output-document samtools.tar.bz2 https://github.com/samtools/samtools/releases/download/1.17/samtools-1.17.tar.bz2
+# tar -xf samtools.tar.bz2 -C ./external/
+# make --
+
 # Install NCBI sra-tools
 echo "Installing SRA-Tools ..."
 wget -q --output-document sratoolkit.tar.gz https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/current/sratoolkit.current-ubuntu64.tar.gz

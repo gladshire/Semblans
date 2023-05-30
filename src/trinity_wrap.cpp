@@ -7,6 +7,7 @@
 std::vector<SRA> get_sra_to_combine(std::vector<SRA> sras, std::string org_name) {
   std::vector<SRA> sra_comb;
   for (auto &sra : sras) {
+    // TODO: FIX THIS; SHOULD NOT JUST BE BY ORGANISM NAME
     if (sra.get_org_name() == org_name) {
       sra_comb.push_back(sra);
     }
@@ -24,11 +25,10 @@ std::string combine_reads(std::vector<std::pair<std::string, std::string>> sraRu
 
   std::ofstream outFile;
   std::ifstream inFile;
-  logOutput("Combined assembly chosen", logFile);
+  logOutput("Combined assembly chosen\nPreparing reads for assembly ...", logFile);
   if (fs::exists(fs::path(outFileStr.c_str()))) {
     return outFileStr;
   }
-  //for (auto &sra : sras_comb) {
   for (auto sraRun : sraRuns) {
     inFile.open(sraRun.first.c_str());
     outFile.open(outFileStr, std::ios_base::app);
@@ -96,7 +96,7 @@ void run_trinity_comb(std::vector<std::pair<std::string, std::string>> sraRuns,
                       std::string outFile,
                       std::string threads, std::string ram_gb,
                       bool dispOutput, std::string logFile) {
-  // Run Trinity for assembly using multiple SRAS
+  // Run Trinity for assembly using multiple SRAs
   long long int ram_b = (long long int)stoi(ram_gb) * 1000000000;
   std::string outComb(std::string(fs::path(outFile.c_str()).stem().c_str()) + ".comb.fastq");
   std::string outFileComb(std::string(fs::path(outFile.c_str()).parent_path().c_str()) + "/" +

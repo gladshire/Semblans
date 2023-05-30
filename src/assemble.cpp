@@ -35,6 +35,8 @@ std::vector<transcript> run_trinity_bulk(std::vector<SRA> sras,
                                          std::string threads, std::string ram_gb,
                                          bool mult_sra, bool dispOutput, bool retainInterFiles,
                                          std::string logFile, const INI_MAP & cfgIni) {
+  logOutput("Starting de-novo assembly for:", logFile);
+  summarize_all_sras(sras, logFile, 2);
   INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
   std::vector<transcript> sra_transcripts;
   std::string outDir;
@@ -80,6 +82,8 @@ std::vector<transcript> run_trinity_bulk(std::vector<SRA> sras,
     if (mult_sra) {
       std::vector<std::pair<std::string, std::string>> sraTrinInComb;
       std::vector<SRA> sras_comb = get_sra_to_combine(sras, sra.get_org_name());
+      logOutput("Combined assembly chosen using:", logFile);
+      summarize_all_sras(sras_comb, logFile, 2);
       for (auto sra : sras_comb) {
         currTrinIn.first = sra.get_sra_path_orep_filt().first.c_str();
         currTrinIn.second = sra.get_sra_path_orep_filt().second.c_str();
@@ -114,6 +118,8 @@ std::vector<transcript> run_trinity_bulk(std::vector<SRA> sras,
       makeTransInfoFile(sras_comb, transInfoFileStr);
     }   
     else {
+      logOutput("Single assembly chosen using:", logFile);
+      summarize_sing_sra(sra, logFile, 2);
       run_trinity(currTrinIn, currTrinOut, threads, ram_gb, dispOutput, logFile);
       // Make file for transcript containing its associated SRA
       std::string sraInfoFileStr(currSraTrans.get_trans_path_trinity().replace_extension(".transInfo").c_str());
