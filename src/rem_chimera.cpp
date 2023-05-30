@@ -161,7 +161,12 @@ void detect_chimera(std::string blastxFile, std::string outDir) {
     std::cout << "Chimera detection files found for: " + blastxFileStr << std::endl;
     return;
   }
+
   std::ifstream fileBlastx(blastxFile);
+  if (!fileBlastx.is_open()) {
+    std::cout << "Could not open BLASTX file. Terminating." << std::endl;
+    exit(1);
+  }
   std::ofstream fileCut(cutFilePath.c_str());
   std::ofstream fileInfo(infoFilePath.c_str());
 

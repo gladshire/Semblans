@@ -35,6 +35,7 @@ std::vector<transcript> run_trinity_bulk(std::vector<SRA> sras,
                                          std::string threads, std::string ram_gb,
                                          bool mult_sra, bool dispOutput, bool retainInterFiles,
                                          std::string logFile, const INI_MAP & cfgIni) {
+
   logOutput("Starting de-novo assembly for:", logFile);
   summarize_all_sras(sras, logFile, 2);
   INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
@@ -43,6 +44,8 @@ std::vector<transcript> run_trinity_bulk(std::vector<SRA> sras,
   std::vector<std::pair<std::string, std::string>> sraRunsInTrin;
   std::pair<std::string, std::string> currTrinIn;
   std::string currTrinOut;
+  std::vector<std::pair<std::string, std::string>> sraRunsSkip;
+  std::pair<std::string, std::string> currSraSkip;
   for (auto sra : sras) {
     transcript currSraTrans(sra);
     // Check for checkpoint file
@@ -75,6 +78,13 @@ std::vector<transcript> run_trinity_bulk(std::vector<SRA> sras,
       else {
         currTrinIn.first = sra.get_sra_path_for_filt().first.c_str();
         currTrinIn.second = sra.get_sra_path_for_filt().second.c_str();
+      }
+    }
+    
+    // Check if SRA has already been assembled. If so, skip.
+    for (auto sraDone : sraRunsSkip) {
+      if (currTrinIn == sraDone) {
+        continue;
       }
     }
 
@@ -111,8 +121,17 @@ std::vector<transcript> run_trinity_bulk(std::vector<SRA> sras,
           }
         }
         sraTrinInComb.push_back(currTrinIn);
+
+        currSraSkip.first = currTrinIn.first;
+        currSraSkip.second = currTrinIn.second;
+
+        sraRunsSkip.push_back(currSraSkip);
       }
       run_trinity_comb(sraTrinInComb, currTrinOut, threads, ram_gb, dispOutput, logFile);
+      // Make checkpoint for SRAs
+      for (auto sra : sras_comb) {
+        sra.makeCheckpoint("trinity");
+      }
       // Make file for transcript containing its associated SRAs
       std::string transInfoFileStr(currSraTrans.get_trans_path_trinity().replace_extension(".transInfo").c_str());
       makeTransInfoFile(sras_comb, transInfoFileStr);
@@ -121,6 +140,10 @@ std::vector<transcript> run_trinity_bulk(std::vector<SRA> sras,
       logOutput("Single assembly chosen using:", logFile);
       summarize_sing_sra(sra, logFile, 2);
       run_trinity(currTrinIn, currTrinOut, threads, ram_gb, dispOutput, logFile);
+
+      // Make checkpoint for SRA
+      sra.makeCheckpoint("trinity");
+
       // Make file for transcript containing its associated SRA
       std::string sraInfoFileStr(currSraTrans.get_trans_path_trinity().replace_extension(".transInfo").c_str());
       std::vector<SRA> singSra{sra};

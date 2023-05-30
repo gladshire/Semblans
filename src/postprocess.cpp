@@ -34,6 +34,7 @@ void blastxDiamBulk(const std::vector<transcript> & transVec, std::string thread
                                            refProt.find_last_of(".") -
                                            refProt.find_last_of("/"));
   for (auto trans : transVec) {
+    std::cout << "DIAMOND" << std::endl;
     currTransInDiam = trans.get_trans_path_trinity().c_str();
 
     makeDb(refProt, blastDbDir, dispOutput, logFilePath);
