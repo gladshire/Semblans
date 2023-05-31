@@ -19,6 +19,7 @@
 #define INI_MAP std::map<std::string, INI_MAP_ENTRY>
 
 
+std::vector<std::string> getStrArray(std::string iniArrStr, std::string delim);
 
 static int ini_callback(IniDispatch * const dispatch, void * map_pt);
 

@@ -14,6 +14,22 @@ std::vector<std::string> stepDirs;
 
 namespace fs = boost::filesystem;
 
+
+// Convert stringified INI array to string vector
+std::vector<std::string> getStrArray(std::string iniArrStr, std::string delim) {
+  std::vector<std::string> strArray;
+  if (iniArrStr.empty()) {
+    return strArray;
+  }
+  size_t delimPos = iniArrStr.find(delim);
+  std::string currSubstr;
+  while ((delimPos = iniArrStr.find(delim)) != std::string::npos) {
+    currSubstr = iniArrStr.substr(0, delimPos);
+    strArray.push_back(currSubstr);
+    iniArrStr.erase(0, delimPos + delim.length());
+  }
+}
+
 // Dispatch INI data to a map, indexable by sections, then by keys
 static int ini_callback(IniDispatch * const dispatch, void * map_pt) {
   #define thismap (reinterpret_cast<INI_MAP*>(map_pt))

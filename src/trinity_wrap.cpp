@@ -96,11 +96,13 @@ void run_trinity_comb(std::vector<std::pair<std::string, std::string>> sraRuns,
                       std::string outFile,
                       std::string threads, std::string ram_gb,
                       bool dispOutput, std::string logFile) {
+
   // Run Trinity for assembly using multiple SRAs
   long long int ram_b = (long long int)stoi(ram_gb) * 1000000000;
   std::string outComb(std::string(fs::path(outFile.c_str()).stem().c_str()) + ".comb.fastq");
   std::string outFileComb(std::string(fs::path(outFile.c_str()).parent_path().c_str()) + "/" +
                           outComb);
+
   std::string inFile = combine_reads(sraRuns, outFileComb, ram_b, logFile);
   std::string trin_cmd;
   std::string printOut;

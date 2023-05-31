@@ -175,7 +175,6 @@ SRA::SRA(std::string fileName1, std::string fileName2, INI_MAP cfgIni) {
   bp = -1;
   paired = (fileName2 == "") ? false : true;
   
-  //sra_path_raw_1  = (projPath + stepDirs[0] + fileBase1 + ".fastq").c_str();
   sra_path_raw_1 = (localDataDir + fileBase1 + ".fastq").c_str();
   fastqc_dir_1_1  = (projPath + stepDirs[1] + fileBase1 + "/" + fileBase1).c_str();
   sra_path_corr_1 = (projPath + stepDirs[2] + fileBase1 + ".cor.fq").c_str();
@@ -187,7 +186,6 @@ SRA::SRA(std::string fileName1, std::string fileName2, INI_MAP cfgIni) {
   sra_path_orep_filt_1 = (projPath + stepDirs[6] + fileBase1 + ".orep.filt.fq").c_str();
 
   if (paired) {
-    //sra_path_raw_2 = (projPath + stepDirs[0] + fileBase2 + ".fastq").c_str();
     sra_path_raw_2 = (localDataDir + fileBase2 + ".fastq").c_str();
     fastqc_dir_2_1 = (projPath + stepDirs[1] + fileBase2 + "/" + fileBase2).c_str();
     sra_path_corr_2 = (projPath + stepDirs[2] + fileBase2 + ".cor.fq").c_str();
@@ -359,12 +357,11 @@ std::string SRA::make_file_str() {
 std::string SRA::makeCheckpointName(std::string ext) {
   fs::path outDir;
   std::string cpFileName;
+  outDir = get_fastqc_dir_2().first.parent_path().parent_path().parent_path() / "checkpoints";
   if (get_accession() == "") {
-    outDir = get_sra_path_corr().first.parent_path().parent_path() / "checkpoints";
     cpFileName = std::string(outDir.c_str()) + "/" + get_file_prefix().first + "." + ext + ".ok";
   }
   else {
-    outDir = get_sra_path_raw().first.parent_path().parent_path() / "checkpoints";
     cpFileName = std::string(outDir.c_str()) + "/" + make_file_str() + "." + ext + ".ok";
   }
   return cpFileName;
