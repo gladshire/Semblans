@@ -3,7 +3,7 @@ CFLAGS = '-Wl,-rpath,$$ORIGIN/../lib/' -g -pthread
 
 LIBS = -L../lib -lboost_system -lboost_filesystem -ldl -lconfini
 INCLUDE_PATH = -I../lib/ -I../include
-OBJ_LINK = preprocess.o sra.o sra_toolkit.o ini_parse.o fastqc_wrap.o rcorr_wrap.o rem_unfixable.o trimm_wrap.o kraken_wrap.o rem_overrep.o print_info.o
+OBJ_LINK = preprocess.o sra.o transcript.o sra_toolkit.o ini_parse.o fastqc_wrap.o rcorr_wrap.o rem_unfixable.o trimm_wrap.o kraken_wrap.o rem_overrep.o print_info.o
 
 
 ../bin/preprocess: $(OBJ_LINK)
@@ -16,6 +16,8 @@ ini_parse.o: ini_parse.cpp ini_parse.h
 	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c ini_parse.cpp $(LIBS)
 sra.o: sra.cpp sra.h
 	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c sra.cpp $(LIBS)
+transcript.o: transcript.cpp transcript.h
+	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c transcript.cpp $(LIBS)
 fastqc_wrap.o: fastqc_wrap.cpp fastqc_wrap.h preprocess.h
 	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c fastqc_wrap.cpp $(LIBS)
 rcorr_wrap.o: rcorr_wrap.cpp fastqc_wrap.h preprocess.h

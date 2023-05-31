@@ -39,3 +39,24 @@ void summarize_all_sras(const std::vector<SRA> & sras, std::string logFile,
   }
 }
 
+void summarize_sing_trans(transcript trans, std::string logFile, int margin) {
+  std::ofstream logStream;
+  logStream.open(logFile, std::ios_base::app);
+  teedev logger(logStream, std::cout);
+  teeStream loggerStream(logger);
+  std::string filePrefix = trans.get_file_prefix();
+  std::string margStr;
+  for (int i = 0; i < margin; i++) {
+    margStr += " ";
+  }
+  loggerStream << margStr << "Transcript:" << std::endl;
+  loggerStream << margStr << filePrefix << "\n" << std::endl;
+  logStream.close();
+}
+
+void summarize_all_trans(const std::vector<transcript> & transVec, std::string logFile,
+                         int margin) {
+  for (auto trans : transVec) {
+    summarize_sing_trans(trans, logFile, margin);
+  }
+}

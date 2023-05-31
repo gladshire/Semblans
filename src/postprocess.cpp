@@ -24,6 +24,8 @@ bool stringToBool(std::string boolStr) {
 void blastxDiamBulk(const std::vector<transcript> & transVec, std::string threads,
                     bool dispOutput, std::string logFilePath, const INI_MAP & cfgIni) {
   // TODO: Print message for initiating diamond
+  logOutput("Starting BLASTX alignment for:", logFilePath);
+  summarize_all_trans(transVec, logFilePath, 2); 
   std::string currTransInDiam;
   std::string currBlastDbName;
   std::string refProt = cfgIni.at("General").at("reference_proteome_path");
@@ -50,6 +52,8 @@ void blastxDiamBulk(const std::vector<transcript> & transVec, std::string thread
 void remChimeraBulk(const std::vector<transcript> & transVec, std::string ram_gb,
                     std::string logFilePath) {
   // TODO: Print message for initiating chimera removal
+  logOutput("Starting chimera removal for:", logFilePath);
+  summarize_all_trans(transVec, logFilePath, 2);
   std::string currTransInChim;
   std::string currTransOutChim;
   std::string currBlastx;
@@ -73,6 +77,8 @@ void remChimeraBulk(const std::vector<transcript> & transVec, std::string ram_gb
 void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
                 bool dispOutput, std::string logFilePath) {
   // TODO: Print message for initiating salmon
+  logOutput("Starting clutering for:", logFilePath);
+  summarize_all_trans(transVec, logFilePath, 2);
   std::string currTransInSalm;
   std::string currIndex;
   std::string currQuant;
@@ -118,6 +124,8 @@ void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
 void corsetBulk(const std::vector<transcript> & transVec, std::string ram_gb,
                 bool dispOutput, std::string logFilePath) {
   // TODO: Print message for initiating corset
+  logOutput("Starting cluster filtering for:", logFilePath);
+  summarize_all_trans(transVec, logFilePath, 2);
   std::string currTransInCors;
   std::string currTransPrefix;
   std::string currEqClassFile;
@@ -154,6 +162,8 @@ void transdecBulk(const std::vector<transcript> & transVec, std::string threads,
                   std::string ram_gb, bool dispOutput, std::string logFilePath,
                   const INI_MAP & cfgIni) {
   // TODO: Print message for initiating transdecoder
+  logOutput("Starting transdecoder for:", logFilePath);
+  summarize_all_trans(transVec, logFilePath, 2);
   std::string currTransInTD;
   std::string currTransCds;
   std::string currTransPep;
