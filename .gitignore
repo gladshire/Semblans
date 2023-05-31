@@ -7,7 +7,7 @@
 *.mer_counts
 *.o
 *.cut
-*.info
+*.ti
 *.blastx*
 *.blastp*
 *.p*
