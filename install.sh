@@ -18,7 +18,7 @@ echo "  Installing Boost libraries ..."
 wget -q https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.gz
 tar -xf boost_1_81_0.tar.gz
 cd boost_1_81_0
-./bootstrap.sh --prefix=../ --with-libraries=system,filesystem,regex
+./bootstrap.sh --prefix=../
 ./b2 install
 mv LICENSE_1_0.txt ../include/boost/
 cd ..
@@ -27,7 +27,7 @@ rm -rf boost_1_81_0*
 # Install rapidXML
 echo "  Installing rapidXML library ..."
 wget -q https://sourceforge.net/projects/rapidxml/files/rapidxml/rapidxml%201.13/rapidxml-1.13.zip
-unzip rapidxml-1.13.zip
+unzip rapidxml-1.13.zip -d ./include/
 mv rapidxml-1.13 rapidxml
 mv rapidxml include/
 rm rapidxml-1.13.zip
@@ -148,12 +148,16 @@ rm corset.tar.gz
 
 # Install Salmon
 echo "Installing Salmon ..."
-wget -q --output-document salmon.tar.gz https://github.com/COMBINE-lab/salmon/releases/download/v1.9.0/salmon-1.9.0_linux_x86_64.tar.gz
+wget -q --output-document salmon.tar.gz https://github.com/COMBINE-lab/salmon/archive/refs/tags/v1.10.1.tar.gz
 tar -xf salmon.tar.gz -C ./external/
-mv ./external/salmon-1.9.0_linux_x86_64 ./external/salmon-1.9.0
-cd ./external/salmon-1.9.0
-wget -q https://raw.githubusercontent.com/COMBINE-lab/salmon/v1.9.0/LICENSE
-cd ../../
+cd ./external/salmon-1.10.1
+wget -q https://raw.githubusercontent.com/COMBINE-lab/salmon/master/LICENSE
+mkdir build
+cd build
+cmake -DNO_IPO=TRUE -DBOOST_INCLUDEDIR="$(dirname "$(dirname "$(dirname "$PWD")")")/include" -DBOOST_LIBRARYDIR="$(dirname "$(dirname "$(dirname "$PWD")")")/lib" -S ../ -B .
+make
+make install
+cd ../../../
 rm salmon.tar.gz
 
 # Install TransDecoder
