@@ -94,7 +94,10 @@ void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
     currIndex = trans.get_trans_path_index().c_str();
     currQuant = trans.get_trans_path_quant().c_str();
     
-    currTransInfoFileStr = std::string(trans.get_trans_path_trinity().replace_extension(".transInfo").c_str());
+    currTransInfoFileStr = std::string(trans.get_trans_path_trinity().replace_extension(".ti").c_str());
+
+    std::cout << currTransInfoFileStr << std::endl;
+
     currTransInfoFile.open(currTransInfoFileStr);
     while(getline(currTransInfoFile, currLineInfo)) {
       spacePos = currLineInfo.find(" ");
@@ -105,6 +108,9 @@ void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
         currSraRun.first = currLineInfo.substr(0, spacePos + 1);
         // Assign everything from space to endline as currSraRun.second
         currSraRun.second = currLineInfo.substr(spacePos + 1, nlPos - spacePos);
+
+        std::cout << currSraRun.first << std::endl;
+        std::cout << currSraRun.second << std::endl;
       }
       else {
         currSraRun.first = currLineInfo;
