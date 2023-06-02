@@ -51,7 +51,6 @@ std::string combine_reads(std::vector<std::pair<std::string, std::string>> sraRu
     outFile << std::endl;
     outFile.close();
   }
-  logOutput("Initiating Trinity assembly ...", logFile);
   return outFileStr;
 }
 
@@ -59,6 +58,13 @@ void run_trinity(std::pair<std::string, std::string> sraRun, std::string outFile
                  std::string threads, std::string ram_gb,
                  bool dispOutput, std::string logFile) {
   // Run Trinity for assembly using single SRA
+
+  // Summarize Trinity assembly job
+  logOutput("Now assembling de-novo transcriptome for:", logFile);
+  logOutput("\n  " + sraRun.first, logFile);
+  if (sraRun.second != "") {
+    logOutput("\n  " + sraRun.second, logFile);
+  }
   std::string inFile1 = sraRun.first;
   std::string inFile2 = sraRun.second;
   std::string trin_cmd;
@@ -96,8 +102,18 @@ void run_trinity_comb(std::vector<std::pair<std::string, std::string>> sraRuns,
                       std::string outFile,
                       std::string threads, std::string ram_gb,
                       bool dispOutput, std::string logFile) {
-
   // Run Trinity for assembly using multiple SRAs
+
+  // Summarize Trinity assembly job
+  logOutput("Now assembling de-novo transcriptome for:", logFile);
+  for (auto sraRun : sraRuns) {
+    logOutput("\n  SRA Run:", logFile);
+    logOutput("\n  " + sraRun.first, logFile);
+    if (sraRun.second != "") {
+      logOutput("\n  " + sraRun.second, logFile);
+    }
+    logOutput("\n", logFile);
+  }
   long long int ram_b = (long long int)stoi(ram_gb) * 1000000000;
   std::string outComb(std::string(fs::path(outFile.c_str()).stem().c_str()) + ".comb.fastq");
   std::string outFileComb(std::string(fs::path(outFile.c_str()).parent_path().c_str()) + "/" +

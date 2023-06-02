@@ -53,6 +53,7 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
                       std::string threads, std::string ram_gb,
                       bool dispOutput, bool retainInterFiles,
                       std::string logFile, const INI_MAP & cfgIni) {
+  logOutput("Starting de-novo assembly (this may take awhile)", logFile);
   INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
   INI_MAP_ENTRY assembGroups = cfgIni.at("Assembly groups");
   std::string outDir;
