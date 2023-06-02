@@ -28,8 +28,7 @@ rm -rf boost_1_81_0*
 echo "  Installing rapidXML library ..."
 wget -q https://sourceforge.net/projects/rapidxml/files/rapidxml/rapidxml%201.13/rapidxml-1.13.zip
 unzip rapidxml-1.13.zip -d ./include/
-mv rapidxml-1.13 rapidxml
-mv rapidxml include/
+mv ./include/rapidxml-1.13 ./include/rapidxml
 rm rapidxml-1.13.zip
 
 # Install libconfini
@@ -76,9 +75,9 @@ rm sratoolkit.tar.gz
 
 # Install FastQC
 echo "Installing FastQC ..."
-wget -q --output-document fastqc.zip https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.11.9.zip
+wget -q --output-document fastqc.zip https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.12.1.zip
 unzip fastqc.zip -d ./external/
-chmod 755 FastQC/fastqc
+chmod 755 ./external/FastQC/fastqc
 rm fastqc.zip
 
 # Install Rcorrector
@@ -126,10 +125,10 @@ rm ncbi-blast.tar.gz
 
 # Install Diamond
 echo "Installing Diamond ..."
-mkdir ./external/diamond-2.1.6
-wget -q --output-document diamond.tar.gz https://github.com/bbuchfink/diamond/releases/download/v2.1.6/diamond-linux64.tar.gz
-tar -xf diamond.tar.gz -C ./external/diamond-2.1.6/
-cd ./external/diamond-2.1.6
+mkdir ./external/diamond-2.1.7
+wget -q --output-document diamond.tar.gz https://github.com/bbuchfink/diamond/releases/download/v2.1.7/diamond-linux64.tar.gz
+tar -xf diamond.tar.gz -C ./external/diamond-2.1.7/
+cd ./external/diamond-2.1.7
 wget -q https://raw.githubusercontent.com/bbuchfink/diamond/master/LICENSE
 cd ../../
 rm diamond.tar.gz

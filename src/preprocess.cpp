@@ -257,7 +257,7 @@ void filtForeignBulk(const std::vector<SRA> & sras, std::vector<std::string> kra
 
   
   for (int i = 0; i < krakenDbs.size(); i++) {
-    logOutput("Now filtering with database: " +
+    logOutput("\nNow filtering with database: " +
               std::string(fs::path(krakenDbs[i].c_str()).filename().c_str()) + "\n",
               logFilePath);
     for (auto sra : sras) {
@@ -268,7 +268,7 @@ void filtForeignBulk(const std::vector<SRA> & sras, std::vector<std::string> kra
         summarize_sing_sra(sra, logFilePath, 2);
         continue;
       }
-      logOutput("Running filter of:", logFilePath);
+      logOutput("  Running filter of:", logFilePath);
       summarize_sing_sra(sra, logFilePath, 4);
       krakOutDir = sra.get_sra_path_for_filt().first.parent_path().c_str();
       if (sra.get_accession() == "") {
@@ -330,6 +330,22 @@ void filtForeignBulk(const std::vector<SRA> & sras, std::vector<std::string> kra
         }
       }
     }
+    // TODO: Perform summary of kraken2 filter jobs
+    //
+    // for each sra in sras
+    //   currNumFragsFilt <- 0
+    //   CurrPerFragsFilt <- 0.0
+    //   totNumFragsFilt <- 0
+    //   totPerFragsFilt <- 0.0
+    //   for each of sra's report files
+    //     currDb <- db
+    //     open(report file)
+    //     currNumFragsFilt <- reportFile.row(1).col(0)
+    //     currPerFragsFilt <- reportFile.row(1).col(1)
+    //     totNumFragsFilt += currNumFragsFilt
+    //     totPerFragsFilt += currPerFragsFilt
+    //     PRINT(currDb, currNumFragsFilt, currPerFragsFilt)
+    //   PRINT(totNumFragsFilt, totPerFrangsFilt)
   }
   // If deleting intermediates, remove directory from previous step
   if (!retainInterFiles) {
