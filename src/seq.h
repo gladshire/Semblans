@@ -14,6 +14,7 @@ class sequence {
     std::string header;
     std::string sequenceData;
     std::string quality;
+    std::string id;
     int numBp;
   public:
     sequence();
@@ -21,4 +22,5 @@ class sequence {
     sequence(const sequence & seq);
     std::string get_header();
     std::string get_sequence();
+    std::string get_id();
 };
