@@ -1,5 +1,17 @@
 #!/bin/sh
 
+# rcorrVersion   =
+# trimmVersion   =
+# fastqcVersion  = 
+# kraken2Version =
+# trinityVersion = 
+# dmndVersion    = 
+# blastVersion   =
+# corsetVersion  =
+# salmonVersion  = 
+# trnsDecVersion =
+
+
 echo "Initiating install of Paando ..."
 
 # Prepare Paando file structure
@@ -67,8 +79,8 @@ echo "Now installing required packages ..."
 echo "Installing SRA-Tools ..."
 wget -q --output-document sratoolkit.tar.gz https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/current/sratoolkit.current-ubuntu64.tar.gz
 tar -xf sratoolkit.tar.gz -C ./external/
-mv ./external/sratoolkit.3.0.5* ./external/sratoolkit-3.0.5
-cd ./external/sratoolkit-3.0.5
+mv ./external/sratoolkit.3.0.5* ./external/sratoolkit
+cd ./external/sratoolkit
 wget -q https://raw.githubusercontent.com/ncbi/sra-tools/master/LICENSE
 cd ../../
 rm sratoolkit.tar.gz
@@ -84,7 +96,8 @@ rm fastqc.zip
 echo "Installing Rcorrector ..."
 wget -q --output-document rcorrector.tar.gz https://github.com/mourisl/Rcorrector/archive/refs/tags/v1.0.5.tar.gz
 tar -xf rcorrector.tar.gz -C ./external/
-cd ./external/Rcorrector-1.0.5
+mv ./external/Rcorrector-1.0.5 ./external/Rcorrector
+cd ./external/Rcorrector
 make
 cd ../../
 rm rcorrector.tar.gz
@@ -93,7 +106,8 @@ rm rcorrector.tar.gz
 echo "Installing Trimmomatic ..."
 wget -q --output-document trimmomatic.zip https://github.com/usadellab/Trimmomatic/files/5854859/Trimmomatic-0.39.zip
 unzip trimmomatic.zip -d ./external/
-cd ./external/Trimmomatic-0.39/adapters/
+mv ./external/Trimmomatic-0.39 ./external/Trimmomatic
+cd ./external/Trimmomatic/adapters/
 cat TruSeq*.fa > TruSeq_all.fa
 cd ../../../
 rm trimmomatic.zip
@@ -102,7 +116,8 @@ rm trimmomatic.zip
 echo "Installing Kraken2 ..."
 wget -q --output-document kraken2.tar.gz https://github.com/DerrickWood/kraken2/archive/refs/tags/v2.1.2.tar.gz
 tar -xf kraken2.tar.gz -C ./external/
-cd ./external/kraken2-2.1.2
+mv ./external/kraken2-2.1.2 ./external/kraken2
+cd ./external/kraken2
 ./install_kraken2.sh .
 cd ../../
 rm kraken2.tar.gz
@@ -111,8 +126,8 @@ rm kraken2.tar.gz
 echo "Installing Trinity ..."
 wget -q --output-document trinity.tar.gz https://github.com/trinityrnaseq/trinityrnaseq/releases/download/Trinity-v2.15.1/trinityrnaseq-v2.15.1.FULL.tar.gz
 tar -xf trinity.tar.gz -C ./external/
-mv ./external/trinityrnaseq-v2.15.1 ./external/trinityrnaseq-2.15.1
-cd ./external/trinityrnaseq-2.15.1/
+mv ./external/trinityrnaseq-v2.15.1 ./external/trinityrnaseq
+cd ./external/trinityrnaseq/
 make
 cd ../../
 rm trinity.tar.gz
@@ -121,6 +136,7 @@ rm trinity.tar.gz
 echo "Installing NCBI-BLAST+ ..."
 wget -q --output-document ncbi-blast.tar.gz https://ftp.ncbi.nlm.nih.gov/blast/executables/LATEST/ncbi-blast-2.14.0+-x64-linux.tar.gz
 tar -xf ncbi-blast.tar.gz -C ./external/
+mv ./external/ncbi-blast-2.14.0+/ ./external/ncbi-blast+
 rm ncbi-blast.tar.gz
 
 # Install Diamond
@@ -128,7 +144,8 @@ echo "Installing Diamond ..."
 mkdir ./external/diamond-2.1.7
 wget -q --output-document diamond.tar.gz https://github.com/bbuchfink/diamond/releases/download/v2.1.7/diamond-linux64.tar.gz
 tar -xf diamond.tar.gz -C ./external/diamond-2.1.7/
-cd ./external/diamond-2.1.7
+mv ./external/diamond-2.1.7 ./external/diamond
+cd ./external/diamond
 wget -q https://raw.githubusercontent.com/bbuchfink/diamond/master/LICENSE
 cd ../../
 rm diamond.tar.gz
@@ -138,8 +155,8 @@ rm diamond.tar.gz
 echo "Installing Corset ..."
 wget -q --output-document corset.tar.gz https://github.com/Oshlack/Corset/releases/download/version-1.09/corset-1.09-linux64.tar.gz
 tar -xf corset.tar.gz -C ./external/
-mv ./external/corset-1.09-linux64 ./external/corset-1.09
-cd ./external/corset-1.09/
+mv ./external/corset-1.09-linux64 ./external/corset
+cd ./external/corset/
 chmod -x LICENSE
 chmod -x COPYING
 cd ../../
@@ -149,7 +166,8 @@ rm corset.tar.gz
 echo "Installing Salmon ..."
 wget -q --output-document salmon.tar.gz https://github.com/COMBINE-lab/salmon/archive/refs/tags/v1.10.1.tar.gz
 tar -xf salmon.tar.gz -C ./external/
-cd ./external/salmon-1.10.1
+mv ./external/salmon-1.10.1 ./external/salmon
+cd ./external/salmon
 wget -q https://raw.githubusercontent.com/COMBINE-lab/salmon/master/LICENSE
 mkdir build
 cd build
@@ -163,7 +181,7 @@ rm salmon.tar.gz
 echo "Installing TransDecoder ..."
 wget -q --output-document transdecoder.tar.gz https://github.com/TransDecoder/TransDecoder/archive/refs/tags/TransDecoder-v5.7.0.tar.gz
 tar -xf transdecoder.tar.gz -C ./external/
-mv ./external/TransDecoder-TransDecoder-v5.7.0 ./external/TransDecoder-5.7.0
+mv ./external/TransDecoder-TransDecoder-v5.7.0 ./external/TransDecoder
 rm transdecoder.tar.gz
 
 #========================================================================

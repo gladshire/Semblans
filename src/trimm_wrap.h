@@ -6,8 +6,8 @@
 namespace fs = boost::filesystem;
 namespace dl = boost::dll;
 
-#define PATH_TRIMM_DIR std::string((dl::program_location().parent_path() / fs::path(std::string("../external/Trimmomatic-0.39/"))).c_str())
-#define PATH_TRIMM std::string((dl::program_location().parent_path() / fs::path(std::string("../external/Trimmomatic-0.39/trimmomatic-0.39.jar"))).c_str())
+#define PATH_TRIMM_DIR std::string((dl::program_location().parent_path() / fs::path(std::string("../external/Trimmomatic/"))).c_str())
+#define PATH_TRIMM std::string((dl::program_location().parent_path() / fs::path(std::string("../external/Trimmomatic/trimmomatic-0.39.jar"))).c_str())
 #define TRUSEQ_ADAPT3_PE std::string(PATH_TRIMM_DIR + "/adapters/TruSeq3-PE.fa")
 #define TRUSEQ_ADAPT3_SE std::string(PATH_TRIMM_DIR + "/adapters/TruSeq3-SE.fa")
 #define TRUSEQ_ALL std::string(PATH_TRIMM_DIR + "/adapters/TruSeq_all.fa")

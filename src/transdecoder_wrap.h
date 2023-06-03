@@ -12,9 +12,9 @@
 namespace fs = boost::filesystem;
 namespace dl = boost::dll;
 
-#define PATH_TRANSD_LONGORFS std::string((dl::program_location().parent_path() / fs::path(std::string("../external/TransDecoder-5.7.0/TransDecoder.LongOrfs"))).c_str())
+#define PATH_TRANSD_LONGORFS std::string((dl::program_location().parent_path() / fs::path(std::string("../external/TransDecoder/TransDecoder.LongOrfs"))).c_str())
 
-#define PATH_TRANSD_PREDICT std::string((dl::program_location().parent_path() / fs::path(std::string("../external/TransDecoder-5.7.0/TransDecoder.Predict"))).c_str())
+#define PATH_TRANSD_PREDICT std::string((dl::program_location().parent_path() / fs::path(std::string("../external/TransDecoder/TransDecoder.Predict"))).c_str())
 
 bool fasta_ok(std::string fastaFile, uintmax_t ram_b);
 
