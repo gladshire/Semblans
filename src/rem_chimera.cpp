@@ -305,7 +305,7 @@ void removeChimera(std::string transIn, std::string transOut,
       return;
     }
   }
-  logOutput("Chimeric removal successful!\n", logFile);
+  logOutput("Chimeric removal finished\n", logFile);
   logOutput("====================", logFile);
   logOutput("  SUMMARY:", logFile);
   logOutput("    Removed:  " + std::to_string(numRemoved), logFile);

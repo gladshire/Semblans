@@ -34,3 +34,7 @@ std::string sequence::get_sequence() {
 std::string sequence::get_id() {
   return this->id;
 }
+
+void sequence::set_id(std::string newId) {
+  this->id = newId;
+}

@@ -77,7 +77,7 @@ void remChimeraBulk(const std::vector<transcript> & transVec, std::string ram_gb
 void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
                 bool dispOutput, std::string logFilePath) {
   // TODO: Print message for initiating salmon
-  logOutput("Starting clutering for:", logFilePath);
+  logOutput("Starting clustering for:", logFilePath);
   summarize_all_trans(transVec, logFilePath, 2);
   std::string currTransInSalm;
   std::string currIndex;
@@ -156,8 +156,6 @@ void corsetBulk(const std::vector<transcript> & transVec, std::string ram_gb,
     currTransRedund = trans.get_trans_path_redund().c_str();
     currOutDir = trans.get_trans_path_clust().parent_path().c_str();
 
-    corset_eq_classes(currTransPrefix, currEqClassFile, currOutDir, dispOutput, logFilePath);
-      
     // Filter corset output
     filterCorset(currTransInCors, currTransClust, currTransLargestClust, currTransRedund,
                  ram_b, currOutDir, logFilePath);
