@@ -55,6 +55,15 @@ mv ./usr/share/doc/libconfini/COPYING ./include/libconfini/
 rm libconfini-1.16.4-x86_64-bin.tar.xz
 rm -rf ./usr/
 
+# Install libcurl
+echo " Installing libcurl library ..."
+wget -q https://curl.se/download/curl-8.1.2.tar.gz
+tar -xf curl-8.1.2.tar.gz
+mv ./curl-8.1.2/include/curl ./include/
+mv ./curl-8.1.2/COPYING ./include/curl
+rm -rf curl-8.1.2
+rm curl-8.1.2.tar.gz
+
 #========================================================================
 #/////////////   INSTALLATION OF THIRD-PARTY PACKAGES    \\\\\\\\\\\\\\\\
 #========================================================================

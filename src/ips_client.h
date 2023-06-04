@@ -20,3 +20,5 @@ std::string submitJob(std::string email, std::string title, std::string sequence
 std::string getJobStatus(std::string jobID);
 
 void getJobResult(std::string jobID, std::string resultType, std::string outFilePath);
+
+std::string getBestMatchTSV(std::string resultTsvFilePath);

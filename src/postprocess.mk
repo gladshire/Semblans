@@ -1,8 +1,8 @@
 CC = g++
 CFLAGS = '-Wl,-rpath,$$ORIGIN/../lib/' -g -pthread
-LIBS = -L../lib -lboost_system -lboost_filesystem -ldl -lconfini
+LIBS = -L../lib -lboost_system -lboost_filesystem -ldl -lconfini -lcurl
 INCLUDE_PATH = -I../lib/ -I../include
-OBJ_LINK = postprocess.o sra.o sra_toolkit.o ini_parse.o transcript.o seq.o seq_hash.o ncbi_blast.o diamond.o rem_chimera.o salmon_wrap.o corset_wrap.o filter_corset.o transdecoder_wrap.o print_info.o thread_pool.o
+OBJ_LINK = postprocess.o sra.o sra_toolkit.o ini_parse.o transcript.o seq.o seq_hash.o ncbi_blast.o diamond.o rem_chimera.o salmon_wrap.o corset_wrap.o filter_corset.o transdecoder_wrap.o print_info.o thread_pool.o ips_client.o ips_job_man.o
 
 
 ../bin/postprocess: $(OBJ_LINK)
@@ -39,5 +39,9 @@ print_info.o: print_info.cpp print_info.h
 	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c print_info.cpp $(LIBS)
 thread_pool.o: thread_pool.cpp thread_pool.h
 	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c thread_pool.cpp $(LIBS)
+ips_client.o: ips_client.cpp ips_client.h
+	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c ips_client.cpp $(LIBS)
+ips_job_man.o: ips_job_man.cpp ips_job_man.h
+	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c ips_job_man.cpp $(LIBS)
 clean:
 	rm $(OBJ_LINK)

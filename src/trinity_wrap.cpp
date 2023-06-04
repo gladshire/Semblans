@@ -61,9 +61,9 @@ void run_trinity(std::pair<std::string, std::string> sraRun, std::string outFile
 
   // Summarize Trinity assembly job
   logOutput("Now assembling de-novo transcriptome for:", logFile);
-  logOutput("\n  " + sraRun.first, logFile);
+  logOutput("  " + sraRun.first, logFile);
   if (sraRun.second != "") {
-    logOutput("\n  " + sraRun.second, logFile);
+    logOutput("  " + sraRun.second, logFile);
   }
   std::string inFile1 = sraRun.first;
   std::string inFile2 = sraRun.second;

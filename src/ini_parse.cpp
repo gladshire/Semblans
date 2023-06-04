@@ -28,6 +28,7 @@ std::vector<std::string> getStrArray(std::string iniArrStr, std::string delim) {
     strArray.push_back(currSubstr);
     iniArrStr.erase(0, delimPos + delim.length());
   }
+  return strArray;
 }
 
 // Dispatch INI data to a map, indexable by sections, then by keys

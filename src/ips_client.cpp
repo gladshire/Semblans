@@ -190,38 +190,3 @@ std::string getBestMatchTSV(std::string resultTsvFilePath) {
   }
   return matchIdBest;
 }
-
-
-int main() {
-  std::string email = "gladshire@gmail.com";
-  std::string title = "test";
-  std::string sequence = "MASITYALCLCSLFILFSPLVSSNRRVRRQNRSDRLLADIGVRAQSYDPRVPENGIQQYT\n"
-                         "DIDQDLRHLFLNTRQTTLRWALNNIDALSSRGRREGKLQVPVSKKVPFLCPTNDTRSPSP\n"
-                         "PTSIEHLRPGDIDIIAAFGDSLSAGNGILSNNAIDMINEFRGLTFSGGGLGNWRRFVTLP\n"
-                         "NILKIFNPKLYGFAVSNSLVINHRSSRLNIAEPMIMSRDLPFQARVLIDLLRRDRHVDMK\n"
-                         "RHWKLLTVYVGNNDICSDLCHWDTPQSFLDQHARDLRQAFRLLRDHVPRLLINLIVVPNI\n"
-                         "PLVLSTMTQVPLQCFVVHRVGCHCLINDRLNRTQFNERMDTLIRWQQLDMEIARLPEFHR\n"
-                         "QDFAIVAHPMLTKVTAPTLPDGSTDWRFFSHDCFHFSQRGHAIISNLLWNSMLLPDDQKP\n"
-                         "RPSVVPELFERVVCPTAEQPYFVVRPS\n";
-
-  std::string jobID;
-  std::string jobStatus;
-
-  std::string currLine;
-
-  jobID = submitJob(email, title, sequence);
-  std::cout << "Job submitted: ";
-  std::cout << jobID << std::endl;
-
-  jobStatus = getJobStatus(jobID);
-  while (jobStatus != "FINISHED") {
-    std::cout << jobStatus << std::endl;
-    jobStatus = getJobStatus(jobID);
-  }
-
-  getJobResult(jobID, "tsv", "test_annotation.tsv");
-  std::cout << "Done." << std::endl;
-
-  currLine = getBestMatchTSV("test_annotation.tsv");
-  std::cout << "Best match: " << currLine << std::endl;
-}
