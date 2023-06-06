@@ -34,8 +34,8 @@ void blastxDiamBulk(const std::vector<transcript> & transVec, std::string thread
                                            refProt.find_last_of(".") -
                                            refProt.find_last_of("/"));
   for (auto trans : transVec) {
-    logOutput("Now running BLASTX alignment for:", logFilePath);
-    summarize_sing_trans(trans, logFilePath, 2);
+    logOutput("  Now running BLASTX alignment for:", logFilePath);
+    summarize_sing_trans(trans, logFilePath, 4);
     currTransInDiam = trans.get_trans_path_trinity().c_str();
 
     makeDb(refProt, blastDbDir, dispOutput, logFilePath);
@@ -58,8 +58,8 @@ void remChimeraBulk(const std::vector<transcript> & transVec, std::string ram_gb
   std::string currTransCut;
   std::string chimOutDir;
   for (auto trans : transVec) {
-    logOutput("Now running chimera removal for:", logFilePath);
-    summarize_sing_trans(trans, logFilePath, 2);
+    logOutput("  Now running chimera removal for:", logFilePath);
+    summarize_sing_trans(trans, logFilePath, 4);
     currTransInChim = trans.get_trans_path_trinity().c_str();
     currTransOutChim = trans.get_trans_path_chimera().c_str();
     currBlastx = trans.get_trans_path_blastx().c_str();
@@ -87,8 +87,8 @@ void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
   std::vector<std::pair<std::string, std::string>> currSraRunsIn;
   std::pair<std::string, std::string> currSraRun;
   for (auto trans : transVec) {
-    logOutput("Now performing cluster for:", logFilePath);
-    summarize_sing_trans(trans, logFilePath, 2);
+    logOutput("  Now performing cluster for:", logFilePath);
+    summarize_sing_trans(trans, logFilePath, 4);
     currTransInSalm = trans.get_trans_path_chimera().c_str();
     currIndex = trans.get_trans_path_index().c_str();
     currQuant = trans.get_trans_path_quant().c_str();
@@ -138,8 +138,8 @@ void corsetBulk(const std::vector<transcript> & transVec, std::string ram_gb,
   std::string currOutDir;
   uintmax_t ram_b = (uintmax_t)stoi(ram_gb) * 1000000000;
   for (auto trans : transVec) {
-    logOutput("Now performing cluster-based filtering for:", logFilePath);
-    summarize_sing_trans(trans, logFilePath, 2);
+    logOutput("  Now performing cluster-based filtering for:", logFilePath);
+    summarize_sing_trans(trans, logFilePath, 4);
     currTransInCors = trans.get_trans_path_chimera().c_str();
     if (trans.get_org_name() == "") {
       currTransPrefix = trans.get_file_prefix();
@@ -179,8 +179,8 @@ void transdecBulk(const std::vector<transcript> & transVec, std::string threads,
                                            refProt.find_last_of("/"));
   uintmax_t ram_b = (uintmax_t)stoi(ram_gb) * 1000000000;
   for (auto trans : transVec) {
-    logOutput("Now building coding sequences / peptides for:", logFilePath);
-    summarize_sing_trans(trans, logFilePath, 2);
+    logOutput("  Now building coding sequences / peptides for:", logFilePath);
+    summarize_sing_trans(trans, logFilePath, 4);
     currTransInTD = trans.get_trans_path_largest().c_str();
     currTransCds = trans.get_trans_path_cds().c_str();
     currTransPep = trans.get_trans_path_prot().c_str();

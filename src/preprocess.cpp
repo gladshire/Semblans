@@ -4,8 +4,7 @@
 
 void retrieveSraData(const std::vector<SRA> & sras, std::string threads,
                      bool dispOutput, std::string logFilePath) {
-  logOutput("Retrieving raw transcript data for:", logFilePath);
-  summarize_all_sras(sras, logFilePath, 2);
+  logOutput("Starting retrieval raw sequence data", logFilePath);
   // Prefetch raw data
   for (auto sra : sras) {
     // Check for checkpoint file
@@ -22,6 +21,8 @@ void retrieveSraData(const std::vector<SRA> & sras, std::string threads,
   }
   // Dump raw data to FASTQ files
   for (auto sra : sras) {
+    logOutput("  Now retrieving raw data for:", logFilePath);
+    summarize_sing_sra(sra, logFilePath, 4);
     // Check for checkpoint file
     if (sra.checkpointExists("dump")) {
       logOutput("Raw FASTQC dump found for: " + sra.get_accession(), logFilePath);
@@ -67,8 +68,8 @@ void fastqcBulk1(const std::vector<SRA> & sras, std::string threads, bool dispOu
       summarize_sing_sra(sra, logFilePath, 2);
       continue;
     }
-    logOutput("Now running quality analysis for:", logFilePath);
-    summarize_sing_sra(sra, logFilePath, 2);
+    logOutput("  Now running quality analysis for:", logFilePath);
+    summarize_sing_sra(sra, logFilePath, 4);
     run_fastqc(currFastqcIn1, threads, currFastqcOut1, dispOutput, logFilePath);
     // Make checkpoint file
     sra.makeCheckpoint("fastqc1");
@@ -107,8 +108,8 @@ void fastqcBulk2(const std::vector<SRA> & sras, std::string threads, bool dispOu
       summarize_sing_sra(sra, logFilePath, 2);
       continue;
     }
-    logOutput("Now running quality analysis for:", logFilePath);
-    summarize_sing_sra(sra, logFilePath, 2);
+    logOutput("  Now running quality analysis for:", logFilePath);
+    summarize_sing_sra(sra, logFilePath, 4);
     run_fastqc(currFastqcIn, threads, currFastqcOut, dispOutput, logFilePath);
     // Make checkpoint file
     sra.makeCheckpoint("fastqc2");
@@ -133,8 +134,8 @@ void errorCorrBulk(const std::vector<SRA> & sras, std::string threads,
       summarize_sing_sra(sra, logFilePath, 2);
       continue;
     }
-    logOutput("Now running error correction for:", logFilePath);
-    summarize_sing_sra(sra, logFilePath, 2);
+    logOutput("  Now running error correction for:", logFilePath);
+    summarize_sing_sra(sra, logFilePath, 4);
     run_rcorr(currRcorrIn, rcorrOutDir, threads, dispOutput, logFilePath);
     // Make checkpoint file
     sra.makeCheckpoint("corr");
@@ -160,8 +161,8 @@ void remUnfixBulk(const std::vector<SRA> & sras, std::string threads, std::strin
       summarize_sing_sra(sra, logFilePath, 2);
       continue;
     }
-    logOutput("Now removing unfixable reads for:", logFilePath);
-    summarize_sing_sra(sra, logFilePath, 2);
+    logOutput("  Now removing unfixable reads for:", logFilePath);
+    summarize_sing_sra(sra, logFilePath, 4);
     if (sra.is_paired()) {
       rem_unfix_pe(currCorrFixIn, currCorrFixOut, ram_b); 
     }
@@ -215,8 +216,8 @@ void trimBulk(const std::vector<SRA> & sras, std::string threads,
       summarize_sing_sra(sra, logFilePath, 2);
       continue;
     }
-    logOutput("Running adapter sequence trimming for:", logFilePath);
-    summarize_sing_sra(sra, logFilePath, 2);
+    logOutput("  Running adapter sequence trimming for:", logFilePath);
+    summarize_sing_sra(sra, logFilePath, 4);
     run_trimmomatic(currTrimIn, currTrimOutP, currTrimOutU, threads,
                     dispOutput, logFilePath);
     // Make checkpoint file
@@ -366,8 +367,8 @@ void remOverrepBulk(const std::vector<SRA> & sras, std::string threads, std::str
       summarize_sing_sra(sra, logFilePath, 2);
       continue;
     }
-    logOutput("Running removal of overrepresented reads for:", logFilePath);
-    summarize_sing_sra(sra, logFilePath, 2);
+    logOutput("  Running removal of overrepresented reads for:", logFilePath);
+    summarize_sing_sra(sra, logFilePath, 4);
     currOrepIn.first = sra.get_sra_path_for_filt().first.c_str();
     currOrepIn.second = sra.get_sra_path_for_filt().second.c_str();
 
