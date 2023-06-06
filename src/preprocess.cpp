@@ -3,7 +3,8 @@
 
 
 void retrieveSraData(const std::vector<SRA> & sras, std::string threads,
-                     bool dispOutput, std::string logFilePath) {
+                     bool dispOutput, bool retainInterFiles,
+                     std::string logFilePath) {
   logOutput("Starting retrieval raw sequence data", logFilePath);
   // Prefetch raw data
   for (auto sra : sras) {
@@ -34,6 +35,9 @@ void retrieveSraData(const std::vector<SRA> & sras, std::string threads,
     }
     // Make checkpoint file
     sra.makeCheckpoint("dump");
+    if (!retainInterFiles) {
+      fs::remove(sra.get_sra_path_raw().first.parent_path() / fs::path(sra.get_accession().c_str()));
+    }
   }
 }
 
@@ -459,7 +463,7 @@ int main(int argc, char * argv[]) {
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
     
     if (!sras.empty()) {
-      retrieveSraData(sras, threads, dispOutput, logFilePath);
+      retrieveSraData(sras, threads, dispOutput, retainInterFiles, logFilePath);
       logOutput("Successfully downloaded sequence data", logFilePath);
     }
     // Get single/paired filenames of local data

@@ -19,7 +19,8 @@
 #include "print_info.h"
 
 void retrieve_sra_data(const std::vector<SRA> & sras, std::string threads,
-                       bool dispOutput, std::string logFile);
+                       bool dispOutput, bool retainInterFiles,
+                       std::string logFile);
 
 bool stringToBool(std::string boolStr);
 
