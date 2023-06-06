@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include <vector>
+#include <functional>
 #include <boost/filesystem.hpp>
 #include <boost/dll.hpp>
 #include "sra.h"
@@ -28,4 +29,5 @@ class seqHash {
     sequence getSeq(std::string header);
     void dump(std::string filePath);
     uintmax_t getSize();
+    std::vector<sequence> * getHashData();
 };

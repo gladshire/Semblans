@@ -178,3 +178,8 @@ void seqHash::dump(std::string filePath) {
 uintmax_t seqHash::getSize() {
   return numItems;
 }
+
+// Get pointer to hash data
+std::vector<sequence> * getHashData() {
+  return seqHashData;
+}
