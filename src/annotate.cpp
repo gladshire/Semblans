@@ -39,4 +39,9 @@ void annotateTranscript(std::transIn, std::string transOut,
   // Initiate annotation manager
   transAnnotator.startSeqJobs(stoi(threads), email);
 
+  // Obtain annotator new sequence ID data
+  std::map<std::string, std::string> transAnnotator.getSeqIds();
+
+  // Iterate over hash table, renaming each header to new sequence ID
+  for (uintmax_t
 }

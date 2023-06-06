@@ -27,6 +27,7 @@ class seqHash {
     void deleteHash(std::string header);
     bool inHashTable(std::string header);
     sequence getSeq(std::string header);
+    void setSeqHeader(std::string header, std::string newHeader);
     void dump(std::string filePath);
     uintmax_t getSize();
     std::vector<sequence> * getHashData();

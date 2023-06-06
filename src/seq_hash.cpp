@@ -152,6 +152,30 @@ sequence seqHash::getSeq(std::string header) {
   }
 }
 
+// Set new sequence header
+void seqHash::setSeqHeader(std::string header, std::string newHeader) {
+  std::string keyStr = header.substr(0, header.find(' '));
+  unsigned long hashIndex = hashFunction(&keyStr[0]) % lenHashTable;
+  if (seqHashData[hashIndex].empty()) {
+    std::cout << "ERROR: Sequence not found" << std::endl;
+    exit(2);
+  }
+  else {
+    std::string currKeyStrHash;
+    auto vecIter = seqHashData[hashIndex].begin();
+    // Check for sequence in chained hash table
+    while (vecIter != seqHashData[hashIndex].end()) {
+      // If match found update its header and return
+      if (vecIter->get_header() == header || currKeyStrHash == keyStr) {
+        vecIter->set_header(newHeader);
+        return;
+      }
+    }
+    std::cout << "ERROR: Sequence not found" << std::endl;
+    exit(2);
+  }
+}
+
 // Output all hash table data to text file
 void seqHash::dump(std::string filePath) {
   std::ofstream outFile(filePath);
@@ -180,6 +204,6 @@ uintmax_t seqHash::getSize() {
 }
 
 // Get pointer to hash data
-std::vector<sequence> * getHashData() {
+std::vector<sequence> * seqHash::getHashData() {
   return seqHashData;
 }

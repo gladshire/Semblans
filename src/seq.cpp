@@ -35,6 +35,10 @@ std::string sequence::get_id() {
   return this->id;
 }
 
+void sequence::set_header(std::string newHeader) {
+  this->header = newHeader;
+}
+
 void sequence::set_id(std::string newId) {
   this->id = newId;
 }
