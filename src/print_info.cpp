@@ -1,5 +1,6 @@
 #include "print_info.h"
 
+
 void logOutput(std::string input, std::string logFile) {
   std::ofstream logStream;
   logStream.open(logFile, std::ios_base::app);
@@ -23,11 +24,11 @@ void summarize_sing_sra(SRA sra, std::string logFile, int margin) {
   if (sra.is_paired()) {
     loggerStream << margStr << "Paired-end run:" << std::endl;
     loggerStream << margStr << filePrefix1 << std::endl;
-    loggerStream << margStr << filePrefix2 << "\n" << std::endl;
+    loggerStream << margStr << filePrefix2 << std::endl;
   }
   else {
     loggerStream << margStr << "Single-end run:" << std::endl;
-    loggerStream << margStr << filePrefix1 << "\n" << std::endl;
+    loggerStream << margStr << filePrefix1 << std::endl;
   }
   logStream.close();
 }

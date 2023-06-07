@@ -1,6 +1,28 @@
 #include "preprocess.h"
 
 
+std::atomic<bool> procRunning(false);
+
+
+void progressAnim(int numSpace) {
+  const std::string anim[] = {".  ", ".. ", "..."};
+  int animIndex = 0;
+
+  while (procRunning) {
+    std::cout << "\r";
+    for (int i = 0; i < numSpace; i++) {
+      std::cout << " ";
+    }
+    std::cout << anim[animIndex] << std::flush;
+    animIndex = (animIndex + 1) % 3;
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+  }
+  std::cout << "\r";
+  for (int i = 0; i < numSpace; i++) {
+    std::cout << " ";
+  }
+  std::cout << std::endl;
+}
 
 void retrieveSraData(const std::vector<SRA> & sras, std::string threads,
                      bool dispOutput, bool compressOutput,
@@ -17,7 +39,13 @@ void retrieveSraData(const std::vector<SRA> & sras, std::string threads,
     else {
       logOutput("  Downloading raw data for: ", logFilePath);
       summarize_sing_sra(sra, logFilePath, 4);
+     
+      procRunning = true;
+      std::thread prefProgThread(progressAnim,2);
       prefetch_sra(sra, dispOutput, logFilePath);
+      procRunning = false;
+      prefProgThread.join();
+
     }
     // Make checkpoint file
     sra.makeCheckpoint("sra");
@@ -32,7 +60,13 @@ void retrieveSraData(const std::vector<SRA> & sras, std::string threads,
     else {
       logOutput("  Dumping to FASTQ file: ", logFilePath);
       summarize_sing_sra(sra, logFilePath, 4);
+
+      procRunning = true;
+      std::thread fqdumpThread(progressAnim,2);
       fasterq_sra(sra, threads, dispOutput, compressOutput, logFilePath);
+      procRunning = false;
+      fqdumpThread.join();
+
     }
     // Make checkpoint file
     sra.makeCheckpoint("dump");
@@ -50,6 +84,7 @@ bool stringToBool(std::string boolStr) {
   boolConv = (boolStr == "true") ? true : false;
   return boolConv;
 }
+
 
 void print_help() {
   winsize w;
@@ -74,7 +109,13 @@ void fastqcBulk1(const std::vector<SRA> & sras, std::string threads, bool dispOu
     }
     logOutput("  Now running quality analysis for:", logFilePath);
     summarize_sing_sra(sra, logFilePath, 4);
+
+    procRunning = true;
+    std::thread fqcThread(progressAnim,2);
     run_fastqc(currFastqcIn1, threads, currFastqcOut1, dispOutput, logFilePath);
+    procRunning = false;
+    fqcThread.join();
+    
     // Make checkpoint file
     sra.makeCheckpoint("fastqc1");
   }
@@ -113,7 +154,13 @@ void fastqcBulk2(const std::vector<SRA> & sras, std::string threads, bool dispOu
     }
     logOutput("  Now running quality analysis for:", logFilePath);
     summarize_sing_sra(sra, logFilePath, 4);
+
+    procRunning = true;
+    std::thread fqcThread(progressAnim,2);
     run_fastqc(currFastqcIn, threads, currFastqcOut, dispOutput, logFilePath);
+    procRunning = false;
+    fqcThread.join();
+
     // Make checkpoint file
     sra.makeCheckpoint("fastqc2");
   }
@@ -138,7 +185,13 @@ void errorCorrBulk(const std::vector<SRA> & sras, std::string threads,
     }
     logOutput("  Now running error correction for:", logFilePath);
     summarize_sing_sra(sra, logFilePath, 4);
+
+    procRunning = true;
+    std::thread rcorrThread(progressAnim,2);
     run_rcorr(currRcorrIn, rcorrOutDir, threads, dispOutput, compressFiles, logFilePath);
+    procRunning = false;
+    rcorrThread.join();
+
     // Make checkpoint file
     sra.makeCheckpoint("corr");
   }
@@ -164,12 +217,18 @@ void remUnfixBulk(const std::vector<SRA> & sras, std::string threads, std::strin
     }
     logOutput("  Now removing unfixable reads for:", logFilePath);
     summarize_sing_sra(sra, logFilePath, 4);
+
+    procRunning = true;
+    std::thread fixThread(progressAnim,2);
     if (sra.is_paired()) {
       rem_unfix_pe(currCorrFixIn, currCorrFixOut, ram_b, compressFiles); 
     }
     else {
       rem_unfix_se(currCorrFixIn.first, currCorrFixOut.first, ram_b);
     }
+    procRunning = false;
+    fixThread.join();
+
     // Make checkpoint file
     sra.makeCheckpoint("corr.fix");
 
@@ -218,8 +277,14 @@ void trimBulk(const std::vector<SRA> & sras, std::string threads,
     }
     logOutput("  Running adapter sequence trimming for:", logFilePath);
     summarize_sing_sra(sra, logFilePath, 4);
+
+    procRunning = true;
+    std::thread trimThread(progressAnim,2);
     run_trimmomatic(currTrimIn, currTrimOutP, currTrimOutU, threads,
                     dispOutput, logFilePath);
+    procRunning = false;
+    trimThread.join();
+
     // Make checkpoint file
     sra.makeCheckpoint("trim");
 
@@ -300,8 +365,13 @@ void filtForeignBulk(const std::vector<SRA> & sras, std::vector<std::string> kra
         else {
         currKrakOut = krakOutDir + "TMP.fq";
       }
+      procRunning = true;
+      std::thread krakThread(progressAnim,2);
       run_kraken2(currKrakIn, currKrakOut, repFile, threads, krakenDbs[i],
                   krakenConf, dispOutput, logFilePath);
+      procRunning = false;
+      krakThread.join();
+      
       if (sra.is_paired()) {
         std::rename((krakOutDir + "/TMP_1.fq").c_str(),
                     sra.get_sra_path_for_filt().first.c_str());
@@ -390,6 +460,9 @@ void remOverrepBulk(const std::vector<SRA> & sras, std::string threads, std::str
 
     currOrepOut.first = sra.get_sra_path_orep_filt().first.c_str();
     currOrepOut.second = sra.get_sra_path_orep_filt().second.c_str();
+
+    procRunning = true;
+    std::thread orepThread(progressAnim,2);
     if (sra.is_paired()) {
       currOrepSeqsPe = get_overrep_seqs_pe(sra);
       rem_overrep_pe(currOrepIn, currOrepOut, ram_b, currOrepSeqsPe);
@@ -398,6 +471,9 @@ void remOverrepBulk(const std::vector<SRA> & sras, std::string threads, std::str
       currOrepSeqsSe = get_overrep_seqs_se(sra);
       rem_overrep_se(currOrepIn.first, currOrepOut.first, ram_b, currOrepSeqsSe);
     }
+    procRunning = false;
+    orepThread.join();
+
     // Make checkpoint file
     sra.makeCheckpoint("orep.fix");
 
@@ -417,6 +493,7 @@ void remOverrepBulk(const std::vector<SRA> & sras, std::string threads, std::str
 }
 
 int main(int argc, char * argv[]) {
+  system("setterm -cursor off");
   if (argc < 4) {
     print_help();
     return 0;
@@ -576,6 +653,6 @@ int main(int argc, char * argv[]) {
       remOverrepBulk(sras, threads, ram_gb, dispOutput, retainInterFiles, logFilePath, cfgIni);
     }
   }
-
+  system("setterm -cursor on");
   return 0;
 }

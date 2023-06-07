@@ -3,6 +3,9 @@
 #include <algorithm>
 #include <cctype>
 #include <iomanip>
+#include <thread>
+#include <chrono>
+#include <atomic>
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <boost/filesystem.hpp>
@@ -17,6 +20,9 @@
 #include "kraken_wrap.h"
 #include "rem_overrep.h"
 #include "print_info.h"
+
+
+void progressAnim(int numSpace);
 
 void retrieve_sra_data(const std::vector<SRA> & sras, std::string threads,
                        bool dispOutput, bool retainInterFiles,
