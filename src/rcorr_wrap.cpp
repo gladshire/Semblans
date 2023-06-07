@@ -1,7 +1,8 @@
 #include "rcorr_wrap.h"
 
 void run_rcorr(std::pair<std::string, std::string> sraRun, std::string outDir,
-               std::string threads, bool dispOutput, std::string logFile) {
+               std::string threads, bool dispOutput, bool compressFiles,
+               std::string logFile) {
   std::string inFile1 = sraRun.first;
   std::string inFile2 = sraRun.second;
 
@@ -10,6 +11,7 @@ void run_rcorr(std::pair<std::string, std::string> sraRun, std::string outDir,
   std::string wkProp;
 
   std::string printOut;
+  
   if (dispOutput) {
     printOut = " 2>&1 | tee -a " + logFile;
   }
@@ -25,15 +27,25 @@ void run_rcorr(std::pair<std::string, std::string> sraRun, std::string outDir,
   else {
     isPaired = false;
   }
-  std::string rcorrCmd = "perl " + PATH_RCORR + " -t " + threads + " -od " + outDir;
+  std::string rcorrCmd;
   if (isPaired) {
-    rcorrCmd += " -1 " + inFile1 + " -2 " + inFile2;
-    result = system((rcorrCmd + printOut).c_str()); 
+    rcorrCmd = "( perl " + PATH_RCORR + " -t " + threads + " -1 " + inFile1 + " -2 " + inFile2;
   }
   else {
-    rcorrCmd += " -s " + inFile1;
-    result = system((rcorrCmd + printOut).c_str());
+    rcorrCmd = "( perl " + PATH_RCORR + " -t " + threads + " -s " + inFile1;
   }
+  if (compressFiles) {
+    std::string sraPathL = outDir + "/" + std::string(fs::path(sraRun.first.c_str()).stem().stem().c_str()) + ".fix.fq.gz";
+    std::string sraPathR = outDir + "/" + std::string(fs::path(sraRun.second.c_str()).stem().stem().c_str()) + ".fix.fq.gz";
+    rcorrCmd += std::string(" -stdout | awk \'{ if ((NR-1) % 8 < 4) {print | \"" +
+                            PATH_PIGZ + " --fast -p " + threads + " > " + sraPathL + "\"} " +
+                            "else {print | \"" + PATH_PIGZ + " --fast -p " + threads + " > " + sraPathR + "\"} }\' )");
+  }
+  else {
+    rcorrCmd += std::string(" -od " + outDir);
+  }
+  rcorrCmd += printOut;
+  result = system(rcorrCmd.c_str());
   if (WIFSIGNALED(result)) {
     logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
     exit(1);

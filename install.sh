@@ -92,6 +92,7 @@ mv ./external/pigz-2.7 ./external/pigz
 cd ./external/pigz
 make
 cd ../../
+rm pigz.tar.gz
 
 # Install NCBI sra-tools
 echo "Installing SRA-Tools ..."

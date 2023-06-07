@@ -9,6 +9,8 @@ namespace fs = boost::filesystem;
 namespace dl = boost::dll;
 
 #define PATH_RCORR std::string((dl::program_location().parent_path() / fs::path(std::string("../external/Rcorrector/run_rcorrector.pl"))).c_str())
+#define PATH_PIGZ std::string((dl::program_location().parent_path() / fs::path(std::string("../external/pigz/pigz"))).c_str())
 
 void run_rcorr(std::pair<std::string, std::string> sraRun, std::string outDir,
-               std::string threads, bool dispOutput, std::string logFile);
+               std::string threads, bool dispOutput, bool compressFiles,
+               std::string logFile);

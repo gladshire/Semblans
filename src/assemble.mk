@@ -1,6 +1,6 @@
 CC = g++
 CFLAGS = '-Wl,-rpath,$$ORIGIN/../lib/' -g -pthread
-LIBS = -L../lib/ -lboost_system -lboost_filesystem -ldl -lconfini
+LIBS = -L../lib/ -lboost_system -lboost_filesystem -lboost_iostreams -ldl -lconfini
 INCLUDE_PATH = -I../lib -I../include
 OBJ_LINK = assemble.o sra.o sra_toolkit.o transcript.o ini_parse.o trinity_wrap.o print_info.o
 

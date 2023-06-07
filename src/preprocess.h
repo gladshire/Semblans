@@ -33,11 +33,11 @@ void fastqcBulk2(const std::vector<SRA> & sras, std::string threads, bool dispOu
                  std::string logFilePath, const INI_MAP & cfgIni);
 
 void errorCorrBulk(const std::vector<SRA> & sras, std::string threads,
-                   bool dispOutput, bool retainInterFiles,
+                   bool dispOutput, bool retainInterFiles, bool compressFiles,
                    std::string logFilePath, const INI_MAP & cfgIni);
 
 void remUnfixBulk(const std::vector<SRA> & sras, std::string threads, std::string ram_gb,
-                  bool dispOutput, bool retainInterFiles,
+                  bool dispOutput, bool retainInterFiles, bool compressFiles,
                   std::string logFilePath, const INI_MAP & cfgIni);
 
 void trimBulk(const std::vector<SRA> & sras, std::string threads,
