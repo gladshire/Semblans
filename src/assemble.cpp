@@ -141,6 +141,25 @@ int main(int argc, char * argv[]) {
   if (argc > 1) {
     std::vector<SRA> sras;
     std::vector<std::string> localDataFiles;
+    
+    // Get number of threads
+    std::string threads = argv[2];
+
+    // Get RAM in GB
+    std::string ram_gb = argv[3];
+
+    // Get boolean for multiple sra processing
+    bool mult_sra = stringToBool(argv[4]);
+
+    // Get boolean for intermediate file fate
+    bool retainInterFiles = stringToBool(argv[5]);
+    
+    // Get boolean for verbose printing
+    bool dispOutput = stringToBool(argv[6]);
+   
+    // Get boolean for output file compression
+    bool compressFiles = stringToBool(argv[7]);
+
     // Retrieve SRA objects for trinity runs
     INI_MAP cfgIni = make_ini_map(argv[1]);
     std::string logFilePath = cfgIni["General"]["log_file"];
@@ -149,7 +168,7 @@ int main(int argc, char * argv[]) {
     make_proj_space(cfgIni, "assemble");
 
     // Obtain SRAs
-    sras = get_sras(cfgIni);
+    sras = get_sras(cfgIni, compressFiles);
     
     for (auto fqFileName : cfgIni.at("Local files")) {
       localDataFiles.push_back(fqFileName.first);
@@ -168,7 +187,7 @@ int main(int argc, char * argv[]) {
       }
       if (fs::exists(cfgIni["General"]["local_data_directory"] + sraRunsLocal.first) &&
           fs::exists(cfgIni["General"]["local_data_directory"] + sraRunsLocal.second)) {
-        sras.push_back(SRA(sraRunsLocal.first, sraRunsLocal.second, cfgIni));
+        sras.push_back(SRA(sraRunsLocal.first, sraRunsLocal.second, cfgIni, compressFiles));
       }
       else {
         if (sraRunsLocal.first != "" &&
@@ -187,21 +206,7 @@ int main(int argc, char * argv[]) {
       std::cout << "ERROR: No SRA runs specified. Please check config file" << std::endl;
     }
 
-    // Get number of threads
-    std::string threads = argv[2];
-
-    // Get RAM in GB
-    std::string ram_gb = argv[3];
-
-    // Get boolean for multiple sra processing
-    bool mult_sra = stringToBool(argv[4]);
-
-    // Get boolean for intermediate file fate
-    bool retainInterFiles = stringToBool(argv[5]);
     
-    // Get boolean for verbose printing
-    bool dispOutput = stringToBool(argv[6]);
-
     // Get group specifications for SRAs
 
     std::map<std::string, std::vector<SRA>> sraGroups;

@@ -1,11 +1,11 @@
 #include "sra_toolkit.h"
 
 
-std::vector<SRA> get_sras(const INI_MAP &iniFile) {
+std::vector<SRA> get_sras(const INI_MAP &iniFile, bool compressFiles) {
   std::vector<SRA> sras;
   if (!iniFile.at("SRA accessions").empty()) {
     for (auto sra : iniFile.at("SRA accessions")) {
-      sras.push_back(SRA(sra.first, iniFile));
+      sras.push_back(SRA(sra.first, iniFile, compressFiles));
     }
   }
   return sras;
@@ -32,7 +32,7 @@ void prefetch_sra(SRA sra, bool dispOutput, std::string logFile) {
 
 
 void fasterq_sra(SRA sra, std::string threads, bool dispOutput,
-                 std::string logFile) {
+                 bool compressOutput, std::string logFile) {
   std::string prefetchDir(sra.get_sra_path_raw().first.parent_path().c_str());
   std::string outFile;
   std::string fasterqFlag = " -e " + threads + " -t " + prefetchDir + " " + prefetchDir;
@@ -41,14 +41,24 @@ void fasterq_sra(SRA sra, std::string threads, bool dispOutput,
   outFile = sra.make_file_str();
   fs::path currDir = fs::current_path();
   fs::current_path(fs::path(prefetchDir.c_str()));
-  std::string fasterqCmd = PATH_FASTERQ + " " + fasterqFlag + "/" + sraAccession +
-                           " -o " + outFile;
+  std::string fasterqCmd;
+  if (compressOutput) {
+    fasterqCmd = "( " + PATH_FASTERQ + " " + fasterqFlag + "/" + sraAccession +
+                 " --split-spot -Z | awk \'{" +
+                 "if ((NR-1) % 8 < 4) {print | \"" + PATH_PIGZ + " --fast -p " + threads + " > " + outFile + "_1.fastq.gz\"} " +
+                 "else {print | \"" + PATH_PIGZ + " --fast -p " + threads + " > " + outFile + "_2.fastq.gz\"} }\' )";
+  }
+  else {
+    fasterqCmd = PATH_FASTERQ + " " + fasterqFlag + "/" + sraAccession +
+                 " -o " + outFile;
+  }
   if (dispOutput) {
     fasterqCmd += (" 2>&1 | tee -a " + logFile);
   }
   else {
     fasterqCmd += (" >>" + logFile + " 2>&1");
   }
+
   result = system(fasterqCmd.c_str());
   fs::current_path(currDir);
   if (WIFSIGNALED(result)) {

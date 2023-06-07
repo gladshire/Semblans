@@ -23,6 +23,7 @@ class SRA {
     int spots_m;
     long int bp;
     bool paired;
+    bool compressedFiles;
     std::string file_prefix_1;
     std::string file_prefix_2;
     fs::path fastqc_dir_1_1;
@@ -45,8 +46,8 @@ class SRA {
     fs::path sra_path_orep_filt_2;
   public:
     SRA();
-    SRA(std::string sra_accession, INI_MAP cfgIni);
-    SRA(std::string fileName1, std::string fileName2, INI_MAP cfgIni);
+    SRA(std::string sra_accession, INI_MAP cfgIni, bool compressedFiles);
+    SRA(std::string fileName1, std::string fileName2, INI_MAP cfgIni, bool compressedFiles);
     std::string get_accession();
     std::string get_org_name();
     std::string get_tax_id();

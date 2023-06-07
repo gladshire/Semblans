@@ -3,9 +3,10 @@
 
 
 void retrieveSraData(const std::vector<SRA> & sras, std::string threads,
-                     bool dispOutput, bool retainInterFiles,
+                     bool dispOutput, bool compressOutput,
+                     bool retainInterFiles,
                      std::string logFilePath) {
-  logOutput("Starting retrieval raw sequence data", logFilePath);
+  logOutput("Starting retrieval of raw sequence data", logFilePath);
   // Prefetch raw data
   for (auto sra : sras) {
     // Check for checkpoint file
@@ -14,7 +15,8 @@ void retrieveSraData(const std::vector<SRA> & sras, std::string threads,
       continue;
     }
     else {
-      logOutput("Downloading raw data for: " + sra.get_accession() + " ...", logFilePath);
+      logOutput("  Downloading raw data for: ", logFilePath);
+      summarize_sing_sra(sra, logFilePath, 4);
       prefetch_sra(sra, dispOutput, logFilePath);
     }
     // Make checkpoint file
@@ -30,8 +32,9 @@ void retrieveSraData(const std::vector<SRA> & sras, std::string threads,
       continue;
     }
     else {
-      logOutput("Dumping to FASTQ file: " + sra.get_accession() + " ...", logFilePath);
-      fasterq_sra(sra, threads, dispOutput, logFilePath);
+      logOutput("  Dumping to FASTQ file: ", logFilePath);
+      summarize_sing_sra(sra, logFilePath, 4);
+      fasterq_sra(sra, threads, dispOutput, compressOutput, logFilePath);
     }
     // Make checkpoint file
     sra.makeCheckpoint("dump");
@@ -443,6 +446,9 @@ int main(int argc, char * argv[]) {
     // Obtain specification for verbose printing to terminal
     bool dispOutput = stringToBool(argv[5]);
 
+    // Obtain specification for compression of output files
+    bool compressFiles = stringToBool(argv[6]);
+
     // Obtain path to log file from config file
     std::string logFilePath = cfgIni["General"]["log_file"];
  
@@ -456,14 +462,14 @@ int main(int argc, char * argv[]) {
     std::vector<std::string> localDataFiles;
 
     // Create vector of SRA objects from SRA accessions, using NCBI web API
-    sras = get_sras(cfgIni);
+    sras = get_sras(cfgIni, compressFiles);
 
     // Obtain terminal window size for printing purposes
     struct winsize w;
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
     
     if (!sras.empty()) {
-      retrieveSraData(sras, threads, dispOutput, retainInterFiles, logFilePath);
+      retrieveSraData(sras, threads, dispOutput, retainInterFiles, compressFiles, logFilePath);
       logOutput("Successfully downloaded sequence data", logFilePath);
     }
     // Get single/paired filenames of local data
@@ -489,7 +495,7 @@ int main(int argc, char * argv[]) {
       // Check if files in pair exist. If not, do not add to sras vector
       if (fs::exists(localDataDir + sraRunsLocal.first) &&
           fs::exists(localDataDir + sraRunsLocal.second)) {
-        sras.push_back(SRA(sraRunsLocal.first, sraRunsLocal.second, cfgIni));
+        sras.push_back(SRA(sraRunsLocal.first, sraRunsLocal.second, cfgIni, compressFiles));
       }
       else {
         if (sraRunsLocal.first != "" &&

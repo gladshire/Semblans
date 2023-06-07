@@ -57,6 +57,7 @@ int main(int argc, char * argv[]) {
   bool multAssembly;
   bool useLocalData;
   bool retainInterFiles;
+  bool compressFiles;
   bool verboseOutput;
 
   if (argc == 1 || 
@@ -80,6 +81,7 @@ int main(int argc, char * argv[]) {
     std::string command = "";
     multAssembly = false;
     retainInterFiles = false;
+    compressFiles = true;
     verboseOutput = false;
 
     for (int i = 0; i < argc; i++) {
@@ -205,6 +207,12 @@ int main(int argc, char * argv[]) {
                strcmp("-V", argv[i]) == 0) {
         verboseOutput = true;
       }
+      else if (strcmp("--no-compress", argv[i]) == 0 ||
+               strcmp("--No-compress", argv[i]) == 0 ||
+               strcmp("-d", argv[i]) == 0 ||
+               strcmp("-D", argv[i]) == 0) {
+        compressFiles = false;
+      }
     }
 
     if (command == "") {
@@ -223,6 +231,7 @@ int main(int argc, char * argv[]) {
  
     std::string verbose;
     std::string retain;
+    std::string compress;
     if (verboseOutput) {
       verbose = " true";
     }
@@ -235,11 +244,18 @@ int main(int argc, char * argv[]) {
     else {
       retain = " false";
     }
+    if (compressFiles) {
+      compress = " true";
+    }
+    else {
+      compress = " false";
+    }
     std::string preCmd = PAANDO_DIR + "preprocess " + pathConfig + " " +
                          std::to_string(numThreads) + " " +
                          std::to_string(ram);
     preCmd += retain;
     preCmd += verbose;
+    preCmd += compress;
     std::string assCmd = PAANDO_DIR + "assemble " + pathConfig + " " +
                          std::to_string(numThreads) + " " +
                          std::to_string(ram);
@@ -251,11 +267,13 @@ int main(int argc, char * argv[]) {
     }
     assCmd += retain;
     assCmd += verbose;
+    assCmd += compress;
     std::string postCmd = PAANDO_DIR + "postprocess " + pathConfig + " " +
                           std::to_string(numThreads) + " " +
                           std::to_string(ram);
     postCmd += retain;
     postCmd += verbose;
+    postCmd += compress;
     int result;
 
     print_intro(logFilePath);

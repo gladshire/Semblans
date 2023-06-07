@@ -20,7 +20,7 @@
 
 void retrieve_sra_data(const std::vector<SRA> & sras, std::string threads,
                        bool dispOutput, bool retainInterFiles,
-                       std::string logFile);
+                       bool compressOutput, std::string logFile);
 
 bool stringToBool(std::string boolStr);
 

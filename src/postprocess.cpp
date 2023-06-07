@@ -195,6 +195,17 @@ void transdecBulk(const std::vector<transcript> & transVec, std::string threads,
 
 int main(int argc, char * argv[]) {
   if (argc > 1) {
+    // Get number of threads
+    std::string threads = argv[2];
+    // Get RAM in GB
+    std::string ram_gb = argv[3];
+    // Determine whether to keep intermediate files
+    bool retainInterFiles = stringToBool(argv[4]);
+    // Determine whether to print output of programs
+    bool dispOutput = stringToBool(argv[5]);
+    // Determine whether to compress files
+    bool compressFiles = stringToBool(argv[6]);
+
     // Retrieve SRA objects, convert to transcripts
     INI_MAP cfgIni = make_ini_map(argv[1]);
     make_proj_space(cfgIni, "postprocess");
@@ -204,7 +215,7 @@ int main(int argc, char * argv[]) {
     std::string logFilePath = cfgIni["General"]["log_file"];
     std::vector<SRA> sras;
     std::vector<std::string> localDataFiles;
-    sras = get_sras(cfgIni);
+    sras = get_sras(cfgIni, compressFiles);
     for (auto fqFileName : cfgIni.at("Local files")) {
       localDataFiles.push_back(fqFileName.first);
     }
@@ -222,7 +233,7 @@ int main(int argc, char * argv[]) {
       }
       if (fs::exists(cfgIni["General"]["local_data_directory"] + sraRunsLocal.first) &&
           fs::exists(cfgIni["General"]["local_data_directory"] + sraRunsLocal.second)) {
-        sras.push_back(SRA(sraRunsLocal.first, sraRunsLocal.second, cfgIni));
+        sras.push_back(SRA(sraRunsLocal.first, sraRunsLocal.second, cfgIni, compressFiles));
       }
       else {
         if (sraRunsLocal.first != "" &&
@@ -255,15 +266,7 @@ int main(int argc, char * argv[]) {
     }
  
 
-    // Get number of threads
-    std::string threads = argv[2];
-    // Get RAM in GB
-    std::string ram_gb = argv[3];
-    // Determine whether to keep intermediate files
-    bool retainInterFiles = stringToBool(argv[4]);
-    // Determine whether to print output of programs
-    bool dispOutput = stringToBool(argv[5]);
-
+  
     // Summarize program execution parameters
     logOutput("Paando Postprocess started with following parameters:", logFilePath);
     logOutput("  Config file:     " + std::string(argv[1]), logFilePath);
