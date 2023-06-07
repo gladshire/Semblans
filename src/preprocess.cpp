@@ -11,7 +11,7 @@ void retrieveSraData(const std::vector<SRA> & sras, std::string threads,
   for (auto sra : sras) {
     // Check for checkpoint file
     if (sra.checkpointExists("sra")) {
-      logOutput("  Prefetch found for: " + sra.get_accession(), logFilePath);
+      logOutput("  Prefetch data found for:   " + sra.get_accession(), logFilePath);
       continue;
     }
     else {
@@ -69,8 +69,7 @@ void fastqcBulk1(const std::vector<SRA> & sras, std::string threads, bool dispOu
     currFastqcOut1 = sra.get_fastqc_dir_1().first.parent_path().c_str();
     // Check for checkpoint file
     if (sra.checkpointExists("fastqc1")) {
-      logOutput("  FastQC analysis found for:", logFilePath);
-      summarize_sing_sra(sra, logFilePath, 4);
+      logOutput("  FastQC analysis found for: " + sra.get_accession(), logFilePath);
       continue;
     }
     logOutput("  Now running quality analysis for:", logFilePath);
@@ -109,8 +108,7 @@ void fastqcBulk2(const std::vector<SRA> & sras, std::string threads, bool dispOu
     currFastqcOut = sra.get_fastqc_dir_2().first.parent_path().c_str();
     // Check for checkpoint file
     if (sra.checkpointExists("fastqc2")) {
-      logOutput("  FastQC analysis found for:", logFilePath);
-      summarize_sing_sra(sra, logFilePath, 4);
+      logOutput("  FastQC analysis found for: " + sra.get_accession(), logFilePath);
       continue;
     }
     logOutput("  Now running quality analysis for:", logFilePath);
@@ -135,8 +133,7 @@ void errorCorrBulk(const std::vector<SRA> & sras, std::string threads,
      
     // Check for checkpoint file
     if (sra.checkpointExists("corr")) {
-      logOutput("  Error-corrected version found for:", logFilePath);
-      summarize_sing_sra(sra, logFilePath, 2);
+      logOutput("  Error-corrected version found for: " + sra.get_accession(), logFilePath);
       continue;
     }
     logOutput("  Now running error correction for:", logFilePath);
@@ -162,8 +159,7 @@ void remUnfixBulk(const std::vector<SRA> & sras, std::string threads, std::strin
 
     // Check for checkpoint file
     if (sra.checkpointExists("corr.fix")) {
-      logOutput("   Unfixable error-fixed version found for:", logFilePath);
-      summarize_sing_sra(sra, logFilePath, 2);
+      logOutput("  Unfixable error-fixed version found for: " + sra.get_accession(), logFilePath);
       continue;
     }
     logOutput("  Now removing unfixable reads for:", logFilePath);
@@ -217,8 +213,7 @@ void trimBulk(const std::vector<SRA> & sras, std::string threads,
     }
     // Check for checkpoint file
     if (sra.checkpointExists("trim")) {
-      logOutput("  Adapter-trimmed version found for:", logFilePath);
-      summarize_sing_sra(sra, logFilePath, 2);
+      logOutput("  Adapter-trimmed version found for: " + sra.get_accession(), logFilePath);
       continue;
     }
     logOutput("  Running adapter sequence trimming for:", logFilePath);
@@ -265,8 +260,7 @@ void filtForeignBulk(const std::vector<SRA> & sras, std::vector<std::string> kra
       // Check for checkpoint file
       if (sra.checkpointExists(std::string(fs::path(krakenDbs[i]).stem().c_str()) + ".filt")) {
         logOutput("With database: " + krakenDbs[i], logFilePath);
-        logOutput("Filtered version found for: ", logFilePath);
-        summarize_sing_sra(sra, logFilePath, 2);
+        logOutput("Filtered version found for: " + sra.get_accession(), logFilePath);
         continue;
       }
       logOutput("  Running filter of:", logFilePath);
@@ -368,8 +362,7 @@ void remOverrepBulk(const std::vector<SRA> & sras, std::string threads, std::str
   for (auto sra : sras) {
     // Check for checkpoint file
     if (sra.checkpointExists("orep.fix")) {
-      logOutput("  Overrepresented-filtered version found for: ", logFilePath);
-      summarize_sing_sra(sra, logFilePath, 2);
+      logOutput("  Overrepresented-filtered version found for: " + sra.get_accession(), logFilePath);
       continue;
     }
     logOutput("  Running removal of overrepresented reads for:", logFilePath);

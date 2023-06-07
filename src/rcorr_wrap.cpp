@@ -35,8 +35,8 @@ void run_rcorr(std::pair<std::string, std::string> sraRun, std::string outDir,
     rcorrCmd = "( perl " + PATH_RCORR + " -t " + threads + " -s " + inFile1;
   }
   if (compressFiles) {
-    std::string sraPathL = outDir + "/" + std::string(fs::path(sraRun.first.c_str()).stem().stem().c_str()) + ".fix.fq.gz";
-    std::string sraPathR = outDir + "/" + std::string(fs::path(sraRun.second.c_str()).stem().stem().c_str()) + ".fix.fq.gz";
+    std::string sraPathL = outDir + "/" + std::string(fs::path(sraRun.first.c_str()).stem().stem().c_str()) + ".cor.fq.gz";
+    std::string sraPathR = outDir + "/" + std::string(fs::path(sraRun.second.c_str()).stem().stem().c_str()) + ".cor.fq.gz";
     rcorrCmd += std::string(" -stdout | awk \'{ if ((NR-1) % 8 < 4) {print | \"" +
                             PATH_PIGZ + " --fast -p " + threads + " > " + sraPathL + "\"} " +
                             "else {print | \"" + PATH_PIGZ + " --fast -p " + threads + " > " + sraPathR + "\"} }\' )");
