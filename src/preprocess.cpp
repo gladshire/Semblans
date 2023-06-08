@@ -21,14 +21,14 @@ void progressAnim(int numSpace) {
   for (int i = 0; i < numSpace; i++) {
     std::cout << " ";
   }
-  std::cout << std::endl;
+  std::cout << "   " << std::endl;
 }
 
 void retrieveSraData(const std::vector<SRA> & sras, std::string threads,
                      bool dispOutput, bool compressOutput,
                      bool retainInterFiles,
                      std::string logFilePath) {
-  logOutput("Starting retrieval of raw sequence data", logFilePath);
+  logOutput("\nStarting retrieval of raw sequence data", logFilePath);
   // Prefetch raw data
   for (auto sra : sras) {
     // Check for checkpoint file
@@ -95,7 +95,7 @@ void print_help() {
 
 void fastqcBulk1(const std::vector<SRA> & sras, std::string threads, bool dispOutput,
                  std::string logFilePath) {
-  logOutput("Starting initial quality analysis", logFilePath);
+  logOutput("\nStarting initial quality analysis", logFilePath);
   std::pair<std::string, std::string> currFastqcIn1;
   std::string currFastqcOut1;
   for (auto sra : sras) {
@@ -123,7 +123,7 @@ void fastqcBulk1(const std::vector<SRA> & sras, std::string threads, bool dispOu
 
 void fastqcBulk2(const std::vector<SRA> & sras, std::string threads, bool dispOutput,
                  std::string logFilePath, const INI_MAP & cfgIni) {
-  logOutput("Starting pre-assembly quality analysis", logFilePath);
+  logOutput("\nStarting pre-assembly quality analysis", logFilePath);
   INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
   std::pair<std::string, std::string> currFastqcIn;
   std::string currFastqcOut;
@@ -170,7 +170,7 @@ void fastqcBulk2(const std::vector<SRA> & sras, std::string threads, bool dispOu
 void errorCorrBulk(const std::vector<SRA> & sras, std::string threads,
                    bool dispOutput, bool retainInterFiles, bool compressFiles,
                    std::string logFilePath, const INI_MAP & cfgIni) {
-  logOutput("Starting error correction", logFilePath);
+  logOutput("\nStarting error correction", logFilePath);
   std::pair<std::string, std::string> currRcorrIn;
   std::string rcorrOutDir;
   for (auto sra : sras) {
@@ -200,7 +200,7 @@ void errorCorrBulk(const std::vector<SRA> & sras, std::string threads,
 void remUnfixBulk(const std::vector<SRA> & sras, std::string threads, std::string ram_gb,
                   bool dispOutput, bool retainInterFiles, bool compressFiles,
                   std::string logFilePath, const INI_MAP & cfgIni) {
-  logOutput("Starting post-correction removal of unfixable reads", logFilePath);
+  logOutput("\nStarting post-correction removal of unfixable reads", logFilePath);
   std::pair<std::string, std::string> currCorrFixIn;
   std::pair<std::string, std::string> currCorrFixOut;
   uintmax_t ram_b = (uintmax_t)stoi(ram_gb) * 1000000000;
@@ -245,7 +245,7 @@ void remUnfixBulk(const std::vector<SRA> & sras, std::string threads, std::strin
 void trimBulk(const std::vector<SRA> & sras, std::string threads,
               bool dispOutput, bool retainInterFiles,
               std::string logFilePath, const INI_MAP & cfgIni) {
-  logOutput("Starting adapter sequence trimming", logFilePath);
+  logOutput("\nStarting adapter sequence trimming", logFilePath);
   INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
   std::pair<std::string, std::string> currTrimIn;
   std::pair<std::string, std::string> currTrimOutP;
@@ -306,7 +306,7 @@ void filtForeignBulk(const std::vector<SRA> & sras, std::vector<std::string> kra
                      std::string krakenConf, std::string threads,
                      bool dispOutput, bool retainInterFiles,
                      std::string logFilePath, const INI_MAP & cfgIni) {
-  logOutput("Starting foreign sequence filtering", logFilePath);
+  logOutput("\nStarting foreign sequence filtering", logFilePath);
   INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
   std::pair<std::string, std::string> firstKrakIn;
   std::pair<std::string, std::string> currKrakIn;
@@ -422,7 +422,7 @@ void remOverrepBulk(const std::vector<SRA> & sras, std::string threads, std::str
                     bool dispOutput, bool retainInterFiles,
                     std::string logFilePath, const INI_MAP & cfgIni) {
   INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
-  logOutput("Starting removal of overrepresented reads", logFilePath);
+  logOutput("\nStarting removal of overrepresented reads", logFilePath);
   uintmax_t ram_b = (uintmax_t)stoi(ram_gb) * 1000000000;
   std::pair<std::vector<std::string>, std::vector<std::string>> currOrepSeqsPe;
   std::vector<std::string> currOrepSeqsSe;
@@ -538,7 +538,6 @@ int main(int argc, char * argv[]) {
     
     if (!sras.empty()) {
       retrieveSraData(sras, threads, dispOutput, compressFiles, retainInterFiles, logFilePath);
-      logOutput("Successfully downloaded sequence data", logFilePath);
     }
     // Get single/paired filenames of local data
     for (auto fqFileName : cfgIni.at("Local files")) {
@@ -568,20 +567,18 @@ int main(int argc, char * argv[]) {
       else {
         if (sraRunsLocal.first != "" &&
             !fs::exists(localDataDir + sraRunsLocal.first)) {
-          std::cout << "ERROR: Local run not found: \"" << sraRunsLocal.first << "\""
-                    << std::endl;
+          logOutput("ERROR: Local run not found: \"" + sraRunsLocal.first + "\"", logFilePath);
         }
         if (sraRunsLocal.second != "" &&
             !fs::exists(localDataDir + sraRunsLocal.second)) {
-          std::cout << "ERROR: Local run not found: \"" << sraRunsLocal.second << "\""
-                    << std::endl;
+          logOutput("ERROR: Local run not found: \"" + sraRunsLocal.second + "\"", logFilePath);
         }
       }
     }
     
     // Check if no SRAs specified
     if (sras.empty()) {
-      std::cout << "ERROR: No SRA runs specified. Please check config file" << std::endl;
+      logOutput("ERROR: No SRA runs specified. Please check config file", logFilePath);
     }
 
     logOutput("Raw sequence data prepared for pre-assembly processing", logFilePath);
@@ -611,7 +608,7 @@ int main(int argc, char * argv[]) {
     else {
       compressStr = "NO";
     }
-    logOutput("  Compress all output files: " + compressStr, logFilePath);
+    logOutput("  Compress all output files: " + compressStr + "\n", logFilePath);
 
     std::string fastqc_dir_1(sras[0].get_fastqc_dir_1().first.parent_path().parent_path().c_str());
     std::string fastqc_dir_2(sras[0].get_fastqc_dir_2().first.parent_path().parent_path().c_str());

@@ -280,7 +280,7 @@ int main(int argc, char * argv[]) {
 
     // Case 1: preprocess
     if (command == "preprocess") {
-      logOutput("Performing preprocessing only ...", logFilePath);
+      logOutput("Performing preprocessing only", logFilePath);
       result = system(preCmd.c_str());
       if (WIFSIGNALED(result)) {
         exit(1);
@@ -289,7 +289,7 @@ int main(int argc, char * argv[]) {
     }
     // Case 2: assemble
     if (command == "assemble") {
-      logOutput("Performing assembly only ...", logFilePath);
+      logOutput("Performing assembly only", logFilePath);
       result = system(assCmd.c_str());
       if (WIFSIGNALED(result)) {
         exit(1);
@@ -298,7 +298,7 @@ int main(int argc, char * argv[]) {
     }
     // Case 3: postprocess
     if (command == "postprocess") {
-      logOutput("Performing postprocess only ...", logFilePath);
+      logOutput("Performing postprocess only", logFilePath);
       result = system(postCmd.c_str());
       if (WIFSIGNALED(result)) {
         exit(1);
@@ -307,7 +307,7 @@ int main(int argc, char * argv[]) {
     }
     // Case 4: all three
     if (command == "all") {
-      logOutput("Performing entire assembly ...", logFilePath);
+      logOutput("Performing entire assembly", logFilePath);
       result = system(preCmd.c_str());
       if (WIFSIGNALED(result)) {
         exit(1);

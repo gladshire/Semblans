@@ -52,7 +52,8 @@ void rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
   std::istream inputStream1(&gzInBuffer1);
   std::istream inputStream2(&gzInBuffer2);
 
-  while (!inFile1.eof() || !inFile2.eof()) {
+  while ((!inFile1.eof() || !inFile2.eof()) ||
+         (!inputStream1.eof() || !inputStream2.eof())) {
     if (compressFiles) {
       inputStream1.read(&inFile1Data[0], ram_b_per_file);
       inputStream2.read(&inFile2Data[0], ram_b_per_file);
