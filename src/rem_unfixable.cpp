@@ -1,3 +1,5 @@
+// TODO: Not compressing files properly. Missing last few lines
+
 #include "rem_unfixable.h"
 
 
@@ -66,9 +68,13 @@ void rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
 
   std::ostream outputStream1(&gzOutBuffer1);
   std::ostream outputStream2(&gzOutBuffer2);
-
+/*
   while ((!inFile1.eof() || !inFile2.eof()) &&
          (!inputStream1.eof() || !inputStream2.eof())) {
+*/
+while (((compressFiles && !inputStream1.eof() && !inputStream2.eof()) || (!compressFiles && !inFile1.eof() && !inFile2.eof())) &&
+        ((compressFiles && inputStream1.good() && inputStream2.good()) || (!compressFiles && inFile1.good() && inFile2.good()))) {
+
     if (compressFiles) {
       inputStream1.read(&inFile1Data[0], ram_b_per_file);
       inputStream2.read(&inFile2Data[0], ram_b_per_file);
@@ -140,10 +146,10 @@ void rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
     inFile2.close();
   }
   else {
-    io::close(inputStream1);
-    io::close(inputStream2);
-    io::close(outputStream1);
-    io::close(outputStream2);
+    io::close(gzInBuffer1);
+    io::close(gzInBuffer2);
+    io::close(gzOutBuffer1);
+    io::close(gzOutBuffer2);
   }
   outFile1.close();
   outFile2.close();

@@ -86,7 +86,7 @@ void retrieveSraData(const std::vector<SRA> & sras, std::string threads,
   for (auto sra : sras) {
     // Check for checkpoint file
     if (sra.checkpointExists("dump")) {
-      logOutput("  Raw FASTQC dump checkpoint found for: " + sra.get_accession(), logFilePath);
+      logOutput("  Raw dump checkpoint found for: " + sra.get_accession(), logFilePath);
       continue;
     }
     else {
@@ -251,7 +251,7 @@ void remUnfixBulk(const std::vector<SRA> & sras, std::string threads, std::strin
     summarize_sing_sra(sra, logFilePath, 4);
 
     procRunning = true;
-    //std::thread fixThread(progressAnim,2);
+    std::thread fixThread(progressAnim,2);
     if (sra.is_paired()) {
       rem_unfix_pe(currCorrFixIn, currCorrFixOut, ram_b, compressFiles); 
     }
@@ -259,7 +259,7 @@ void remUnfixBulk(const std::vector<SRA> & sras, std::string threads, std::strin
       rem_unfix_se(currCorrFixIn.first, currCorrFixOut.first, ram_b);
     }
     procRunning = false;
-    //fixThread.join();
+    fixThread.join();
 
     // Make checkpoint file
     sra.makeCheckpoint("corr.fix");
