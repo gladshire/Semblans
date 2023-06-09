@@ -40,9 +40,10 @@ void rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
   char * inFile1L;
   char * inFile2L;
 
+  // Instantiate input stream for compressed file
   io::filtering_streambuf<io::input> gzInBuffer1;
   io::filtering_streambuf<io::input> gzInBuffer2;
-   
+     
   gzInBuffer1.push(io::gzip_decompressor());
   gzInBuffer2.push(io::gzip_decompressor());
     
@@ -52,7 +53,21 @@ void rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
   std::istream inputStream1(&gzInBuffer1);
   std::istream inputStream2(&gzInBuffer2);
 
-  while ((!inFile1.eof() || !inFile2.eof()) ||
+
+  // Instantiate output stream for compressed file
+  io::filtering_streambuf<io::output> gzOutBuffer1;
+  io::filtering_streambuf<io::output> gzOutBuffer2;
+
+  gzOutBuffer1.push(io::gzip_compressor(io::gzip_params(io::gzip::best_speed)));
+  gzOutBuffer2.push(io::gzip_compressor(io::gzip_params(io::gzip::best_speed)));
+
+  gzOutBuffer1.push(outFile1);
+  gzOutBuffer2.push(outFile2);
+
+  std::ostream outputStream1(&gzOutBuffer1);
+  std::ostream outputStream2(&gzOutBuffer2);
+
+  while ((!inFile1.eof() || !inFile2.eof()) &&
          (!inputStream1.eof() || !inputStream2.eof())) {
     if (compressFiles) {
       inputStream1.read(&inFile1Data[0], ram_b_per_file);
@@ -92,9 +107,16 @@ void rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
       if (strncmp(nlPos1 - 5, "error", 5) == 0 ||
           strncmp(nlPos2 - 5, "error", 5) == 0) {
         writeEnd1 = nlPos1Prev;
-        outFile1.write(writeStart1, writeEnd1 - writeStart1);
         writeEnd2 = nlPos2Prev;
-        outFile2.write(writeStart2, writeEnd2 - writeStart2);
+ 
+        if (compressFiles) {
+          outputStream1.write(writeStart1, writeEnd1 - writeStart1);
+          outputStream2.write(writeStart2, writeEnd2 - writeStart2);
+        }
+        else {
+          outFile1.write(writeStart1, writeEnd1 - writeStart1);
+          outFile2.write(writeStart2, writeEnd2 - writeStart2);
+        }
 
         for (int i = 0; i < 3; i++) {
           nlPos1 = std::find(nlPos1 + 1, inFile1L, '\n');
@@ -104,12 +126,24 @@ void rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
         writeStart2 = nlPos2;
       }
     }
-    outFile1.write(writeStart1, &inFile1Data[0] + s1 - writeStart1);
-    outFile2.write(writeStart2, &inFile2Data[0] + s2 - writeStart2);
+    if (compressFiles) {
+      outputStream1.write(writeStart1, &inFile1Data[0] + s1 - writeStart1);
+      outputStream2.write(writeStart2, &inFile2Data[0] + s2 - writeStart2);
+    }
+    else {
+      outFile1.write(writeStart1, &inFile1Data[0] + s1 - writeStart1);
+      outFile2.write(writeStart2, &inFile2Data[0] + s2 - writeStart2);
+    }
   }
   if (!compressFiles) {
     inFile1.close();
     inFile2.close();
+  }
+  else {
+    io::close(inputStream1);
+    io::close(inputStream2);
+    io::close(outputStream1);
+    io::close(outputStream2);
   }
   outFile1.close();
   outFile2.close();

@@ -42,7 +42,7 @@ void run_rcorr(std::pair<std::string, std::string> sraRun, std::string outDir,
                             "else {print | \"" + PATH_PIGZ + " --fast -p " + threads + " > " + sraPathR + "\"} }\' )");
   }
   else {
-    rcorrCmd += std::string(" -od " + outDir);
+    rcorrCmd += std::string(" -od " + outDir + ")");
   }
   rcorrCmd += printOut;
   result = system(rcorrCmd.c_str());
