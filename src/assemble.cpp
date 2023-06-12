@@ -141,7 +141,9 @@ int main(int argc, char * argv[]) {
   if (argc > 1) {
     std::vector<SRA> sras;
     std::vector<std::string> localDataFiles;
-    
+    // Get INI config file
+    INI_MAP cfgIni = make_ini_map(argv[1]);
+
     // Get number of threads
     std::string threads = argv[2];
 
@@ -158,11 +160,12 @@ int main(int argc, char * argv[]) {
     bool dispOutput = stringToBool(argv[6]);
    
     // Get boolean for output file compression
-    bool compressFiles = stringToBool(argv[7]);
-
+    //bool compressFiles = ini_get_bool(cfgIni["General"]["compress_files"].c_str(), 0);
+    bool compressFiles = false;
     // Retrieve SRA objects for trinity runs
-    INI_MAP cfgIni = make_ini_map(argv[1]);
     std::string logFilePath = cfgIni["General"]["log_file"];
+
+    //
 
     // Create file space
     make_proj_space(cfgIni, "assemble");

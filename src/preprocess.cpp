@@ -52,7 +52,7 @@ void preSummary(const std::vector<SRA> sras,
   else {
     compressStr = "NO";
   }
-  logOutput("  Compress all output files: " + compressStr, logFilePath);
+  //logOutput("  Compress all output files: " + compressStr, logFilePath);
 
 }
 
@@ -65,7 +65,7 @@ void retrieveSraData(const std::vector<SRA> & sras, std::string threads,
   for (auto sra : sras) {
     // Check for checkpoint file
     if (sra.checkpointExists("sra")) {
-      logOutput("  Prefetch checkpoint found for:   " + sra.get_accession(), logFilePath);
+      logOutput("  Prefetch checkpoint found for: " + sra.get_accession(), logFilePath);
       continue;
     }
     else {
@@ -400,7 +400,7 @@ void filtForeignBulk(const std::vector<SRA> & sras, std::vector<std::string> kra
       procRunning = true;
       std::thread krakThread(progressAnim,2);
       run_kraken2(currKrakIn, currKrakOut, repFile, threads, krakenDbs[i],
-                  krakenConf, dispOutput, logFilePath);
+                  krakenConf, dispOutput, compressFiles, logFilePath);
       procRunning = false;
       krakThread.join();
 
@@ -441,10 +441,10 @@ void filtForeignBulk(const std::vector<SRA> & sras, std::vector<std::string> kra
         }
       }
       if (compressFiles) {
-        std::string compCmd1 = PATH_PIGZ + " -d " + std::string(sra.get_sra_path_for_filt().first.c_str()) + " -p " + threads;
+        std::string compCmd1 = PATH_PIGZ + " " + std::string(sra.get_sra_path_for_filt().first.replace_extension().c_str()) + " -p " + threads;
         std::string compCmd2 = "";
         if (sra.is_paired()) {
-          compCmd2 = PATH_PIGZ + " -d " + std::string(sra.get_sra_path_for_filt().second.c_str()) + " -p " + threads;
+          compCmd2 = PATH_PIGZ + " " + std::string(sra.get_sra_path_for_filt().second.replace_extension().c_str()) + " -p " + threads;
         }
         system((compCmd1 + " && " + compCmd2).c_str());
       }
@@ -569,8 +569,8 @@ int main(int argc, char * argv[]) {
     bool dispOutput = stringToBool(argv[5]);
 
     // Obtain specification for compression of output files
-    bool compressFiles = stringToBool(argv[6]);
-
+    //bool compressFiles = ini_get_bool(cfgIni["General"]["compress_files"].c_str(), 0);
+    bool compressFiles = false;
     // Obtain path to log file from config file
     std::string logFilePath = cfgIni["General"]["log_file"];
  

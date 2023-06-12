@@ -195,19 +195,25 @@ void transdecBulk(const std::vector<transcript> & transVec, std::string threads,
 
 int main(int argc, char * argv[]) {
   if (argc > 1) {
+    // Get INI config file
+    INI_MAP cfgIni = make_ini_map(argv[1]);
+
     // Get number of threads
     std::string threads = argv[2];
+    
     // Get RAM in GB
     std::string ram_gb = argv[3];
+    
     // Determine whether to keep intermediate files
     bool retainInterFiles = stringToBool(argv[4]);
+    
     // Determine whether to print output of programs
     bool dispOutput = stringToBool(argv[5]);
+    
     // Determine whether to compress files
-    bool compressFiles = stringToBool(argv[6]);
-
+    //bool compressFiles = ini_get_bool(cfgIni["General"]["compress_files"].c_str(), 0);
+    bool compressFiles = false;
     // Retrieve SRA objects, convert to transcripts
-    INI_MAP cfgIni = make_ini_map(argv[1]);
     make_proj_space(cfgIni, "postprocess");
     std::string outputDir = cfgIni["General"]["output_directory"];
     std::string projDir = outputDir + cfgIni["General"]["project_name"] + "/";
