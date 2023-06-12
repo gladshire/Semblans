@@ -68,12 +68,9 @@ void rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
 
   std::ostream outputStream1(&gzOutBuffer1);
   std::ostream outputStream2(&gzOutBuffer2);
-/*
-  while ((!inFile1.eof() || !inFile2.eof()) &&
-         (!inputStream1.eof() || !inputStream2.eof())) {
-*/
-while (((compressFiles && !inputStream1.eof() && !inputStream2.eof()) || (!compressFiles && !inFile1.eof() && !inFile2.eof())) &&
-        ((compressFiles && inputStream1.good() && inputStream2.good()) || (!compressFiles && inFile1.good() && inFile2.good()))) {
+  
+  while  ((!inputStream1.eof() && !inputStream2.eof() && !inFile1.eof() && !inFile2.eof()) &&
+         (inputStream1.good() && inputStream2.good() && inFile1.good() && inFile2.good())) {
 
     if (compressFiles) {
       inputStream1.read(&inFile1Data[0], ram_b_per_file);
@@ -157,10 +154,17 @@ while (((compressFiles && !inputStream1.eof() && !inputStream2.eof()) || (!compr
 
 
 void rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
-                  uintmax_t ram_b) {
+                  uintmax_t ram_b, bool compressFiles) {
 
-  std::ifstream inFile(sraRunIn);
+  std::ifstream inFile;
   std::ofstream outFile(sraRunOut);
+
+  if (compressFiles) {
+    inFile.open(sraRunIn, std::ios_base::binary);
+  }
+  else {
+    inFile.open(sraRunIn);
+  }
 
   inFile.seekg(0, inFile.end);
   long int lenFile = inFile.tellg();
@@ -175,9 +179,28 @@ void rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
   char * writeEnd;
   char * inFileL;
 
-  while (!inFile.eof()) {
-    inFile.read(inFileData, ram_b);
-    s = inFile.gcount();
+  // Instantiate input stream of compressed file
+  io::filtering_streambuf<io::input> gzInBuffer;
+  gzInBuffer.push(io::gzip_decompressor());
+  gzInBuffer.push(inFile);
+  std::istream inputStream(&gzInBuffer);
+
+  // Instantiate output stream to compressed file
+  io::filtering_streambuf<io::output> gzOutBuffer;
+  gzOutBuffer.push(io::gzip_compressor(io::gzip_params(io::gzip::best_speed)));
+  gzOutBuffer.push(outFile);
+  std::ostream outputStream(&gzOutBuffer);
+
+  while (!inputStream.eof() && !inputStream.good() && !inFile.eof() && !inFile.good()) {
+    if (compressFiles) {
+      inputStream.read(inFileData, ram_b);
+      s = inputStream.gcount();
+    }
+    else {
+      inFile.read(inFileData, ram_b);
+      s = inFile.gcount();
+    }
+
     nlPos = inFileData;
     writeStart = inFileData;
     inFileL = inFileData + s;
@@ -195,7 +218,12 @@ void rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
       nlPos = std::find(nlPos + 1, inFileL, '\n');
       if (strncmp(nlPos - 5, "error", 4) == 0) {
         writeEnd = nlPosPrev;
-        outFile.write(writeStart, writeEnd - writeStart);
+        if (compressFiles) {
+          outputStream.write(writeStart, writeEnd - writeStart);
+        }
+        else {
+          outFile.write(writeStart, writeEnd - writeStart);
+        }
 
         for (int i = 0; i < 3; i++) {
           nlPos = std::find(nlPos + 1, inFileL, '\n');
@@ -203,8 +231,19 @@ void rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
         writeStart = nlPos;
       }
     }
-    outFile.write(writeStart, inFileData + s - writeStart);
+    if (compressFiles) {
+      outputStream.write(writeStart, writeEnd - writeStart);
+    }
+    else {
+      outFile.write(writeStart, inFileData + s - writeStart);
+    }
   }
-  inFile.close();
+  if (!compressFiles) {
+    inFile.close();
+  }
+  else {
+    io::close(gzInBuffer);
+    io::close(gzOutBuffer);
+  }
   outFile.close();
 }

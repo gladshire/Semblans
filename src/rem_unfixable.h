@@ -19,4 +19,4 @@ void rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
                   uintmax_t ram_b, bool compressFiles);
 
 void rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
-                  uintmax_t ram_b);
+                  uintmax_t ram_b, bool compressFiles);

@@ -256,7 +256,7 @@ void remUnfixBulk(const std::vector<SRA> & sras, std::string threads, std::strin
       rem_unfix_pe(currCorrFixIn, currCorrFixOut, ram_b, compressFiles); 
     }
     else {
-      rem_unfix_se(currCorrFixIn.first, currCorrFixOut.first, ram_b);
+      rem_unfix_se(currCorrFixIn.first, currCorrFixOut.first, ram_b, compressFiles);
     }
     procRunning = false;
     fixThread.join();
@@ -336,7 +336,7 @@ void trimBulk(const std::vector<SRA> & sras, std::string threads,
 
 void filtForeignBulk(const std::vector<SRA> & sras, std::vector<std::string> krakenDbs,
                      std::string krakenConf, std::string threads,
-                     bool dispOutput, bool retainInterFiles,
+                     bool dispOutput, bool compressFiles, bool retainInterFiles,
                      std::string logFilePath, const INI_MAP & cfgIni) {
   logOutput("\nStarting foreign sequence filtering", logFilePath);
   INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
@@ -403,16 +403,30 @@ void filtForeignBulk(const std::vector<SRA> & sras, std::vector<std::string> kra
                   krakenConf, dispOutput, logFilePath);
       procRunning = false;
       krakThread.join();
-      
+
       if (sra.is_paired()) {
-        std::rename((krakOutDir + "/TMP_1.fq").c_str(),
-                    sra.get_sra_path_for_filt().first.c_str());
-        std::rename((krakOutDir + "/TMP_2.fq").c_str(),
-                    sra.get_sra_path_for_filt().second.c_str());
+        if (compressFiles) {
+          std::rename((krakOutDir + "/TMP_1.fq").c_str(),
+                       sra.get_sra_path_for_filt().first.replace_extension().c_str());
+          std::rename((krakOutDir + "/TMP_2.fq").c_str(),
+                       sra.get_sra_path_for_filt().second.replace_extension().c_str());
+        }
+        else {
+          std::rename((krakOutDir + "/TMP_!.fq").c_str(),
+                       sra.get_sra_path_for_filt().first.c_str());
+          std::rename((krakOutDir + "/TMP_2.fq").c_str(),
+                       sra.get_sra_path_for_filt().second.c_str());
+        }
       }
       else {
-        std::rename((krakOutDir + "/TMP.fq").c_str(),
-                    sra.get_sra_path_for_filt().first.c_str());
+        if (compressFiles) {
+          std::rename((krakOutDir + "/TMP.fq").c_str(),
+                       sra.get_sra_path_for_filt().first.replace_extension().c_str());
+        }
+        else {
+          std::rename((krakOutDir + "/TMP.fq").c_str(),
+                       sra.get_sra_path_for_filt().first.c_str());
+        }
       }
       // Make checkpoint file
       sra.makeCheckpoint(std::string(fs::path(krakenDbs[i]).stem().c_str()) + ".filt");
@@ -425,6 +439,14 @@ void filtForeignBulk(const std::vector<SRA> & sras, std::vector<std::string> kra
             fs::remove(fs::path(firstKrakIn.second));
           }
         }
+      }
+      if (compressFiles) {
+        std::string compCmd1 = PATH_PIGZ + " -d " + std::string(sra.get_sra_path_for_filt().first.c_str()) + " -p " + threads;
+        std::string compCmd2 = "";
+        if (sra.is_paired()) {
+          compCmd2 = PATH_PIGZ + " -d " + std::string(sra.get_sra_path_for_filt().second.c_str()) + " -p " + threads;
+        }
+        system((compCmd1 + " && " + compCmd2).c_str());
       }
     }
     // TODO: Perform summary of kraken2 filter jobs
@@ -451,7 +473,7 @@ void filtForeignBulk(const std::vector<SRA> & sras, std::vector<std::string> kra
 }
 
 void remOverrepBulk(const std::vector<SRA> & sras, std::string threads, std::string ram_gb,
-                    bool dispOutput, bool retainInterFiles,
+                    bool dispOutput, bool retainInterFiles, bool compressFiles,
                     std::string logFilePath, const INI_MAP & cfgIni) {
   INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
   logOutput("\nStarting removal of overrepresented reads", logFilePath);
@@ -497,11 +519,11 @@ void remOverrepBulk(const std::vector<SRA> & sras, std::string threads, std::str
     std::thread orepThread(progressAnim,2);
     if (sra.is_paired()) {
       currOrepSeqsPe = get_overrep_seqs_pe(sra);
-      rem_overrep_pe(currOrepIn, currOrepOut, ram_b, currOrepSeqsPe);
+      rem_overrep_pe(currOrepIn, currOrepOut, ram_b, compressFiles, currOrepSeqsPe);
     }
     else {
       currOrepSeqsSe = get_overrep_seqs_se(sra);
-      rem_overrep_se(currOrepIn.first, currOrepOut.first, ram_b, currOrepSeqsSe);
+      rem_overrep_se(currOrepIn.first, currOrepOut.first, ram_b, compressFiles, currOrepSeqsSe);
     }
     procRunning = false;
     orepThread.join();
@@ -646,7 +668,7 @@ int main(int argc, char * argv[]) {
       std::vector<std::string> krakenDbs = get_kraken2_dbs(cfgIni);
       std::string krakenConf = get_kraken2_conf(cfgIni);
       filtForeignBulk(sras, krakenDbs, krakenConf, threads,
-                      dispOutput, retainInterFiles, logFilePath, cfgIni);
+                      dispOutput, compressFiles, retainInterFiles, logFilePath, cfgIni);
     }
 
     // Run fastqc on all runs
@@ -654,7 +676,7 @@ int main(int argc, char * argv[]) {
 
     // Remove reads with over-represented sequences
     if (ini_get_bool(cfgPipeline.at("remove_overrepresented").c_str(), 0)) {
-      remOverrepBulk(sras, threads, ram_gb, dispOutput, retainInterFiles, logFilePath, cfgIni);
+      remOverrepBulk(sras, threads, ram_gb, dispOutput, retainInterFiles, compressFiles, logFilePath, cfgIni);
     }
   }
   system("setterm -cursor on");

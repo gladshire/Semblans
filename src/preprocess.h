@@ -21,6 +21,8 @@
 #include "rem_overrep.h"
 #include "print_info.h"
 
+#define PATH_PIGZ std::string((dl::program_location().parent_path() / fs::path(std::string("../external/pigz/pigz"))).c_str())
+
 
 void progressAnim(int numSpace);
 
@@ -52,9 +54,9 @@ void trimBulk(const std::vector<SRA> & sras, std::string threads,
 
 void filtForeignBulk(const std::vector<SRA> & sras, std::vector<std::string> krakenDbs,
                      std::string krakenConf, std::string threads,
-                     bool dispOutput, bool retainInterFiles,
+                     bool dispOutput, bool compressFiles, bool retainInterFiles,
                      std::string logFilePath, const INI_MAP & cfgIni);
 
 void remOverrepBulk(const std::vector<SRA> & sras, std::string threads, std::string ram_gb,
-                    bool dispOutput, bool retainInterFiles,
+                    bool dispOutput, bool retainInterFiles, bool compressFiles,
                     std::string logFilePath, const INI_MAP & cfgIni);
