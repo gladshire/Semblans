@@ -2,7 +2,7 @@
 Author: Miles Woodcock-Girard
 *Walker Lab, UIC Department of Biological Sciences*
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; As-***Sembl**-er for tr-***ans***-criptomes
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; As-***Sembl***-er for tr-***ans***-criptomes
 
 Semblans is a tool that enables the automatic assembly of *de novo* transcriptomes for non-model organisms.
 
