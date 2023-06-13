@@ -350,17 +350,16 @@ void filtForeignBulk(const std::vector<SRA> & sras, std::vector<std::string> kra
 
   
   for (int i = 0; i < krakenDbs.size(); i++) {
-    logOutput("\nNow filtering with database: " +
-              std::string(fs::path(krakenDbs[i].c_str()).filename().c_str()) + "\n",
+    logOutput("\n  Now filtering with database: " +
+              std::string(fs::path(krakenDbs[i].c_str()).filename().c_str()),
               logFilePath);
     for (auto sra : sras) {
       // Check for checkpoint file
       if (sra.checkpointExists(std::string(fs::path(krakenDbs[i]).stem().c_str()) + ".filt")) {
-        logOutput("With database: " + krakenDbs[i], logFilePath);
-        logOutput("Filter checkpoint found for: " + sra.get_accession(), logFilePath);
+        logOutput("    Filter checkpoint found for: " + sra.get_accession(), logFilePath);
         continue;
       }
-      logOutput("  Running filter of:", logFilePath);
+      logOutput("    Running filter of:", logFilePath);
       summarize_sing_sra(sra, logFilePath, 4);
       krakOutDir = sra.get_sra_path_for_filt().first.parent_path().c_str();
       if (sra.get_accession() == "") {

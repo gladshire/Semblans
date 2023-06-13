@@ -294,6 +294,7 @@ int main(int argc, char * argv[]) {
       if (WIFSIGNALED(result)) {
         exit(1);
       }
+      logOutput("", logFilePath);
       result = system(assCmd.c_str());
       if (WIFSIGNALED(result)) {
         exit(1);
