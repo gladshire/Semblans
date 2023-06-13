@@ -1,5 +1,6 @@
 #include "assemble.h"
 
+
 std::vector<transcript> get_transcript(std::vector<SRA> sras) {
   std::vector<transcript> transcripts;
   for (auto &sra : sras) {
@@ -138,6 +139,7 @@ void print_help() {
 }
 
 int main(int argc, char * argv[]) {
+  system("setterm -cursor off");
   if (argc > 1) {
     std::vector<SRA> sras;
     std::vector<std::string> localDataFiles;
@@ -277,5 +279,6 @@ int main(int argc, char * argv[]) {
   else {
     print_help();
   }
+  system("setterm -cursor on");
   return 0;
 }

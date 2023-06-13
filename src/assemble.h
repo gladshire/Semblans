@@ -4,6 +4,10 @@
 #include <boost/dll.hpp>
 #include <algorithm>
 #include <cctype>
+#include <iomanip>
+#include <thread>
+#include <chrono>
+#include <atomic>
 #include "sra.h"
 #include "transcript.h"
 #include "ini_parse.h"

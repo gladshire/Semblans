@@ -1,18 +1,27 @@
 #include "trinity_wrap.h"
 
-// TODO: Change condition by which multi-SRA assembly is determined
-//   NOW: SRAs with same organism name are combined
-//     - Problem if local files, without organism names are used
 
-std::vector<SRA> get_sra_to_combine(std::vector<SRA> sras, std::string org_name) {
-  std::vector<SRA> sra_comb;
-  for (auto &sra : sras) {
-    // TODO: FIX THIS; SHOULD NOT JUST BE BY ORGANISM NAME
-    if (sra.get_org_name() == org_name) {
-      sra_comb.push_back(sra);
-    }
+std::atomic<bool> procRunning(false);
+
+
+void progressAnim(int numSpace) {
+  const std::string anim[] = {".  ", ".. ", "..."};
+  int animIndex = 0;
+  
+  while (procRunning) {
+    std::cout << "\r";
+    for (int i = 0; i < numSpace; i++) {
+      std::cout << " ";
+    }   
+    std::cout << anim[animIndex] << std::flush;
+    animIndex = (animIndex + 1) % 3;
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   }
-  return sra_comb;
+  std::cout << "\r";
+  for (int i = 0; i < numSpace; i++) {
+    std::cout << " ";
+  }
+  std::cout << "   " << std::endl;
 }
 
 std::string combine_reads(std::vector<std::pair<std::string, std::string>> sraRuns,
@@ -25,7 +34,6 @@ std::string combine_reads(std::vector<std::pair<std::string, std::string>> sraRu
 
   std::ofstream outFile;
   std::ifstream inFile;
-  logOutput("Combined assembly chosen\nPreparing reads for assembly ...", logFile);
   if (fs::exists(fs::path(outFileStr.c_str()))) {
     return outFileStr;
   }
@@ -62,6 +70,14 @@ void run_trinity(std::pair<std::string, std::string> sraRun, std::string outFile
   std::string inFile2 = sraRun.second;
   std::string trin_cmd;
   std::string printOut;
+  logOutput("  Single assembly chosen", logFile);
+  logOutput("  Now assembling de-novo transcriptome for:\n", logFile);
+  logOutput("    SRA Run:", logFile);
+  logOutput("    " + std::string(fs::path(sraRun.first).stem().c_str()), logFile);
+  if (sraRun.second != "") {
+    logOutput("    " + std::string(fs::path(sraRun.second).stem().c_str()), logFile);
+  }
+  logOutput("", logFile);
   if (dispOutput) {
     printOut = " 2>&1 | tee -a " + logFile;
   }
@@ -91,28 +107,36 @@ void run_trinity(std::pair<std::string, std::string> sraRun, std::string outFile
   std::rename((outFile + ".Trinity.fasta").c_str(), outFile.c_str());
 }
 
+
 void run_trinity_comb(std::vector<std::pair<std::string, std::string>> sraRuns,
                       std::string outFile,
                       std::string threads, std::string ram_gb,
                       bool dispOutput, std::string logFile) {
-  // Run Trinity for assembly using multiple SRAs
-
-  // Summarize Trinity assembly job
-  logOutput("Now assembling de-novo transcriptome for:\n", logFile);
-  for (auto sraRun : sraRuns) {
-    logOutput("  SRA Run:", logFile);
-    logOutput("  " + std::string(fs::path(sraRun.first).stem().c_str()), logFile);
-    if (sraRun.second != "") {
-      logOutput("  " + std::string(fs::path(sraRun.second).stem().c_str()), logFile);
-    }
-    logOutput("", logFile);
-  }
+  
+  // Run Trinity for assembly using multiple SRA runs
+  logOutput("  Combined assembly chosen\n  Preparing reads for assembly", logFile);
   long long int ram_b = (long long int)stoi(ram_gb) * 1000000000;
   std::string outComb(std::string(fs::path(outFile.c_str()).stem().c_str()) + ".comb.fastq");
   std::string outFileComb(std::string(fs::path(outFile.c_str()).parent_path().c_str()) + "/" +
                           outComb);
-
+  // Prepare combined SRA file for multiple assembly 
+  procRunning = true;
+  std::thread combProgThread(progressAnim,2);
   std::string inFile = combine_reads(sraRuns, outFileComb, ram_b, logFile);
+  procRunning = false;
+  combProgThread.join();
+
+  // Summarize Trinity assembly job 
+  logOutput("  Now assembling de-novo transcriptome for:\n", logFile);
+  for (auto sraRun : sraRuns) {
+    logOutput("    SRA Run:", logFile);
+    logOutput("    " + std::string(fs::path(sraRun.first).stem().c_str()), logFile);
+    if (sraRun.second != "") {
+      logOutput("    " + std::string(fs::path(sraRun.second).stem().c_str()), logFile);
+    }
+    logOutput("", logFile);
+  }
+  
   std::string trin_cmd;
   std::string printOut;
   if (dispOutput) {
@@ -125,7 +149,13 @@ void run_trinity_comb(std::vector<std::pair<std::string, std::string>> sraRuns,
   trin_cmd = PATH_TRINITY + " --seqType fq" + " --single " + inFile + " --max_memory " +
              ram_gb + "G " + "--CPU " + threads + " --bflyCalculateCPU" + " --full_cleanup" +
              " --no_normalize_reads" + " --run_as_paired" + " --output " + outFile + printOut; 
+  
+  // Run Trinity assembly
+  procRunning = true;
+  std::thread trinProgThread(progressAnim,2);
   result = system(trin_cmd.c_str());
+  procRunning = false;
+  trinProgThread.join();
 
   if (WIFSIGNALED(result)) {
     logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
