@@ -1,4 +1,4 @@
-#include "paando.h"
+#include "semblans.h"
 
 
 void print_intro(std::string logFile) {
@@ -34,9 +34,9 @@ void print_intro(std::string logFile) {
 
 void print_help() {
   std::cout << "USAGE:\n" << std::endl;
-  std::cout << "  paando [--help/-h] [COMMAND] [--config/-cfg]\n"
-            << "         [--threads/-t] [--ram/-r] [--multi/-m]\n"
-            << "         [--retain/-f] [--verbose/-v]\n" << std::endl;
+  std::cout << "  semblans [--help/-h] [COMMAND] [--config/-cfg]\n"
+            << "           [--threads/-t] [--ram/-r] [--multi/-m]\n"
+            << "           [--retain/-f] [--verbose/-v]\n" << std::endl;
   std::cout << "ARGUMENTS:\n" << std::endl;
   std::cout << "  [COMMAND]" << std::endl;
   std::cout << "    preprocess       Performs pre-assembly steps only" << std::endl;
@@ -90,7 +90,7 @@ int main(int argc, char * argv[]) {
     verboseOutput = false;
 
     for (int i = 0; i < argc; i++) {
-      // Check for paando command (preprocess/assemble/postprocess)
+      // Check for semblans command (preprocess/assemble/postprocess)
       // If none is given, will perform all
       if (strcmp("preprocess", argv[i]) == 0 ||
           strcmp("Preprocess", argv[i]) == 0 ||

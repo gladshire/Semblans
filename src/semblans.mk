@@ -2,12 +2,12 @@ CC = g++
 CFLAGS = '-Wl,-rpath,$$ORIGIN/../lib/' -g -pthread
 LIBS = -L../lib -lboost_system -lboost_filesystem -ldl -lconfini
 INCLUDE_PATH = -I../lib/ -I../include
-OBJ_LINK = paando.o print_info.o ini_parse.o sra.o transcript.o
+OBJ_LINK = semblans.o print_info.o ini_parse.o sra.o transcript.o
 
-../bin/Paando: paando.o
-	$(CC) $(OBJ_LINK) $(CFLAGS) -o ../bin/paando $(LIBS)
-paando.o: paando.cpp paando.h
-	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c paando.cpp $(LIBS)
+../bin/Paando: semblans.o
+	$(CC) $(OBJ_LINK) $(CFLAGS) -o ../bin/semblans $(LIBS)
+semblans.o: semblans.cpp semblans.h
+	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c semblans.cpp $(LIBS)
 print_info.o: print_info.cpp print_info.h
 	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c print_info.cpp $(LIBS)
 ini_parse.o: ini_parse.cpp ini_parse.h
@@ -17,7 +17,7 @@ sra.o: sra.cpp sra.h
 transcript.o: transcript.cpp transcript.h
 	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c transcript.cpp $(LIBS)
 clean:
-	rm paando.o
+	rm semblans.o
 	rm print_info.o
 	rm ini_parse.o
 	rm sra.o

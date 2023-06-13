@@ -7,5 +7,5 @@ all:
 	#$(MAKE) assemble.mk clean
 	$(MAKE) postprocess.mk
 	#$(MAKE) postprocess.mk clean
-	$(MAKE) paando.mk
-	#$(MAKE) paando.mk clean
+	$(MAKE) semblans.mk
+	#$(MAKE) semblans.mk clean
