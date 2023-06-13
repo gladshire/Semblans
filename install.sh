@@ -12,9 +12,9 @@
 # trnsDecVersion =
 
 
-echo "Initiating install of Paando ..."
+echo "Initiating install of Semblans ..."
 
-# Prepare Paando file structure
+# Prepare Semblans file structure
 mkdir include
 mkdir lib
 mkdir external
@@ -210,5 +210,4 @@ rm transdecoder.tar.gz
 mkdir ./bin/
 make
 
-echo "\nPaando has been installed successfully!\n"
 
