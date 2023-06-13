@@ -98,14 +98,14 @@ void run_trinity_comb(std::vector<std::pair<std::string, std::string>> sraRuns,
   // Run Trinity for assembly using multiple SRAs
 
   // Summarize Trinity assembly job
-  logOutput("Now assembling de-novo transcriptome for:", logFile);
+  logOutput("Now assembling de-novo transcriptome for:\n", logFile);
   for (auto sraRun : sraRuns) {
-    logOutput("\n  SRA Run:", logFile);
-    logOutput("\n  " + sraRun.first, logFile);
+    logOutput("  SRA Run:", logFile);
+    logOutput("  " + std::string(fs::path(sraRun.first).stem().c_str()), logFile);
     if (sraRun.second != "") {
-      logOutput("\n  " + sraRun.second, logFile);
+      logOutput("  " + std::string(fs::path(sraRun.second).stem().c_str()), logFile);
     }
-    logOutput("\n", logFile);
+    logOutput("", logFile);
   }
   long long int ram_b = (long long int)stoi(ram_gb) * 1000000000;
   std::string outComb(std::string(fs::path(outFile.c_str()).stem().c_str()) + ".comb.fastq");

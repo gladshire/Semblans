@@ -165,8 +165,6 @@ int main(int argc, char * argv[]) {
     // Retrieve SRA objects for trinity runs
     std::string logFilePath = cfgIni["General"]["log_file"];
 
-    //
-
     // Create file space
     make_proj_space(cfgIni, "assemble");
 
@@ -209,9 +207,7 @@ int main(int argc, char * argv[]) {
       std::cout << "ERROR: No SRA runs specified. Please check config file" << std::endl;
     }
 
-    
     // Get group specifications for SRAs
-
     std::map<std::string, std::vector<SRA>> sraGroups;
     INI_MAP_ENTRY assemblyGroups = cfgIni["Assembly groups"];
     std::string currGroupName;
@@ -232,7 +228,6 @@ int main(int argc, char * argv[]) {
       iniStrArray = getStrArray(currIniArrStr, ",");
 
       // Match vector's strings with SRAs, filling SRA group vector
-      
       bool sraChosen;
       std::vector<bool> iniEntryFound(iniStrArray.size(), false);
       for (auto sra : sras) {

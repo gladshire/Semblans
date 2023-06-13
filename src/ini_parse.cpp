@@ -21,13 +21,14 @@ std::vector<std::string> getStrArray(std::string iniArrStr, std::string delim) {
   if (iniArrStr.empty()) {
     return strArray;
   }
-  size_t delimPos = iniArrStr.find(delim);
+  size_t delimPos = 0;
   std::string currSubstr;
   while ((delimPos = iniArrStr.find(delim)) != std::string::npos) {
     currSubstr = iniArrStr.substr(0, delimPos);
     strArray.push_back(currSubstr);
     iniArrStr.erase(0, delimPos + delim.length());
   }
+  strArray.push_back(iniArrStr);
   return strArray;
 }
 
