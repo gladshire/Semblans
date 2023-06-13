@@ -40,8 +40,13 @@ void annotateTranscript(std::transIn, std::string transOut,
   transAnnotator.startSeqJobs(stoi(threads), email);
 
   // Obtain annotator new sequence ID data
-  std::map<std::string, std::string> transAnnotator.getSeqIds();
+  std::map<std::string, std::string> newSeqData = transAnnotator.getSeqIds();
 
-  // Iterate over hash table, renaming each header to new sequence ID
-  for (uintmax_t
+  // Iterate over new seq ID data, renaming each header to new sequence ID
+  for (auto seqPair : newSeqData) {
+    fastaHashTable.setSeqHeader(seqPair.first, seqPair.second);
+  }
+
+  // Dump annotated hash table to new location
+  fastaHashTable.dump(transOut); 
 }

@@ -58,13 +58,6 @@ void run_trinity(std::pair<std::string, std::string> sraRun, std::string outFile
                  std::string threads, std::string ram_gb,
                  bool dispOutput, std::string logFile) {
   // Run Trinity for assembly using single SRA
-
-  // Summarize Trinity assembly job
-  logOutput("Now assembling de-novo transcriptome for:", logFile);
-  logOutput("  " + sraRun.first, logFile);
-  if (sraRun.second != "") {
-    logOutput("  " + sraRun.second, logFile);
-  }
   std::string inFile1 = sraRun.first;
   std::string inFile2 = sraRun.second;
   std::string trin_cmd;

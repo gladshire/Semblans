@@ -297,6 +297,8 @@ int main(int argc, char * argv[]) {
     
     // Run transdecoder
     transdecBulk(transVec, threads, ram_gb, dispOutput, logFilePath, cfgIni);
+  
+    // Annotate transcriptome
   }
   else {
   

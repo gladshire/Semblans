@@ -222,9 +222,7 @@ void rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
       }
       checkOverrep:if (overRep) {
         writeEnd1 = nlPos1Prev;
-        outFile1.write(writeStart1, writeEnd1 - writeStart1);
         writeEnd2 = nlPos2Prev;
-        outFile2.write(writeStart2, writeEnd2 - writeStart2);
         if (compressFiles) {
           outputStream1.write(writeStart1, writeEnd1 - writeStart1);
           outputStream2.write(writeStart2, writeEnd2 - writeStart2);

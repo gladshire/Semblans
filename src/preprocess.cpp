@@ -412,7 +412,7 @@ void filtForeignBulk(const std::vector<SRA> & sras, std::vector<std::string> kra
                        sra.get_sra_path_for_filt().second.replace_extension().c_str());
         }
         else {
-          std::rename((krakOutDir + "/TMP_!.fq").c_str(),
+          std::rename((krakOutDir + "/TMP_1.fq").c_str(),
                        sra.get_sra_path_for_filt().first.c_str());
           std::rename((krakOutDir + "/TMP_2.fq").c_str(),
                        sra.get_sra_path_for_filt().second.c_str());

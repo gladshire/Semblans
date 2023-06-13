@@ -7,7 +7,7 @@ std::vector<std::string> allSteps = {"Raw_reads/", "Pre_quality_analysis/",
                                      "Filter_foreign/", "Quality_analysis/",
                                      "Filter_overrepresented/", "Transcript_assembly/",
                                      "Filter_chimera/", "Clustering/",
-                                     "Final_cds_pep/"};
+                                     "Coding_seqs_peps/", "Final_annotated/"};
 
 std::vector<std::string> stepDirs;
 

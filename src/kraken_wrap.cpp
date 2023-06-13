@@ -56,17 +56,19 @@ void run_kraken2(std::pair<std::string, std::string> sraRunIn,
     isPaired = false;
   }
   if (isPaired) {
-    result = system((krakCmd + " " + krakFlags + " " + " --paired " + "--unclassified-out " + sraRunOut + " " +
+    krakCmd = krakCmd + " " + krakFlags + " --paired " + krakOutput + " " + inFile1 + " " + inFile2 + " --report " +
+              repFile + printOut;
+    /*result = system((krakCmd + " " + krakFlags + " " + " --paired " + "--unclassified-out " + sraRunOut + " " +
                      inFile1 + " " + inFile2 + " --output - " + " --confidence " + conf_threshold + " --report " +
-                     repFile + " " + printOut).c_str());
-    /*result = system((krakCmd + " " + krakFlags + " --paired " + krakOutput + " " +
-                     inFile1 + " " + inFile2 + " --report " + repFile + " " + printOut).c_str());*/
+                     repFile + " " + printOut).c_str());*/
+    result = system(krakCmd.c_str());
   }
   else {
-    result = system((krakCmd + " " + krakFlags + " " + " --unclassified-out " + sraRunOut + "--output - " + inFile1 + " " +
-                     " --confidence " + conf_threshold + " --report " + repFile + " " + printOut).c_str());
-    /*result = system((krakCmd + " " + krakFlags + krakOutput + " " +
-                     inFile1 + " " + " --report " + repFile + " " + printOut).c_str());*/
+    krakCmd = krakCmd + " " + krakFlags + " " + krakOutput + " " + inFile1 + " " + " --report " + repFile + " " + printOut;
+    /*result = system((krakCmd + " " + krakFlags + " " + " --unclassified-out " + sraRunOut + "--output - " + inFile1 + " " +
+                     " --confidence " + conf_threshold + " --report " + repFile + " " + printOut).c_str());*/
+    result = system((krakCmd + " " + krakFlags + " " +  krakOutput + " " +
+                     inFile1 + " " + " --report " + repFile + " " + printOut).c_str());
   }
   if (WIFSIGNALED(result)) {
     logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);

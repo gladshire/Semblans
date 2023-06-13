@@ -85,14 +85,14 @@ echo "Now installing required packages ..."
 # make --
 
 # Install pigz
-echo "Installing pigz ..."
-wget -q --output-document pigz.tar.gz https://zlib.net/pigz/pigz-2.7.tar.gz
-tar -xf pigz.tar.gz -C ./external/
-mv ./external/pigz-2.7 ./external/pigz
-cd ./external/pigz
-make
-cd ../../
-rm pigz.tar.gz
+# echo "Installing pigz ..."
+# wget -q --output-document pigz.tar.gz https://zlib.net/pigz/pigz-2.7.tar.gz
+# tar -xf pigz.tar.gz -C ./external/
+# mv ./external/pigz-2.7 ./external/pigz
+# cd ./external/pigz
+# make
+# cd ../../
+# rm pigz.tar.gz
 
 # Install NCBI sra-tools
 echo "Installing SRA-Tools ..."
