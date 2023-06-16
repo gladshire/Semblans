@@ -48,7 +48,7 @@ std::pair<std::vector<std::string>, std::vector<std::string>> get_overrep_seqs_p
 std::vector<std::string> get_overrep_seqs_se(SRA sra) {
   std::vector<std::string> overrepSeqs;
 
-  std::string inFileStr(std::string(sra.get_fastqc_dir_2().first.c_str()) + "_fastqc.html");
+  std::string inFileStr(std::string(sra.get_fastqc_dir_2().first.c_str()) + ".filt_fastqc.html");
 
   std::ifstream inFile(inFileStr);
 
@@ -92,6 +92,8 @@ void rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
   }
 
   if (overrepSeqs.first.empty() && overrepSeqs.second.empty()) {
+    system(std::string("cp " + sraRunIn.first + " " + sraRunOut.first).c_str());
+    system(std::string("cp " + sraRunIn.second + " " + sraRunOut.second).c_str());
     return;
   }
   int lenOverReps1;
@@ -277,6 +279,11 @@ void rem_overrep_se(std::string sraRunIn, std::string sraRunOut,
   std::ifstream inFile(sraRunIn);
   std::ofstream outFile(sraRunOut);
 
+  if (overrepSeqs.empty()) {
+    system(std::string("cp " + sraRunIn + " " + sraRunOut).c_str());
+    return;
+  }
+
   int lenOverReps = overrepSeqs.front().size();
 
   std::string inFileData;
@@ -306,7 +313,7 @@ void rem_overrep_se(std::string sraRunIn, std::string sraRunOut,
   gzOutBuffer.push(outFile);
   std::ostream outputStream(&gzOutBuffer);
 
-  while (!inputStream.eof() && !inputStream.good() && !inFile.eof() && !inFile.good()) {
+  while ((!inputStream.eof() && !inFile.eof()) && (inputStream.good() && inFile.good())) {
     if (compressFiles) {
       inputStream.read(&inFileData[0], ram_b);
       s = inputStream.gcount();

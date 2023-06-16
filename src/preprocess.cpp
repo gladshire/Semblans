@@ -394,8 +394,8 @@ void filtForeignBulk(const std::vector<SRA> & sras, std::vector<std::string> kra
       if (sra.is_paired()) {
         currKrakOut = krakOutDir + "/TMP#.fq";
       }
-        else {
-        currKrakOut = krakOutDir + "TMP.fq";
+      else {
+        currKrakOut = krakOutDir + "/TMP.fq";
       }
       procRunning = true;
       std::thread krakThread(progressAnim,2);
@@ -515,18 +515,28 @@ void remOverrepBulk(const std::vector<SRA> & sras, std::string threads, std::str
     currOrepOut.first = sra.get_sra_path_orep_filt().first.c_str();
     currOrepOut.second = sra.get_sra_path_orep_filt().second.c_str();
 
-    procRunning = true;
-    std::thread orepThread(progressAnim,2);
     if (sra.is_paired()) {
       currOrepSeqsPe = get_overrep_seqs_pe(sra);
+      if (currOrepSeqsPe.first.empty() && currOrepSeqsPe.second.empty()) {
+        logOutput("    No overrepresented reads detected. Continuing.", logFilePath);
+      }
+      procRunning = true;
+      std::thread orepThread(progressAnim,2);
       rem_overrep_pe(currOrepIn, currOrepOut, ram_b, compressFiles, currOrepSeqsPe);
+      procRunning = false;
+      orepThread.join();
     }
     else {
       currOrepSeqsSe = get_overrep_seqs_se(sra);
+      if (currOrepSeqsSe.empty()) {
+        logOutput("    No overrepresented reads detected. Continuing.", logFilePath);
+      }
+      procRunning = true;
+      std::thread orepThread(progressAnim,2);
       rem_overrep_se(currOrepIn.first, currOrepOut.first, ram_b, compressFiles, currOrepSeqsSe);
+      procRunning = false;
+      orepThread.join();
     }
-    procRunning = false;
-    orepThread.join();
 
     // Make checkpoint file
     sra.makeCheckpoint("orep.fix");
