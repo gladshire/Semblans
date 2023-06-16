@@ -106,8 +106,14 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool compressedFiles) {
   }
   
   std::string fileBase = make_file_str();
-  file_prefix_1 = fileBase + "_1";
-  file_prefix_2 = fileBase + "_2";
+  if (paired) {
+    file_prefix_1 = fileBase + "_1";
+    file_prefix_2 = fileBase + "_2";
+  }
+  else {
+    file_prefix_1 = fileBase;
+    file_prefix_2 = "";
+  }
 
   std::string projPath = outDir + projName + "/";
   extern std::vector<std::string> stepDirs;

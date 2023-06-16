@@ -1,5 +1,6 @@
 #include "preprocess.h"
 
+// TODO: FASTQC FOR SINGLE-END PRINTS. IT SHOULDNT. FIx
 
 std::atomic<bool> procRunning(false);
 
@@ -571,7 +572,15 @@ int main(int argc, char * argv[]) {
     //bool compressFiles = ini_get_bool(cfgIni["General"]["compress_files"].c_str(), 0);
     bool compressFiles = false;
     // Obtain path to log file from config file
-    std::string logFilePath = cfgIni["General"]["log_file"];
+    fs::path logFile(cfgIni["General"]["log_file"].c_str());
+    std::string logFilePath;
+    if (logFile.filename() == logFile) {
+      logFilePath = fs::canonical((fs::path(cfgIni["General"]["output_directory"].c_str()) / 
+                                   fs::path(cfgIni["General"]["log_file"].c_str()))).c_str();
+    }
+    else {
+      logFilePath = fs::canonical((fs::path(cfgIni["General"]["log_file"].c_str()))).c_str();
+    }
  
     // Make project file structure
     make_proj_space(cfgIni, "preprocess");

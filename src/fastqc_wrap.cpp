@@ -35,7 +35,7 @@ void run_fastqc(std::pair<std::string, std::string> sraRunFiles,
     else {
       fastqcCmd += (" >>" + logFile + " 2>&1");
     }
-    result = system((PATH_FASTQC + fastqcFlags + outFile + " " + inFile1).c_str());
+    result = system(fastqcCmd.c_str());
   }
   if (WIFSIGNALED(result)) {
     std::cout << "Exited with signal " << WTERMSIG(result) << std::endl;

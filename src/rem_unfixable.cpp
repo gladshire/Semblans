@@ -191,7 +191,7 @@ void rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
   gzOutBuffer.push(outFile);
   std::ostream outputStream(&gzOutBuffer);
 
-  while (!inputStream.eof() && !inputStream.good() && !inFile.eof() && !inFile.good()) {
+  while ((!inputStream.eof() && !inFile.eof()) && (inputStream.good() && inFile.good())) {
     if (compressFiles) {
       inputStream.read(inFileData, ram_b);
       s = inputStream.gcount();
@@ -232,7 +232,7 @@ void rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
       }
     }
     if (compressFiles) {
-      outputStream.write(writeStart, writeEnd - writeStart);
+      outputStream.write(writeStart, writeEnd + s - writeStart);
     }
     else {
       outFile.write(writeStart, inFileData + s - writeStart);

@@ -35,22 +35,25 @@ void fasterq_sra(SRA sra, std::string threads, bool dispOutput,
                  bool compressOutput, std::string logFile) {
   std::string prefetchDir(sra.get_sra_path_raw().first.parent_path().c_str());
   std::string outFile;
-  std::string fasterqFlag = " -e " + threads + " -t " + prefetchDir + " " + prefetchDir;
+  std::string fasterqFlag = " -e " + threads + " -t ./";
   std::string sraAccession = sra.get_accession();
   int result;
   outFile = sra.make_file_str();
+  if (!sra.is_paired()) {
+    outFile += ".fastq";
+  }
   fs::path currDir = fs::current_path();
   fs::current_path(fs::path(prefetchDir.c_str()));
   std::string fasterqCmd;
   if (compressOutput) {
-    fasterqCmd = "( " + PATH_FASTERQ + " " + fasterqFlag + "/" + sraAccession +
+    fasterqCmd = "( " + PATH_FASTERQ + " " + sraAccession + fasterqFlag +
                  " --split-spot -Z | awk \'{" +
                  "if ((NR-1) % 8 < 4) {print | \"" + PATH_PIGZ + " --fast -p " + threads + " > " + outFile + "_1.fastq.gz\"} " +
                  "else {print | \"" + PATH_PIGZ + " --fast -p " + threads + " > " + outFile + "_2.fastq.gz\"} }\' )";
   }
   else {
-    fasterqCmd = PATH_FASTERQ + " " + fasterqFlag + "/" + sraAccession +
-                 " -o " + outFile;
+    fasterqCmd = "(" + PATH_FASTERQ + " " + sraAccession + fasterqFlag +
+                 " -o ./" + outFile + " )";
   }
   if (dispOutput) {
     fasterqCmd += (" 2>&1 | tee -a " + logFile);
@@ -58,7 +61,6 @@ void fasterq_sra(SRA sra, std::string threads, bool dispOutput,
   else {
     fasterqCmd += (" >>" + logFile + " 2>&1");
   }
-
   result = system(fasterqCmd.c_str());
   fs::current_path(currDir);
   if (WIFSIGNALED(result)) {
