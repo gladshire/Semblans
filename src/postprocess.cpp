@@ -27,12 +27,17 @@ void blastxDiamBulk(const std::vector<transcript> & transVec, std::string thread
   std::string currTransInDiam;
   std::string currBlastDbName;
   std::string refProt = cfgIni.at("General").at("reference_proteome_path");
-  std::string blastDbDir = cfgIni.at("General").at("output_directory") + "/" +
-                           cfgIni.at("General").at("project_name") + "/" +
-                           stepDirs[8] + "/";
-  std::string blastDbName = refProt.substr(refProt.find_last_of("/"),
-                                           refProt.find_last_of(".") -
-                                           refProt.find_last_of("/"));
+  if (!fs::exists(fs::path(refProt.c_str()))) {
+    logOutput("ERROR: Reference proteome: " + refProt + " not found", logFilePath);
+    logOutput("  Please ensure its path is correctly specified in your config INI file", logFilePath);
+    exit(1);
+  }
+  std::string blastDbDir;
+  blastDbDir = cfgIni.at("General").at("output_directory") + "/" +
+               cfgIni.at("General").at("project_name") + "/" +
+               stepDirs[8] + "/";
+  std::string blastDbName;
+  blastDbName = std::string(fs::path(refProt.c_str()).stem().c_str());
   for (auto trans : transVec) {
     logOutput("  Now running BLASTX alignment for:", logFilePath);
     summarize_sing_trans(trans, logFilePath, 4);
@@ -40,9 +45,7 @@ void blastxDiamBulk(const std::vector<transcript> & transVec, std::string thread
 
     makeDb(refProt, blastDbDir, dispOutput, logFilePath);
     // Run BlastX
-    currBlastDbName = refProt.substr(refProt.find_last_of("/"),
-                                     refProt.find_last_of(".") -
-                                     refProt.find_last_of("/"));
+    currBlastDbName = std::string(fs::path(refProt.c_str()).stem().c_str());
     blastxDiam(currTransInDiam, blastDbDir + currBlastDbName, threads,
                blastDbDir, dispOutput, logFilePath);
   }
@@ -171,12 +174,15 @@ void transdecBulk(const std::vector<transcript> & transVec, std::string threads,
   std::string currDb;
   std::string currOutDirTD;
   std::string refProt = cfgIni.at("General").at("reference_proteome_path");
+  if (!fs::exists(fs::path(refProt.c_str()))) {
+    logOutput("ERROR: Reference proteome: " + refProt + " not found", logFilePath);
+    logOutput("  Please ensure its path is correctly specified in your config INI file", logFilePath);
+    exit(1);
+  }
   std::string blastDbDir = cfgIni.at("General").at("output_directory") + "/" +
                            cfgIni.at("General").at("project_name") + "/" +
                            stepDirs[8] + "/";
-  std::string blastDbName = refProt.substr(refProt.find_last_of("/"),
-                                           refProt.find_last_of(".") -
-                                           refProt.find_last_of("/"));
+  std::string blastDbName(fs::path(refProt.c_str()).stem().c_str());
   uintmax_t ram_b = (uintmax_t)stoi(ram_gb) * 1000000000;
   for (auto trans : transVec) {
     logOutput("  Now building coding sequences / peptides for:", logFilePath);
