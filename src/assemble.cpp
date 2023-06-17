@@ -21,7 +21,8 @@ bool stringToBool(std::string boolStr) {
 
 void makeGroupCheckpoint(std::string cpDir, std::string prefix) {
   std::string cpFileName = cpDir + "/" + prefix + ".Trinity.ok";
-  std::ofstream cpFile(cpFileName);
+  std::ofstream cpFile;
+  cpFile.open(cpFileName);
   cpFile.close();
 }
 
@@ -67,7 +68,7 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
 
   for (auto sraGroup : sraGroups) {
     SRA dummySra = sraGroup.second.at(0);
-    cpDir = dummySra.get_fastqc_dir_2().first.parent_path().parent_path() / "checkpoints";
+    cpDir = dummySra.get_fastqc_dir_2().first.parent_path().parent_path().parent_path() / "checkpoints";
 
     // Check whether checkpoint exists
     if (groupCheckpointExists(std::string(cpDir.c_str()), sraGroup.first)) {
