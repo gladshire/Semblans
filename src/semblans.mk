@@ -4,7 +4,7 @@ LIBS = -L../lib -lboost_system -lboost_filesystem -ldl -lconfini
 INCLUDE_PATH = -I../lib/ -I../include
 OBJ_LINK = semblans.o print_info.o ini_parse.o sra.o transcript.o
 
-../bin/Paando: semblans.o
+../bin/semblans: semblans.o
 	$(CC) $(OBJ_LINK) $(CFLAGS) -o ../bin/semblans $(LIBS)
 semblans.o: semblans.cpp semblans.h
 	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c semblans.cpp $(LIBS)

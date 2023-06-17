@@ -274,7 +274,7 @@ int main(int argc, char * argv[]) {
 
   
     // Summarize program execution parameters
-    logOutput("Paando Postprocess started with following parameters:", logFilePath);
+    logOutput("Semblans Postprocess started with following parameters:", logFilePath);
     logOutput("  Config file:     " + std::string(argv[1]), logFilePath);
     logOutput("  Threads (Cores): " + threads, logFilePath);
     logOutput("  Memory (GB):     " + ram_gb, logFilePath);

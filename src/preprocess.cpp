@@ -29,7 +29,7 @@ void preSummary(const std::vector<SRA> sras,
                 std::string logFilePath, std::string threads, std::string ram_gb,
                 bool retainInterFiles, bool compressFiles) {
   // Summarize preprocess task
-  logOutput("Paando Preprocess started with following parameters:", logFilePath);
+  logOutput("Semblans Preprocess started with following parameters:", logFilePath);
   logOutput("  Config file:     " + std::string(fs::path(logFilePath.c_str()).filename().c_str()),
             logFilePath);
   logOutput("  Threads (Cores): " + threads, logFilePath);

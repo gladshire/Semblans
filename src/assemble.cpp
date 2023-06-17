@@ -267,7 +267,7 @@ int main(int argc, char * argv[]) {
       currSraGroup.clear();
     }
 
-    logOutput("Paando Assemble started with following parameters:", logFilePath);
+    logOutput("Semblans Assemble started with following parameters:", logFilePath);
     logOutput("  Config file:     " + std::string(argv[1]), logFilePath);;
     logOutput("  Threads (Cores): " + threads, logFilePath);
     logOutput("  Memory (GB):     " + ram_gb, logFilePath);

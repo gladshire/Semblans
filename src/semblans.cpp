@@ -48,7 +48,7 @@ void print_help() {
   std::cout << "  -r,   --ram        Specifies ammount of memory/RAM (GB) to dedicate" << std::endl;
   std::cout << "  -m,   --multi      Perform assembly from multiple SRA runs" << std::endl;
   std::cout << "  -f,   --retain     Prevents deletion of intermediate files in pipeline" << std::endl;
-  std::cout << "  -v,   --verbose    Prints all output from Paando and sub-programs" << std::endl;
+  std::cout << "  -v,   --verbose    Prints all output from Semblans and sub-programs" << std::endl;
   std::cout << "  -h,   --help       Displays this help screen" << std::endl;
 
 }
@@ -75,7 +75,7 @@ int main(int argc, char * argv[]) {
   }
   if (argc == 2 && (strcmp("--version", argv[1]) == 0 ||
                     strcmp("-v", argv[1]) == 0)) {
-    std::cout << "Paando version: 0.0.1" << std::endl;
+    std::cout << "Semblans version: 0.0.1" << std::endl;
   }
   else {
     // Parse through flags in commands
