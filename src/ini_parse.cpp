@@ -60,8 +60,9 @@ std::string getStepNum(int stepNum) {
 
 // Create directory space for project
 void make_proj_space(const INI_MAP &iniFile, std::string pipeStage) {
-  std::string projDir = iniFile.at("General").at("output_directory") +
-                        iniFile.at("General").at("project_name") + "/";
+  std::string projDir((fs::path(iniFile.at("General").at("output_directory").c_str()) /
+                       fs::path(iniFile.at("General").at("project_name").c_str())).c_str());
+  projDir += "/";
   INI_MAP_ENTRY pipeSteps = iniFile.at("Pipeline");
   if (!fs::exists(fs::path(projDir.c_str()))) {
     system(("mkdir " + projDir).c_str());
@@ -167,10 +168,16 @@ void make_proj_space(const INI_MAP &iniFile, std::string pipeStage) {
     stepDirs.push_back(allSteps[9]);
   }
   
-  // Create directory for final transcripts coding seqs, proteins
+  // Create directory for transcripts coding seqs, proteins
   currNum = getStepNum(stepNum);
   stepDirs.push_back(currNum + "-" + allSteps[10]);
   system(("mkdir " + projDir + currNum + "-" + allSteps[10] + " > /dev/null 2>&1").c_str());
+  stepNum++;
+
+  // Create directory for annotated transcripts
+  currNum = getStepNum(stepNum);
+  stepDirs.push_back(currNum + "-" + allSteps[11]);
+  system(("mkdir " + projDir + currNum + "-" + allSteps[11] + " > /dev/null 2>&1").c_str());
   stepNum++;
 }
 

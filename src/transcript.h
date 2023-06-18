@@ -30,6 +30,7 @@ class transcript {
     fs::path trans_path_counts;
     fs::path trans_path_cds;
     fs::path trans_path_prot;
+    fs::path trans_path_annot;
   public:
     transcript();
     transcript(SRA sra);
@@ -50,6 +51,7 @@ class transcript {
     fs::path get_trans_path_counts();
     fs::path get_trans_path_cds();
     fs::path get_trans_path_prot();
+    fs::path get_trans_path_annot();
     std::string get_file_prefix();
     void set_trans_path_trinity(fs::path transTrinity);
     void set_trans_path_blastx(fs::path transBlastx);

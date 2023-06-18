@@ -157,10 +157,6 @@ void detect_chimera(std::string blastxFile, std::string outDir) {
 
   fs::path cutFilePath((outDir + "/" + cutFile).c_str());
   fs::path infoFilePath((outDir + "/" + infoFile).c_str());
-  if (fs::exists(cutFilePath) && fs::exists(infoFilePath)) {
-    std::cout << "Chimera detection files found for: " + blastxFileStr << std::endl;
-    return;
-  }
 
   std::ifstream fileBlastx(blastxFile);
   if (!fileBlastx.is_open()) {
@@ -265,11 +261,6 @@ void removeChimera(std::string transIn, std::string transOut,
   std::set<std::string> chimeraSet;
 
   std::string filtTrans = transOut;
-
-  if (fs::exists(fs::path(filtTrans))) {
-    logOutput("Filtered transcripts found for: " + transFileStr, logFile);
-    return;
-  }
 
   uintmax_t ram_b = (uintmax_t)stoi(ram_gb) * 1000000000;
 

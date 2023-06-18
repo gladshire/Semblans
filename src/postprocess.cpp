@@ -42,12 +42,18 @@ void blastxDiamBulk(const std::vector<transcript> & transVec, std::string thread
     logOutput("  Now running BLASTX alignment for:", logFilePath);
     summarize_sing_trans(trans, logFilePath, 4);
     currTransInDiam = trans.get_trans_path_trinity().c_str();
-
+    // Check if BlastX checkpoint exists
+    if (trans.checkpointExists("blastx")) {
+      logOutput("  BLASTX checkpoint found for: " + trans.get_file_prefix(), logFilePath);
+      continue;
+    }
     makeDb(refProt, blastDbDir, dispOutput, logFilePath);
     // Run BlastX
     currBlastDbName = std::string(fs::path(refProt.c_str()).stem().c_str());
     blastxDiam(currTransInDiam, blastDbDir + currBlastDbName, threads,
                blastDbDir, dispOutput, logFilePath);
+    // Create BlastX checkpoint
+    trans.makeCheckpoint("blastx");
   }
 }
 
@@ -63,6 +69,11 @@ void remChimeraBulk(const std::vector<transcript> & transVec, std::string ram_gb
   for (auto trans : transVec) {
     logOutput("  Now running chimera removal for:", logFilePath);
     summarize_sing_trans(trans, logFilePath, 4);
+    // Check if chimera removal checkpoint exists
+    if (trans.checkpointExists("chimera")) {
+      logOutput("  Chimera removal checkpoint found for: " + trans.get_file_prefix(), logFilePath);
+      continue;
+    }
     currTransInChim = trans.get_trans_path_trinity().c_str();
     currTransOutChim = trans.get_trans_path_chimera().c_str();
     currBlastx = trans.get_trans_path_blastx().c_str();
@@ -73,12 +84,14 @@ void remChimeraBulk(const std::vector<transcript> & transVec, std::string ram_gb
     detect_chimera(currBlastx, chimOutDir);
     removeChimera(currTransInChim, currTransOutChim, currTransInfo, currTransCut, ram_gb,
                   logFilePath);
+    // Create chimera removal checkpoint
+    trans.makeCheckpoint("chimera");
   }
 }
 
 void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
                 bool dispOutput, std::string logFilePath) {
-  logOutput("Starting clustering of transcripts", logFilePath);
+  logOutput("Starting quantification of transcripts", logFilePath);
   std::string currTransInSalm;
   std::string currIndex;
   std::string currQuant;
@@ -90,15 +103,15 @@ void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
   std::vector<std::pair<std::string, std::string>> currSraRunsIn;
   std::pair<std::string, std::string> currSraRun;
   for (auto trans : transVec) {
-    logOutput("  Now performing cluster for:", logFilePath);
+    logOutput("  Now performing quantification for:", logFilePath);
     summarize_sing_trans(trans, logFilePath, 4);
+    // Check if clustering checkpoint exists
+
     currTransInSalm = trans.get_trans_path_chimera().c_str();
     currIndex = trans.get_trans_path_index().c_str();
     currQuant = trans.get_trans_path_quant().c_str();
     
     currTransInfoFileStr = std::string(trans.get_trans_path_trinity().replace_extension(".ti").c_str());
-
-    std::cout << currTransInfoFileStr << std::endl;
 
     currTransInfoFile.open(currTransInfoFileStr);
     while(getline(currTransInfoFile, currLineInfo)) {
@@ -110,9 +123,6 @@ void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
         currSraRun.first = currLineInfo.substr(0, spacePos + 1);
         // Assign everything from space to endline as currSraRun.second
         currSraRun.second = currLineInfo.substr(spacePos + 1, nlPos - spacePos);
-
-        std::cout << currSraRun.first << std::endl;
-        std::cout << currSraRun.second << std::endl;
       }
       else {
         currSraRun.first = currLineInfo;
@@ -120,18 +130,32 @@ void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
       currSraRunsIn.push_back(currSraRun);
     }
 
+    // Check if salmon index checkpoint exists
+    if (trans.checkpointExists("index")) {
+      logOutput("  Indexing checkpoint found for: " + trans.get_file_prefix(), logFilePath);
+      continue;
+    }
     // Perform salmon index of transcript
     salmon_index(currTransInSalm, currIndex, threads, dispOutput, logFilePath);
+    // Create salmon index checkpoint
+    trans.makeCheckpoint("index");
 
+    // Check if salmon quant checkpoint exists
+    if (trans.checkpointExists("quant")) {
+      logOutput("  Quant checkpoint found for: " + trans.get_file_prefix(), logFilePath);
+      continue;
+    }
     // Perform salmon quant of transcript
     salmon_quant(currTransInSalm, currIndex, currQuant, currSraRunsIn, threads,
                  dispOutput, logFilePath);
+    // Create salmon quant checkpoint
+    trans.makeCheckpoint("quant");
   }
 }
 
 void corsetBulk(const std::vector<transcript> & transVec, std::string ram_gb,
                 bool dispOutput, std::string logFilePath) {
-  logOutput("Starting cluster-based filtering", logFilePath);
+  logOutput("Removing redundant transcripts for:", logFilePath);
   std::string currTransInCors;
   std::string currTransPrefix;
   std::string currEqClassFile;
@@ -157,10 +181,26 @@ void corsetBulk(const std::vector<transcript> & transVec, std::string ram_gb,
     currTransLargestClust = trans.get_trans_path_largest().c_str();
     currTransRedund = trans.get_trans_path_redund().c_str();
     currOutDir = trans.get_trans_path_clust().parent_path().c_str();
+    // Check if corset run checkpoint exists
+    if (trans.checkpointExists("corset")) {
+      logOutput("  Corset checkpoint found for: " + trans.get_file_prefix(), logFilePath);
+      continue;
+    }
+    // Perform corset run
+    corset_eq_classes(trans.get_file_prefix(), currEqClassFile, currOutDir, dispOutput, logFilePath);
+    // Create corset run checkpoint
+    trans.makeCheckpoint("corset");
 
+    // Check if corset filter checkpoint exists
+    if (trans.checkpointExists("cors_filt")) {
+      logOutput("  Corset filtering checkpoint found for: " + trans.get_file_prefix(), logFilePath);
+      continue;
+    }
     // Filter corset output
     filterCorset(currTransInCors, currTransClust, currTransLargestClust, currTransRedund,
                  ram_b, currOutDir, logFilePath);
+    // Create corset filtering checkpoint
+    trans.makeCheckpoint("cors_filt");
   }
 }
 
@@ -194,8 +234,40 @@ void transdecBulk(const std::vector<transcript> & transVec, std::string threads,
     currDb = blastDbDir + "/" + blastDbName;
     currOutDirTD = trans.get_trans_path_cds().parent_path().c_str();
 
+    // Check if transdecoder checkpoint exists
+    if (trans.checkpointExists("transdecoder")) {
+      logOutput("  TransDecoder checkpoint found for: " + trans.get_file_prefix(), logFilePath);
+      continue;
+    }
+    // Perform transdecoder run to obtain coding sequences / peptides
     run_transdecoder(currTransInTD, currTransCds, currTransPep, threads, ram_b,
                      currDb, currOutDirTD, dispOutput, logFilePath);
+    // Create transdecoder checkpoint
+    trans.makeCheckpoint("transdecoder");
+  }
+}
+
+void annotateBulk(const std::vector<transcript> & transVec, std::string threads,
+                  std::string ram_gb, bool dispOutput, std::string logFilePath,
+                  const INI_MAP & cfgIni) {
+  logOutput("Starting annotation of transcripts", logFilePath);
+  std::string currTransIn;
+  std::string currTransPep;
+  std::string currTransOut;
+  // Check for checkpoint
+
+  std::string email = "gladshire@gmail.com";
+  for (auto trans : transVec) {
+    logOutput("  Now running annotation on:", logFilePath);
+    summarize_sing_trans(trans, logFilePath, 4);
+
+    currTransIn = trans.get_trans_path_cds().c_str();
+    currTransPep = trans.get_trans_path_prot().c_str();
+  
+    currTransOut = trans.get_trans_path_annot().c_str();
+
+
+    annotateTranscript(currTransIn, currTransPep, currTransOut, threads, ram_gb, logFilePath, email);
   }
 }
 
@@ -219,12 +291,24 @@ int main(int argc, char * argv[]) {
     // Determine whether to compress files
     //bool compressFiles = ini_get_bool(cfgIni["General"]["compress_files"].c_str(), 0);
     bool compressFiles = false;
+    
     // Retrieve SRA objects, convert to transcripts
     make_proj_space(cfgIni, "postprocess");
     std::string outputDir = cfgIni["General"]["output_directory"];
     std::string projDir = outputDir + cfgIni["General"]["project_name"] + "/";
     std::string refProt = cfgIni["General"]["reference_proteome_path"];
-    std::string logFilePath = cfgIni["General"]["log_file"];
+
+    // Obtain path to log file from config file
+    fs::path logFile(cfgIni["General"]["log_file"].c_str());
+    std::string logFilePath;
+    if (logFile.filename() == logFile) {
+      logFilePath = std::string(fs::canonical((fs::path(cfgIni["General"]["output_directory"].c_str()) /
+                                               fs::path(cfgIni["General"]["log_file"].c_str()))).c_str());
+    }
+    else {
+      logFilePath = std::string(fs::canonical((fs::path(cfgIni["General"]["log_file"].c_str()))).c_str());
+    }
+    
     std::vector<SRA> sras;
     std::vector<std::string> localDataFiles;
     sras = get_sras(cfgIni, compressFiles);
@@ -305,6 +389,7 @@ int main(int argc, char * argv[]) {
     transdecBulk(transVec, threads, ram_gb, dispOutput, logFilePath, cfgIni);
   
     // Annotate transcriptome
+    //annotateBulk(transVec, threads, ram_gb, dispOutput, logFilePath, cfgIni);
   }
   else {
   

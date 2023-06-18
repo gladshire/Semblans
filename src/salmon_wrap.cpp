@@ -56,9 +56,6 @@ void salmon_index(std::string transIn, std::string transIndex,
   }
   int result;
 
-  if (fs::exists(fs::path(transIndex.c_str()))) {
-    return;
-  }
   std::string salm_cmd = PATH_SALMON + " index" + " -t " + transFilePath +
                          " -i " + indexFilePath + " -p " + threads +
                          printOut;
@@ -99,16 +96,25 @@ void salmon_quant(std::string transIn, std::string transIndex, std::string trans
   std::string sras1 = "";
   std::string sras2 = "";
 
+  // Determine if more data exists for paired or single runs contituting transcript
+  bool morePaired = false;
+  morePaired = runPaired(sraRunsIn);
+  
+  // Construct largest possible list of either paired or single runs
   for (int i = 0; i < sraRunsIn.size(); i++) {
-    if (i != 0) {
-      sras1 += " ";
+    if (morePaired) {
       if (sraRunsIn[i].second != "") {
-        sras2 += " ";
+        sras1 += (sraRunsIn[i].first + " ");
+        sras2 += (sraRunsIn[i].second + " ");
       }
     }
-    sras1 += sraRunsIn[i].first;
-    sras2 += sraRunsIn[i].second;
+    else {
+      if (sraRunsIn[i].second == "") {
+        sras1 += (sraRunsIn[i].first + " ");
+      }
+    }
   }
+
   std::string printOut;
   if (dispOutput) {
     printOut = " 2>&1 | tee -a " + logFile;
@@ -117,12 +123,7 @@ void salmon_quant(std::string transIn, std::string transIndex, std::string trans
     printOut = " >>" + logFile + " 2>&1";
   }
   int result;
-  if (fs::exists(fs::path(transQuant.c_str()))) {
-    //logOutput("Quant found for: " + trans.make_file_str(), logFile);
-    return;
-  }
-  bool morePaired = false;
-  morePaired = runPaired(sraRunsIn);
+  
   if (morePaired) {
     std::string salm_cmd = PATH_SALMON + " quant" + " -i " + indexFilePath + " --dumpEq" +
                            " --libType" + " A" + " -p " + threads +

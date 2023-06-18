@@ -14,6 +14,6 @@
 namespace fs = boost::filesystem;
 
 
-void annotateTranscript(std::string transIn, std::string transOut,
+void annotateTranscript(std::string transIn, std::string transPep, std::string transOut,
                         std::string threads, std::string ram_gb,
-                        std::string logFile);
+                        std::string logFile, std::string email);

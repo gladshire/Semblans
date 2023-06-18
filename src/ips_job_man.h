@@ -36,7 +36,6 @@ class seqIdJobManager {
     std::map<std::string, std::string> newSeqIds;
     void performJob(std::string email, std::string title, std::string sequence);
   public:
-    seqIdJobManager();
     void submitSeqJob(sequence newSeq);
     void startSeqJobs(int numThreads, std::string email);
     std::map<std::string, std::string> getSeqIds();

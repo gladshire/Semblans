@@ -585,11 +585,11 @@ int main(int argc, char * argv[]) {
     fs::path logFile(cfgIni["General"]["log_file"].c_str());
     std::string logFilePath;
     if (logFile.filename() == logFile) {
-      logFilePath = fs::canonical((fs::path(cfgIni["General"]["output_directory"].c_str()) / 
-                                   fs::path(cfgIni["General"]["log_file"].c_str()))).c_str();
+      logFilePath = std::string(fs::canonical((fs::path(cfgIni["General"]["output_directory"].c_str()) / 
+                                               fs::path(cfgIni["General"]["log_file"].c_str()))).c_str());
     }
     else {
-      logFilePath = fs::canonical((fs::path(cfgIni["General"]["log_file"].c_str()))).c_str();
+      logFilePath = std::string(fs::canonical((fs::path(cfgIni["General"]["log_file"].c_str()))).c_str());
     }
  
     // Make project file structure

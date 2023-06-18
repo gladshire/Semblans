@@ -30,7 +30,7 @@ SRA::SRA() {
 // Takes SRA accession number string as input
 // Fills object members with correct values using NCBI eutils API
 SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool compressedFiles) {
-  std::string outDir(cfgIni["General"]["output_directory"]);
+  std::string outDir(fs::canonical(fs::path(cfgIni["General"]["output_directory"].c_str())).c_str());
   std::string projName(cfgIni["General"]["project_name"]);
   std::string apiKey(cfgIni["General"]["ncbi_api_key"]);
   this->compressedFiles = compressedFiles;
@@ -115,7 +115,9 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool compressedFiles) {
     file_prefix_2 = "";
   }
 
-  std::string projPath = outDir + projName + "/";
+  std::string projPath((fs::path(outDir.c_str()) / fs::path(projName.c_str())).c_str());
+  projPath += "/";
+
   extern std::vector<std::string> stepDirs;
 
   if (compressedFiles) {
@@ -179,9 +181,11 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool compressedFiles) {
 
 // Constructor for if local paired-end data used
 SRA::SRA(std::string fileName1, std::string fileName2, INI_MAP cfgIni, bool compressedFiles) {
-  std::string outDir(cfgIni["General"]["output_directory"]);
+  std::string outDir(fs::canonical(fs::path(cfgIni["General"]["output_directory"].c_str())).c_str());
   std::string projName(cfgIni["General"]["project_name"]);
-  std::string projPath = outDir + projName + "/";
+  std::string projPath((fs::path(outDir.c_str()) / fs::path(projName.c_str())).c_str());
+  projPath += "/";
+
   std::string localDataDir(cfgIni["General"]["local_data_directory"]);
   std::string compressExt;
   std::string fileBase1(fs::path(fileName1.c_str()).stem().c_str());

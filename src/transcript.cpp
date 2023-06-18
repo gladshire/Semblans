@@ -8,7 +8,8 @@ transcript::transcript() {
 }
 
 transcript::transcript(SRA sra) {
-  std::string projPath(sra.get_sra_path_trim_u().first.parent_path().parent_path().c_str());
+  //std::string projPath(sra.get_sra_path_trim_u().first.parent_path().parent_path().c_str());
+  std::string projPath(sra.get_fastqc_dir_2().first.parent_path().parent_path().parent_path().c_str());
   projPath += "/";
   org_name = sra.get_org_name();
   tax_id = sra.get_tax_id();
@@ -50,12 +51,13 @@ transcript::transcript(SRA sra) {
   trans_path_cds = (projPath + stepDirs[10] + "/" + fileBase + ".transdecoder.cds").c_str();
   // Define transdecoder prot path 
   trans_path_prot = (projPath + stepDirs[10] + "/" + fileBase + ".transdecoder.pep").c_str();
-
+  // Define annotated transcripts path
+  trans_path_annot = (projPath + stepDirs[11] + "/" + fileBase + ".annotated.fasta").c_str();
 } 
 
 transcript::transcript(std::string filename, INI_MAP cfgIni) {
-  std::string projPath(fs::path(fs::path(cfgIni["General"]["output_directory"].c_str()) /
-                                fs::path(cfgIni["General"]["project_name"].c_str())).c_str());
+  std::string projPath(fs::canonical(fs::path(cfgIni["General"]["output_directory"].c_str()) /
+                                     fs::path(cfgIni["General"]["project_name"].c_str())).c_str());
   projPath += "/";
   org_name = "";
   tax_id = "";
@@ -94,6 +96,8 @@ transcript::transcript(std::string filename, INI_MAP cfgIni) {
   trans_path_cds = (projPath + stepDirs[10] + "/" + fileBase + ".transdecoder.cds").c_str();
   // Define transdecoder prot path 
   trans_path_prot = (projPath + stepDirs[10] + "/" + fileBase + ".transdecoder.pep").c_str();
+  // Define annotated transcripts path
+  trans_path_annot = (projPath + stepDirs[11] + "/" + fileBase + ".annotated.fasta").c_str();
 }
 
 std::string transcript::get_org_name() {
@@ -160,6 +164,10 @@ fs::path transcript::get_trans_path_prot() {
   return trans_path_prot;
 }
 
+fs::path transcript::get_trans_path_annot() {
+  return trans_path_annot;
+}
+
 std::string transcript::get_file_prefix() {
   return file_prefix;
 }
@@ -224,7 +232,7 @@ std::string transcript::make_file_str() {
 
 std::string transcript::makeCheckpointName(std::string ext) {
   fs::path outDir = get_trans_path_trinity().parent_path().parent_path() / "checkpoints";
-  std::string cpFileName = std::string(outDir.c_str()) + "/" + make_file_str() + "." + ext + ".ok";
+  std::string cpFileName = std::string(outDir.c_str()) + "/" + get_file_prefix() + "." + ext + ".ok";
   return cpFileName;
 }
 

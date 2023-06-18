@@ -20,14 +20,14 @@ bool stringToBool(std::string boolStr) {
 }
 
 void makeGroupCheckpoint(std::string cpDir, std::string prefix) {
-  std::string cpFileName = cpDir + "/" + prefix + ".Trinity.ok";
+  std::string cpFileName = cpDir + "/" + prefix + ".trinity.ok";
   std::ofstream cpFile;
   cpFile.open(cpFileName);
   cpFile.close();
 }
 
 bool groupCheckpointExists(std::string cpDir, std::string prefix) {
-  std::string cpFileName = cpDir + "/" + prefix + ".Trinity.ok";
+  std::string cpFileName = cpDir + "/" + prefix + ".trinity.ok";
   fs::path cpFilePath(cpFileName.c_str());
   if (fs::exists(cpFilePath)) {
     return true;

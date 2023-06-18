@@ -85,6 +85,7 @@ void run_transdecoder(std::string transIn, std::string transCds, std::string tra
         logOutput("Exited with signal " + std::to_string(WTERMSIG(resultLO)), logFile);
         exit(1);
       }
+      
     }
     if (blastpout_ok(outDir + "/" +  blastpout)) {
       logOutput("Skipping blastp", logFile);
@@ -110,6 +111,14 @@ void run_transdecoder(std::string transIn, std::string transCds, std::string tra
         exit(1);
       }
       fs::current_path(currDir);
+      std::rename((outDir + "/" + transFileName + ".transdecoder.gff3").c_str(),
+                  (outDir + "/" + transPrefix + ".transdecoder.gff3").c_str());
+      std::rename((outDir + "/" + transFileName + ".transdecoder.bed").c_str(),
+                  (outDir + "/" + transPrefix + ".transdecoder.bed").c_str());
+      std::rename((outDir + "/" + transFileName + ".transdecoder.pep").c_str(),
+                  (outDir + "/" + transPrefix + ".transdecoder.pep").c_str());
+      std::rename((outDir + "/" + transFileName + ".transdecoder.cds").c_str(),
+                  (outDir + "/" + transPrefix + ".transdecoder.cds").c_str());
     }
   }
 }
