@@ -32,7 +32,7 @@
 class seqIdJobManager {
   private:
     std::queue<sequence> seqJobQueue;
-    threadPool * seqJobPool;
+    threadPool seqJobPool;
     std::map<std::string, std::string> newSeqIds;
     void performJob(std::string email, std::string title, std::string sequence);
   public:

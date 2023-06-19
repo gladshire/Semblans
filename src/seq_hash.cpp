@@ -41,10 +41,6 @@ seqHash::seqHash(uintmax_t lenTable, fs::path transFilePath, uintmax_t ram_b) {
     // Initizlie address of last buffer position
     inFileL = &inFileData[0] + s;
     // Align end of buffer with end of last transcript
-
-    std::cout << inFile.eof() << std::endl;
-    std::cout << inFile.good() << std::endl;
-
     this->align_buffer_end(inFile, &inFileData[0], s);
     std::string currHeader;
     std::string currSequence;

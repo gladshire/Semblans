@@ -27,7 +27,6 @@ std::string submitJob(std::string email, std::string title, std::string sequence
 
   // Instantiate curl handle
   curl = curl_easy_init();
-
   if (curl) {
     // Set URL to interproscan API
     curl_easy_setopt(curl, CURLOPT_URL, runURL.c_str());

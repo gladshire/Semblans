@@ -8,7 +8,7 @@ void seqIdJobManager::performJob(std::string email, std::string title, std::stri
   std::string seqBestMatch;
   // Submit job
   jobID = submitJob(email, title, sequence);
-
+  std::cout << jobID << " submitted." << std::endl;
   // Continuously obtain status of job
   while (true) {
     jobStatus = getJobStatus(jobID);
@@ -22,9 +22,10 @@ void seqIdJobManager::performJob(std::string email, std::string title, std::stri
     // Once finished, obtain TSV result file
     getJobResult(jobID, "tsv", title + ".tsv");
     // Get best sequence match
-    seqBestMatch = getBestMatchTSV(title + ".txv");
+    std::cout << jobID << " finished!" << std::endl;
+    //seqBestMatch = getBestMatchTSV(title + ".tsv");
     // Emplace new (oldSeqId, newSeqId) entry into map
-    newSeqIds.emplace(title, seqBestMatch);
+    //newSeqIds.emplace(title, seqBestMatch);
   }
 }
 
@@ -40,18 +41,24 @@ void seqIdJobManager::startSeqJobs(int numThreads, std::string email) {
   std::string title;
   std::string seqData;
   sequence currSeq;
+
+  threadPool annotJobPool;
+  annotJobPool.start(numThreads);
+
+  //seqJobPool.start(numThreads);
   while (!seqJobQueue.empty()) {
     currSeq = seqJobQueue.front();
     title = currSeq.get_header();
     seqData = currSeq.get_sequence();
-    seqJobPool->queueJob([&] {performJob(email, title, seqData);});
+    seqData.pop_back();
+
+    annotJobPool.queueJob([email, title, seqData, this] {performJob(email, title, seqData);});
     seqJobQueue.pop();
   }
   if (numThreads > 30) {
     numThreads = 30;
   }
-  seqJobPool->start(numThreads);
-  while (seqJobPool->busy()) {
+  while (seqJobPool.busy()) {
     std::cout << "Thread pool busy" << std::endl;
   }
   std::cout << "Done. Seq map should be filled" << std::endl;
