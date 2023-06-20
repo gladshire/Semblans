@@ -296,12 +296,14 @@ void removeChimera(std::string transIn, std::string transOut,
       return;
     }
   }
+  /*
   logOutput("Chimeric removal finished\n", logFile);
   logOutput("====================", logFile);
   logOutput("  SUMMARY:", logFile);
   logOutput("    Removed:  " + std::to_string(numRemoved), logFile);
   logOutput("    Retained: " + std::to_string(fastaHashTable.getSize()), logFile);
   logOutput("====================\n", logFile);
+  */
   fastaHashTable.dump(filtTrans);
 }
 

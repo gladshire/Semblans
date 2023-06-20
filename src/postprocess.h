@@ -20,19 +20,23 @@
 #include "annotate.h"
 #include "print_info.h"
 
+void progressAnim(int numSpace);
+
 std::vector<transcript> get_transcript(std::vector<SRA> sras);
+
+bool stringToBool(std::string boolStr);
 
 void blastxDiamBulk(const std::vector<transcript> & transVec, std::string threads,
                     bool dispOutput, std::string logFilePath, const INI_MAP & cfgIni);
 
 void remChimeraBulk(const std::vector<transcript> & transVec, std::string ram_gb,
-                    std::string logFilePath);
+                    std::string logFilePath, const INI_MAP & cfgIni);
 
 void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
-                bool dispOutput, std::string logFilePath);
+                bool dispOutput, std::string logFilePath, const INI_MAP & cfgIni);
 
 void corsetBulk(const std::vector<transcript> & transVec, std::string ram_gb,
-                bool dispOutput, std::string logFilePath);
+                bool dispOutput, std::string logFilePath, const INI_MAP & cfgIni);
 
 void transdecBulk(const std::vector<transcript> & transVec, std::string threads,
                   std::string ram_gb, bool dispOutput, std::string logFilePath,

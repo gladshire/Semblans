@@ -53,6 +53,7 @@ seqHash::seqHash(uintmax_t lenTable, fs::path transFilePath, uintmax_t ram_b) {
       }
       seqStartPos = std::find(headerStartPos, inFileL, '\n') + 1;
       currHeader = std::string(headerStartPos + 1, seqStartPos - 1);
+      //currHeader = currHeader.substr(0, currHeader.find(" "));
       // Extract sequence
       headerStartPos = std::find(seqStartPos, inFileL, '>');
       currSequence = std::string(seqStartPos, headerStartPos - 1);

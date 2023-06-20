@@ -94,6 +94,16 @@ echo "Now installing required packages ..."
 # cd ../../
 # rm pigz.tar.gz
 
+# Install interproscan
+# echo "Installing IPS ..."
+# wget -q --output-document interproscan.tar.gz wget https://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/5.62-94.0/interproscan-5.62-94.0-64-bit.tar.gz
+# tar -pxzf interproscan.tar.gz -C ./external/
+# mv ./external/interproscan-5.62.94.0 ./external/interproscan
+# cd ./external/interproscan
+# python3 setup.py -f interproscan.properties
+# cd ../../
+# rm interproscan.tar.gz
+
 # Install NCBI sra-tools
 echo "Installing SRA-Tools ..."
 wget -q --output-document sratoolkit.tar.gz https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/current/sratoolkit.current-ubuntu64.tar.gz

@@ -1,7 +1,5 @@
 #include "preprocess.h"
 
-// TODO: FASTQC FOR SINGLE-END PRINTS. IT SHOULDNT. FIx
-
 std::atomic<bool> procRunning(false);
 
 

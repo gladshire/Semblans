@@ -27,6 +27,7 @@ std::string submitJob(std::string email, std::string title, std::string sequence
 
   // Instantiate curl handle
   curl = curl_easy_init();
+
   if (curl) {
     // Set URL to interproscan API
     curl_easy_setopt(curl, CURLOPT_URL, runURL.c_str());
@@ -49,13 +50,22 @@ std::string submitJob(std::string email, std::string title, std::string sequence
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlWriter);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &jobID);
 
+    // Set length of time for timeout of curl operation
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10);
+
     // Execute post request
     result = curl_easy_perform(curl);
 
-    // Check for errors
-    if (result != CURLE_OK) {
-      //logOutput("curl_easy_perform() failed: " + curl_easy_strerror(result), logFile);
-      std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(result) << std::endl;
+    // Check for errors. Retry if failed.
+    int numTries = 0;
+    while (result != CURLE_OK) {
+      if (numTries == 6) {
+        std::cerr << "submitJob() FAILED!" << std::endl;
+        break;
+      }
+      std::this_thread::sleep_for(std::chrono::seconds(5));
+      result = curl_easy_perform(curl);
+      numTries++;
     }
     curl_easy_cleanup(curl);
   }
@@ -96,12 +106,22 @@ std::string getJobStatus(std::string jobID) {
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlWriter);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &jobStatus);
 
+    // Set length of time for timeout of curl operation
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 20);
+
     // Execute request
     result = curl_easy_perform(curl);
 
     // Check for errors
-    if (result != CURLE_OK) {
-      std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(result) << std::endl;
+    int numTries = 0;
+    while (result != CURLE_OK) {
+      if (numTries == 6) {
+        std::cerr << "getJobStatus() FAILED!" << std::endl;
+        break;
+      }
+      std::this_thread::sleep_for(std::chrono::seconds(5));
+      result = curl_easy_perform(curl);
+      numTries++;
     }
     curl_easy_cleanup(curl);
   }
@@ -137,19 +157,29 @@ void getJobResult(std::string jobID, std::string resultType, std::string outFile
     result = curl_easy_perform(curl);
 
     // Check for errors
-    if (result != CURLE_OK) {
-      std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(result) << std::endl;
+    int numTries = 0;
+    while (result != CURLE_OK) {
+      if (numTries == 6) {
+        std::cerr << "getJobResult() FAILED!" << std::endl;
+        break;
+      }
+      std::this_thread::sleep_for(std::chrono::seconds(5));
+      result = curl_easy_perform(curl);
+      numTries++;
     }
-    curl_easy_cleanup(curl);
+    outFile.open(outFilePath);
+    outFile << jobResult;
+    outFile.close();
+    curl_global_cleanup();
   }
-  curl_global_cleanup();
-  outFile.open(outFilePath);
-  outFile << jobResult;
 }
 
 
 // Obtain likeliest ID from interproscan result TSV file
 std::string getBestMatchTSV(std::string resultTsvFilePath) {
+  if (fs::is_empty(resultTsvFilePath.c_str())) {
+    return "";
+  }
   std::ifstream resultTsvFile(resultTsvFilePath);
   std::string currLine;
   std::string currTok;
@@ -162,7 +192,6 @@ std::string getBestMatchTSV(std::string resultTsvFilePath) {
   int linNum = 0;
   while (getline(resultTsvFile, currLine)) {
     // Split line by tab
-    //std::cout << currLine << std::endl;
     int colNum = 0;
     while ((tabPos = currLine.find("\t")) != std::string::npos) {
       currTok = currLine.substr(0, tabPos);
@@ -186,6 +215,9 @@ std::string getBestMatchTSV(std::string resultTsvFilePath) {
       matchIdBest = matchId;
     }
     linNum++;
+  }
+  if (eValMin == DBL_MAX) {
+    return "";
   }
   return matchIdBest;
 }

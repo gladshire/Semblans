@@ -12,25 +12,29 @@ void annotateTranscript(std::string transIn, std::string transPep, std::string t
 
   std::string annotatedTrans = transOut;
 
+  // Prepare annotation data directory
+  std::string annotDir((fs::path(transOut.c_str()).parent_path() / 
+                        fs::path(transIn.c_str()).stem().stem()).c_str());
+  annotDir += ".annot_data";
+  if (!fs::exists(fs::path(annotDir.c_str()))) {
+    fs::create_directory(fs::path(annotDir.c_str()));
+  }
+
   // Determine size of hash table
   uintmax_t ram_b = (uintmax_t)stoi(ram_gb) * 1000000000;
   uintmax_t numBytesTrans = fs::file_size(transPepPath);
   uintmax_t lenHashTable = numBytesTrans / 160;
 
   // Create hash table with peptide sequences
-  std::cout << "Creating peptide hash table for transcript" << std::endl;
   seqHash fastaPepHashTable(lenHashTable, transPepFileStr, ram_b);
 
   // Instantiate sequence ID job manager
-  std::cout << "Instantiating job manager for annotation" << std::endl;
   seqIdJobManager transAnnotator;
 
   // Obtain data from hash table;
-  std::cout << "Obtaining peptide sequence data from hash table" << std::endl;
   std::vector<sequence> * hashData = fastaPepHashTable.getHashData();
 
   // Iterate over hash table, submitting each sequence as job to annotator
-  std::cout << "Iterating over hash table, submitting annotation jobs for seqs" << std::endl;
   for (uintmax_t i = 0; i < lenHashTable; i++) {
     if (hashData[i].empty()) {
       continue;
@@ -43,8 +47,7 @@ void annotateTranscript(std::string transIn, std::string transPep, std::string t
   }
 
   // Initiate annotation manager
-  std::cout << "Starting sequence annotation jobs" << std::endl;
-  transAnnotator.startSeqJobs(stoi(threads), email);
+  transAnnotator.performSeqJobs(stoi(threads), email, annotDir);
 
   // Obtain annotator new sequence ID data
   std::cout << "Obtaining map with (oldSeq, newSeq) pairs" << std::endl;
@@ -56,8 +59,17 @@ void annotateTranscript(std::string transIn, std::string transPep, std::string t
 
   // Iterate over new seq ID data, renaming each header to new sequence ID
   std::cout << "Iterating over (oldSeq, newSeq) map, renaming headers to their new name" << std::endl;
+  std::string currOldHeader;
+  std::string currNewHeader;
   for (auto seqPair : newSeqData) {
-    fastaHashTable.setSeqHeader(seqPair.first, seqPair.second);
+    if (seqPair.second == "") {
+      continue;
+    }
+    currOldHeader = seqPair.first;
+    currNewHeader = std::string(fs::path(transOut.c_str()).stem().stem().c_str()) +
+                    "_" + currOldHeader.substr(0, currOldHeader.find(" ")) + " " +
+                    seqPair.second;
+    fastaHashTable.setSeqHeader(seqPair.first, currNewHeader);
   }
 
   // Dump annotated hash table to new location

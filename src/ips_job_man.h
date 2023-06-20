@@ -4,6 +4,7 @@
 #include <string>
 #include <queue>
 #include <map>
+#include <chrono>
 #include <stdio.h>
 #include <stdlib.h>
 #include <curl/curl.h>
@@ -34,9 +35,10 @@ class seqIdJobManager {
     std::queue<sequence> seqJobQueue;
     threadPool seqJobPool;
     std::map<std::string, std::string> newSeqIds;
-    void performJob(std::string email, std::string title, std::string sequence);
+    void performJob(std::string email, std::string title, std::string sequence,
+                    std::string annotDir);
   public:
     void submitSeqJob(sequence newSeq);
-    void startSeqJobs(int numThreads, std::string email);
+    void performSeqJobs(int numThreads, std::string email, std::string annotDir);
     std::map<std::string, std::string> getSeqIds();
 };
