@@ -116,9 +116,9 @@ void run_transdecoder(std::string transIn, std::string transCds, std::string tra
       std::rename((outDir + "/" + transFileName + ".transdecoder.bed").c_str(),
                   (outDir + "/" + transPrefix + ".transdecoder.bed").c_str());
       std::rename((outDir + "/" + transFileName + ".transdecoder.pep").c_str(),
-                  (outDir + "/" + transPrefix + ".transdecoder.pep").c_str());
+                  (outDir + "/" + transPrefix + ".transdecoder.pep.fasta").c_str());
       std::rename((outDir + "/" + transFileName + ".transdecoder.cds").c_str(),
-                  (outDir + "/" + transPrefix + ".transdecoder.cds").c_str());
+                  (outDir + "/" + transPrefix + ".transdecoder.cds.fasta").c_str());
     }
   }
 }

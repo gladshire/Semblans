@@ -355,12 +355,12 @@ void annotateBulk(const std::vector<transcript> & transVec, std::string threads,
     currTransOut = trans.get_trans_path_annot().c_str();
 
     // Perform annotation of transcript
-    procRunning = true;
-    std::thread annotThread(progressAnim, 2);
+    //procRunning = true;
+    //std::thread annotThread(progressAnim, 2);
     annotateTranscript(currTransIn, currTransPep, currTransOut,
                        threads, ram_gb, logFilePath, email);
-    procRunning = false;
-    annotThread.join();
+    //procRunning = false;
+    //annotThread.join();
 
     // Create annotation checkpoint
     trans.makeCheckpoint("annotate");
@@ -491,7 +491,7 @@ int main(int argc, char * argv[]) {
     transdecBulk(transVec, threads, ram_gb, dispOutput, logFilePath, cfgIni);
   
     // Annotate transcriptome
-    annotateBulk(transVec, threads, ram_gb, dispOutput, logFilePath, cfgIni);
+    //annotateBulk(transVec, threads, ram_gb, dispOutput, logFilePath, cfgIni);
   }
   else {
   

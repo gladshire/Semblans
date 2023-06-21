@@ -11,19 +11,19 @@
 # salmonVersion  = 
 # trnsDecVersion =
 
-
-echo "Initiating install of Semblans ..."
+echo "Initiating install of Semblans"
 
 # Prepare Semblans file structure
 mkdir include
 mkdir lib
 mkdir external
+mkdir data
 
 #========================================================================
 #/////////////   INSTALLATION OF THIRD-PARTY LIBRARIES   \\\\\\\\\\\\\\\\
 #========================================================================
 
-echo "Now installing required libraries ..."
+echo "Now installing required libraries"
 
 # Install boost libraries
 echo "  Installing Boost libraries ..."
@@ -94,15 +94,30 @@ echo "Now installing required packages ..."
 # cd ../../
 # rm pigz.tar.gz
 
-# Install interproscan
-# echo "Installing IPS ..."
-# wget -q --output-document interproscan.tar.gz wget https://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/5.62-94.0/interproscan-5.62-94.0-64-bit.tar.gz
-# tar -pxzf interproscan.tar.gz -C ./external/
-# mv ./external/interproscan-5.62.94.0 ./external/interproscan
-# cd ./external/interproscan
-# python3 setup.py -f interproscan.properties
-# cd ../../
-# rm interproscan.tar.gz
+# Install HMMER
+echo "Installing HMMER ..."
+wget -q http://eddylab.org/software/hmmer/hmmer.tar.gz
+tar -xf hmmer.tar.gz -C ./external/
+mv ./external/hmmer-3.3.2 ./external/hmmer
+cd ./external/hmmer
+./configure --prefix "$PWD"
+make
+make install
+cd ../../
+rm hmmer.tar.gz
+
+# Install PANTHER HMM Scoring components
+echo "Downloading PANTHER components ..."
+wget -q http://data.pantherdb.org/ftp/panther_library/current_release/PANTHER17.0_hmmscoring.tgz
+tar -xzf PANTHER17.0_hmmscoring.tgz
+mv target panther_db/
+mv panther_db ./data/
+rm PANTHER17.0_hmmscoring.tgz
+wget -r -q --no-parent http://data.pantherdb.org/ftp/hmm_scoring/current_release/pantherScore2.2/
+mv data.pantherdb.org/ftp/hmm_scoring/current_release/pantherScore2.2 ./external/pantherScore
+chmod +x ./external/pantherScore2.2.pl
+rm -rf data.pantherdb.org
+
 
 # Install NCBI sra-tools
 echo "Installing SRA-Tools ..."

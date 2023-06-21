@@ -48,9 +48,9 @@ transcript::transcript(SRA sra) {
   // Define corset counts path
   trans_path_counts = (projPath + stepDirs[9] + "/" + fileBase + "_salmon-counts.txt").c_str();
   // Define transdecoder cds path
-  trans_path_cds = (projPath + stepDirs[10] + "/" + fileBase + ".transdecoder.cds").c_str();
+  trans_path_cds = (projPath + stepDirs[10] + "/" + fileBase + ".transdecoder.cds.fasta").c_str();
   // Define transdecoder prot path 
-  trans_path_prot = (projPath + stepDirs[10] + "/" + fileBase + ".transdecoder.pep").c_str();
+  trans_path_prot = (projPath + stepDirs[10] + "/" + fileBase + ".transdecoder.pep.fasta").c_str();
   // Define annotated transcripts path
   trans_path_annot = (projPath + stepDirs[11] + "/" + fileBase + ".annotated.fasta").c_str();
 } 
@@ -93,9 +93,9 @@ transcript::transcript(std::string filename, INI_MAP cfgIni) {
   // Define corset counts path
   trans_path_counts = (projPath + stepDirs[9] + "/" + fileBase + "_salmon-counts.txt").c_str();
   // Define transdecoder cds path
-  trans_path_cds = (projPath + stepDirs[10] + "/" + fileBase + ".transdecoder.cds").c_str();
+  trans_path_cds = (projPath + stepDirs[10] + "/" + fileBase + ".transdecoder.cds.fasta").c_str();
   // Define transdecoder prot path 
-  trans_path_prot = (projPath + stepDirs[10] + "/" + fileBase + ".transdecoder.pep").c_str();
+  trans_path_prot = (projPath + stepDirs[10] + "/" + fileBase + ".transdecoder.pep.fasta").c_str();
   // Define annotated transcripts path
   trans_path_annot = (projPath + stepDirs[11] + "/" + fileBase + ".annotated.fasta").c_str();
 }

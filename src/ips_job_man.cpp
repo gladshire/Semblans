@@ -1,88 +1,98 @@
 #include "ips_job_man.h"
 
 
-// IPS sequence annotation job performer
-void seqIdJobManager::performJob(std::string email, std::string title, std::string sequence,
-                                 std::string annotDir) {
-  std::string jobID;
-  std::string jobStatus;
-  std::string seqBestMatch;
-  std::chrono::seconds pollFreq(3);
-  // Submit job
-  jobID = submitJob(email, title, sequence);
-  // Continuously obtain status of job
-  while (true) {
-    std::this_thread::sleep_for(pollFreq);
-    jobStatus = getJobStatus(jobID);
-    if (jobStatus == "FINISHED" ||
-        jobStatus == "ERROR" ||
-        jobStatus == "FAILURE") {
-      break;
-    }
-  }
-  if (jobStatus == "FINISHED") {
-    // Once finished, obtain GFF3 and TSV result files
-    getJobResult(jobID, "gff", annotDir + "/" + title + ".gff3");
-    std::this_thread::sleep_for(pollFreq);
-    getJobResult(jobID, "tsv", annotDir + "/" + title + ".tsv");
-  }
-  else {
-    // Job failed to complete
-  }
+void seqJobManager::submitSeqJob(sequence seqJob) {
+  jobQueue.push(seqJob);
 }
 
-
-// Submit sequence to queue of jobs
-void seqIdJobManager::submitSeqJob(sequence newSeq) {
-  seqJobQueue.push(newSeq);
-}
-
-
-// Initiate job manager on job queue
-void seqIdJobManager::performSeqJobs(int numThreads, std::string email, std::string annotDir) {
+void seqJobManager::startSeqJobs(int numConcurrent, std::string annotDir,
+                                 std::string email, std::string logFilePath) {
+  totalJobs = getNumJobsQueued();
+  sequence currSeq;
   std::string title;
   std::string seqData;
-  sequence currSeq;
+  std::string jobID;
+  std::string jobStatus;
+  std::vector<std::string> jobsToRemove;
+  std::chrono::seconds pollFreq(5);
+  do {
+    std::cout << "\nAnnotations queued:   " << getNumJobsQueued() << std::endl;
+    std::cout << "Annotations running:  " << getNumJobsRunning() << std::endl;
+    std::cout << "Annotations finished: " << getNumJobsFinished() << std::endl;
+    
+    while (jobsRunning.size() < numConcurrent && !jobQueue.empty()) {
+      // Obtain sequence at front of job queue
+      currSeq = jobQueue.front();
+      title = currSeq.get_header();
+      seqData = currSeq.get_sequence();
+      seqData.pop_back();
 
-  threadPool annotJobPool;
-  if (numThreads > 30) {
-    numThreads = 30;
-  }
+      // Check if outputs for front job already exist
+      if (fs::exists(fs::path((annotDir + "/" + title + ".gff3").c_str())) &&
+          fs::exists(fs::path((annotDir + "/" + title + ".tsv").c_str()))) {
+        std::cout << "Outputs found for: " << title << std::endl;
+        continue;
+      }
 
-  annotJobPool.start(numThreads);
-  while (!seqJobQueue.empty()) {
-    currSeq = seqJobQueue.front();
-    title = currSeq.get_header();
-    seqData = currSeq.get_sequence();
-    seqData.pop_back();
+      // Submit sequence as annotation job
+      jobID = submitJob(email, title, seqData);
 
-    annotJobPool.queueJob([email, title, seqData, annotDir, this]
-                          {performJob(email, title, seqData, annotDir);});
-    seqJobQueue.pop();
-  }
-  annotJobPool.stop();
+      std::cout << "Submitted: " << jobID << std::endl;
 
-  // Iterate over annotation TSV files in annotation directory, getting best predictions
-  fs::directory_iterator fileIter{annotDir};
-  std::string currOldSeq;
-  std::string currNewSeq;
-  while (fileIter != fs::directory_iterator{}) {
-    if (fileIter->path().extension() == ".tsv") {
-      currOldSeq = std::string(fileIter->path().stem().c_str());
-      currNewSeq = getBestMatchTSV(std::string(fileIter->path().c_str()));
+      // Remove sequence from front of job queue
+      jobQueue.pop();
 
-      // Emplace (old seq, new seq) pair into map
-      newSeqIds.emplace(currOldSeq, currNewSeq);
+      // Add sequence and job ID to list of running jobs
+      jobsRunning.emplace(jobID, currSeq);
     }
-  }
-  std::cout << "Annotation finished. Sequence map should be filled." << std::endl;
+    for (auto job : jobsRunning) {
+      // Get status of running job
+      jobStatus = getJobStatus(job.first);
+
+      // If job has ended flag it for removal from list of running jobs
+      if (jobStatus != "QUEUED" &&
+          jobStatus != "RUNNING") {
+        jobsToRemove.push_back(job.first);
+        // If job finished successfully, obtain its results
+        if (jobStatus == "FINISHED") {
+          // Retrieve output in gff3 format
+          getJobResult(job.first, "gff", annotDir + "/" +
+                       job.second.get_header() + ".gff3");
+          // Retrieve output in tsv format
+          getJobResult(job.first, "tsv", annotDir + "/" +
+                       job.second.get_header() + ".tsv");
+        }
+        // If job failed, add it to list of failed jobs
+        else {
+          jobsFailed.emplace(job.first, job.second);
+        }
+      }
+    }
+    // Remove flagged jobs from list of running jobs
+    for (auto job : jobsToRemove) {
+      jobsRunning.erase(job);
+    }
+    // Wait before submitting further requests
+    std::this_thread::sleep_for(pollFreq);
+  } while (!jobQueue.empty() && !jobsRunning.empty());
 }
 
-
-// Get the map containing the (oldSeqId, newSeqId) pairs
-std::map<std::string, std::string> seqIdJobManager::getSeqIds() {
-  return newSeqIds;
+int seqJobManager::getNumJobsQueued() {
+  return jobQueue.size();
 }
 
+int seqJobManager::getNumJobsRunning() {
+  return jobsRunning.size();
+}
 
+int seqJobManager::getNumJobsFinished() {
+  return totalJobs - getNumJobsQueued() - getNumJobsRunning();
+}
 
+std::map<std::string, std::string> seqJobManager::getMatches() {
+  return bestMatches;
+}
+
+std::map<std::string, sequence> seqJobManager::getJobsFailed() {
+  return jobsFailed;
+}

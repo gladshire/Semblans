@@ -117,6 +117,7 @@ std::string getJobStatus(std::string jobID) {
     while (result != CURLE_OK) {
       if (numTries == 6) {
         std::cerr << "getJobStatus() FAILED!" << std::endl;
+        std::cerr << "  URL: " << statusURL << std::endl;
         break;
       }
       std::this_thread::sleep_for(std::chrono::seconds(5));
@@ -153,6 +154,9 @@ void getJobResult(std::string jobID, std::string resultType, std::string outFile
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlWriter);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &jobResult);
 
+    // Set length of time for timeout of curl operation
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 20);
+
     // Execute request
     result = curl_easy_perform(curl);
 
@@ -161,6 +165,7 @@ void getJobResult(std::string jobID, std::string resultType, std::string outFile
     while (result != CURLE_OK) {
       if (numTries == 6) {
         std::cerr << "getJobResult() FAILED!" << std::endl;
+        std::cerr << "  URL: " << resultURL << std::endl;
         break;
       }
       std::this_thread::sleep_for(std::chrono::seconds(5));

@@ -12,33 +12,23 @@
 #include "ips_client.h"
 #include "seq.h"
 #include "seq_hash.h"
-#include "thread_pool.h"
+#include "print_info.h"
 
+class seqJobManager {
 
-// Job manager structure for interproscan annotation jobs
-//
-//   Functional goals:
-//     - Receive sequence objects for annotation
-//     - Organize objects into queue of jobs
-//     - Run a certain number of jobs in parallel (max 30)
-//     - Maintain track of job statuses
-//
-
-//   Implementation:
-//     - Place sequence jobs into queue
-//     - Queue jobs with thread pool via job-performing function
-//       - When a job complete, emplace (oldSeqHeader, newSeqHeader) into newSeqIds map
-//     - When jobs finished, obtain newSeqIds map
-
-class seqIdJobManager {
   private:
-    std::queue<sequence> seqJobQueue;
-    threadPool seqJobPool;
-    std::map<std::string, std::string> newSeqIds;
-    void performJob(std::string email, std::string title, std::string sequence,
-                    std::string annotDir);
+    std::queue<sequence> jobQueue;
+    std::map<std::string, sequence> jobsRunning;
+    std::map<std::string, sequence> jobsFailed;
+    std::map<std::string, std::string> bestMatches;
+    int totalJobs;
   public:
-    void submitSeqJob(sequence newSeq);
-    void performSeqJobs(int numThreads, std::string email, std::string annotDir);
-    std::map<std::string, std::string> getSeqIds();
-};
+    void submitSeqJob(sequence seqJob);
+    void startSeqJobs(int numConcurrent, std::string annotDir,
+                      std::string email, std::string logFilePath);
+    int getNumJobsQueued();
+    int getNumJobsRunning();
+    int getNumJobsFinished();
+    std::map<std::string, std::string> getMatches();
+    std::map<std::string, sequence> getJobsFailed();
+}; 

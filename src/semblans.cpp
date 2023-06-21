@@ -1,6 +1,10 @@
 #include "semblans.h"
 
 
+// TODO: Pull out genes of interest
+// TODO: Differential gene expression
+// TODO: Perform assembly of targeted gene families
+
 void print_intro(std::string logFile) {
   winsize w;
   ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);

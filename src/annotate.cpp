@@ -29,7 +29,7 @@ void annotateTranscript(std::string transIn, std::string transPep, std::string t
   seqHash fastaPepHashTable(lenHashTable, transPepFileStr, ram_b);
 
   // Instantiate sequence ID job manager
-  seqIdJobManager transAnnotator;
+  seqJobManager transAnnotator;
 
   // Obtain data from hash table;
   std::vector<sequence> * hashData = fastaPepHashTable.getHashData();
@@ -47,11 +47,11 @@ void annotateTranscript(std::string transIn, std::string transPep, std::string t
   }
 
   // Initiate annotation manager
-  transAnnotator.performSeqJobs(stoi(threads), email, annotDir);
+  transAnnotator.startSeqJobs(30, annotDir, email, logFile);
 
   // Obtain annotator new sequence ID data
   std::cout << "Obtaining map with (oldSeq, newSeq) pairs" << std::endl;
-  std::map<std::string, std::string> newSeqData = transAnnotator.getSeqIds();
+  std::map<std::string, std::string> newSeqData = transAnnotator.getMatches();
 
   // Create hash table with coding sequences
   std::cout << "Creating coding seq hash table for transcript" << std::endl;

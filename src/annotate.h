@@ -9,7 +9,7 @@
 #include "seq.h"
 #include "ips_job_man.h"
 #include "seq_hash.h"
-
+#include "print_info.h"
 
 namespace fs = boost::filesystem;
 
