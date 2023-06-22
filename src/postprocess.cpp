@@ -484,9 +484,11 @@ int main(int argc, char * argv[]) {
     
     // Run transdecoder
     transdecBulk(transVec, threads, ram_gb, dispOutput, logFilePath, cfgIni);
-  
-    // Annotate transcriptome
-    annotateBulk(transVec, threads, ram_gb, dispOutput, logFilePath, cfgIni);
+ 
+    if (ini_get_bool(cfgPipeline.at("annotate_transcripts").c_str(), 0)) { 
+      // Annotate transcriptome
+      annotateBulk(transVec, threads, ram_gb, dispOutput, logFilePath, cfgIni);
+    }
   }
   else {
   
