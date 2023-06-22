@@ -355,12 +355,12 @@ void annotateBulk(const std::vector<transcript> & transVec, std::string threads,
     currTransOut = trans.get_trans_path_annot().c_str();
 
     // Perform annotation of transcript
-    //procRunning = true;
-    //std::thread annotThread(progressAnim, 2);
+    procRunning = true;
+    std::thread annotThread(progressAnim, 2);
     annotateTranscript(currTransIn, currTransPep, currTransOut,
-                       threads, ram_gb, logFilePath, email);
-    //procRunning = false;
-    //annotThread.join();
+                       threads, ram_gb, dispOutput, logFilePath, email);
+    procRunning = false;
+    annotThread.join();
 
     // Create annotation checkpoint
     trans.makeCheckpoint("annotate");
@@ -372,6 +372,7 @@ int main(int argc, char * argv[]) {
   if (argc > 1) {
     // Get INI config file
     INI_MAP cfgIni = make_ini_map(argv[1]);
+    INI_MAP_ENTRY cfgIniGen = cfgIni["General"];
 
     // Get number of threads
     std::string threads = argv[2];
@@ -396,15 +397,9 @@ int main(int argc, char * argv[]) {
     std::string refProt = cfgIni["General"]["reference_proteome_path"];
 
     // Obtain path to log file from config file
-    fs::path logFile(cfgIni["General"]["log_file"].c_str());
-    std::string logFilePath;
-    if (logFile.filename() == logFile) {
-      logFilePath = std::string(fs::canonical((fs::path(cfgIni["General"]["output_directory"].c_str()) /
-                                               fs::path(cfgIni["General"]["log_file"].c_str()))).c_str());
-    }
-    else {
-      logFilePath = std::string(fs::canonical((fs::path(cfgIni["General"]["log_file"].c_str()))).c_str());
-    }
+    std::string logFilePath((fs::canonical((fs::path(cfgIniGen["output_directory"].c_str()))) /
+                             fs::path(cfgIniGen["project_name"].c_str()) /
+                             fs::path(cfgIniGen["log_file"].c_str())).c_str());
     
     std::vector<SRA> sras;
     std::vector<std::string> localDataFiles;
@@ -491,7 +486,7 @@ int main(int argc, char * argv[]) {
     transdecBulk(transVec, threads, ram_gb, dispOutput, logFilePath, cfgIni);
   
     // Annotate transcriptome
-    //annotateBulk(transVec, threads, ram_gb, dispOutput, logFilePath, cfgIni);
+    annotateBulk(transVec, threads, ram_gb, dispOutput, logFilePath, cfgIni);
   }
   else {
   

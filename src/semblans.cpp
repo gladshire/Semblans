@@ -229,7 +229,10 @@ int main(int argc, char * argv[]) {
     }
 
     INI_MAP cfgIni = make_ini_map(pathConfig.c_str());
-    std::string logFilePath = cfgIni["General"]["log_file"];
+    INI_MAP_ENTRY cfgIniGen = cfgIni["General"];
+    std::string logFilePath((fs::canonical((fs::path(cfgIniGen["output_directory"].c_str()))) /
+                             fs::path(cfgIniGen["project_name"].c_str()) /
+                             fs::path(cfgIniGen["log_file"].c_str())).c_str());
     std::ofstream logFile(logFilePath, std::ios_base::trunc);
  
     std::string verbose;

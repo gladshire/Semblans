@@ -14,5 +14,6 @@ namespace dl = boost::dll;
 
 #define PANTHER_LIB std::string((dl::program_location().parent_path() / fs::path(std::string("../data/panther_db/famlib/rel/PANTHER17.0_altVersion/hmmscoring/PANTHER17.0").c_str())).c_str())
 
-void pantherScore(std::string transPepIn, std::string outFile, std::string threads);
+void pantherScore(std::string transPepIn, std::string outFile, std::string threads,
+                  bool dispOutput, std::string logFile);
 

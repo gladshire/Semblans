@@ -1,8 +1,77 @@
 #include "annotate.h"
 
 
+std::map<std::string, std::string> getGeneMatches(std::string annotFile) {
+  // TODO: Account for overlapping hits
+  std::map<std::string, std::string> geneMatches;
+  if (fs::is_empty(fs::path(annotFile.c_str()))) {
+    return geneMatches;
+  }
+  std::string transPrefix(fs::path(annotFile.c_str()).stem().stem().c_str());
+  std::ifstream pantherFile(annotFile);
+  std::string currLine;
+  std::string currTok;
+  std::string queryId;
+  std::string lastQry;
+  std::string matchId;
+  std::string bestMatchId;
+  std::string matchDesc;
+  std::string bestMatchDesc;
+  std::string eValStr;
+  std::string lastEval;
+  std::string newHeader;
+  size_t tabPos;
+  double eValCurr;
+  double eValMin;
+  int linNum = 0;
+  while (getline(pantherFile, currLine)) {
+    int colNum = 0;
+    while ((tabPos = currLine.find("\t")) != std::string::npos) {
+      currTok = currLine.substr(0, tabPos);
+      if (colNum == 0) {
+        queryId = currTok;
+      }
+      if (colNum == 1) {
+        matchId = currTok;
+      }
+      if (colNum == 2) {
+        matchDesc = currTok;
+      }
+      if (colNum == 3) {
+        eValStr = currTok;
+      }
+      else {
+        continue;
+      }
+    }
+    std::istringstream doubleStr(eValStr);
+    doubleStr >> eValCurr;
+    if (queryId == lastQry) {
+      if (eValCurr < eValMin) {
+        doubleStr >> eValMin;
+        bestMatchId = matchId;
+        bestMatchDesc = matchDesc;
+      }
+    }
+    else {
+      doubleStr >> eValMin;
+      bestMatchId = matchId;
+      bestMatchDesc = matchDesc;
+      if (lastQry != "") {
+        newHeader = transPrefix + queryId.substr(queryId.find("_")) + " " +
+                    matchId + " " + matchDesc;
+        geneMatches.emplace(queryId, newHeader);
+      }
+    }
+    lastQry = queryId;
+    lastEval = eValStr;
+  }
+  return geneMatches;
+}
+
+
 void annotateTranscript(std::string transIn, std::string transPep, std::string transOut,
-                        std::string threads, std::string ram_gb,
+                        std::string threads, std::string ram_gb, bool dispOutput,
                         std::string logFile, std::string email) {
   fs::path transPepPath(transPep.c_str());
   std::string transPepFileStr(transPepPath.c_str());
@@ -10,15 +79,11 @@ void annotateTranscript(std::string transIn, std::string transPep, std::string t
   fs::path transInPath(transIn.c_str());
   std::string transInFileStr(transInPath.c_str());
 
-  std::string annotatedTrans = transOut;
-
+  std::map<std::string, std::string> newSeqHeaders;
   // Prepare annotation data directory
-  std::string annotDir((fs::path(transOut.c_str()).parent_path() / 
-                        fs::path(transIn.c_str()).stem().stem()).c_str());
-  annotDir += ".annot_data";
-  if (!fs::exists(fs::path(annotDir.c_str()))) {
-    fs::create_directory(fs::path(annotDir.c_str()));
-  }
+  std::string annotFile((fs::path(transOut.c_str()).parent_path() / 
+                         fs::path(transIn.c_str()).stem().stem()).c_str());
+  annotFile += ".annot";
 
   // Determine size of hash table
   uintmax_t ram_b = (uintmax_t)stoi(ram_gb) * 1000000000;
@@ -28,48 +93,23 @@ void annotateTranscript(std::string transIn, std::string transPep, std::string t
   // Create hash table with peptide sequences
   seqHash fastaPepHashTable(lenHashTable, transPepFileStr, ram_b);
 
-  // Instantiate sequence ID job manager
-  seqJobManager transAnnotator;
-
   // Obtain data from hash table;
   std::vector<sequence> * hashData = fastaPepHashTable.getHashData();
 
-  // Iterate over hash table, submitting each sequence as job to annotator
-  for (uintmax_t i = 0; i < lenHashTable; i++) {
-    if (hashData[i].empty()) {
-      continue;
-    }
-    else {
-      for (auto seq : hashData[i]) {
-        transAnnotator.submitSeqJob(seq);
-      }
-    }
-  }
+  // Initiate PANTHER scoring
+  pantherScore(transPepFileStr, annotFile, threads, dispOutput, logFile);  
 
-  // Initiate annotation manager
-  transAnnotator.startSeqJobs(30, annotDir, email, logFile);
-
-  // Obtain annotator new sequence ID data
-  std::cout << "Obtaining map with (oldSeq, newSeq) pairs" << std::endl;
-  std::map<std::string, std::string> newSeqData = transAnnotator.getMatches();
+  // Obtain PANTHER gene descriptions
+  newSeqHeaders = getGeneMatches(annotFile);
 
   // Create hash table with coding sequences
-  std::cout << "Creating coding seq hash table for transcript" << std::endl;
   seqHash fastaHashTable(lenHashTable, transInFileStr, ram_b);
 
   // Iterate over new seq ID data, renaming each header to new sequence ID
-  std::cout << "Iterating over (oldSeq, newSeq) map, renaming headers to their new name" << std::endl;
   std::string currOldHeader;
   std::string currNewHeader;
-  for (auto seqPair : newSeqData) {
-    if (seqPair.second == "") {
-      continue;
-    }
-    currOldHeader = seqPair.first;
-    currNewHeader = std::string(fs::path(transOut.c_str()).stem().stem().c_str()) +
-                    "_" + currOldHeader.substr(0, currOldHeader.find(" ")) + " " +
-                    seqPair.second;
-    fastaHashTable.setSeqHeader(seqPair.first, currNewHeader);
+  for (auto seqPair : newSeqHeaders) {
+    fastaHashTable.setSeqHeader(seqPair.first, seqPair.second);
   }
 
   // Dump annotated hash table to new location

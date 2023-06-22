@@ -146,6 +146,7 @@ int main(int argc, char * argv[]) {
     std::vector<std::string> localDataFiles;
     // Get INI config file
     INI_MAP cfgIni = make_ini_map(argv[1]);
+    INI_MAP_ENTRY cfgIniGen = cfgIni["General"];
 
     // Get number of threads
     std::string threads = argv[2];
@@ -166,7 +167,9 @@ int main(int argc, char * argv[]) {
     //bool compressFiles = ini_get_bool(cfgIni["General"]["compress_files"].c_str(), 0);
     bool compressFiles = false;
     // Retrieve SRA objects for trinity runs
-    std::string logFilePath = cfgIni["General"]["log_file"];
+    std::string logFilePath((fs::canonical((fs::path(cfgIniGen["output_directory"].c_str()))) /
+                             fs::path(cfgIniGen["project_name"].c_str()) /
+                             fs::path(cfgIniGen["log_file"].c_str())).c_str());
 
     // Create file space
     make_proj_space(cfgIni, "assemble");

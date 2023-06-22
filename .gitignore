@@ -22,4 +22,5 @@ bat_brain/*
 lib/*
 include/*
 external/*
+data/*
 bin/*

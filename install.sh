@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/env bash
 
 # rcorrVersion   =
 # trimmVersion   =
@@ -69,30 +69,6 @@ rm curl-8.1.2.tar.gz
 #========================================================================
 
 echo "Now installing required packages ..."
-
-# sudo apt install bowtie2
-# sudo apt install jellyfish
-# sudo apt install libbz2-dev
-# sudo apt install libcurl-dev
-# sudo apt install liblzma
-# sudo apt install zlib
-# sudo apt install libcrypto
-
-# Install samtools
-# echo "Installing samtools ..."
-# wget -q --output-document samtools.tar.bz2 https://github.com/samtools/samtools/releases/download/1.17/samtools-1.17.tar.bz2
-# tar -xf samtools.tar.bz2 -C ./external/
-# make --
-
-# Install pigz
-# echo "Installing pigz ..."
-# wget -q --output-document pigz.tar.gz https://zlib.net/pigz/pigz-2.7.tar.gz
-# tar -xf pigz.tar.gz -C ./external/
-# mv ./external/pigz-2.7 ./external/pigz
-# cd ./external/pigz
-# make
-# cd ../../
-# rm pigz.tar.gz
 
 # Install HMMER
 echo "Installing HMMER ..."
