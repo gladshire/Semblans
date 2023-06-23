@@ -8,20 +8,6 @@
 void print_intro(std::string logFile) {
   winsize w;
   ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-  /*logOutput("\n  ┌──────────────────────────────────────┐", logFile);
-  logOutput("  │  _____                      _        │", logFile);
-  logOutput("  │ |  __ \\                    | |       │", logFile);
-  logOutput("  │ | |__) |_ _  __ _ _ __   __| | ___   │", logFile);
-  logOutput("  │ |  ___/ _` |/ _` | '_ \\ / _` |/ _ \\  │ ", logFile);
-  logOutput("  │ | |  | (_| | (_| | | | | (_| | (_) | │", logFile);
-  logOutput("  │ |_|   \\__,_|\\__,_|_| |_|\\__,_|\\___/  │", logFile);
-  logOutput("  └──────────────────────────────────────┘\n", logFile);
-  logOutput("                    P  -ipeline for the       ", logFile);
-  logOutput("                    A  -ssembly and           ", logFile);
-  logOutput("                    An -alysis of            ", logFile);
-  logOutput("                    D  -e novo                ", logFile);
-  logOutput("       transcript-  O  -mics datasets         ", logFile);*/
-  
   logOutput("", logFile);
   logOutput("                          |     |                     ", logFile);
   logOutput("    __|   _ \\  __ `__ \\   __ \\  |   _` |  __ \\    __| ", logFile);
@@ -233,6 +219,8 @@ int main(int argc, char * argv[]) {
     std::string logFilePath((fs::canonical((fs::path(cfgIniGen["output_directory"].c_str()))) /
                              fs::path(cfgIniGen["project_name"].c_str()) /
                              fs::path(cfgIniGen["log_file"].c_str())).c_str());
+    fs::create_directory((fs::canonical(fs::path(cfgIniGen["output_directory"].c_str())) /
+                          fs::path(cfgIniGen["project_name"].c_str())));
     std::ofstream logFile(logFilePath, std::ios_base::trunc);
  
     std::string verbose;
@@ -279,6 +267,7 @@ int main(int argc, char * argv[]) {
       logOutput("Performing preprocessing only", logFilePath);
       result = system(preCmd.c_str());
       if (WIFSIGNALED(result)) {
+        system("setterm -cursor on");
         exit(1);
       }
       exit(0);
@@ -288,6 +277,7 @@ int main(int argc, char * argv[]) {
       logOutput("Performing assembly only", logFilePath);
       result = system(assCmd.c_str());
       if (WIFSIGNALED(result)) {
+        system("setterm -cursor on");
         exit(1);
       }
       exit(0);
@@ -297,6 +287,7 @@ int main(int argc, char * argv[]) {
       logOutput("Performing postprocess only", logFilePath);
       result = system(postCmd.c_str());
       if (WIFSIGNALED(result)) {
+        system("setterm -cursor on");
         exit(1);
       }
       exit(0);

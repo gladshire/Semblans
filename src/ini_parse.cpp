@@ -64,9 +64,6 @@ void make_proj_space(const INI_MAP &iniFile, std::string pipeStage) {
                        fs::path(iniFile.at("General").at("project_name").c_str())).c_str());
   projDir += "/";
   INI_MAP_ENTRY pipeSteps = iniFile.at("Pipeline");
-  if (!fs::exists(fs::path(projDir.c_str()))) {
-    system(("mkdir " + projDir).c_str());
-  }
   if (!fs::exists(fs::path(projDir.c_str()) / "checkpoints")) {
     system(("mkdir " + projDir + "/checkpoints/").c_str());
   }

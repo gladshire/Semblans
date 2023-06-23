@@ -22,6 +22,7 @@ void pantherScore(std::string transPepIn, std::string outFile, std::string threa
   
   result = system(panthCmd.c_str());
   if (WIFSIGNALED(result)) {
+    system("setterm -cursor on");
     logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
     exit(1);
   }
