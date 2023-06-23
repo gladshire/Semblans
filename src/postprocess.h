@@ -30,14 +30,17 @@ void blastxDiamBulk(const std::vector<transcript> & transVec, std::string thread
                     bool dispOutput, std::string logFilePath, const INI_MAP & cfgIni);
 
 void remChimeraBulk(const std::vector<transcript> & transVec, std::string ram_gb,
-                    std::string logFilePath, const INI_MAP & cfgIni);
+                    bool retainInterFiles, bool dispOutput, std::string logFilePath,
+                    const INI_MAP & cfgIni);
 
 void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
-                bool dispOutput, std::string logFilePath, const INI_MAP & cfgIni);
+                bool retainInterFiles, bool dispOutput, std::string logFilePath,
+                const INI_MAP & cfgIni);
 
 void corsetBulk(const std::vector<transcript> & transVec, std::string ram_gb,
-                bool dispOutput, std::string logFilePath, const INI_MAP & cfgIni);
+                bool retainInterFiles, bool dispOutput, std::string logFilePath,
+                const INI_MAP & cfgIni);
 
 void transdecBulk(const std::vector<transcript> & transVec, std::string threads,
-                  std::string ram_gb, bool dispOutput, std::string logFilePath,
-                  const INI_MAP & cfgIni);
+                  std::string ram_gb, bool retainInterFiles, bool dispOutput,
+                  std::string logFilePath, const INI_MAP & cfgIni);

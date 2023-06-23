@@ -1,3 +1,5 @@
+// TODO: Implement removal of intermediates for postprocess
+
 #include "postprocess.h"
 
 std::atomic<bool> procRunning(false);
@@ -84,7 +86,8 @@ void blastxDiamBulk(const std::vector<transcript> & transVec, std::string thread
 }
 
 void remChimeraBulk(const std::vector<transcript> & transVec, std::string ram_gb,
-                    std::string logFilePath, const INI_MAP & cfgIni) {
+                    bool retainInterFiles, bool dispOutput, std::string logFilePath,
+                    const INI_MAP & cfgIni) {
   logOutput("\nStarting chimera removal", logFilePath);
   std::string currTransInChim;
   std::string currTransOutChim;
@@ -124,7 +127,8 @@ void remChimeraBulk(const std::vector<transcript> & transVec, std::string ram_gb
 }
 
 void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
-                bool dispOutput, std::string logFilePath, const INI_MAP & cfgIni) {
+                bool retainInterFiles, bool dispOutput, std::string logFilePath,
+                const INI_MAP & cfgIni) {
   logOutput("\nStarting transcript quantification", logFilePath);
   INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
   std::string currTransInSalm;
@@ -204,7 +208,8 @@ void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
 }
 
 void corsetBulk(const std::vector<transcript> & transVec, std::string ram_gb,
-                bool dispOutput, std::string logFilePath, const INI_MAP & cfgIni) {
+                bool retainInterFiles, bool dispOutput, std::string logFilePath,
+                const INI_MAP & cfgIni) {
   logOutput("\nRemoving redundant transcripts", logFilePath);
   INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
   std::string currTransInCors;
@@ -275,8 +280,8 @@ void corsetBulk(const std::vector<transcript> & transVec, std::string ram_gb,
 }
 
 void transdecBulk(const std::vector<transcript> & transVec, std::string threads,
-                  std::string ram_gb, bool dispOutput, std::string logFilePath,
-                  const INI_MAP & cfgIni) {
+                  std::string ram_gb, bool retainInterFiles, bool dispOutput,
+                  std::string logFilePath, const INI_MAP & cfgIni) {
   logOutput("\nStarting prediction of coding regions", logFilePath);
   INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
   std::string currTransInTD;
@@ -333,8 +338,8 @@ void transdecBulk(const std::vector<transcript> & transVec, std::string threads,
 }
 
 void annotateBulk(const std::vector<transcript> & transVec, std::string threads,
-                  std::string ram_gb, bool dispOutput, std::string logFilePath,
-                  const INI_MAP & cfgIni) {
+                  std::string ram_gb, bool retainInterFiles, bool dispOutput,
+                  std::string logFilePath, const INI_MAP & cfgIni) {
   logOutput("\nStarting annotation of transcripts", logFilePath);
   std::string currTransIn;
   std::string currTransPep;
@@ -471,23 +476,23 @@ int main(int argc, char * argv[]) {
       blastxDiamBulk(transVec, threads, dispOutput, logFilePath, cfgIni);
 
       // Detect and remove chimeric transcripts
-      remChimeraBulk(transVec, ram_gb, logFilePath, cfgIni);
+      remChimeraBulk(transVec, ram_gb, retainInterFiles, dispOutput, logFilePath, cfgIni);
     }
 
     if (ini_get_bool(cfgPipeline.at("cluster_filtering").c_str(), 0)) {
       // Perform salmon index of transcripts
-      salmonBulk(transVec, threads, dispOutput, logFilePath, cfgIni);
+      salmonBulk(transVec, threads, retainInterFiles, dispOutput, logFilePath, cfgIni);
    
       // Perform corset run to cluster transcripts
-      corsetBulk(transVec, ram_gb, dispOutput, logFilePath, cfgIni);
+      corsetBulk(transVec, ram_gb, retainInterFiles, dispOutput, logFilePath, cfgIni);
     }
     
     // Run transdecoder
-    transdecBulk(transVec, threads, ram_gb, dispOutput, logFilePath, cfgIni);
+    transdecBulk(transVec, threads, ram_gb, retainInterFiles, dispOutput, logFilePath, cfgIni);
  
     if (ini_get_bool(cfgPipeline.at("annotate_transcripts").c_str(), 0)) { 
       // Annotate transcriptome
-      annotateBulk(transVec, threads, ram_gb, dispOutput, logFilePath, cfgIni);
+      annotateBulk(transVec, threads, ram_gb, retainInterFiles, dispOutput, logFilePath, cfgIni);
     }
   }
   else {
