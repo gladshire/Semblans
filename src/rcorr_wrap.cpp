@@ -47,6 +47,7 @@ void run_rcorr(std::pair<std::string, std::string> sraRun, std::string outDir,
   rcorrCmd += printOut;
   result = system(rcorrCmd.c_str());
   if (WIFSIGNALED(result)) {
+    system("setterm -cursor on");
     logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
     system("rm ./tmp*");
     exit(1);

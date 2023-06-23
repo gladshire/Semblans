@@ -139,6 +139,7 @@ void salmon_quant(std::string transIn, std::string transIndex, std::string trans
     result = system(salm_cmd.c_str());
   }
   if (WIFSIGNALED(result)) {
+    system("setterm -cursor on");
     logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
     exit(1);
   }

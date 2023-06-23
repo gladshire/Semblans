@@ -21,6 +21,7 @@ void corset_eq_classes(std::string transPrefix, std::string pathEqClassFile,
                          printOut;
   result = system(cors_cmd.c_str());
   if (WIFSIGNALED(result)) {
+    system("setterm -cursor on");
     logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
     exit(1);
   }

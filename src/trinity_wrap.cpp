@@ -101,6 +101,7 @@ void run_trinity(std::pair<std::string, std::string> sraRun, std::string outFile
   }
   result = system(trin_cmd.c_str());
   if (WIFSIGNALED(result)) {
+    system("setterm -cursor on");
     logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
     exit(1);
   }
@@ -158,6 +159,7 @@ void run_trinity_comb(std::vector<std::pair<std::string, std::string>> sraRuns,
   trinProgThread.join();
 
   if (WIFSIGNALED(result)) {
+    system("setterm -cursor on");
     logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
     exit(1);
   }

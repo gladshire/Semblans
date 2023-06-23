@@ -33,6 +33,7 @@ void run_fastqc(std::pair<std::string, std::string> sraRunFiles,
     result = system(fastqcCmd.c_str());
   }
   if (WIFSIGNALED(result)) {
+    system("setterm -cursor on");
     std::cout << "Exited with signal " << WTERMSIG(result) << std::endl;
     exit(1);
   }

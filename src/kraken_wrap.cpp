@@ -65,6 +65,7 @@ void run_kraken2(std::pair<std::string, std::string> sraRunIn,
     result = system(krakCmd.c_str());
   }
   if (WIFSIGNALED(result)) {
+    system("setterm -cursor on");
     logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
     exit(1);
   }

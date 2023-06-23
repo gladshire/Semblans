@@ -17,6 +17,7 @@ void makeDb(std::string pathProtRef, std::string outDir,
                           outDbFile.c_str() + printOut;
   result = system(makeDbCmd.c_str());
   if (WIFSIGNALED(result)) {
+    system("setterm -cursor on");
     logOutput("Existed with signal " + std::to_string(WTERMSIG(result)), logFile);
     exit(1);
   } 
@@ -48,6 +49,7 @@ void blastxDiam(std::string transIn, std::string blastDb,
                               printOut;
   result = system(blastxDiamCmd.c_str());
   if (WIFSIGNALED(result)) {
+    system("setterm -cursor on");
     logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
     exit(1);
   }
@@ -70,6 +72,7 @@ void blastpDiam(std::string pepFilePath, std::string blastDb,
                                " --threads " + threads + " --out " + outFile + printOut;
   result = system(blastpDiamCmd.c_str());
   if (WIFSIGNALED(result)) {
+    system("setterm -cursor on");
     logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
     exit(1);
   }

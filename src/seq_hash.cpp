@@ -167,11 +167,13 @@ void seqHash::setSeqHeader(std::string header, std::string newHeader) {
     auto vecIter = seqHashData[hashIndex].begin();
     // Check for sequence in chained hash table
     while (vecIter != seqHashData[hashIndex].end()) {
+      currKeyStrHash = (vecIter->get_header()).substr(0, vecIter->get_header().find(' '));
       // If match found update its header and return
       if (vecIter->get_header() == header || currKeyStrHash == keyStr) {
         vecIter->set_header(newHeader);
         return;
       }
+      vecIter++;
     }
     std::cout << "ERROR: Sequence not found" << std::endl;
     exit(2);

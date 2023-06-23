@@ -25,6 +25,7 @@ void prefetch_sra(SRA sra, bool dispOutput, std::string logFile) {
   }
   result = system(prefetchCmd.c_str());
   if (WIFSIGNALED(result)) {
+    system("setterm -cursor on");
     logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
     exit(1);
   }
@@ -64,6 +65,7 @@ void fasterq_sra(SRA sra, std::string threads, bool dispOutput,
   result = system(fasterqCmd.c_str());
   fs::current_path(currDir);
   if (WIFSIGNALED(result)) {
+    system("setterm -cursor on");
     logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
     exit(1);
   }

@@ -40,9 +40,8 @@ std::map<std::string, std::string> getGeneMatches(std::string annotFile) {
       if (colNum == 3) {
         eValStr = currTok;
       }
-      else {
-        continue;
-      }
+      currLine.erase(0, tabPos + 1);
+      colNum++;
     }
     std::istringstream doubleStr(eValStr);
     doubleStr >> eValCurr;
@@ -65,6 +64,7 @@ std::map<std::string, std::string> getGeneMatches(std::string annotFile) {
     }
     lastQry = queryId;
     lastEval = eValStr;
+    linNum++;
   }
   return geneMatches;
 }
@@ -106,13 +106,10 @@ void annotateTranscript(std::string transIn, std::string transPep, std::string t
   seqHash fastaHashTable(lenHashTable, transInFileStr, ram_b);
 
   // Iterate over new seq ID data, renaming each header to new sequence ID
-  std::string currOldHeader;
-  std::string currNewHeader;
   for (auto seqPair : newSeqHeaders) {
     fastaHashTable.setSeqHeader(seqPair.first, seqPair.second);
   }
 
   // Dump annotated hash table to new location
-  std::cout << "Dumping annotated sequence hash to FASTA file" << std::endl;
   fastaHashTable.dump(transOut);
 }

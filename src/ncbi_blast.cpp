@@ -21,6 +21,7 @@ void makeBlastDb(std::string pathProtRef, std::string outDir,
                                outDbFile.c_str() + printOut;
   result = system(makeblastdbCmd.c_str());
   if (WIFSIGNALED(result)) {
+    system("setterm -cursor on");
     logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
     exit(1);
   }
@@ -56,6 +57,7 @@ void blastx(std::string transIn, std::string blastDb,
                           " -max_target_seqs 100" + printOut;
   result = system(blastxCmd.c_str());
   if (WIFSIGNALED(result)) {
+    system("setterm -cursor on");
     logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
     exit(1);
   }
@@ -83,6 +85,7 @@ void blastp(std::string pepFilePath, std::string blastDb,
                           threads + " > " + outFile + printOut;
   result = system(blastpCmd.c_str());
   if (WIFSIGNALED(result)) {
+    system("setterm -cursor on");
     logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
     exit(1);
   }

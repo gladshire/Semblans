@@ -82,6 +82,7 @@ void run_transdecoder(std::string transIn, std::string transCds, std::string tra
       int resultLO;
       resultLO = system(tdLongOrfs_cmd.c_str());
       if (WIFSIGNALED(resultLO)) {
+        system("setterm -cursor on");
         logOutput("Exited with signal " + std::to_string(WTERMSIG(resultLO)), logFile);
         exit(1);
       }
@@ -107,6 +108,7 @@ void run_transdecoder(std::string transIn, std::string transCds, std::string tra
       int resultPD;
       resultPD = system(tdPredict_cmd.c_str());
       if (WIFSIGNALED(resultPD)) {
+        system("setterm -cursor on");
         logOutput("Exited with signal " + std::to_string(WTERMSIG(resultPD)), logFile);
         exit(1);
       }
