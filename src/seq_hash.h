@@ -23,12 +23,14 @@ class seqHash {
     seqHash(uintmax_t lenTable, fs::path transFilePath, uintmax_t ram_b);
     void align_buffer_end(std::ifstream & inFile, char * inFileData, std::streamsize & s);
     unsigned long hashFunction(char * key);
+    void insertHash(std::string header, std::string sequence, std::string quality);
     void insertHash(std::string header, std::string sequence);
     void deleteHash(std::string header);
     bool inHashTable(std::string header);
     sequence getSeq(std::string header);
     void setSeqHeader(std::string header, std::string newHeader);
     void dump(std::string filePath);
+    uintmax_t getLength();
     uintmax_t getSize();
     std::vector<sequence> * getHashData();
 };

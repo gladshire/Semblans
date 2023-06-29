@@ -57,7 +57,7 @@ std::map<std::string, std::string> getGeneMatches(std::string annotFile) {
       bestMatchId = matchId;
       bestMatchDesc = matchDesc;
       if (lastQry != "") {
-        newHeader = transPrefix + queryId.substr(queryId.find("_")) + " " +
+        newHeader = transPrefix + queryId.substr(queryId.find(" ")) + " " +
                     matchId + " " + matchDesc;
         geneMatches.emplace(queryId, newHeader);
       }

@@ -3,7 +3,7 @@ CFLAGS = '-Wl,-rpath,$$ORIGIN/../lib/' -g -pthread
 
 LIBS = -L../lib -lboost_system -lboost_filesystem -lboost_iostreams -ldl -lconfini
 INCLUDE_PATH = -I../lib/ -I../include
-OBJ_LINK = preprocess.o sra_toolkit.o ini_parse.o sra.o transcript.o fastqc_wrap.o rcorr_wrap.o rem_unfixable.o trimm_wrap.o kraken_wrap.o rem_overrep.o print_info.o
+OBJ_LINK = preprocess.o sra_toolkit.o ini_parse.o sra.o transcript.o fastqc_wrap.o rcorr_wrap.o rem_unfixable.o trimm_wrap.o kraken_wrap.o rem_overrep.o print_info.o seq.o seq_hash.o
 
 
 ../bin/preprocess: $(OBJ_LINK)
@@ -32,6 +32,10 @@ rem_overrep.o: rem_overrep.cpp rem_overrep.h
 	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c rem_overrep.cpp $(LIBS)
 print_info.o: print_info.cpp print_info.h
 	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c print_info.cpp $(LIBS)
+seq.o: seq.cpp seq.h
+	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c seq.cpp $(LIBS)
+seq_hash.o: seq_hash.cpp seq_hash.h
+	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c seq_hash.cpp $(LIBS)
 clean:
 	rm preprocess.o
 	rm fastqc_wrap.o

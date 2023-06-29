@@ -13,7 +13,12 @@
 #include "ini_parse.h"
 #include "sra_toolkit.h"
 #include "trinity_wrap.h"
+#include "salmon_wrap.h"
 #include "print_info.h"
+#include "seq.h"
+#include "seq_hash.h"
+
+void updateHeaders(std::string fastaFilePath, uintmax_t ram_b);
 
 std::vector<transcript> get_transcript(std::vector<SRA> sras);
 

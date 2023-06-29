@@ -15,6 +15,9 @@ seqHash::seqHash(uintmax_t lenTable) {
 
 seqHash::seqHash(uintmax_t lenTable, fs::path transFilePath, uintmax_t ram_b) {
 
+  if (!fs::exists(transFilePath)) {
+    return;
+  }
   seqHashData = new std::vector<sequence>[lenTable];
   lenHashTable = lenTable;
   numItems = 0;
@@ -53,14 +56,17 @@ seqHash::seqHash(uintmax_t lenTable, fs::path transFilePath, uintmax_t ram_b) {
       }
       seqStartPos = std::find(headerStartPos, inFileL, '\n') + 1;
       currHeader = std::string(headerStartPos + 1, seqStartPos - 1);
-      //currHeader = currHeader.substr(0, currHeader.find(" "));
       // Extract sequence
+      // TODO: Extract quality line, if fastq
+      //   Determine if fastq -> check if '+' exists after sequence line
+      //   If '+' exists, also extract quality line following it
       headerStartPos = std::find(seqStartPos, inFileL, '>');
       currSequence = std::string(seqStartPos, headerStartPos - 1);
       // Insert information into hash table
       this->insertHash(currHeader, currSequence);
     }
   }
+  inFile.close();
 }
 
 void seqHash::align_buffer_end(std::ifstream & inFile, char * inFileData, std::streamsize & s) {
@@ -85,6 +91,13 @@ unsigned long seqHash::hashFunction(char * key) {
 }
 
 // Insert sequence element into hash table
+void seqHash::insertHash(std::string header, std::string sequenceData, std::string quality) {
+  std::string keyStr = header.substr(0, header.find(' '));
+  unsigned long hashIndex = hashFunction(&keyStr[0]) % lenHashTable;
+  seqHashData[hashIndex].push_back(sequence(header, sequenceData, quality));
+  numItems++;
+}
+
 void seqHash::insertHash(std::string header, std::string sequenceData) {
   std::string keyStr = header.substr(0, header.find(' '));
   unsigned long hashIndex = hashFunction(&keyStr[0]) % lenHashTable;
@@ -200,6 +213,11 @@ void seqHash::dump(std::string filePath) {
     }
   }
   outFile.close();
+}
+
+// Return length of hash table
+uintmax_t seqHash::getLength() {
+  return lenHashTable;
 }
 
 // Return number of items in hash table

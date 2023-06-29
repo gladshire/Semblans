@@ -1,6 +1,139 @@
 #include "assemble.h"
 
 
+void updateHeaders(std::string fastaFilePath, uintmax_t ram_b) {
+  uintmax_t numBytesFasta = fs::file_size(fastaFilePath.c_str());
+  uintmax_t lenHashTable = numBytesFasta / 160;
+
+  seqHash fastaHashTable(lenHashTable, fastaFilePath, ram_b);
+
+  std::vector<sequence> * hashData = fastaHashTable.getHashData();
+
+  std::string newPrefix(fs::path(fastaFilePath.c_str()).stem().stem().c_str());
+  std::string currOldHeader;
+  std::string currNewHeader;
+  for (uintmax_t i = 0; i < lenHashTable; i++) {
+    if (hashData[i].empty()) {
+      continue;
+    }
+    else {
+      for (auto seq : hashData[i]) {
+        currOldHeader = seq.get_header();
+        currNewHeader = newPrefix + currOldHeader.substr(currOldHeader.find("_"));
+        fastaHashTable.setSeqHeader(currOldHeader, currNewHeader);
+      }
+    }
+  }
+  fastaHashTable.dump(fastaFilePath);
+}
+
+
+void isolateReads(const std::vector<SRA> & sras, std::string fastaInput, std::string threads,
+                  uintmax_t ram_b, bool dispOutput, const INI_MAP & cfgIni, std::string logFile) {
+
+  INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
+  std::ifstream unmappedReadFile;
+  std::string fastaIndex;
+  transcript dummyTrans;
+  // Create index of fastaInput
+  transcript transTemp(sras[0]);
+  fastaIndex = std::string(transTemp.get_trans_path_trinity().parent_path().c_str()) +
+               std::string(fs::path(fastaInput.c_str()).stem().c_str()) + "_index";
+
+  salmon_index(fastaInput, fastaIndex, threads, dispOutput, logFile);
+
+  // Quantify reads against fastaInput
+  std::vector<std::pair<std::string, std::string>> sraRunsIn;
+  std::pair<std::string, std::string> currSraIn;
+  std::string fastaQuant;
+  for (auto sra : sras) {
+    currSraIn.first = sra.get_sra_path_orep_filt().first.c_str();
+    currSraIn.second = sra.get_sra_path_orep_filt().second.c_str();
+    if (!ini_get_bool(cfgPipeline.at("remove_overrepresented").c_str(), 0)) {
+      if (!ini_get_bool(cfgPipeline.at("filter_foreign_reads").c_str(), 0)) {
+        if (!ini_get_bool(cfgPipeline.at("trim_adapter_seqs").c_str(), 0)) {
+          if (!ini_get_bool(cfgPipeline.at("error_correction").c_str(), 0)) {
+            currSraIn.first = sra.get_sra_path_raw().first.c_str();
+            currSraIn.second = sra.get_sra_path_raw().second.c_str();
+          }
+          else {
+            currSraIn.first = sra.get_sra_path_corr_fix().first.c_str();
+            currSraIn.second = sra.get_sra_path_corr_fix().second.c_str();
+          }
+        }
+        else {
+          currSraIn.first = sra.get_sra_path_trim_p().first.c_str();
+          currSraIn.second = sra.get_sra_path_trim_p().second.c_str();
+        }
+      }
+      else {
+        currSraIn.first = sra.get_sra_path_for_filt().first.c_str();
+        currSraIn.second = sra.get_sra_path_for_filt().second.c_str();
+      }
+    }
+    sraRunsIn.push_back(currSraIn);
+    fastaQuant = std::string(transTemp.get_trans_path_trinity().parent_path().c_str()) +
+                 std::string(fs::path(fastaInput.c_str()).stem().c_str()) + 
+                 std::string(currSraIn.first.substr(0, currSraIn.first.find_last_of("_")));
+    salmon_quant(fastaInput, fastaIndex, fastaQuant, sraRunsIn, threads, dispOutput, logFile);
+    
+    // Parse quantified reads add to new file
+    uintmax_t numBytesReads1;
+    uintmax_t lenReadsHash1;
+    uintmax_t numBytesReads2;
+    uintmax_t lenReadsHash2;
+    
+    numBytesReads1 = fs::file_size(currSraIn.first.c_str());
+    lenReadsHash1 = numBytesReads1 / 160;
+    seqHash readHashTable1(lenReadsHash1, fs::path(currSraIn.first.c_str()), ram_b);
+    seqHash unmappedHash1(lenReadsHash1);
+
+    if (sra.is_paired()) {
+      numBytesReads2 = fs::file_size(currSraIn.second.c_str());
+      lenReadsHash2 = numBytesReads2 / 160;
+    }
+    seqHash readHashTable2(lenReadsHash2, fs::path(currSraIn.second.c_str()), ram_b);
+    seqHash unmappedHash2(lenReadsHash2);
+
+    unmappedReadFile.open(fastaQuant + "/aux_info/" + "unmapped_names.txt");
+    std::string currLine;
+    sequence currSeq;
+    std::string currHead;
+    std::string currSeqData;
+    std::string currQual;
+    while (getline(unmappedReadFile, currLine)) {
+      currHead = currLine.substr(0, currLine.find(" "));
+      currSeq = readHashTable1.getSeq(currHead);
+      currHead = currSeq.get_header();
+      currSeqData = currSeq.get_sequence();
+      currQual = currSeq.get_quality();
+      
+      readHashTable1.deleteHash(currHead);
+      unmappedHash1.insertHash(currHead, currSeqData, currQual);
+      if (sra.is_paired()) {
+        currSeq = readHashTable2.getSeq(currHead);
+        currHead = currSeq.get_header();
+        currSeqData = currSeq.get_sequence();
+        currQual = currSeq.get_quality();
+
+        readHashTable2.deleteHash(currHead);
+        unmappedHash2.insertHash(currHead, currSeqData, currQual);
+      }
+    }
+    readHashTable1.dump(std::string(transTemp.get_trans_path_trinity().parent_path().c_str()) +
+                        std::string(sra.get_sra_path_orep_filt().first.replace_extension(".unmapped.fq").c_str()));
+    unmappedHash1.dump(std::string(transTemp.get_trans_path_trinity().parent_path().c_str()) +
+                       std::string(sra.get_sra_path_orep_filt().first.replace_extension(".mapped.fq").c_str()));
+    if (sra.is_paired()) {
+      readHashTable2.dump(std::string(transTemp.get_trans_path_trinity().parent_path().c_str()) +
+                          std::string(sra.get_sra_path_orep_filt().second.replace_extension(".unmapped.fq").c_str()));
+      unmappedHash2.dump(std::string(transTemp.get_trans_path_trinity().parent_path().c_str()) +
+                         std::string(sra.get_sra_path_orep_filt().second.replace_extension(".mapped.fq").c_str()));
+    }
+  }
+}
+
+
 std::vector<transcript> get_transcript(std::vector<SRA> sras) {
   std::vector<transcript> transcripts;
   for (auto &sra : sras) {
@@ -65,6 +198,7 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
   fs::path cpDir;
   fs::path trinDir;
   std::string transInfoFileStr;
+  uintmax_t ram_b = (uintmax_t)stoi(ram_gb) * 1000000000;
 
   for (auto sraGroup : sraGroups) {
     SRA dummySra = sraGroup.second.at(0);
@@ -78,12 +212,12 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
       continue;
     }
 
-    transcript dummyTrans(dummySra);    
+    transcript dummyTrans(dummySra);
     fs::path pathTrinDir = dummyTrans.get_trans_path_trinity().parent_path();
-
+    
     outDir = std::string(pathTrinDir.c_str());
     currTrinOut = outDir + "/" + sraGroup.first + ".Trinity.fasta";
-
+  
     for (auto sra : sraGroup.second) {
       currTrinIn.first = sra.get_sra_path_orep_filt().first.c_str();
       currTrinIn.second = sra.get_sra_path_orep_filt().second.c_str();
@@ -111,7 +245,7 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
       }
       sraRunsInTrin.push_back(currTrinIn);
     }
-    
+
     if (sraRunsInTrin.size() > 1) {
       // Multi-assembly
       run_trinity_comb(sraRunsInTrin, currTrinOut, threads, ram_gb, dispOutput, logFile);
@@ -123,6 +257,7 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
     else {
       std::cout << "This should never happen. You fucked up" << std::endl;
     }
+    updateHeaders(currTrinOut, ram_b);
     // Make file for transcript containing associated SRAs
     transInfoFileStr = std::string(fs::path(currTrinOut.c_str()).replace_extension(".ti").c_str());
     makeTransInfoFile(sraGroup.second, transInfoFileStr);

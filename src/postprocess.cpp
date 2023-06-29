@@ -173,17 +173,18 @@ void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
       logOutput("  Indexing checkpoint found for: " + trans.get_file_prefix(), logFilePath);
       continue;
     }
-    // Perform salmon index of transcript
+    // Summarize indexing job
     logOutput("  Now mapping reads to transcripts: ", logFilePath);
     summarize_sing_trans(trans, logFilePath, 4);
 
+    // Create index of assembled transcripts
     procRunning = true;
     std::thread salmIdxThread(progressAnim, 2);
     salmon_index(currTransInSalm, currIndex, threads, dispOutput, logFilePath);
     procRunning = false;
     salmIdxThread.join();
 
-    // Create salmon index checkpoint
+    // Create index checkpoint
     trans.makeCheckpoint("index");
 
     // Check if salmon quant checkpoint exists
@@ -191,10 +192,11 @@ void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
       logOutput("  Quant checkpoint found for: " + trans.get_file_prefix(), logFilePath);
       continue;
     }
-    // Perform salmon quant of transcript
+    // Summarize quantification job
     logOutput("  Now quantifying transcripts: ", logFilePath);
     summarize_sing_trans(trans, logFilePath, 4);
 
+    // Quantify reads mapped to transcript index
     procRunning = true;
     std::thread salmQntThread(progressAnim, 2);
     salmon_quant(currTransInSalm, currIndex, currQuant, currSraRunsIn, threads,

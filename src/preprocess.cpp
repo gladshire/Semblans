@@ -481,6 +481,9 @@ void remOverrepBulk(const std::vector<SRA> & sras, std::string threads, std::str
   std::pair<std::string, std::string> currOrepIn;
   std::pair<std::string, std::string> currOrepOut;
   fs::path fastqcDir;
+
+  seqHash overrepHash;
+
   for (auto sra : sras) {
     // Check for checkpoint file
     if (sra.checkpointExists("orep.fix")) {
@@ -514,24 +517,21 @@ void remOverrepBulk(const std::vector<SRA> & sras, std::string threads, std::str
     currOrepOut.second = sra.get_sra_path_orep_filt().second.c_str();
 
     if (sra.is_paired()) {
-      currOrepSeqsPe = get_overrep_seqs_pe(sra);
-      if (currOrepSeqsPe.first.empty() && currOrepSeqsPe.second.empty()) {
-        logOutput("    No overrepresented reads detected. Continuing.", logFilePath);
-      }
+      int len1 = 0;
+      int len2 = 0;
+      overrepHash = get_overrep_seqs_pe(sra, len1, len2);
       procRunning = true;
       std::thread orepThread(progressAnim,2);
-      rem_overrep_pe(currOrepIn, currOrepOut, ram_b, compressFiles, currOrepSeqsPe);
+      rem_overrep_pe(currOrepIn, currOrepOut, ram_b, compressFiles, overrepHash, len1, len2);
       procRunning = false;
       orepThread.join();
     }
     else {
-      currOrepSeqsSe = get_overrep_seqs_se(sra);
-      if (currOrepSeqsSe.empty()) {
-        logOutput("    No overrepresented reads detected. Continuing.", logFilePath);
-      }
+      int len;
+      overrepHash = get_overrep_seqs_se(sra, len);
       procRunning = true;
       std::thread orepThread(progressAnim,2);
-      rem_overrep_se(currOrepIn.first, currOrepOut.first, ram_b, compressFiles, currOrepSeqsSe);
+      rem_overrep_se(currOrepIn.first, currOrepOut.first, ram_b, compressFiles, overrepHash, len);
       procRunning = false;
       orepThread.join();
     }

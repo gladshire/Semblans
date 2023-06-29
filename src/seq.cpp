@@ -9,8 +9,17 @@ sequence::sequence() {
 
 sequence::sequence(std::string header, std::string sequenceData) {
   this->header = header;
+  size_t nlPos = sequenceData.find("\n");
+  this->sequenceData = sequenceData;
+  this->id = "";
+  numBp = sequenceData.length();
+}
+
+sequence::sequence(std::string header, std::string sequenceData, std::string quality) {
+  this->header = header;
   size_t nlPos = sequenceData.find('\n');
   this->sequenceData = sequenceData;
+  this->quality = quality;
   this->id = "";
   numBp = sequenceData.length();
 }
@@ -29,6 +38,10 @@ std::string sequence::get_header() {
 
 std::string sequence::get_sequence() {
   return this->sequenceData;
+}
+
+std::string sequence::get_quality() {
+  return this->quality;
 }
 
 std::string sequence::get_id() {

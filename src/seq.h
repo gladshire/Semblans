@@ -19,9 +19,11 @@ class sequence {
   public:
     sequence();
     sequence(std::string header, std::string sequenceData);
+    sequence(std::string header, std::string sequenceData, std::string quality);
     sequence(const sequence & seq);
     std::string get_header();
     std::string get_sequence();
+    std::string get_quality();
     std::string get_id();
     void set_header(std::string newHeader);
     void set_id(std::string newId);

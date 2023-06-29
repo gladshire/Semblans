@@ -11,8 +11,6 @@ namespace dl = boost::dll;
 
 #define PATH_SALMON std::string((dl::program_location().parent_path() / fs::path(std::string("../external/salmon/bin/salmon"))).c_str())
 
-void combine_paired(std::vector<SRA> sras, long long int ram_b);
-
 void salmon_index(std::string transIn, std::string transIndex,
                   std::string threads, bool dispOutput, std::string logFile);
 
