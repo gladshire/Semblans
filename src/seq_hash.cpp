@@ -33,7 +33,10 @@ seqHash::seqHash(uintmax_t lenTable, fs::path transFilePath, uintmax_t ram_b) {
   char * headerEndPos;
   char * seqStartPos;
   char * seqEndPos;
+  char * qualityStartPos;
+  char * qualityEndPos;
   char * inFileL;
+  char headChar;
   while (!inFile.eof() && inFile.good()) {
     // Store file chunk into buffer
     inFile.read(&inFileData[0], ram_b);
@@ -41,12 +44,19 @@ seqHash::seqHash(uintmax_t lenTable, fs::path transFilePath, uintmax_t ram_b) {
     s = inFile.gcount();
     // Initialize header start position
     headerStartPos = &inFileData[0];
+    if (*headerStartPos == '>') {
+      headChar = '>';
+    }
+    else {
+      headChar = '@';
+    }
     // Initizlie address of last buffer position
     inFileL = &inFileData[0] + s;
     // Align end of buffer with end of last transcript
     this->align_buffer_end(inFile, &inFileData[0], s);
     std::string currHeader;
     std::string currSequence;
+    std::string currQuality;
     std::string currKey;
     while (headerStartPos != inFileL) {
       // Extract header
@@ -60,10 +70,21 @@ seqHash::seqHash(uintmax_t lenTable, fs::path transFilePath, uintmax_t ram_b) {
       // TODO: Extract quality line, if fastq
       //   Determine if fastq -> check if '+' exists after sequence line
       //   If '+' exists, also extract quality line following it
-      headerStartPos = std::find(seqStartPos, inFileL, '>');
-      currSequence = std::string(seqStartPos, headerStartPos - 1);
-      // Insert information into hash table
-      this->insertHash(currHeader, currSequence);
+      
+      seqEndPos = std::find(seqStartPos, inFileL, '\n') - 1;
+      currSequence = std::string(seqStartPos, seqEndPos);
+
+      if (*(seqEndPos + 2) == '+') {
+        qualityStartPos = std::find(seqEndPos + 2, inFileL, '\n') + 1;
+        qualityEndPos = std::find(qualityStartPos, inFileL, headChar) - 1;
+        currQuality = std::string(qualityStartPos, qualityEndPos - 1);
+        headerStartPos = std::find(qualityStartPos, inFileL, headChar);
+        this->insertHash(currHeader, currSequence, currQuality);
+      }
+      else {
+        headerStartPos = std::find(seqStartPos, inFileL, headChar);
+        this->insertHash(currHeader, currSequence);
+      }
     }
   }
   inFile.close();
