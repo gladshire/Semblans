@@ -154,7 +154,7 @@ void fastqcBulk1(const std::vector<SRA> & sras, std::string threads, bool dispOu
 
 void fastqcBulk2(const std::vector<SRA> & sras, std::string threads, bool dispOutput,
                  std::string logFilePath, const INI_MAP & cfgIni) {
-  logOutput("\nStarting pre-assembly quality analysis", logFilePath);
+  logOutput("\nStarting second quality analysis", logFilePath);
   INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
   std::pair<std::string, std::string> currFastqcIn;
   std::string currFastqcOut;

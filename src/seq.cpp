@@ -11,6 +11,7 @@ sequence::sequence(std::string header, std::string sequenceData) {
   this->header = header;
   size_t nlPos = sequenceData.find("\n");
   this->sequenceData = sequenceData;
+  this->quality = "";
   this->id = "";
   numBp = sequenceData.length();
 }

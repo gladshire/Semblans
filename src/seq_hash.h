@@ -33,4 +33,5 @@ class seqHash {
     uintmax_t getLength();
     uintmax_t getSize();
     std::vector<sequence> * getHashData();
+    ~seqHash();
 };

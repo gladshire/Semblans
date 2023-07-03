@@ -32,5 +32,7 @@ void makeTransInfoFile(const std::vector<SRA> & sras, std::string transInfoFileS
 
 void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
                       std::string threads, std::string ram_gb,
+                      bool assembSeqsInterest, bool assembSeqsNoInterest,
+                      bool assembAllSeqs, std::string fastaSeqsFile,
                       bool dispOutput, bool retainInterFiles,
                       std::string logFile, const INI_MAP & cfgIni);

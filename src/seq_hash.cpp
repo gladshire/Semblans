@@ -60,7 +60,7 @@ seqHash::seqHash(uintmax_t lenTable, fs::path transFilePath, uintmax_t ram_b) {
     std::string currKey;
     while (headerStartPos != inFileL) {
       // Extract header
-      if (*headerStartPos != '>') {
+      if (*headerStartPos != '>' && *headerStartPos != '@') {
         std::cout << "Buffer not aligned. Header doesn't start with \">\" or \"@\"" << std::endl;
         exit(0);
       }
@@ -180,7 +180,8 @@ sequence seqHash::getSeq(std::string header) {
     while (vecIter != seqHashData[hashIndex].end()) {
       currKeyStrHash = (vecIter->get_header()).substr(0, vecIter->get_header().find(' '));
       if (vecIter->get_header() == header || currKeyStrHash == keyStr) {
-        return sequence(vecIter->get_header(), vecIter->get_sequence());
+        return sequence(vecIter->get_header(), vecIter->get_sequence(),
+                        vecIter->get_quality());
       }
       vecIter++;
     }
@@ -219,6 +220,7 @@ void seqHash::dump(std::string filePath) {
   std::ofstream outFile(filePath);
   std::string currHeader;
   std::string currSeq;
+  std::string currQual;
   for (uintmax_t i = 0; i < lenHashTable; i++) {
     if (seqHashData[i].empty()) {
       continue;
@@ -228,8 +230,13 @@ void seqHash::dump(std::string filePath) {
       for (auto seq : seqHashData[i]) {
         currHeader = seq.get_header();
         currSeq = seq.get_sequence();
+        currQual = seq.get_quality();
         outFile << ">" << currHeader << '\n';
         outFile << currSeq << std::endl;
+        if (!currQual.empty()) {
+          outFile << "+" << '\n';
+          outFile << currQual << std::endl;
+        }
       }
     }
   }
@@ -249,4 +256,9 @@ uintmax_t seqHash::getSize() {
 // Get pointer to hash data
 std::vector<sequence> * seqHash::getHashData() {
   return seqHashData;
+}
+
+// Destructor for hash table
+seqHash::~seqHash() {
+  delete[] seqHashData;
 }
