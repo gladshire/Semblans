@@ -349,7 +349,7 @@ void filtForeignBulk(const std::vector<SRA> & sras, std::vector<std::string> kra
 
   
   for (int i = 0; i < krakenDbs.size(); i++) {
-    logOutput("\n  Now filtering with database: " +
+    logOutput("  Now filtering with database: " +
               std::string(fs::path(krakenDbs[i].c_str()).filename().c_str()),
               logFilePath);
     for (auto sra : sras) {

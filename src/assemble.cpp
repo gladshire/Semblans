@@ -49,6 +49,8 @@ void isolateReads(const std::vector<SRA> & sras, std::string fastaInput, std::st
   std::pair<std::string, std::string> currSraIn;
   std::string outDir;
   std::string fastaQuant;
+  std::string filePrefix1;
+  std::string filePrefix2;
   for (auto sra : sras) {
     std::vector<std::pair<std::string, std::string>> sraRunsIn;
     logOutput("  Now isolating reads for:", logFile);
@@ -82,6 +84,15 @@ void isolateReads(const std::vector<SRA> & sras, std::string fastaInput, std::st
         outDir = sra.get_sra_path_for_filt().first.parent_path().c_str();
       }
     }
+    filePrefix1 = fs::path(currSraIn.first).filename().c_str();
+    filePrefix2 = fs::path(currSraIn.second).filename().c_str();
+    while (!fs::path(filePrefix1).extension().empty()) {
+      filePrefix1 = fs::path(filePrefix1).stem().c_str();
+    }
+    while (!fs::path(filePrefix2).extension().empty()) {
+      filePrefix2 = fs::path(filePrefix2).stem().c_str();
+    }
+    outDir = fs::path(currSraIn.first).parent_path().c_str();
     sraRunsIn.push_back(currSraIn);
     std::string sraPrefix(fs::path(currSraIn.first.c_str()).stem().c_str());
     
@@ -139,15 +150,11 @@ void isolateReads(const std::vector<SRA> & sras, std::string fastaInput, std::st
       numUnmapped++;
     }
     logOutput("  Dumping split reads to mapped and unmapped files", logFile);
-    readHashTable1.dump(std::string(transTemp.get_trans_path_trinity().parent_path().c_str()) + "/" +
-                        std::string(sra.get_sra_path_orep_filt().first.filename().replace_extension(".mapped.fq").c_str()));
-    unmappedHash1.dump(std::string(transTemp.get_trans_path_trinity().parent_path().c_str()) + "/" +
-                       std::string(sra.get_sra_path_orep_filt().first.filename().replace_extension(".unmapped.fq").c_str()));
+    readHashTable1.dump(outDir + "/" + filePrefix1 + ".mapped.fq");
+    unmappedHash1.dump(outDir + "/" + filePrefix1 + ".unmapped.fq");
     if (sra.is_paired()) {
-      readHashTable2.dump(std::string(transTemp.get_trans_path_trinity().parent_path().c_str()) + "/" +
-                          std::string(sra.get_sra_path_orep_filt().second.filename().replace_extension(".mapped.fq").c_str()));
-      unmappedHash2.dump(std::string(transTemp.get_trans_path_trinity().parent_path().c_str()) + "/" +
-                         std::string(sra.get_sra_path_orep_filt().second.filename().replace_extension(".unmapped.fq").c_str()));
+      readHashTable2.dump(outDir + "/" + filePrefix2 + ".mapped.fq");
+      unmappedHash2.dump(outDir + "/" + filePrefix2 + ".unmapped.fq");
     }
     logOutput("", logFile);
     unmappedReadFile.close();
@@ -278,6 +285,7 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
           }
         }
         sraRunsInTrin.push_back(currTrinIn);
+        outDir = fs::path(currTrinIn.first).parent_path().c_str();
       }
       if (assembSeqsInterest) {
         currTrinIn.first = outDir + currFilePrefix1 + ".mapped.fq";
