@@ -482,8 +482,6 @@ void remOverrepBulk(const std::vector<SRA> & sras, std::string threads, std::str
   std::pair<std::string, std::string> currOrepOut;
   fs::path fastqcDir;
 
-  seqHash overrepHash;
-
   for (auto sra : sras) {
     // Check for checkpoint file
     if (sra.checkpointExists("orep.fix")) {
@@ -517,21 +515,18 @@ void remOverrepBulk(const std::vector<SRA> & sras, std::string threads, std::str
     currOrepOut.second = sra.get_sra_path_orep_filt().second.c_str();
 
     if (sra.is_paired()) {
-      int len1 = 0;
-      int len2 = 0;
-      overrepHash = get_overrep_seqs_pe(sra, len1, len2);
+      currOrepSeqsPe = get_overrep_seqs_pe(sra);
       procRunning = true;
       std::thread orepThread(progressAnim,2);
-      rem_overrep_pe(currOrepIn, currOrepOut, ram_b, compressFiles, overrepHash, len1, len2);
+      rem_overrep_pe(currOrepIn, currOrepOut, ram_b, compressFiles, currOrepSeqsPe);
       procRunning = false;
       orepThread.join();
     }
     else {
-      int len;
-      overrepHash = get_overrep_seqs_se(sra, len);
+      currOrepSeqsSe = get_overrep_seqs_se(sra);
       procRunning = true;
       std::thread orepThread(progressAnim,2);
-      rem_overrep_se(currOrepIn.first, currOrepOut.first, ram_b, compressFiles, overrepHash, len);
+      rem_overrep_se(currOrepIn.first, currOrepOut.first, ram_b, compressFiles, currOrepSeqsSe);
       procRunning = false;
       orepThread.join();
     }
@@ -584,7 +579,10 @@ int main(int argc, char * argv[]) {
     std::string logFilePath((fs::canonical((fs::path(cfgIniGen["output_directory"].c_str()))) /
                              fs::path(cfgIniGen["project_name"].c_str()) /
                              fs::path(cfgIniGen["log_file"].c_str())).c_str());
- 
+    const char * home = std::getenv("HOME");
+    if (logFilePath[0] == '~') {
+      logFilePath = std::string(home) + logFilePath.substr(1, logFilePath.size() - 1);
+    }
     // Make project file structure
     make_proj_space(cfgIni, "preprocess");
 
@@ -610,6 +608,10 @@ int main(int argc, char * argv[]) {
     }
     std::pair<std::string, std::string> sraRunsLocal;
     std::string localDataDir = cfgIni["General"]["local_data_directory"];
+    if (localDataDir[0] == '~') {
+      localDataDir = std::string(home) + localDataDir.substr(1, localDataDir.size() - 1);
+    }
+
     if (localDataDir[localDataDir.size() - 1] != '/') {
       localDataDir += "/";
     }
@@ -646,7 +648,7 @@ int main(int argc, char * argv[]) {
       logOutput("ERROR: No SRA runs specified. Please check config file", logFilePath);
     }
 
-    logOutput("Raw sequence data prepared for pre-assembly processing", logFilePath);
+    logOutput("\nRaw sequence data prepared for pre-assembly processing", logFilePath);
     
     std::string fastqc_dir_1(sras[0].get_fastqc_dir_1().first.parent_path().parent_path().c_str());
     std::string fastqc_dir_2(sras[0].get_fastqc_dir_2().first.parent_path().parent_path().c_str());

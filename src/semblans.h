@@ -3,6 +3,7 @@
 #include <cstring>
 #include <string>
 #include <sys/ioctl.h>
+#include <signal.h>
 #include <boost/filesystem.hpp>
 #include <boost/dll.hpp>
 #include "print_info.h"

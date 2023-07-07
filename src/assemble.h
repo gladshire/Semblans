@@ -8,6 +8,7 @@
 #include <thread>
 #include <chrono>
 #include <atomic>
+#include <signal.h>
 #include "sra.h"
 #include "transcript.h"
 #include "ini_parse.h"

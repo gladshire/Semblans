@@ -1,8 +1,8 @@
 #include "rem_overrep.h"
 
-seqHash get_overrep_seqs_pe(SRA sra, int & len1, int & len2) {
+std::pair<std::vector<std::string>, std::vector<std::string>> get_overrep_seqs_pe(SRA sra) {
 
-  seqHash overrepHash(300);
+  std::pair<std::vector<std::string>, std::vector<std::string>> overrepSeqs;
 
   std::string inFile1Str(std::string(sra.get_fastqc_dir_2().first.c_str()) + ".filt_fastqc.html");
   std::string inFile2Str(std::string(sra.get_fastqc_dir_2().second.c_str()) + ".filt_fastqc.html");
@@ -27,8 +27,7 @@ seqHash get_overrep_seqs_pe(SRA sra, int & len1, int & len2) {
   sEnd = inFile1Data.end();
 
   while (boost::regex_search(sStart, sEnd, res, rgx)) {
-    len1 = res.str().length();
-    overrepHash.insertHash(res.str(), res.str());
+    overrepSeqs.first.push_back(res.str());
     sStart = res.suffix().first;
   }
 
@@ -36,19 +35,15 @@ seqHash get_overrep_seqs_pe(SRA sra, int & len1, int & len2) {
   sEnd = inFile2Data.end();
 
   while (boost::regex_search(sStart, sEnd, res, rgx)) {
-    len2 = res.str().length();
-    overrepHash.insertHash(res.str(), res.str());
+    overrepSeqs.first.push_back(res.str());
     sStart = res.suffix().first;
   }
 
-  return overrepHash;
+  return overrepSeqs;
 }
 
-seqHash get_overrep_seqs_se(SRA sra, int & len) {
-//std::vector<std::string> get_overrep_seqs_se(SRA sra, int & len) {
-  //std::vector<std::string> overrepSeqs;
-
-  seqHash overrepHash(300);
+std::vector<std::string> get_overrep_seqs_se(SRA sra) {
+  std::vector<std::string> overrepSeqs;
 
   std::string inFileStr(std::string(sra.get_fastqc_dir_2().first.c_str()) + ".filt_fastqc.html");
 
@@ -68,20 +63,18 @@ seqHash get_overrep_seqs_se(SRA sra, int & len) {
   sEnd = inFileData.end();
 
   while (boost::regex_search(sStart, sEnd, res, rgx)) {
-    //overrepSeqs.push_back(res.str());
-    overrepHash.insertHash(res.str(), res.str());
+    overrepSeqs.push_back(res.str());
     sStart = res.suffix().first;
-    len = res.str().length();
   }
 
-  return overrepHash;
+  return overrepSeqs;
 }
 
 
 void rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
                     std::pair<std::string, std::string> sraRunOut,
                     uintmax_t ram_b, bool compressFiles,
-                    seqHash overrepHash, int len1, int len2) {
+                    std::pair<std::vector<std::string>, std::vector<std::string>> overrepSeqs) {
   std::ifstream inFile1;
   std::ifstream inFile2;
   std::ofstream outFile1(sraRunOut.first);
@@ -95,11 +88,14 @@ void rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
     inFile2.open(sraRunIn.second);
   }
 
-  if (overrepHash.getSize() == 0) {
+  if (overrepSeqs.first.empty() && overrepSeqs.second.empty()) {
     system(std::string("cp " + sraRunIn.first + " " + sraRunOut.first).c_str());
     system(std::string("cp " + sraRunIn.second + " " + sraRunOut.second).c_str());
     return;
   }
+
+  size_t lenOverrep1 = overrepSeqs.first.front().length();
+  size_t lenOverrep2 = overrepSeqs.second.front().length();
 
   uintmax_t ram_b_per_file = ram_b / 2;
 
@@ -196,16 +192,17 @@ void rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
       nlPos2 = std::find(nlPos2Head + 1, inFile2L, '\n');
       seqLength = nlPos1 - nlPos1Head - 1;
       overRep = false;
-      if (overrepHash.getSize() != 0) {
-        for (int i = 0; i < seqLength - len1; i++) {
-          std::string currSeq(nlPos1Head + 1 + i, len1);
-          if (overrepHash.inHashTable(std::string(nlPos1Head + 1 + i, len1))) {
+      for (int i = 0; i < seqLength - lenOverrep1; i++) {
+        for (auto const & seq : overrepSeqs.first) {
+          if (strncmp(nlPos1Head + 1 + i, seq.c_str(), lenOverrep1)) {
             overRep = true;
             goto checkOverrep;
           }
         }
-        for (int i = 0; i < seqLength - len2; i++) {
-          if (overrepHash.inHashTable(std::string(nlPos2Head + 1 + i, len2))) {
+      }
+      for (int i = 0; i < seqLength - lenOverrep2; i++) {
+        for (auto const & seq : overrepSeqs.second) {
+          if (strncmp(nlPos1Head + 1 + i, seq.c_str(), lenOverrep2)) {
             overRep = true;
             goto checkOverrep;
           }
@@ -264,17 +261,16 @@ void rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
 
 void rem_overrep_se(std::string sraRunIn, std::string sraRunOut,
                     uintmax_t ram_b, bool compressFiles,
-                    //std::vector<std::string> overrepSeqs) {
-                    seqHash overrepHash, int len) {
+                    std::vector<std::string> overrepSeqs) {
   std::ifstream inFile(sraRunIn);
   std::ofstream outFile(sraRunOut);
 
-  if (overrepHash.getSize() == 0) {
+  if (overrepSeqs.empty()) {
     system(std::string("cp " + sraRunIn + " " + sraRunOut).c_str());
     return;
   }
 
-  //int lenOverReps = overrepSeqs.front().size();
+  size_t lenOverrep = overrepSeqs.front().size();
 
   std::string inFileData;
 
@@ -324,16 +320,12 @@ void rem_overrep_se(std::string sraRunIn, std::string sraRunOut,
       nlPos = std::find(nlPosHead + 1, inFileL, '\n');
       seqLength = nlPos - nlPosHead - 1;
       overRep = false;
-      for (int i = 0; i < seqLength - len; i++) {
-        /*for (auto const & seq : overrepSeqs) {
-          if (strncmp(nlPosHead + 1 + i, &seq[0], lenOverReps) == 0) {
+      for (int i = 0; i < seqLength - lenOverrep; i++) {
+        for (auto const & seq : overrepSeqs) {
+          if (strncmp(nlPosHead + 1 + i, &seq[0], lenOverrep) == 0) {
             overRep = true;
             goto checkOverrep;
           }
-        }*/
-        if (overrepHash.inHashTable(std::string(nlPosHead + 1 + i, len))) {
-          overRep = true;
-          goto checkOverrep;
         }
       }
       checkOverrep:if (overRep) {

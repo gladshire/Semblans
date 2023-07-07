@@ -356,6 +356,12 @@ int main(int argc, char * argv[]) {
     INI_MAP cfgIni = make_ini_map(argv[1]);
     INI_MAP_ENTRY cfgIniGen = cfgIni["General"];
 
+    // Define log file
+    std::string logFilePath((fs::canonical((fs::path(cfgIniGen["output_directory"].c_str()))) /
+                             fs::path(cfgIniGen["project_name"].c_str()) /
+                             fs::path(cfgIniGen["log_file"].c_str())).c_str());
+
+
     // Get number of threads
     std::string threads = argv[2];
 
@@ -373,22 +379,41 @@ int main(int argc, char * argv[]) {
   
     // Get sequences of interest from config
     bool selectiveAssembly = false;
-    std::string fastaSeqs = cfgIniGen["seqs_of_interest"];
-    if (fs::exists(fastaSeqs.c_str())) {
-      selectiveAssembly = true;
-    }
     bool assembleInterest = ini_get_bool(cfgIniGen["assemble_seqs_of_interest"].c_str(), 0);
     bool assembleOthers = ini_get_bool(cfgIniGen["assemble_other_seqs"].c_str(), 0);
     bool assembleAllSeqs = ini_get_bool(cfgIniGen["assemble_all_seqs"].c_str(), 0);
 
-    // Get boolean for output file compression
-    //bool compressFiles = ini_get_bool(cfgIni["General"]["compress_files"].c_str(), 0);
-    bool compressFiles = false;
-    // Retrieve SRA objects for trinity runs
-    std::string logFilePath((fs::canonical((fs::path(cfgIniGen["output_directory"].c_str()))) /
-                             fs::path(cfgIniGen["project_name"].c_str()) /
-                             fs::path(cfgIniGen["log_file"].c_str())).c_str());
+    const char * home = std::getenv("HOME");
+    std::string fastaSeqs = "blap";//cfgIniGen["seqs_of_interest"];
+    if (fastaSeqs[0] == '~') {
+      fastaSeqs = std::string(home) + fastaSeqs.substr(1, fastaSeqs.size() - 1);
+    }
 
+    if (!fastaSeqs.empty() && fs::exists(fastaSeqs.c_str())) {
+      selectiveAssembly = true;
+    }
+    else {
+      if (fastaSeqs.empty()) {
+        logOutput("User did not define sequences of interest. Skipping selective assembly.",
+                  logFilePath);
+        exit(2);
+      }
+      else if (!fs::exists(fastaSeqs.c_str())) {
+        logOutput("ERROR:\n  file \"" + fastaSeqs + "\" not found.\n  Exiting.", logFilePath);
+        exit(2);
+      }
+      assembleInterest = false;
+      assembleOthers = false;
+    }
+    
+    // If all assembly options are disabled, exit
+    if (!assembleInterest && !assembleOthers && !assembleAllSeqs) {
+      logOutput("No assembly option specified. Have a nice day!", logFilePath);
+      exit(2);
+    }
+    
+    bool compressFiles = false;
+    
     // Create file space
     make_proj_space(cfgIni, "assemble");
 

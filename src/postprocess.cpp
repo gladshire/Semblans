@@ -397,17 +397,29 @@ int main(int argc, char * argv[]) {
     //bool compressFiles = ini_get_bool(cfgIni["General"]["compress_files"].c_str(), 0);
     bool compressFiles = false;
     
-    // Retrieve SRA objects, convert to transcripts
+    // Set up project file space, get necessary paths
     make_proj_space(cfgIni, "postprocess");
+
+    const char * home = std::getenv("HOME");
     std::string outputDir = cfgIni["General"]["output_directory"];
+    if (outputDir[0] == '~') {
+      outputDir = std::string(home) + outputDir.substr(1, outputDir.size() - 1);
+    }
     std::string projDir = outputDir + cfgIni["General"]["project_name"] + "/";
     std::string refProt = cfgIni["General"]["reference_proteome_path"];
+    if (refProt[0] == '~') {
+      refProt = std::string(home) + refProt.substr(1, refProt.size() - 1);
+    }
 
     // Obtain path to log file from config file
     std::string logFilePath((fs::canonical((fs::path(cfgIniGen["output_directory"].c_str()))) /
                              fs::path(cfgIniGen["project_name"].c_str()) /
                              fs::path(cfgIniGen["log_file"].c_str())).c_str());
+    if (logFilePath[0] == '~') {
+      logFilePath = std::string(home) + logFilePath.substr(1, logFilePath.size() - 1);
+    }
     
+    // Retrieve SRA objects, convert to transcripts
     std::vector<SRA> sras;
     std::vector<std::string> localDataFiles;
     sras = get_sras(cfgIni, compressFiles);
