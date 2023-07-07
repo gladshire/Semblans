@@ -1,5 +1,7 @@
 #include "rem_overrep.h"
 
+// Given a paired-end SRA run object post-FastQC, return a pair of vectors containing its
+// overrepresented sequences
 std::pair<std::vector<std::string>, std::vector<std::string>> get_overrep_seqs_pe(SRA sra) {
 
   std::pair<std::vector<std::string>, std::vector<std::string>> overrepSeqs;
@@ -42,6 +44,8 @@ std::pair<std::vector<std::string>, std::vector<std::string>> get_overrep_seqs_p
   return overrepSeqs;
 }
 
+// Given a single-end SRA run object post-FastQC, return a vector containing its overrepresented
+// sequences
 std::vector<std::string> get_overrep_seqs_se(SRA sra) {
   std::vector<std::string> overrepSeqs;
 
@@ -70,7 +74,8 @@ std::vector<std::string> get_overrep_seqs_se(SRA sra) {
   return overrepSeqs;
 }
 
-
+// Given a paired-end SRA run's sequence data files and vectors containing its
+// overrepresented sequences, parse the files and remove reads containing these sequences
 void rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
                     std::pair<std::string, std::string> sraRunOut,
                     uintmax_t ram_b, bool compressFiles,
@@ -258,7 +263,8 @@ void rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
 
 }
 
-
+// Given a single-end SRA run's sequence data file and a vector containing its
+// overrepresented sequences, parse the file and remove reads containing these sequences
 void rem_overrep_se(std::string sraRunIn, std::string sraRunOut,
                     uintmax_t ram_b, bool compressFiles,
                     std::vector<std::string> overrepSeqs) {
@@ -366,28 +372,3 @@ void rem_overrep_se(std::string sraRunIn, std::string sraRunOut,
 
 }
 
-
-/*void rem_overrep_bulk(std::vector<std::pair<std::string, std::string>> sraRunsIn,
-                      std::string ram_gb, std::string logFile) {
-  uintmax_t ram_b = (uintmax_t)stoi(ram_gb) * 1000000000;
-  for (auto sraRun : sraRunsIn) {
-    // Check for checkpoint
-    if (sra.checkpointExists("orep.fix")) {
-      logOutput("Fixed version found for: ", logFile);
-      summarize_sing_sra(sra, logFile, 2);
-      continue;
-    }
-    //logOutput("\nNow processing:\n", logFile);
-    if (sra.is_paired()) {
-      //summarize_sing_sra(sra, logFile, 2);
-      std::pair<std::vector<std::string>, std::vector<std::string>> overrepSeqs = get_overrep_seqs_pe(sra);
-      rem_overrep_pe(sra, ram_b, overrepSeqs);
-    }
-    else {
-      summarize_sing_sra(sra, logFile, 2);
-      std::vector<std::string> overrepSeqs = get_overrep_seqs_se(sra);
-      rem_overrep_se(sra, ram_b, overrepSeqs);
-    }
-    sra.makeCheckpoint("orep.fix");
-  }
-}*/

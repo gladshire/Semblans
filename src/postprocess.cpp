@@ -5,6 +5,7 @@
 std::atomic<bool> procRunning(false);
 extern std::vector<std::string> stepDirs;
 
+// Output cosmetic function: Animate an ellipsis
 void progressAnim(int numSpace) {
   const std::string anim[] = {".  ", ".. ", "..."};
   int animIndex = 0;
@@ -25,6 +26,8 @@ void progressAnim(int numSpace) {
   std::cout << "   " << std::endl;
 }
 
+// Given a vector of SRAs, instantiate transcript objects constructed
+// off of them
 std::vector<transcript> get_transcript(std::vector<SRA> sras) {
   std::vector<transcript> transcripts;
   for (auto & sra : sras) {
@@ -34,6 +37,7 @@ std::vector<transcript> get_transcript(std::vector<SRA> sras) {
   return transcripts;
 }
 
+// Given a "true" / "false" string, return the appropriate boolean
 bool stringToBool(std::string boolStr) {
   bool boolConv;
   for (int i = 0; i < boolStr.length(); i++) {
@@ -43,6 +47,8 @@ bool stringToBool(std::string boolStr) {
   return boolConv;
 }
 
+// Given a vector of transcript objects, perform a blastx alignment against the
+// user-provided reference proteome
 void blastxDiamBulk(const std::vector<transcript> & transVec, std::string threads,
                     bool dispOutput, std::string logFilePath, const INI_MAP & cfgIni) {
   logOutput("\nStarting BLASTX alignment", logFilePath);
@@ -85,6 +91,7 @@ void blastxDiamBulk(const std::vector<transcript> & transVec, std::string thread
   }
 }
 
+// Given a vector of transcript objects, detect and remove chimera transcripts from each's data
 void remChimeraBulk(const std::vector<transcript> & transVec, std::string ram_gb,
                     bool retainInterFiles, bool dispOutput, std::string logFilePath,
                     const INI_MAP & cfgIni) {
@@ -126,6 +133,8 @@ void remChimeraBulk(const std::vector<transcript> & transVec, std::string ram_gb
   }
 }
 
+// Given a vector of transcript objects, create a salmon index for each and then
+// quantify each's corresponding reads against its index
 void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
                 bool retainInterFiles, bool dispOutput, std::string logFilePath,
                 const INI_MAP & cfgIni) {
@@ -209,6 +218,8 @@ void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
   }
 }
 
+// Given a vector of transcript objects, determine each's largest cluster / redundant
+// transcripts using Corset, and then generate output files for both
 void corsetBulk(const std::vector<transcript> & transVec, std::string ram_gb,
                 bool retainInterFiles, bool dispOutput, std::string logFilePath,
                 const INI_MAP & cfgIni) {
@@ -281,6 +292,7 @@ void corsetBulk(const std::vector<transcript> & transVec, std::string ram_gb,
   }
 }
 
+// Given a vector of transcript objects, predict each's coding regions using TransDecoder
 void transdecBulk(const std::vector<transcript> & transVec, std::string threads,
                   std::string ram_gb, bool retainInterFiles, bool dispOutput,
                   std::string logFilePath, const INI_MAP & cfgIni) {
@@ -339,6 +351,7 @@ void transdecBulk(const std::vector<transcript> & transVec, std::string threads,
   }
 }
 
+// Given a vector of transcript objects, run a HMMER/PANTHER-based annotation for each
 void annotateBulk(const std::vector<transcript> & transVec, std::string threads,
                   std::string ram_gb, bool retainInterFiles, bool dispOutput,
                   std::string logFilePath, const INI_MAP & cfgIni) {

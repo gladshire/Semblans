@@ -1,6 +1,6 @@
 #include "print_info.h"
 
-
+// Given a string, output it to stdout as well as a log file
 void logOutput(std::string input, std::string logFile) {
   std::ofstream logStream;
   logStream.open(logFile, std::ios_base::app);
@@ -10,6 +10,8 @@ void logOutput(std::string input, std::string logFile) {
   loggerStream << input << std::endl;
 }
 
+// Given an SRA run object, output basic information to stdout and
+// a log file
 void summarize_sing_sra(SRA sra, std::string logFile, int margin) {
   std::ofstream logStream;
   logStream.open(logFile, std::ios_base::app);
@@ -33,6 +35,8 @@ void summarize_sing_sra(SRA sra, std::string logFile, int margin) {
   logStream.close();
 }
 
+// Given a vector of SRA run objects, briefly summarize basic information for
+// each in stdout and a log file
 void summarize_all_sras(const std::vector<SRA> & sras, std::string logFile,
                         int margin) {
   for (auto sra : sras) {
@@ -41,6 +45,8 @@ void summarize_all_sras(const std::vector<SRA> & sras, std::string logFile,
   }
 }
 
+// Given a transcript object, output basic information to stdout and
+// a log file
 void summarize_sing_trans(transcript trans, std::string logFile, int margin) {
   std::ofstream logStream;
   logStream.open(logFile, std::ios_base::app);
@@ -56,6 +62,8 @@ void summarize_sing_trans(transcript trans, std::string logFile, int margin) {
   logStream.close();
 }
 
+// Given a vector of transcript objects, briefly summarize basic information for
+// each in stdout and a log file
 void summarize_all_trans(const std::vector<transcript> & transVec, std::string logFile,
                          int margin) {
   for (auto trans : transVec) {

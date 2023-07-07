@@ -2,6 +2,7 @@
 
 #include "kraken_wrap.h"
 
+// Obtain the paths to kraken2 databases from user config INI file
 std::vector<std::string> get_kraken2_dbs(const INI_MAP &iniFile) {
   std::string krakDbDir = iniFile.at("Kraken2 settings").at("db_directory");
   std::vector<std::string> kraken2Dbs;
@@ -13,7 +14,7 @@ std::vector<std::string> get_kraken2_dbs(const INI_MAP &iniFile) {
   return kraken2Dbs;
 }
 
-
+// Obtain kraken2 confidence threshold from user config INI file
 std::string get_kraken2_conf(const INI_MAP &iniFile) {
   return iniFile.at("Kraken2 settings").at("confidence_threshold");
 }
@@ -23,6 +24,8 @@ void pre_summary(SRA sra, std::string db, std::string logFile) {
   logOutput("\nFor SRA accession: " + sra.get_accession(), logFile);
 }
 
+// Given an SRA run, attempt to classify its reads with a given kraken2 database
+// Output both the classified and unclassified reads to new files
 void run_kraken2(std::pair<std::string, std::string> sraRunIn,
                  std::string sraRunOut, std::string repFile,
                  std::string threads, std::string db, std::string conf_threshold,

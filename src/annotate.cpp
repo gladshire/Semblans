@@ -1,9 +1,11 @@
 #include "annotate.h"
 
-
+// Given a HMMER output file, produce a dictionary of query header - best hit
+// header pairs
 std::map<std::string, std::string> getGeneMatches(std::string annotFile) {
-  // TODO: Account for overlapping hits
+
   std::map<std::string, std::string> geneMatches;
+ 
   if (fs::is_empty(fs::path(annotFile.c_str()))) {
     return geneMatches;
   }
@@ -24,6 +26,14 @@ std::map<std::string, std::string> getGeneMatches(std::string annotFile) {
   double eValCurr;
   double eValMin;
   int linNum = 0;
+
+  // Parse tabular annotation file, capturing for each entry:
+  //   - The header of the query
+  //   - The PANTHER ID of the hit sequence
+  //   - A functional description of the hit sequence
+  //   - The hit's E-value
+  //
+  // Pair a query header with its best hit (the hit with the lowest E-value)
   while (getline(pantherFile, currLine)) {
     int colNum = 0;
     while ((tabPos = currLine.find("\t")) != std::string::npos) {
@@ -69,7 +79,8 @@ std::map<std::string, std::string> getGeneMatches(std::string annotFile) {
   return geneMatches;
 }
 
-
+// Perform annotation of transcripts using HMMER and PANTHER, generating a tabular output
+// file, and then rename each transcript's header to one corresponding with its best hit
 void annotateTranscript(std::string transIn, std::string transPep, std::string transOut,
                         std::string threads, std::string ram_gb, bool dispOutput,
                         std::string logFile, std::string email) {

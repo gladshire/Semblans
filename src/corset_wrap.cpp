@@ -1,5 +1,7 @@
 #include "corset_wrap.h"
 
+// Given the output equivalence class file from a Salmon quant run, cluster transcript
+// contigs into genes and identify redundant transcripts using Corset
 void corset_eq_classes(std::string transPrefix, std::string pathEqClassFile,
                        std::string outDir, bool dispOutput, std::string logFile) {
   fs::path eqClassFile(pathEqClassFile);

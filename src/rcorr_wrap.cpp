@@ -1,5 +1,6 @@
 #include "rcorr_wrap.h"
 
+// Given an SRA run's sequence files, correct base pair errors with Rcorrector
 void run_rcorr(std::pair<std::string, std::string> sraRun, std::string outDir,
                std::string threads, bool dispOutput, bool compressFiles,
                std::string logFile) {
@@ -29,10 +30,10 @@ void run_rcorr(std::pair<std::string, std::string> sraRun, std::string outDir,
   }
   std::string rcorrCmd;
   if (isPaired) {
-    rcorrCmd = "( perl " + PATH_RCORR + " -t " + threads + " -1 " + inFile1 + " -2 " + inFile2; // + " -verbose";
+    rcorrCmd = "( perl " + PATH_RCORR + " -t " + threads + " -1 " + inFile1 + " -2 " + inFile2 + " -verbose";
   }
   else {
-    rcorrCmd = "( perl " + PATH_RCORR + " -t " + threads + " -s " + inFile1; // + " -verbose";
+    rcorrCmd = "( perl " + PATH_RCORR + " -t " + threads + " -s " + inFile1 + " -verbose";
   }
   if (compressFiles) {
     std::string sraPathL = outDir + "/" + std::string(fs::path(sraRun.first.c_str()).stem().stem().c_str()) + ".cor.fq.gz";

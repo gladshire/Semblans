@@ -1,6 +1,6 @@
 #include "assemble.h"
 
-
+// Update Trinity output transcript headers
 void updateHeaders(std::string fastaFilePath, uintmax_t ram_b) {
   uintmax_t numBytesFasta = fs::file_size(fastaFilePath.c_str());
   uintmax_t lenHashTable = numBytesFasta / 160;
@@ -27,7 +27,8 @@ void updateHeaders(std::string fastaFilePath, uintmax_t ram_b) {
   fastaHashTable.dump(fastaFilePath);
 }
 
-
+// Given a FASTA input, divide all SRA reads into those which map to it and those that do not.
+// Create two new files for containing the two.
 void isolateReads(const std::vector<SRA> & sras, std::string fastaInput, std::string threads,
                   std::string ram_gb, bool dispOutput, const INI_MAP & cfgIni, std::string logFile) {
 
@@ -36,21 +37,21 @@ void isolateReads(const std::vector<SRA> & sras, std::string fastaInput, std::st
   std::ifstream unmappedReadFile;
   std::string fastaIndex;
   transcript dummyTrans;
-  // Create index of fastaInput
+
+  // Create index of fastaInput with Salmon
   transcript transTemp(sras[0]);
   fastaIndex = std::string(transTemp.get_trans_path_trinity().parent_path().c_str()) + "/" +
                std::string(fs::path(fastaInput.c_str()).stem().c_str()) + "_index";
 
   salmon_index(fastaInput, fastaIndex, threads, dispOutput, logFile);
 
-  // Quantify reads against fastaInput
   uintmax_t ram_b = (uintmax_t)stoi(ram_gb) * 1000000000;
-  //std::vector<std::pair<std::string, std::string>> sraRunsIn;
   std::pair<std::string, std::string> currSraIn;
   std::string outDir;
   std::string fastaQuant;
   std::string filePrefix1;
   std::string filePrefix2;
+  // Iterate through SRAs, copying their mapped and unmapped reads into separate files
   for (auto sra : sras) {
     std::vector<std::pair<std::string, std::string>> sraRunsIn;
     logOutput("  Now isolating reads for:", logFile);
@@ -58,6 +59,8 @@ void isolateReads(const std::vector<SRA> & sras, std::string fastaInput, std::st
     currSraIn.first = sra.get_sra_path_orep_filt().first.c_str();
     currSraIn.second = sra.get_sra_path_orep_filt().second.c_str();
     outDir = sra.get_sra_path_orep_filt().first.parent_path().c_str();
+
+    // Obtain read input files, based on pipeline preferences
     if (!ini_get_bool(cfgPipeline.at("remove_overrepresented").c_str(), 0)) {
       if (!ini_get_bool(cfgPipeline.at("filter_foreign_reads").c_str(), 0)) {
         if (!ini_get_bool(cfgPipeline.at("trim_adapter_seqs").c_str(), 0)) {
@@ -95,13 +98,15 @@ void isolateReads(const std::vector<SRA> & sras, std::string fastaInput, std::st
     outDir = fs::path(currSraIn.first).parent_path().c_str();
     sraRunsIn.push_back(currSraIn);
     std::string sraPrefix(fs::path(currSraIn.first.c_str()).stem().c_str());
-    
+
+    // Quantify / map SRA reads against fastaInput index    
     fastaQuant = std::string(transTemp.get_trans_path_trinity().parent_path().c_str()) + "/" +
                  std::string(fs::path(fastaInput.c_str()).stem().c_str()) + "_" + 
                  std::string(sraPrefix.substr(0, sraPrefix.find_last_of("_"))) + "_quant";
     salmon_quant(fastaInput, fastaIndex, fastaQuant, sraRunsIn, threads, dispOutput, logFile);
-    
-    // Parse quantified reads add to new file
+   
+    // Parse Salmon output file with names of unmapped reads
+    // Use sequence hash tables to quickly separate mapped from unmapped 
     uintmax_t numBytesReads1;
     uintmax_t lenReadsHash1;
     uintmax_t numBytesReads2;
@@ -129,6 +134,8 @@ void isolateReads(const std::vector<SRA> & sras, std::string fastaInput, std::st
     std::string currSeqData;
     std::string currQual;
     unsigned int numUnmapped = 0;
+    // Iterate through headers in unmapped reads file
+    // Fill hash tables accordingly
     while (getline(unmappedReadFile, currLine)) {
       currHead = currLine.substr(0, currLine.find(" "));
       currSeq = readHashTable1.getSeq(currHead);
@@ -149,6 +156,8 @@ void isolateReads(const std::vector<SRA> & sras, std::string fastaInput, std::st
       }
       numUnmapped++;
     }
+    // Dump filled sequence hash tables to new files, containing the mapped
+    // and unmapped reads respectively
     logOutput("  Dumping split reads to mapped and unmapped files", logFile);
     readHashTable1.dump(outDir + "/" + filePrefix1 + ".mapped.fq");
     unmappedHash1.dump(outDir + "/" + filePrefix1 + ".unmapped.fq");
@@ -161,7 +170,8 @@ void isolateReads(const std::vector<SRA> & sras, std::string fastaInput, std::st
   }
 }
 
-
+// Utility function. Given vector of SRA objects, return vector of transcript
+// objects constructed off of them
 std::vector<transcript> get_transcript(std::vector<SRA> sras) {
   std::vector<transcript> transcripts;
   for (auto &sra : sras) {
@@ -171,6 +181,8 @@ std::vector<transcript> get_transcript(std::vector<SRA> sras) {
   return transcripts;
 }
 
+// Utility function. Given a "true" / "false" string, return the corresponding
+// boolean
 bool stringToBool(std::string boolStr) {
   bool boolConv;
   for (int i = 0; i < boolStr.length(); i++) {
@@ -180,6 +192,7 @@ bool stringToBool(std::string boolStr) {
   return boolConv;
 }
 
+// Create a checkpoint for a given assembly group
 void makeGroupCheckpoint(std::string cpDir, std::string prefix) {
   std::string cpFileName = cpDir + "/" + prefix + ".trinity.ok";
   std::ofstream cpFile;
@@ -187,6 +200,7 @@ void makeGroupCheckpoint(std::string cpDir, std::string prefix) {
   cpFile.close();
 }
 
+// Determine whether a group checkpoint file exists
 bool groupCheckpointExists(std::string cpDir, std::string prefix) {
   std::string cpFileName = cpDir + "/" + prefix + ".trinity.ok";
   fs::path cpFilePath(cpFileName.c_str());
@@ -198,6 +212,7 @@ bool groupCheckpointExists(std::string cpDir, std::string prefix) {
   }
 }
 
+// Create a transcript info file containing the read files used in its assembly
 void makeTransInfoFile(const std::vector<SRA> & sras, std::string transInfoFileStr) {
   std::ofstream transInfoFile;
   transInfoFile.open(transInfoFileStr);
@@ -211,7 +226,7 @@ void makeTransInfoFile(const std::vector<SRA> & sras, std::string transInfoFileS
   transInfoFile.close();
 }
 
-
+// Perform a bulk assembly for SRAs and groups of SRAs
 void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
                       std::string threads, std::string ram_gb,
                       bool assembSeqsInterest, bool assembSeqsNoInterest,

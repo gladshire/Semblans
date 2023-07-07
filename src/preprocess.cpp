@@ -2,7 +2,7 @@
 
 std::atomic<bool> procRunning(false);
 
-
+// Output cosmetic function: Animate an ellipsis
 void progressAnim(int numSpace) {
   const std::string anim[] = {".  ", ".. ", "..."};
   int animIndex = 0;
@@ -23,10 +23,10 @@ void progressAnim(int numSpace) {
   std::cout << "   " << std::endl;
 }
 
+// Summarize the initialized preprocessing job's parameters
 void preSummary(const std::vector<SRA> sras, 
                 std::string logFilePath, std::string threads, std::string ram_gb,
                 bool retainInterFiles, bool compressFiles) {
-  // Summarize preprocess task
   logOutput("Semblans Preprocess started with following parameters:", logFilePath);
   logOutput("  Config file:     " + std::string(fs::path(logFilePath.c_str()).filename().c_str()),
             logFilePath);
@@ -55,6 +55,8 @@ void preSummary(const std::vector<SRA> sras,
 
 }
 
+// Given a vector of SRA run objects, retrieve their raw data from NCBI using
+// sratoolkit
 void retrieveSraData(const std::vector<SRA> & sras, std::string threads,
                      bool dispOutput, bool compressOutput,
                      bool retainInterFiles,
@@ -107,6 +109,7 @@ void retrieveSraData(const std::vector<SRA> & sras, std::string threads,
   }
 }
 
+// Given a "true" / "false" string, return the appropriate boolean
 bool stringToBool(std::string boolStr) {
   bool boolConv;
   for (int i = 0; i < boolStr.length(); i++) {
@@ -124,6 +127,7 @@ void print_help() {
   std::cout << std::left << std::setw(w.ws_col) << "preprocess PATH/TO/CONFIG.INI num_threads RAM_GB" << std::endl;
 }
 
+// Given a vector of SRAs, perform a pre-assembly FastQC quality analysis on their sequence data
 void fastqcBulk1(const std::vector<SRA> & sras, std::string threads, bool dispOutput,
                  std::string logFilePath) {
   logOutput("\nStarting initial quality analysis", logFilePath);
@@ -152,6 +156,7 @@ void fastqcBulk1(const std::vector<SRA> & sras, std::string threads, bool dispOu
   }
 }
 
+// Given a vector of SRAs, perform a FastQC quality analysis just prior to assembly
 void fastqcBulk2(const std::vector<SRA> & sras, std::string threads, bool dispOutput,
                  std::string logFilePath, const INI_MAP & cfgIni) {
   logOutput("\nStarting second quality analysis", logFilePath);
@@ -197,7 +202,8 @@ void fastqcBulk2(const std::vector<SRA> & sras, std::string threads, bool dispOu
   }
 }
 
-
+// Given a vector of SRA run objects, perform base error correction on each's sequence
+// data using Rcorrector
 void errorCorrBulk(const std::vector<SRA> & sras, std::string threads,
                    bool dispOutput, bool retainInterFiles, bool compressFiles,
                    std::string logFilePath, const INI_MAP & cfgIni) {
@@ -228,6 +234,8 @@ void errorCorrBulk(const std::vector<SRA> & sras, std::string threads,
   }
 }
 
+// Given a vector of SRA run objects post-Rcorrector, remove all "unfixable error" reads
+// identified by Rcorrector
 void remUnfixBulk(const std::vector<SRA> & sras, std::string threads, std::string ram_gb,
                   bool dispOutput, bool retainInterFiles, bool compressFiles,
                   std::string logFilePath, const INI_MAP & cfgIni) {
@@ -273,6 +281,8 @@ void remUnfixBulk(const std::vector<SRA> & sras, std::string threads, std::strin
   }
 }
 
+// Given a vector of SRA run objects, trim adapter sequences from the reads in each's sequence
+// data
 void trimBulk(const std::vector<SRA> & sras, std::string threads,
               bool dispOutput, bool retainInterFiles,
               std::string logFilePath, const INI_MAP & cfgIni) {
@@ -333,6 +343,8 @@ void trimBulk(const std::vector<SRA> & sras, std::string threads,
   }
 }
 
+// Given a vector of SRA run objects, attempt to classify the reads from each sequence data
+// against several input databases
 void filtForeignBulk(const std::vector<SRA> & sras, std::vector<std::string> krakenDbs,
                      std::string krakenConf, std::string threads,
                      bool dispOutput, bool compressFiles, bool retainInterFiles,
@@ -470,6 +482,8 @@ void filtForeignBulk(const std::vector<SRA> & sras, std::vector<std::string> kra
   }
 }
 
+// Given a vector of SRA run objects post-FastQC, remove any reads containing overrepresented
+// sequences from each's sequence data, as identified by FastQC
 void remOverrepBulk(const std::vector<SRA> & sras, std::string threads, std::string ram_gb,
                     bool dispOutput, bool retainInterFiles, bool compressFiles,
                     std::string logFilePath, const INI_MAP & cfgIni) {

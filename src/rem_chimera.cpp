@@ -1,5 +1,7 @@
 #include "rem_chimera.h"
 
+// Utility function: given a table row that is tab-delimited,
+//                   split its columns and push them to a vector
 std::vector<std::string> getLineVec(std::string line) {
   std::vector<std::string> lineVec;
   

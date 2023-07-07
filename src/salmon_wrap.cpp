@@ -1,7 +1,7 @@
 #include "salmon_wrap.h"
 
 
-// Index reads from sequence data
+// Index reads from sequence data using Salmon
 void salmon_index(std::string transIn, std::string transIndex,
                   std::string threads, bool dispOutput, std::string logFile) {
   std::string transFilePath(transIn);

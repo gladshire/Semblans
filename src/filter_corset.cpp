@@ -1,6 +1,6 @@
 #include "filter_corset.h"
 
-
+// Given a cluster output file from Corset, create a set containing cluster names
 std::set<std::string> makeClusterSet(std::ifstream & clustFile) {
   std::set<std::string> clustSet;
   std::string currClust;
@@ -17,6 +17,8 @@ std::set<std::string> makeClusterSet(std::ifstream & clustFile) {
   return clustSet;
 }
 
+// Perform cluster-based redundancy elimination, extracting largest cluster transcripts
+// (genes) and writing redundant transcripts to separate file
 void filterCorset(std::string transIn, std::string transClust,
                   std::string transLargestClust, std::string transRedund,
                   uintmax_t ram_b, std::string outDir, std::string logFile) {
@@ -49,6 +51,8 @@ void filterCorset(std::string transIn, std::string transClust,
   bool foundInHashTable;
   int numRemoved = 0;
   sequence currSeq;
+  // For each defined cluster, move its corresponding transcript to a new hash table
+  // Result is two hash tables containing largest cluster transcripts and redundant ones
   for (auto head : clustSet) {
     foundInHashTable = seqRemovedHash.inHashTable(head);
     if (foundInHashTable) {

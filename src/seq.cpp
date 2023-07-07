@@ -1,5 +1,6 @@
 #include "seq.h"
 
+// Default constructor for sequence object
 sequence::sequence() {
   header = "";
   sequenceData = "";
@@ -7,6 +8,8 @@ sequence::sequence() {
   int numBp = -1;
 }
 
+// Constructor for sequence object allowing definition of its header and
+// sequence data
 sequence::sequence(std::string header, std::string sequenceData) {
   this->header = header;
   size_t nlPos = sequenceData.find("\n");
@@ -16,6 +19,8 @@ sequence::sequence(std::string header, std::string sequenceData) {
   numBp = sequenceData.length();
 }
 
+// Constructor for sequence object allowing definition of its header, sequence data, and
+// quality data
 sequence::sequence(std::string header, std::string sequenceData, std::string quality) {
   this->header = header;
   size_t nlPos = sequenceData.find('\n');
@@ -25,6 +30,7 @@ sequence::sequence(std::string header, std::string sequenceData, std::string qua
   numBp = sequenceData.length();
 }
 
+// Copy constructor for sequence object
 sequence::sequence(const sequence & seq) {
   header = seq.header;
   sequenceData = seq.sequenceData;
@@ -33,26 +39,32 @@ sequence::sequence(const sequence & seq) {
   id = seq.id;
 }
 
+// Return sequence object's header
 std::string sequence::get_header() {
   return this->header;
 }
 
+// Return sequence object's sequence data
 std::string sequence::get_sequence() {
   return this->sequenceData;
 }
 
+// Return sequence object's quality data
 std::string sequence::get_quality() {
   return this->quality;
 }
 
+// Return sequence object's ID
 std::string sequence::get_id() {
   return this->id;
 }
 
+// Set new header for sequence object
 void sequence::set_header(std::string newHeader) {
   this->header = newHeader;
 }
 
+// Set new ID for sequence object
 void sequence::set_id(std::string newId) {
   this->id = newId;
 }

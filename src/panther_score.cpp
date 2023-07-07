@@ -1,5 +1,8 @@
 #include "panther_score.h"
 
+
+// Given a protein sequence, produce a scoring output file using HMMER against the
+// PANTHER standard protein database
 void pantherScore(std::string transPepIn, std::string outFile, std::string threads,
                   bool dispOutput, std::string logFile) {
 

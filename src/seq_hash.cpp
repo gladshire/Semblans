@@ -1,18 +1,21 @@
 #include "seq_hash.h"
 
-
+// Default constructor for sequence hash table (seqHash) object
 seqHash::seqHash() {
   seqHashData = NULL;
   lenHashTable = 0;
   numItems = 0;
 }
 
+// Constructor for seqHash object allowing definition of hash table size
 seqHash::seqHash(uintmax_t lenTable) {
   seqHashData = new std::vector<sequence>[lenTable];
   lenHashTable = lenTable;
   numItems = 0;
 }
 
+// Constructor for seqHash object providing FASTA/FASTQ file with sequences
+// to fill it
 seqHash::seqHash(uintmax_t lenTable, fs::path transFilePath, uintmax_t ram_b) {
 
   if (!fs::exists(transFilePath)) {
@@ -90,6 +93,7 @@ seqHash::seqHash(uintmax_t lenTable, fs::path transFilePath, uintmax_t ram_b) {
   inFile.close();
 }
 
+// Utility function: remove characters from input stream until header character @ / > is reached
 void seqHash::align_buffer_end(std::ifstream & inFile, char * inFileData, std::streamsize & s) {
   if (!inFile.eof() && inFile.good()) {
     while (inFile.peek() != '@' && inFile.peek() != '>') {

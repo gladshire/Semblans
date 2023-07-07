@@ -1,6 +1,6 @@
 #include "fastqc_wrap.h"
 
-
+// Perform a quality analysis of a given SRA run with FastQC
 void run_fastqc(std::pair<std::string, std::string> sraRunFiles,
                 std::string threads, std::string outFile,
                 bool dispOutput, std::string logFile) {

@@ -2,7 +2,8 @@
 
 #include "rem_unfixable.h"
 
-
+// Given a paired-end SRA run's sequence data files post-Rcorrector,
+// remove all reads Rcorrector flagged as "unfixable error"
 void rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
                   std::pair<std::string, std::string> sraRunOut,
                   uintmax_t ram_b, bool compressFiles) {
@@ -152,7 +153,8 @@ void rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
   outFile2.close();
 }
 
-
+// Given a single-end SRA run's sequence data file post-Rcorrector,
+// remove all reads Rcorrector flagged as "unfixable error"
 void rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
                   uintmax_t ram_b, bool compressFiles) {
 

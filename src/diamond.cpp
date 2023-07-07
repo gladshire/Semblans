@@ -1,5 +1,7 @@
 #include "diamond.h"
 
+// Given protein sequence data, use Diamond to create a blast
+// database from it
 void makeDb(std::string pathProtRef, std::string outDir,
             bool dispOutput, std::string logFile) {
   fs::path pathProtRefFile(pathProtRef.c_str());
@@ -23,6 +25,7 @@ void makeDb(std::string pathProtRef, std::string outDir,
   } 
 }
 
+// Perform sequence translate - protein blastx alignment using Diamond
 void blastxDiam(std::string transIn, std::string blastDb,
                 std::string threads, std::string outDir,
                 bool dispOutput, std::string logFile) {
@@ -55,6 +58,7 @@ void blastxDiam(std::string transIn, std::string blastDb,
   }
 }
 
+// Perform protein - protein blastp alignment using Diamond
 void blastpDiam(std::string pepFilePath, std::string blastDb,
                 std::string threads, std::string outFile,
                 bool dispOutput, std::string logFile) {
