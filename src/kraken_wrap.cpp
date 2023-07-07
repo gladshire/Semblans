@@ -35,11 +35,27 @@ void run_kraken2(std::pair<std::string, std::string> sraRunIn,
   std::string krakFlags("--threads " + threads + " --confidence " + conf_threshold);
   std::string krakOutput;
   std::string printOut;
+  std::string sraRunOutDir = fs::path(sraRunOut.c_str()).parent_path().c_str();
+  fs::path sraRunOutFile(sraRunIn.first.c_str());
+  while (!sraRunOutFile.extension().empty()) {
+    sraRunOutFile = sraRunOutFile.stem();
+  }
+  std::string sraRunOutClass(sraRunOutFile.c_str());
+  if (*(&sraRunOutClass.back() - 1) == '_') {
+    sraRunOutClass.pop_back();
+    sraRunOutClass.back() = '#';
+  }
+  else {
+    sraRunOutClass.push_back('#');
+  }
+  sraRunOutClass = sraRunOutDir + "/" + sraRunOutClass;
   if (compressFiles) {
     krakOutput = "";
   }
   else {
-    krakOutput = " --output - --unclassified-out " + sraRunOut;
+    
+    krakOutput = " --output - --unclassified-out " + sraRunOut +
+                 " --classified-out " + sraRunOutClass;
   }
   if (dispOutput) {
     printOut = " 2>&1 | tee -a " + logFile;

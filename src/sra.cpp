@@ -384,8 +384,11 @@ void SRA::set_sra_path_orep_filt(std::pair<fs::path, fs::path> sraOrepFiltFiles)
 // Utility function to construct filename for SRA
 std::string SRA::make_file_str() {
   std::string filename;
-  filename = get_accession() + "_" + get_tax_id() + "_" +
-             get_org_name().replace(get_org_name().find(" "), 1, "_");
+  std::string orgName = get_org_name();
+  while (orgName.find(" ") != std::string::npos) {
+    orgName = orgName.replace(orgName.find(" "), 1, "_");
+  }
+  filename = get_accession() + "_" + get_tax_id() + "_" + orgName;
   return filename;
 }
 
