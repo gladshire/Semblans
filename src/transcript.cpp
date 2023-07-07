@@ -2,11 +2,13 @@
 
 extern std::vector<std::string> stepDirs;
 
+// Default constructor for transcript object
 transcript::transcript() {
   org_name = "";
   tax_id = "";
 }
 
+// Constructor for transcript object, taking an SRA run object as input
 transcript::transcript(SRA sra) {
   //std::string projPath(sra.get_sra_path_trim_u().first.parent_path().parent_path().c_str());
   std::string projPath(sra.get_fastqc_dir_2().first.parent_path().parent_path().parent_path().c_str());
@@ -55,6 +57,7 @@ transcript::transcript(SRA sra) {
   trans_path_annot = (projPath + stepDirs[11] + "/" + fileBase + ".annotated.fasta").c_str();
 } 
 
+// Constructor for transcript object, taking a FASTA file as input
 transcript::transcript(std::string filename, INI_MAP cfgIni) {
   std::string projPath(fs::canonical(fs::path(cfgIni["General"]["output_directory"].c_str()) /
                                      fs::path(cfgIni["General"]["project_name"].c_str())).c_str());
@@ -100,14 +103,17 @@ transcript::transcript(std::string filename, INI_MAP cfgIni) {
   trans_path_annot = (projPath + stepDirs[11] + "/" + fileBase + ".annotated.fasta").c_str();
 }
 
+// Return the organism name
 std::string transcript::get_org_name() {
   return org_name;
 }
 
+// Return the taxon ID
 std::string transcript::get_tax_id() {
   return tax_id;
 }
 
+// Return the path to the Trinity assembly file
 fs::path transcript::get_trans_path_trinity() {
   return trans_path_trinity;
 }

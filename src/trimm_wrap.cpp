@@ -1,6 +1,6 @@
 #include "trimm_wrap.h"
 
-
+// Given an SRA run's sequence data, trim its reads' adapter sequences
 void run_trimmomatic(std::pair<std::string, std::string> sraRunIn,
                      std::pair<std::string, std::string> sraRunOutP,
                      std::pair<std::string, std::string> sraRunOutU,

@@ -3,7 +3,7 @@
 
 std::atomic<bool> procRunning(false);
 
-
+// Output cosmetic function: Animate an ellipsis
 void progressAnim(int numSpace) {
   const std::string anim[] = {".  ", ".. ", "..."};
   int animIndex = 0;
@@ -24,6 +24,7 @@ void progressAnim(int numSpace) {
   std::cout << "   " << std::endl;
 }
 
+// Given several SRA run sequence data files, combine into one single file
 std::string combine_reads(std::vector<std::pair<std::string, std::string>> sraRuns,
                           std::string outFileStr,
                           long long int ram_b, std::string logFile) {
@@ -62,6 +63,7 @@ std::string combine_reads(std::vector<std::pair<std::string, std::string>> sraRu
   return outFileStr;
 }
 
+// Perform a de novo assembly on a single SRA's sequence file or file pair with Trinity
 void run_trinity(std::pair<std::string, std::string> sraRun, std::string outFile,
                  std::string threads, std::string ram_gb,
                  bool dispOutput, std::string logFile) {
@@ -108,7 +110,7 @@ void run_trinity(std::pair<std::string, std::string> sraRun, std::string outFile
   std::rename((outFile + ".Trinity.fasta").c_str(), outFile.c_str());
 }
 
-
+// Perform a de novo assembly using multiple SRAs' sequence data with Trinity
 void run_trinity_comb(std::vector<std::pair<std::string, std::string>> sraRuns,
                       std::string outFile,
                       std::string threads, std::string ram_gb,

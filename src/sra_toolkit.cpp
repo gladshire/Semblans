@@ -1,6 +1,8 @@
 #include "sra_toolkit.h"
 
 
+// Given a Semblans config INI file, construct and extract SRA objects
+// based on accession numbers
 std::vector<SRA> get_sras(const INI_MAP &iniFile, bool compressFiles) {
   std::vector<SRA> sras;
   if (!iniFile.at("SRA accessions").empty()) {
@@ -11,6 +13,7 @@ std::vector<SRA> get_sras(const INI_MAP &iniFile, bool compressFiles) {
   return sras;
 }
 
+// Given an SRA run object, prefetch the raw pre-sequence data using SRA-toolkit
 void prefetch_sra(SRA sra, bool dispOutput, std::string logFile) {
   std::string outDir(sra.get_sra_path_raw().first.parent_path().c_str());
   std::string prefetchFlag = " --max-size u -O ";
@@ -31,7 +34,7 @@ void prefetch_sra(SRA sra, bool dispOutput, std::string logFile) {
   }
 }
 
-
+// Given an SRA run object, dump prefetched data to a FASTQ file 
 void fasterq_sra(SRA sra, std::string threads, bool dispOutput,
                  bool compressOutput, std::string logFile) {
   std::string prefetchDir(sra.get_sra_path_raw().first.parent_path().c_str());
@@ -71,7 +74,8 @@ void fasterq_sra(SRA sra, std::string threads, bool dispOutput,
   }
 }
 
-
+// Align in file streams of paired-end sequence data to ensure both data buffers
+// contain the same reads
 void align_file_buffer(std::istream & inStream1, std::istream & inStream2,
                        char * inStream1Data, char * inStream2Data,
                        std::streamsize & s1, std::streamsize & s2) {

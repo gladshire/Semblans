@@ -2,6 +2,8 @@
 
 int MIN_FASTA = 1000;
 
+// Determine if FASTA file meets the minimum requirement for
+// number of entries
 bool fasta_ok(std::string fastaFile, uintmax_t ram_b) {
   fs::path fastaFilePath(fastaFile.c_str());
   if (!fs::exists(fastaFilePath)) {
@@ -20,6 +22,8 @@ bool fasta_ok(std::string fastaFile, uintmax_t ram_b) {
   }
 }
 
+// Determine if the blastp output file meets the minimum
+// requirement for number of query sequence entries
 bool blastpout_ok(std::string blastpFile) {
   fs::path blastpFilePath(blastpFile.c_str());
   if (!fs::exists(blastpFilePath)) {
@@ -46,6 +50,8 @@ bool blastpout_ok(std::string blastpFile) {
   }
 }
 
+// Given a transcripts file, predict the sequence data's coding regions using
+// TransDecoder
 void run_transdecoder(std::string transIn, std::string transCds, std::string transPep,
                       std::string threads, uintmax_t ram_b,
                       std::string dbPath, std::string outDir,
