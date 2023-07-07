@@ -6,6 +6,6 @@ Author: Miles Woodcock-Girard
 
 Semblans is a tool that enables the automatic assembly of *de novo* transcriptomes for non-model organisms.
 
-Through the collation of several external packages and the leveraging of C++ data streaming performance, Semblans streamlines the necessary pre-processing, quality control, assembly, and post-assembly steps, allowing a 'hands-off' assembly process without loss to versatility.
+Through the collation of several external packages and the leveraging of C++ data streaming performance, Semblans streamlines the necessary pre-processing, quality control, assembly, and post-assembly steps, allowing a hands-off assembly process without loss to versatility.
 
 All documentation for Semblans can be found in the [wiki](https://github.com/gladshire/Semblans/wiki)
