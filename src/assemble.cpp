@@ -384,7 +384,7 @@ int main(int argc, char * argv[]) {
     bool assembleAllSeqs = ini_get_bool(cfgIniGen["assemble_all_seqs"].c_str(), 0);
 
     const char * home = std::getenv("HOME");
-    std::string fastaSeqs = "blap";//cfgIniGen["seqs_of_interest"];
+    std::string fastaSeqs = cfgIniGen["seqs_of_interest"];
     if (fastaSeqs[0] == '~') {
       fastaSeqs = std::string(home) + fastaSeqs.substr(1, fastaSeqs.size() - 1);
     }
@@ -396,7 +396,6 @@ int main(int argc, char * argv[]) {
       if (fastaSeqs.empty()) {
         logOutput("User did not define sequences of interest. Skipping selective assembly.",
                   logFilePath);
-        exit(2);
       }
       else if (!fs::exists(fastaSeqs.c_str())) {
         logOutput("ERROR:\n  file \"" + fastaSeqs + "\" not found.\n  Exiting.", logFilePath);
