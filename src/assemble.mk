@@ -2,7 +2,7 @@ CC = g++
 CFLAGS = '-Wl,-rpath,$$ORIGIN/../lib/' -g -pthread
 LIBS = -L../lib/ -lboost_system -lboost_filesystem -lboost_iostreams -ldl -lconfini
 INCLUDE_PATH = -I../lib -I../include
-OBJ_LINK = assemble.o sra.o sra_toolkit.o transcript.o ini_parse.o trinity_wrap.o salmon_wrap.o print_info.o seq.o seq_hash.o
+OBJ_LINK = assemble.o sra.o sra_toolkit.o transcript.o ini_parse.o trinity_wrap.o salmon_wrap.o print_info.o seq.o llist.o seq_hash.o
 
 ../bin/assemble: $(OBJ_LINK)
 	$(CC) $(CFLAGS) -o ../bin/assemble $(OBJ_LINK) $(LIBS)
@@ -24,6 +24,8 @@ print_info.o: print_info.cpp print_info.h
 	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c print_info.cpp $(LIBS)
 seq.o: seq.cpp seq.h
 	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c seq.cpp $(LIBS)
+llist.o: llist.cpp llist.h
+	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c llist.cpp $(LIBS)
 seq_hash.o: seq_hash.cpp seq_hash.h
 	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c seq_hash.cpp $(LIBS)
 clean:

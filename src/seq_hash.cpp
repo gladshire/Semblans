@@ -2,14 +2,15 @@
 
 // Default constructor for sequence hash table (seqHash) object
 seqHash::seqHash() {
-  seqHashData = NULL;
+  seqHashData = nullptr;
   lenHashTable = 0;
   numItems = 0;
 }
 
 // Constructor for seqHash object allowing definition of hash table size
 seqHash::seqHash(uintmax_t lenTable) {
-  seqHashData = new std::vector<sequence>[lenTable];
+  //seqHashData = new std::vector<sequence>[lenTable];
+  seqHashData = new linkedList[lenTable]; 
   lenHashTable = lenTable;
   numItems = 0;
 }
@@ -19,9 +20,11 @@ seqHash::seqHash(uintmax_t lenTable) {
 seqHash::seqHash(uintmax_t lenTable, fs::path transFilePath, uintmax_t ram_b) {
 
   if (!fs::exists(transFilePath)) {
+    seqHashData = nullptr;
     return;
   }
-  seqHashData = new std::vector<sequence>[lenTable];
+  //seqHashData = new std::vector<sequence>[lenTable];
+  seqHashData = new linkedList[lenTable];
   lenHashTable = lenTable;
   numItems = 0;
 
@@ -69,14 +72,12 @@ seqHash::seqHash(uintmax_t lenTable, fs::path transFilePath, uintmax_t ram_b) {
       }
       seqStartPos = std::find(headerStartPos, inFileL, '\n') + 1;
       currHeader = std::string(headerStartPos + 1, seqStartPos - 1);
-      // Extract sequence
-      // TODO: Extract quality line, if fastq
-      //   Determine if fastq -> check if '+' exists after sequence line
-      //   If '+' exists, also extract quality line following it
       
+      // Extract sequence
       seqEndPos = std::find(seqStartPos, inFileL, '\n') - 1;
       currSequence = std::string(seqStartPos, seqEndPos);
 
+      // Extract quality if FASTQ, insert sequence object into hash table
       if (*(seqEndPos + 2) == '+') {
         qualityStartPos = std::find(seqEndPos + 2, inFileL, '\n') + 1;
         qualityEndPos = std::find(qualityStartPos, inFileL, headChar) - 1;
@@ -119,14 +120,16 @@ unsigned long seqHash::hashFunction(char * key) {
 void seqHash::insertHash(std::string header, std::string sequenceData, std::string quality) {
   std::string keyStr = header.substr(0, header.find(' '));
   unsigned long hashIndex = hashFunction(&keyStr[0]) % lenHashTable;
-  seqHashData[hashIndex].push_back(sequence(header, sequenceData, quality));
+  //seqHashData[hashIndex].push_back(sequence(header, sequenceData, quality));
+  seqHashData[hashIndex].insert(sequence(header, sequenceData, quality));
   numItems++;
 }
 
 void seqHash::insertHash(std::string header, std::string sequenceData) {
   std::string keyStr = header.substr(0, header.find(' '));
   unsigned long hashIndex = hashFunction(&keyStr[0]) % lenHashTable;
-  seqHashData[hashIndex].push_back(sequence(header, sequenceData));
+  //seqHashData[hashIndex].push_back(sequence(header, sequenceData));
+  seqHashData[hashIndex].insert(sequence(header, sequenceData));
   numItems++;
 }
 
@@ -138,17 +141,22 @@ void seqHash::deleteHash(std::string header) {
     return;
   }
   std::string currKeyStrHash;
-  auto vecIter = seqHashData[hashIndex].begin();
-  while (vecIter != seqHashData[hashIndex].end()) {
-    currKeyStrHash = (vecIter->get_header()).substr(0, vecIter->get_header().find(' '));
+  //auto dataIter = seqHashData[hashIndex].begin();
+  /*
+  while (dataIter != seqHashData[hashIndex].end()) {
+    currKeyStrHash = (dataIter->get_header()).substr(0, dataIter->get_header().find(' '));
     if (keyStr == currKeyStrHash) {
-      vecIter = seqHashData[hashIndex].erase(vecIter);
+      dataIter = seqHashData[hashIndex].erase(dataIter);
+      numItems--;
     }
     else {
-      vecIter++;
+      dataIter++;
     }
+  }*/
+  bool removed = seqHashData[hashIndex].remove(header);
+  if (removed) {
+    numItems--;
   }
-  numItems--;
 }
 
 // Determine if sequence element is contained in hash table
@@ -160,15 +168,17 @@ bool seqHash::inHashTable(std::string header) {
   }
   else {
     std::string currKeyStrHash;
-    auto vecIter = seqHashData[hashIndex].begin();
-    while (vecIter != seqHashData[hashIndex].end()) {
-      currKeyStrHash = (vecIter->get_header()).substr(0, vecIter->get_header().find(' '));
-      if (vecIter->get_header() == header || currKeyStrHash == keyStr) {
+    //auto dataIter = seqHashData[hashIndex].begin();
+    /*while (dataIter != seqHashData[hashIndex].end()) {
+      currKeyStrHash = (dataIter->get_header()).substr(0, dataIter->get_header().find(' '));
+      if (dataIter->get_header() == header || currKeyStrHash == keyStr) {
         return true;
       }
-      vecIter++;
+      dataIter++;
     }
     return false;
+    */
+    return seqHashData[hashIndex].exists(header);
   }
 }
 
@@ -179,17 +189,21 @@ sequence seqHash::getSeq(std::string header) {
     return sequence();
   }
   else {
-    std::string currKeyStrHash;
-    auto vecIter = seqHashData[hashIndex].begin();
-    while (vecIter != seqHashData[hashIndex].end()) {
-      currKeyStrHash = (vecIter->get_header()).substr(0, vecIter->get_header().find(' '));
-      if (vecIter->get_header() == header || currKeyStrHash == keyStr) {
-        return sequence(vecIter->get_header(), vecIter->get_sequence(),
-                        vecIter->get_quality());
+    //std::string currKeyStrHash;
+    //auto dataIter = seqHashData[hashIndex].begin();
+    /*
+    while (dataIter != seqHashData[hashIndex].end()) {
+      currKeyStrHash = (dataIter->get_header()).substr(0, dataIter->get_header().find(' '));
+      if (dataIter->get_header() == header || currKeyStrHash == keyStr) {
+        return sequence(dataIter->get_header(), dataIter->get_sequence(),
+                        dataIter->get_quality());
       }
-      vecIter++;
+      dataIter++;
     }
     return sequence();
+    */
+    //sequence seq = seqHashData[hashIndex].getSeq(header);
+    return seqHashData[hashIndex].getSeq(header);
   }
 }
 
@@ -203,19 +217,22 @@ void seqHash::setSeqHeader(std::string header, std::string newHeader) {
   }
   else {
     std::string currKeyStrHash;
-    auto vecIter = seqHashData[hashIndex].begin();
+    //auto dataIter = seqHashData[hashIndex].begin();
     // Check for sequence in chained hash table
-    while (vecIter != seqHashData[hashIndex].end()) {
-      currKeyStrHash = (vecIter->get_header()).substr(0, vecIter->get_header().find(' '));
+    /*
+    while (dataIter != seqHashData[hashIndex].end()) {
+      currKeyStrHash = (dataIter->get_header()).substr(0, dataIter->get_header().find(' '));
       // If match found update its header and return
-      if (vecIter->get_header() == header || currKeyStrHash == keyStr) {
-        vecIter->set_header(newHeader);
+      if (dataIter->get_header() == header || currKeyStrHash == keyStr) {
+        dataIter->set_header(newHeader);
         return;
       }
-      vecIter++;
+      dataIter++;
     }
-    std::cout << "ERROR: Sequence not found" << std::endl;
-    exit(2);
+    */
+    seqHashData[hashIndex].setSeqHead(header, newHeader);
+    //std::cout << "ERROR: Sequence not found" << std::endl;
+    //exit(2);
   }
 }
 
@@ -231,6 +248,7 @@ void seqHash::dump(std::string filePath) {
     }
     else {
       int bpPerLine;
+      /*
       for (auto seq : seqHashData[i]) {
         currHeader = seq.get_header();
         currSeq = seq.get_sequence();
@@ -241,7 +259,8 @@ void seqHash::dump(std::string filePath) {
           outFile << "+" << '\n';
           outFile << currQual << std::endl;
         }
-      }
+      }*/
+      seqHashData[i].dump(outFile);
     }
   }
   outFile.close();
@@ -258,11 +277,24 @@ uintmax_t seqHash::getSize() {
 }
 
 // Get pointer to hash data
-std::vector<sequence> * seqHash::getHashData() {
+//std::vector<sequence> * seqHash::getHashData() {
+linkedList * seqHash::getHashData() {
   return seqHashData;
 }
+/*
+void seqHash::clear() {
+  for (uintmax_t i = 0; i < lenHashTable; i++) {
+    seqHashData[i].clear();
+  }
+  delete[] seqHashData;
+}*/
 
 // Destructor for hash table
 seqHash::~seqHash() {
-  delete[] seqHashData;
+  if (seqHashData != nullptr) {
+    for (uintmax_t i = 0; i < lenHashTable; i++) {
+      seqHashData[i].clear();
+    }
+    delete[] seqHashData;
+  }
 }

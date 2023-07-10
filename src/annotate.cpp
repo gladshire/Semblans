@@ -105,7 +105,8 @@ void annotateTranscript(std::string transIn, std::string transPep, std::string t
   seqHash fastaPepHashTable(lenHashTable, transPepFileStr, ram_b);
 
   // Obtain data from hash table;
-  std::vector<sequence> * hashData = fastaPepHashTable.getHashData();
+  //std::vector<sequence> * hashData = fastaPepHashTable.getHashData();
+  linkedList * hashData = fastaPepHashTable.getHashData();
 
   // Initiate PANTHER scoring
   pantherScore(transPepFileStr, annotFile, threads, dispOutput, logFile);  

@@ -299,9 +299,9 @@ int main(int argc, char * argv[]) {
       if (WIFSIGNALED(result)) {
         exit(1);
       }
-      logOutput("", logFilePath);
       result = system(assCmd.c_str());
-      if (WIFSIGNALED(result)) {
+      if (WIFSIGNALED(result) ||
+          WIFEXITED(result) == 1) {
         exit(1);
       }
       result = system(postCmd.c_str());

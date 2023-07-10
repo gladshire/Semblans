@@ -51,7 +51,8 @@ void run_kraken2(std::pair<std::string, std::string> sraRunIn,
   else {
     sraRunOutClass.push_back('#');
   }
-  sraRunOutClass = sraRunOutDir + "/" + sraRunOutClass;
+  sraRunOutClass = sraRunOutDir + "/" + sraRunOutClass + "." +
+                   std::string(fs::path(db.c_str()).stem().c_str()) + ".fastq";
   if (compressFiles) {
     krakOutput = "";
   }

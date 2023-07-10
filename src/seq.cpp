@@ -35,36 +35,35 @@ sequence::sequence(const sequence & seq) {
   header = seq.header;
   sequenceData = seq.sequenceData;
   quality = seq.quality;
-  numBp = seq.numBp;
-  id = seq.id;
 }
 
 // Return sequence object's header
 std::string sequence::get_header() {
+  //std::cout << header << std::endl;
   return this->header;
 }
 
 // Return sequence object's sequence data
 std::string sequence::get_sequence() {
-  return this->sequenceData;
+  return sequenceData;
 }
 
 // Return sequence object's quality data
 std::string sequence::get_quality() {
-  return this->quality;
+  return quality;
 }
 
 // Return sequence object's ID
 std::string sequence::get_id() {
-  return this->id;
+  return id;
 }
 
 // Set new header for sequence object
 void sequence::set_header(std::string newHeader) {
-  this->header = newHeader;
+  header = newHeader;
 }
 
 // Set new ID for sequence object
 void sequence::set_id(std::string newId) {
-  this->id = newId;
+  id = newId;
 }

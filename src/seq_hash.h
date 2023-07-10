@@ -1,12 +1,14 @@
 #pragma once
 #include <iostream>
 #include <vector>
+#include <list>
 #include <functional>
 #include <boost/filesystem.hpp>
 #include <boost/dll.hpp>
 #include "sra.h"
 #include "transcript.h"
 #include "seq.h"
+#include "llist.h"
 
 namespace fs = boost::filesystem;
 namespace dl = boost::dll;
@@ -14,7 +16,8 @@ namespace dl = boost::dll;
 
 class seqHash {
   private:
-    std::vector<sequence> * seqHashData;
+    //std::vector<sequence> * seqHashData;
+    linkedList * seqHashData;
     uintmax_t lenHashTable;
     uintmax_t numItems;
   public:
@@ -32,6 +35,8 @@ class seqHash {
     void dump(std::string filePath);
     uintmax_t getLength();
     uintmax_t getSize();
-    std::vector<sequence> * getHashData();
+    void clear();
+    //std::vector<sequence> * getHashData();
+    linkedList * getHashData();    
     ~seqHash();
 };

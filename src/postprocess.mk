@@ -2,7 +2,7 @@ CC = g++
 CFLAGS = '-Wl,-rpath,$$ORIGIN/../lib/' -g -pthread
 LIBS = -L../lib -lboost_system -lboost_filesystem -lboost_iostreams -ldl -lconfini -lcurl
 INCLUDE_PATH = -I../lib/ -I../include
-OBJ_LINK = postprocess.o sra.o sra_toolkit.o ini_parse.o transcript.o seq.o seq_hash.o ncbi_blast.o diamond.o rem_chimera.o salmon_wrap.o corset_wrap.o filter_corset.o transdecoder_wrap.o print_info.o thread_pool.o ips_client.o ips_job_man.o panther_score.o annotate.o
+OBJ_LINK = postprocess.o sra.o sra_toolkit.o ini_parse.o transcript.o seq.o llist.o seq_hash.o ncbi_blast.o diamond.o rem_chimera.o salmon_wrap.o corset_wrap.o filter_corset.o transdecoder_wrap.o print_info.o thread_pool.o ips_client.o ips_job_man.o panther_score.o annotate.o
 
 
 ../bin/postprocess: $(OBJ_LINK)
@@ -19,6 +19,8 @@ transcript.o: transcript.cpp transcript.h
 	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c transcript.cpp $(LIBS)
 seq.o: seq.cpp seq.h
 	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c seq.cpp $(LIBS)
+llist.o: llist.cpp llist.h
+	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c llist.cpp $(LIBS)
 seq_hash.o: seq_hash.cpp seq_hash.h
 	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c seq_hash.cpp $(LIBS)
 ncbi_blast.o: ncbi_blast.cpp ncbi_blast.h
