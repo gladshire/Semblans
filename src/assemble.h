@@ -29,7 +29,7 @@ void makeGroupCheckpoint(std::string cpDir, std::string prefix);
 
 bool groupCheckpointExists(std::string cpDir, std::string prefix);
 
-void makeTransInfoFile(const std::vector<SRA> & sras, std::string transInfoFileStr);
+void makeTransInfoFile(const std::vector<std::pair<std::string, std::string>> & sraRuns, std::string transInfoFileStr);
 
 void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
                       std::string threads, std::string ram_gb,

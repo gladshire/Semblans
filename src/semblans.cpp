@@ -302,6 +302,7 @@ int main(int argc, char * argv[]) {
       result = system(assCmd.c_str());
       if (WIFSIGNALED(result) ||
           WIFEXITED(result) == 1) {
+        std::cout << "Assembly exited" << std::endl;
         exit(1);
       }
       result = system(postCmd.c_str());

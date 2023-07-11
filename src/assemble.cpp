@@ -255,13 +255,13 @@ bool groupCheckpointExists(std::string cpDir, std::string prefix) {
 }
 
 // Create a transcript info file containing the read files used in its assembly
-void makeTransInfoFile(const std::vector<SRA> & sras, std::string transInfoFileStr) {
+void makeTransInfoFile(const std::vector<std::pair<std::string, std::string>> & sraRuns, std::string transInfoFileStr) {
   std::ofstream transInfoFile;
   transInfoFile.open(transInfoFileStr);
-  for (auto sra : sras) {
-    transInfoFile << std::string(sra.get_sra_path_orep_filt().first.c_str());
-    if (sra.is_paired()) {
-      transInfoFile << " " << std::string(sra.get_sra_path_orep_filt().second.c_str());
+  for (auto sra : sraRuns) {
+    transInfoFile << sra.first;
+    if (sra.second != "") {
+      transInfoFile << " " << sra.second;
     }
     transInfoFile << std::endl;
   }
@@ -296,12 +296,13 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
     cpDir = dummySra.get_fastqc_dir_2().first.parent_path().parent_path().parent_path() / "checkpoints";
 
     // Check whether checkpoint exists
+    /*
     if (groupCheckpointExists(std::string(cpDir.c_str()), sraGroup.first)) {
       logOutput("Assembly found for group: " + sraGroup.first, logFile);
       logOutput("  Containing:", logFile);
       summarize_all_sras(sraGroup.second, logFile, 4);
       continue;
-    }
+    }*/
 
     transcript dummyTrans(dummySra);
     fs::path pathTrinDir = dummyTrans.get_trans_path_trinity().parent_path();
@@ -359,49 +360,71 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
         sraRunsNoInterest.push_back(currTrinIn);
       }
     }
+    // TODO: fix updating of headers in Trinity output
+
     // Perform assembly for reads of interest (those that map to provided FASTA)
-    if (assembSeqsInterest && !groupCheckpointExists(std::string(cpDir.c_str()), sraGroup.first +
-                                                    ".mapped")) {
+    if (assembSeqsInterest) {
       logOutput("Now assembling reads that map to:\n  " + fastaSeqsFile, logFile);
-      if (sraRunsInterest.size() > 1) {
-        run_trinity_comb(sraRunsInterest, currTrinOutInt, threads, ram_gb, dispOutput, logFile);
+      if (!groupCheckpointExists(std::string(cpDir.c_str()), sraGroup.first + ".mapped")) {
+        if (sraRunsInterest.size() > 1) {
+          run_trinity_comb(sraRunsInterest, currTrinOutInt, threads, ram_gb, dispOutput, logFile);
+        }
+        else {
+          run_trinity(sraRunsInterest.at(0), currTrinOutInt, threads, ram_gb, dispOutput, logFile);
+        }
+        // Make file for mapped assembly containing associated SRAs
+        transInfoFileStr = std::string(fs::path(currTrinOutInt.c_str()).replace_extension(".ti").c_str());
+        makeTransInfoFile(sraRunsInterest, transInfoFileStr);
+  
+        makeGroupCheckpoint(std::string(cpDir.c_str()), sraGroup.first + ".mapped");
+        //updateHeaders(currTrinOutInt, ram_b);
       }
       else {
-        run_trinity(sraRunsInterest.at(0), currTrinOutInt, threads, ram_gb, dispOutput, logFile);
+        logOutput("  Mapped assembly checkpoint found", logFile);
       }
-      makeGroupCheckpoint(std::string(cpDir.c_str()), sraGroup.first + ".mapped");
-      updateHeaders(currTrinOutInt, ram_b);
     }
     // Perform assembly for reads of no interest (those that DO NOT map to provided FASTA)
-    if (assembSeqsNoInterest && !groupCheckpointExists(std::string(cpDir.c_str()), sraGroup.first +
-                                                      ".unmapped")) {
+    if (assembSeqsNoInterest) {
       logOutput("Now assembling reads that do not map to:\n  " + fastaSeqsFile, logFile);
-      if (sraRunsNoInterest.size() > 1) {
-        run_trinity_comb(sraRunsNoInterest, currTrinOutNon, threads, ram_gb, dispOutput, logFile);
+      if (!groupCheckpointExists(std::string(cpDir.c_str()), sraGroup.first + ".unmapped")) {
+        if (sraRunsNoInterest.size() > 1) {
+          run_trinity_comb(sraRunsNoInterest, currTrinOutNon, threads, ram_gb, dispOutput, logFile);
+        }
+        else {
+          run_trinity(sraRunsNoInterest.at(0), currTrinOutNon, threads, ram_gb, dispOutput, logFile);
+        }
+        // Make file for unmapped assembly containing associated SRAs
+        transInfoFileStr = std::string(fs::path(currTrinOutNon.c_str()).replace_extension(".ti").c_str());
+        makeTransInfoFile(sraRunsNoInterest, transInfoFileStr);
+
+        makeGroupCheckpoint(std::string(cpDir.c_str()), sraGroup.first + ".unmapped");
+        //updateHeaders(currTrinOutNon, ram_b);
       }
       else {
-        run_trinity(sraRunsNoInterest.at(0), currTrinOutNon, threads, ram_gb, dispOutput, logFile);
+        logOutput("  Unmapped assembly checkpoint found", logFile);
       }
-      makeGroupCheckpoint(std::string(cpDir.c_str()), sraGroup.first + ".unmapped");
-      updateHeaders(currTrinOutNon, ram_b);
     }
     // Perform assembly for all reads
     if (assembAllSeqs && !groupCheckpointExists(std::string(cpDir.c_str()), sraGroup.first)) {
       logOutput("Now assembling all reads", logFile);
-      if (sraRunsInTrin.size() > 1) {
-        run_trinity_comb(sraRunsInTrin, currTrinOutAll, threads, ram_gb, dispOutput, logFile);
+      if (!groupCheckpointExists(std::string(cpDir.c_str()), sraGroup.first)) {
+        if (sraRunsInTrin.size() > 1) {
+          run_trinity_comb(sraRunsInTrin, currTrinOutAll, threads, ram_gb, dispOutput, logFile);
+        }
+        else {
+          run_trinity(sraRunsInTrin.at(0), currTrinOutAll, threads, ram_gb, dispOutput, logFile);
+        }
+        // Make file for entire assembly containing associated SRAs
+        transInfoFileStr = std::string(fs::path(currTrinOutAll.c_str()).replace_extension(".ti").c_str());
+        makeTransInfoFile(sraRunsInTrin, transInfoFileStr);
+
+        makeGroupCheckpoint(std::string(cpDir.c_str()), sraGroup.first);
+        //updateHeaders(currTrinOutAll, ram_b);
       }
       else {
-        run_trinity(sraRunsInTrin.at(0), currTrinOutAll, threads, ram_gb, dispOutput, logFile);
+        logOutput("  Global assembly checkpoint found", logFile);
       }
-      makeGroupCheckpoint(std::string(cpDir.c_str()), sraGroup.first);
-      updateHeaders(currTrinOutAll, ram_b);
     }
-    // Make file for transcript containing associated SRAs
-    transInfoFileStr = std::string(fs::path(currTrinOutAll.c_str()).replace_extension(".ti").c_str());
-    makeTransInfoFile(sraGroup.second, transInfoFileStr);
-    // Create checkpoint for assembly group
-    makeGroupCheckpoint(std::string(cpDir.c_str()), sraGroup.first + ".mapped");
   }
 }
 
@@ -474,7 +497,7 @@ int main(int argc, char * argv[]) {
     // If all assembly options are disabled, exit
     if (!assembleInterest && !assembleOthers && !assembleAllSeqs) {
       logOutput("No assembly option specified. Have a nice day!", logFilePath);
-      exit(2);
+      exit(1);
     }
     
     bool compressFiles = false;
