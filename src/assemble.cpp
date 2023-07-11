@@ -1,5 +1,6 @@
 #include "assemble.h"
 
+
 // Update Trinity output transcript headers
 void updateHeaders(std::string fastaFilePath, uintmax_t ram_b) {
   uintmax_t numBytesFasta = fs::file_size(fastaFilePath.c_str());
@@ -112,7 +113,7 @@ void isolateReads(const std::vector<SRA> & sras, std::string fastaInput, std::st
     }
     outDir = fs::path(currSraIn.first).parent_path().c_str();
     sraRunsIn.push_back(currSraIn);
-    std::string sraPrefix(fs::path(currSraIn.first.c_str()).stem().c_str());
+    std::string sraPrefix(sra.get_file_prefix().first);
 
           
     // Quantify / map SRA reads against fastaInput index    
@@ -128,7 +129,7 @@ void isolateReads(const std::vector<SRA> & sras, std::string fastaInput, std::st
     }
     // Check if quant checkpoint exists
     if (!sra.checkpointExists(std::string(fs::path(fastaInput.c_str()).stem().c_str()) + ".qt.iso")) {
-   
+      logOutput("  Mapping reads to sequences of interest", logFile); 
       salmon_quant(fastaInput, fastaIndex, fastaQuant, sraRunsIn, threads, dispOutput, logFile);
       // Create checkpoint for salmon quant of SRA against seqs of interest
       sra.makeCheckpoint(std::string(fs::path(fastaInput.c_str()).stem().c_str()) + ".qt.iso");
