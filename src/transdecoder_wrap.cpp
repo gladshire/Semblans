@@ -86,6 +86,9 @@ void run_transdecoder(std::string transIn, std::string transCds, std::string tra
       std::string tdLongOrfs_cmd = PATH_TRANSD_LONGORFS + " -t " + transFilePath + " -O " +
                                    std::string(allpep.parent_path().c_str()) + printOut;
       int resultLO;
+
+      std::cout << tdLongOrfs_cmd << std::endl;
+
       resultLO = system(tdLongOrfs_cmd.c_str());
       if (WIFSIGNALED(resultLO)) {
         system("setterm -cursor on");
@@ -112,6 +115,9 @@ void run_transdecoder(std::string transIn, std::string transCds, std::string tra
       fs::path currDir = fs::current_path();
       fs::current_path(fs::path(outDir.c_str()));
       int resultPD;
+
+      std::cout << tdPredict_cmd << std::endl;
+
       resultPD = system(tdPredict_cmd.c_str());
       if (WIFSIGNALED(resultPD)) {
         system("setterm -cursor on");

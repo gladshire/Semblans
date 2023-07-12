@@ -75,18 +75,25 @@ seqHash::seqHash(uintmax_t lenTable, fs::path transFilePath, uintmax_t ram_b) {
       
       // Extract sequence
       seqEndPos = std::find(seqStartPos, inFileL, '\n');
-      currSequence = std::string(seqStartPos, seqEndPos);
+      //currSequence = std::string(seqStartPos, seqEndPos);
 
       // Extract quality if FASTQ, insert sequence object into hash table
       if (*(seqEndPos + 1) == '+') {
+        currSequence = std::string(seqStartPos, seqEndPos);
         qualityStartPos = std::find(seqEndPos + 1, inFileL, '\n') + 1;
         qualityEndPos = std::find(qualityStartPos, inFileL, headChar);
-        currQuality = std::string(qualityStartPos, qualityEndPos - 1);
+        if (qualityEndPos == inFileL) {
+          currQuality = std::string(qualityStartPos, (int)(inFileL - qualityStartPos));
+        }
+        else {
+          currQuality = std::string(qualityStartPos, qualityEndPos - 1);
+        }
         headerStartPos = std::find(qualityStartPos, inFileL, headChar);
         this->insertHash(currHeader, currSequence, currQuality);
       }
       else {
         headerStartPos = std::find(seqStartPos, inFileL, headChar);
+        currSequence = std::string(seqStartPos, headerStartPos - 1);
         this->insertHash(currHeader, currSequence);
       }
     }

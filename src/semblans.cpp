@@ -300,8 +300,7 @@ int main(int argc, char * argv[]) {
         exit(1);
       }
       result = system(assCmd.c_str());
-      if (WIFSIGNALED(result) ||
-          WIFEXITED(result) == 1) {
+      if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
         std::cout << "Assembly exited" << std::endl;
         exit(1);
       }

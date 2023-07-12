@@ -82,8 +82,11 @@ void linkedList::updateSeqHead(const std::string & newPrefix) {
 
 bool linkedList::exists(const std::string & header) {
   Node * currNode = head;
+  std::string currHead;
   while (currNode != nullptr) {
-    if (currNode->seqEntry.get_header() == header) {
+    currHead = currNode->seqEntry.get_header();
+    if (currHead.substr(0, currHead.find(" ")) == header ||
+        currHead == header) {
       return true;
     }
     currNode = currNode->next;

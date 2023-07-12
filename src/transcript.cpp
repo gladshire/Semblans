@@ -64,10 +64,10 @@ transcript::transcript(std::string filename, INI_MAP cfgIni) {
   projPath += "/";
   org_name = "";
   tax_id = "";
-  std::string fileBase(fs::path(filename).filename().stem().c_str());
-  while (fileBase.find(".") != std::string::npos) {
-    fileBase = std::string(fs::path(fileBase).stem().c_str());
-  }
+  std::string fileBase(fs::path(filename).filename().stem().stem().c_str());
+  //while (fileBase.find(".") != std::string::npos) {
+  //  fileBase = std::string(fs::path(fileBase).stem().c_str());
+  //}
   file_prefix = fileBase;
   
   // Define trinity assembly path

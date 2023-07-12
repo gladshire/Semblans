@@ -485,7 +485,9 @@ int main(int argc, char * argv[]) {
       fileIter++;
     }
  
-
+    for (auto trans : transVec) {
+      std::cout << trans.get_trans_path_trinity().c_str() << std::endl;
+    }
   
     // Summarize program execution parameters
     logOutput("Semblans Postprocess started with following parameters:", logFilePath);
