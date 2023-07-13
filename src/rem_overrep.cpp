@@ -37,7 +37,7 @@ std::pair<std::vector<std::string>, std::vector<std::string>> get_overrep_seqs_p
   sEnd = inFile2Data.end();
 
   while (boost::regex_search(sStart, sEnd, res, rgx)) {
-    overrepSeqs.first.push_back(res.str());
+    overrepSeqs.second.push_back(res.str());
     sStart = res.suffix().first;
   }
 
@@ -99,8 +99,8 @@ void rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
     return;
   }
 
-  size_t lenOverrep1;
-  size_t lenOverrep2;
+  size_t lenOverrep1 = 0;
+  size_t lenOverrep2 = 0;
 
   if (!overrepSeqs.first.empty()) {
     lenOverrep1 = overrepSeqs.first.front().length();
