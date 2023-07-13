@@ -102,12 +102,8 @@ void rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
   size_t lenOverrep1 = 0;
   size_t lenOverrep2 = 0;
 
-  if (!overrepSeqs.first.empty()) {
-    lenOverrep1 = overrepSeqs.first.front().length();
-  }
-  if (!overrepSeqs.second.empty()) {
-    lenOverrep2 = overrepSeqs.second.front().length();
-  }
+  lenOverrep1 = overrepSeqs.first.front().length();
+  lenOverrep2 = overrepSeqs.second.front().length();
 
   uintmax_t ram_b_per_file = ram_b / 2;
 
@@ -204,19 +200,23 @@ void rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
       nlPos2 = std::find(nlPos2Head + 1, inFile2L, '\n');
       seqLength = nlPos1 - nlPos1Head - 1;
       overRep = false;
-      for (int i = 0; i < seqLength - lenOverrep1; i++) {
-        for (auto const & seq : overrepSeqs.first) {
-          if (strncmp(nlPos1Head + 1 + i, seq.c_str(), lenOverrep1)) {
-            overRep = true;
-            goto checkOverrep;
+      if (!overrepSeqs.first.empty()) {
+        for (int i = 0; i < seqLength - lenOverrep1; i++) {
+          for (auto const & seq : overrepSeqs.first) {
+            if (strncmp(nlPos1Head + 1 + i, seq.c_str(), lenOverrep1) == 0) {
+              overRep = true;
+              goto checkOverrep;
+            }
           }
         }
       }
-      for (int i = 0; i < seqLength - lenOverrep2; i++) {
-        for (auto const & seq : overrepSeqs.second) {
-          if (strncmp(nlPos1Head + 1 + i, seq.c_str(), lenOverrep2)) {
-            overRep = true;
-            goto checkOverrep;
+      if (!overrepSeqs.second.empty()) {
+        for (int i = 0; i < seqLength - lenOverrep2; i++) {
+          for (auto const & seq : overrepSeqs.second) {
+            if (strncmp(nlPos2Head + 1 + i, seq.c_str(), lenOverrep2) == 0) {
+              overRep = true;
+              goto checkOverrep;
+            }
           }
         }
       }
