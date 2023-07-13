@@ -406,7 +406,8 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
       }
     }
     // Perform assembly for all reads
-    if (assembAllSeqs && !groupCheckpointExists(std::string(cpDir.c_str()), sraGroup.first)) {
+    std::cout << assembAllSeqs << std::endl;
+    if (assembAllSeqs) {
       logOutput("Now assembling all reads", logFile);
       if (!groupCheckpointExists(std::string(cpDir.c_str()), sraGroup.first)) {
         if (sraRunsInTrin.size() > 1) {
@@ -553,6 +554,14 @@ int main(int argc, char * argv[]) {
     std::vector<std::string> iniStrArray;
     std::vector<SRA> currSraGroup;
     // Iterate through user-defined assembly groups in config file
+    if (assemblyGroups.empty()) {
+      for (auto sra : sras) {
+        currSraGroup.push_back(sra);
+        sraGroups.emplace(sra.get_file_prefix().first.substr(0, 
+                          sra.get_file_prefix().first.find_last_of("_")), currSraGroup);
+        currSraGroup.clear();
+      }
+    }
     for (auto assemblyGroup : assemblyGroups) {
       // Get group name and group array string 
       currGroupName = assemblyGroup.first;
