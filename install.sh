@@ -128,6 +128,7 @@ wget -q --output-document trimmomatic.zip https://github.com/usadellab/Trimmomat
 unzip trimmomatic.zip -d ./external/
 mv ./external/Trimmomatic-0.39 ./external/Trimmomatic
 cd ./external/Trimmomatic/adapters/
+# TODO: Fix newlines in TruSeq_all.fa
 cat TruSeq*.fa > TruSeq_all.fa
 cd ../../../
 rm trimmomatic.zip

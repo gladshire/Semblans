@@ -32,12 +32,14 @@ void run_trimmomatic(std::pair<std::string, std::string> sraRunIn,
                          ":2:30:10 SLIDINGWINDOW:4:5 LEADING:5 TRAILING:5 MINLEN:25");
 
   if (isPaired) {
-    trimmCmd += " PE " + inFile1 + " " + inFile2 + " " + outFileP1 + " " + outFileU1 +
-                " " + outFileP2 + " " + outFileU2 + " " + trimmFlags + printOut;
+    trimmCmd = trimmCmd + " PE " + " -phred33 " + inFile1 + " " + inFile2 + " " +
+               outFileP1 + " " + outFileU1 + " " + outFileP2 + " " + outFileU2 + " " +
+               trimmFlags + printOut;
     result = system(trimmCmd.c_str());
   }
   else {
-    trimmCmd += " SE " + inFile1 + " " + outFileU1 + " " + trimmFlags + printOut;
+    trimmCmd = trimmCmd + " SE " + " -phred33 " + inFile1 + " " +
+               outFileU1 + " " + trimmFlags + printOut;
     result = system(trimmCmd.c_str());
   }
   if (WIFSIGNALED(result)) {

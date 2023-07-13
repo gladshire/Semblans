@@ -69,7 +69,9 @@ void rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
 
   std::ostream outputStream1(&gzOutBuffer1);
   std::ostream outputStream2(&gzOutBuffer2);
-  
+ 
+  int numUnfix = 0;
+ 
   while  ((!inputStream1.eof() && !inputStream2.eof() && !inFile1.eof() && !inFile2.eof()) &&
          (inputStream1.good() && inputStream2.good() && inFile1.good() && inFile2.good())) {
 
@@ -110,8 +112,15 @@ void rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
       nlPos2 = std::find(nlPos2 + 1, inFile2L, '\n');
       if (strncmp(nlPos1 - 5, "error", 5) == 0 ||
           strncmp(nlPos2 - 5, "error", 5) == 0) {
-        writeEnd1 = nlPos1Prev;
-        writeEnd2 = nlPos2Prev;
+        numUnfix++;
+        if (numUnfix == 1) {
+          writeEnd1 = nlPos1Prev - 1;
+          writeEnd2 = nlPos2Prev - 1;
+        }
+        else {
+          writeEnd1 = nlPos1Prev;
+          writeEnd2 = nlPos2Prev;
+        }
  
         if (compressFiles) {
           outputStream1.write(writeStart1, writeEnd1 - writeStart1);

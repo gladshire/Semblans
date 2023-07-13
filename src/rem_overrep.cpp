@@ -99,8 +99,15 @@ void rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
     return;
   }
 
-  size_t lenOverrep1 = overrepSeqs.first.front().length();
-  size_t lenOverrep2 = overrepSeqs.second.front().length();
+  size_t lenOverrep1;
+  size_t lenOverrep2;
+
+  if (!overrepSeqs.first.empty()) {
+    lenOverrep1 = overrepSeqs.first.front().length();
+  }
+  if (!overrepSeqs.second.empty()) {
+    lenOverrep2 = overrepSeqs.second.front().length();
+  }
 
   uintmax_t ram_b_per_file = ram_b / 2;
 
