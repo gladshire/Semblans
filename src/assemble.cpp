@@ -293,6 +293,13 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
   uintmax_t ram_b = (uintmax_t)stoi(ram_gb) * 1000000000;
 
   for (auto sraGroup : sraGroups) {
+    for (auto sra : sraGroup.second) {
+      std::cout << sra.get_accession() << std::endl;
+    }
+    std::cout << std::endl;
+  }
+
+  for (auto sraGroup : sraGroups) {
     SRA dummySra = sraGroup.second.at(0);
     cpDir = dummySra.get_fastqc_dir_2().first.parent_path().parent_path().parent_path() / "checkpoints";
 
@@ -383,6 +390,7 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
       else {
         logOutput("  Mapped assembly checkpoint found", logFile);
       }
+      sraRunsInterest.clear();
     }
     // Perform assembly for reads of no interest (those that DO NOT map to provided FASTA)
     if (assembSeqsNoInterest) {
@@ -404,9 +412,9 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
       else {
         logOutput("  Unmapped assembly checkpoint found", logFile);
       }
+      sraRunsNoInterest.clear();
     }
     // Perform assembly for all reads
-    std::cout << assembAllSeqs << std::endl;
     if (assembAllSeqs) {
       logOutput("Now assembling all reads", logFile);
       if (!groupCheckpointExists(std::string(cpDir.c_str()), sraGroup.first)) {
@@ -426,6 +434,7 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
       else {
         logOutput("  Global assembly checkpoint found", logFile);
       }
+      sraRunsInTrin.clear();
     }
   }
 }
