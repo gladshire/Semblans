@@ -157,9 +157,8 @@ void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
     }
     currIndex = trans.get_trans_path_index().c_str();
     currQuant = trans.get_trans_path_quant().c_str();
-    
+   
     currTransInfoFileStr = std::string(trans.get_trans_path_trinity().replace_extension(".ti").c_str());
-
     currTransInfoFile.open(currTransInfoFileStr);
     while(getline(currTransInfoFile, currLineInfo)) {
       spacePos = currLineInfo.find(" ");
@@ -176,45 +175,50 @@ void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
       }
       currSraRunsIn.push_back(currSraRun);
     }
+    currTransInfoFile.close();
 
     // Check if salmon index checkpoint exists
     if (trans.checkpointExists("index")) {
       logOutput("  Indexing checkpoint found for: " + trans.get_file_prefix(), logFilePath);
-      continue;
     }
-    // Summarize indexing job
-    logOutput("  Now mapping reads to transcripts: ", logFilePath);
-    summarize_sing_trans(trans, logFilePath, 4);
+    else {
+      // Summarize indexing job
+      logOutput("  Now producing index for: ", logFilePath);
+      summarize_sing_trans(trans, logFilePath, 4);
 
-    // Create index of assembled transcripts
-    procRunning = true;
-    std::thread salmIdxThread(progressAnim, 2);
-    salmon_index(currTransInSalm, currIndex, threads, dispOutput, logFilePath);
-    procRunning = false;
-    salmIdxThread.join();
+      // Create index of assembled transcripts
+      procRunning = true;
+      std::thread salmIdxThread(progressAnim, 2);
+      salmon_index(currTransInSalm, currIndex, threads, dispOutput, logFilePath);
+      procRunning = false;
+      salmIdxThread.join();
 
-    // Create index checkpoint
-    trans.makeCheckpoint("index");
+      // Create index checkpoint
+      trans.makeCheckpoint("index");
+    }
 
     // Check if salmon quant checkpoint exists
     if (trans.checkpointExists("quant")) {
       logOutput("  Quant checkpoint found for: " + trans.get_file_prefix(), logFilePath);
-      continue;
     }
-    // Summarize quantification job
-    logOutput("  Now quantifying transcripts: ", logFilePath);
-    summarize_sing_trans(trans, logFilePath, 4);
+    else {
+      // Summarize quantification job
+      logOutput("  Now quantifying transcripts: ", logFilePath);
+      summarize_sing_trans(trans, logFilePath, 4);
 
-    // Quantify reads mapped to transcript index
-    procRunning = true;
-    std::thread salmQntThread(progressAnim, 2);
-    salmon_quant(currTransInSalm, currIndex, currQuant, currSraRunsIn, threads,
-                 dispOutput, logFilePath);
-    procRunning = false;
-    salmQntThread.join();
+      // Quantify reads mapped to transcript index
+      procRunning = true;
+      std::thread salmQntThread(progressAnim, 2);
 
-    // Create salmon quant checkpoint
-    trans.makeCheckpoint("quant");
+      salmon_quant(currTransInSalm, currIndex, currQuant, currSraRunsIn, threads,
+                   dispOutput, logFilePath);
+      procRunning = false;
+      salmQntThread.join();
+
+      // Create salmon quant checkpoint
+      trans.makeCheckpoint("quant");
+    }
+    currSraRunsIn.clear();
   }
 }
 
@@ -474,11 +478,19 @@ int main(int argc, char * argv[]) {
     
     std::vector<transcript> transVec;
     fs::path currFile = transcript(sras[0]).get_trans_path_trinity().parent_path();
+    fs::path currPrefix;
     fs::directory_iterator fileIter{currFile};
     while (fileIter != fs::directory_iterator{}) {
       // Iterate through files in transcript directory
       // Push transcript to transcript vector
       if (fileIter->path().extension() == ".fasta") {
+        currFile = fileIter->path();
+        currPrefix = currFile;
+        while (!currPrefix.extension().empty()) {
+          currPrefix = currPrefix.stem();
+        }
+        fs::rename(currFile, currFile.parent_path() /
+                             fs::path((std::string(currPrefix.c_str()) + ".Trinity.fasta").c_str()));
         transcript currTrans(fileIter->path().c_str(), cfgIni);
         transVec.push_back(currTrans);
       }

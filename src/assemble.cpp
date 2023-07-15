@@ -20,13 +20,6 @@ void updateHeaders(std::string fastaFilePath, uintmax_t ram_b) {
       continue;
     }
     else {
-      /*
-      for (auto seq : hashData[i]) {
-        currOldHeader = seq.get_header();
-        currNewHeader = newPrefix + currOldHeader.substr(currOldHeader.find("_"));
-        fastaHashTable.setSeqHeader(currOldHeader, currNewHeader);
-      }
-      */
       hashData[i].updateSeqHead(newPrefix);
     }
   }
@@ -45,7 +38,6 @@ void isolateReads(const std::vector<SRA> & sras, std::string fastaInput, std::st
   transcript dummyTrans;
 
   // Create index of fastaInput with Salmon
-  //transcript transTemp(sras[0]);
   transcript transTemp(fastaInput, cfgIni);
   // Check if indexing checkpoint exists
   fastaIndex = std::string(transTemp.get_trans_path_trinity().parent_path().c_str()) + "/" +
@@ -293,13 +285,6 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
   uintmax_t ram_b = (uintmax_t)stoi(ram_gb) * 1000000000;
 
   for (auto sraGroup : sraGroups) {
-    for (auto sra : sraGroup.second) {
-      std::cout << sra.get_accession() << std::endl;
-    }
-    std::cout << std::endl;
-  }
-
-  for (auto sraGroup : sraGroups) {
     SRA dummySra = sraGroup.second.at(0);
     cpDir = dummySra.get_fastqc_dir_2().first.parent_path().parent_path().parent_path() / "checkpoints";
 
@@ -372,7 +357,7 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
 
     // Perform assembly for reads of interest (those that map to provided FASTA)
     if (assembSeqsInterest) {
-      logOutput("Now assembling reads that map to:\n  " + fastaSeqsFile, logFile);
+      logOutput("  Now assembling reads that map to:\n  " + fastaSeqsFile, logFile);
       if (!groupCheckpointExists(std::string(cpDir.c_str()), sraGroup.first + ".mapped")) {
         if (sraRunsInterest.size() > 1) {
           run_trinity_comb(sraRunsInterest, currTrinOutInt, threads, ram_gb, dispOutput, logFile);
@@ -388,13 +373,13 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
         //updateHeaders(currTrinOutInt, ram_b);
       }
       else {
-        logOutput("  Mapped assembly checkpoint found", logFile);
+        logOutput("    Mapped assembly checkpoint found for: " + sraGroup.first, logFile);
       }
       sraRunsInterest.clear();
     }
     // Perform assembly for reads of no interest (those that DO NOT map to provided FASTA)
     if (assembSeqsNoInterest) {
-      logOutput("Now assembling reads that do not map to:\n  " + fastaSeqsFile, logFile);
+      logOutput("  Now assembling reads that do not map to:\n  " + fastaSeqsFile, logFile);
       if (!groupCheckpointExists(std::string(cpDir.c_str()), sraGroup.first + ".unmapped")) {
         if (sraRunsNoInterest.size() > 1) {
           run_trinity_comb(sraRunsNoInterest, currTrinOutNon, threads, ram_gb, dispOutput, logFile);
@@ -410,13 +395,13 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
         //updateHeaders(currTrinOutNon, ram_b);
       }
       else {
-        logOutput("  Unmapped assembly checkpoint found", logFile);
+        logOutput("    Unmapped assembly checkpoint found for: " + sraGroup.first, logFile);
       }
       sraRunsNoInterest.clear();
     }
     // Perform assembly for all reads
     if (assembAllSeqs) {
-      logOutput("Now assembling all reads", logFile);
+      logOutput("  Now assembling all reads", logFile);
       if (!groupCheckpointExists(std::string(cpDir.c_str()), sraGroup.first)) {
         if (sraRunsInTrin.size() > 1) {
           run_trinity_comb(sraRunsInTrin, currTrinOutAll, threads, ram_gb, dispOutput, logFile);
@@ -432,7 +417,7 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
         //updateHeaders(currTrinOutAll, ram_b);
       }
       else {
-        logOutput("  Global assembly checkpoint found", logFile);
+        logOutput("    Global assembly checkpoint found for: " + sraGroup.first, logFile);
       }
       sraRunsInTrin.clear();
     }
