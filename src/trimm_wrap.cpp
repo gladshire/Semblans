@@ -5,7 +5,7 @@ void run_trimmomatic(std::pair<std::string, std::string> sraRunIn,
                      std::pair<std::string, std::string> sraRunOutP,
                      std::pair<std::string, std::string> sraRunOutU,
                      std::string threads, std::string maxSeedMismatch,
-                     std::string minMatchPaired, std::string minMatchAny,
+                     std::string minScorePaired, std::string minScoreSingle,
                      std::string windowSize, std::string windowMinQuality,
                      std::string minQualityLead, std::string minQualityTrail,
                      std::string minReadLength, std::string numBpCutFront,
@@ -34,7 +34,7 @@ void run_trimmomatic(std::pair<std::string, std::string> sraRunIn,
   }
   std::string trimmCmd("java -jar " + PATH_TRIMM);
   std::string trimmFlags("-threads " + threads + " " + "ILLUMINACLIP:" +
-                         TRUSEQ_ALL + ":" + maxSeedMismatch + ":" + minMatchPaired + ":" + minMatchAny +
+                         TRUSEQ_ALL + ":" + maxSeedMismatch + ":" + minScorePaired + ":" + minScoreSingle +
                          " SLIDINGWINDOW:" + windowSize + ":" + windowMinQuality +
                          " LEADING:" + minQualityLead + " TRAILING:" + minQualityTrail +
                          " MINLEN:" + minReadLength + " HEADCROP:" + numBpCutFront);

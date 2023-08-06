@@ -2,7 +2,8 @@
 
 // Given an SRA run's sequence files, correct base pair errors with Rcorrector
 void run_rcorr(std::pair<std::string, std::string> sraRun, std::string outDir,
-               std::string threads, bool dispOutput, bool compressFiles,
+               std::string threads, std::string kmerLength, std::string maxCorrK,
+               std::string weakProportion, bool dispOutput, bool compressFiles,
                std::string logFile) {
   std::string inFile1 = sraRun.first;
   std::string inFile2 = sraRun.second;
@@ -30,10 +31,12 @@ void run_rcorr(std::pair<std::string, std::string> sraRun, std::string outDir,
   }
   std::string rcorrCmd;
   if (isPaired) {
-    rcorrCmd = "( perl " + PATH_RCORR + " -t " + threads + " -1 " + inFile1 + " -2 " + inFile2;
+    rcorrCmd = "( perl " + PATH_RCORR + " -t " + threads + " -1 " + inFile1 + " -2 " + inFile2 +
+               " -k " + kmerLength + " -maxcorK " + maxCorrK + " -wk " + weakProportion;
   }
   else {
-    rcorrCmd = "( perl " + PATH_RCORR + " -t " + threads + " -s " + inFile1;
+    rcorrCmd = "( perl " + PATH_RCORR + " -t " + threads + " -s " + inFile1 +
+               " -k " + kmerLength + " -maxcorK " + maxCorrK + " -wk " + weakProportion;
   }
   if (compressFiles) {
     std::string sraPathL = outDir + "/" + std::string(fs::path(sraRun.first.c_str()).stem().stem().c_str()) + ".cor.fq.gz";

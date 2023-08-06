@@ -208,6 +208,10 @@ void errorCorrBulk(const std::vector<SRA> & sras, std::string threads,
                    bool dispOutput, bool retainInterFiles, bool compressFiles,
                    std::string logFilePath, const INI_MAP & cfgIni) {
   logOutput("\nStarting error correction", logFilePath);
+  INI_MAP_ENTRY rcorrSettings = cfgIni.at("Rcorrector settings");
+  std::string kmerLength = rcorrSettings.at("kmer_length");
+  std::string maxCorrK = rcorrSettings.at("max_corrections_per_kmer_window");
+  std::string weakProportion = rcorrSettings.at("weak_kmer_proportion_threshold");
   std::pair<std::string, std::string> currRcorrIn;
   std::string rcorrOutDir;
   for (auto sra : sras) {
@@ -225,7 +229,8 @@ void errorCorrBulk(const std::vector<SRA> & sras, std::string threads,
 
     procRunning = true;
     std::thread rcorrThread(progressAnim,2);
-    run_rcorr(currRcorrIn, rcorrOutDir, threads, dispOutput, compressFiles, logFilePath);
+    run_rcorr(currRcorrIn, rcorrOutDir, threads, kmerLength, maxCorrK, weakProportion,
+              dispOutput, compressFiles, logFilePath);
     procRunning = false;
     rcorrThread.join();
 
@@ -293,8 +298,8 @@ void trimBulk(const std::vector<SRA> & sras, std::string threads,
   std::pair<std::string, std::string> currTrimOutP;
   std::pair<std::string, std::string> currTrimOutU;
   std::string maxSeedMismatch = trimmSettings.at("max_allowed_seed_mismatch");
-  std::string minMatchPaired = trimmSettings.at("min_matches_for_paired");
-  std::string minMatchAny = trimmSettings.at("min_matches_for_any");
+  std::string minScorePaired = trimmSettings.at("min_score_paired");
+  std::string minScoreSingle = trimmSettings.at("min_score_single");
   std::string windowSize = trimmSettings.at("sliding_window_size");
   std::string windowMinQuality = trimmSettings.at("sliding_window_min_quality");
   std::string minQualityLead = trimmSettings.at("min_quality_leading");
@@ -332,7 +337,7 @@ void trimBulk(const std::vector<SRA> & sras, std::string threads,
     procRunning = true;
     std::thread trimThread(progressAnim,2);
     run_trimmomatic(currTrimIn, currTrimOutP, currTrimOutU, threads,
-                    maxSeedMismatch, minMatchPaired, minMatchAny,
+                    maxSeedMismatch, minScorePaired, minScoreSingle,
                     windowSize, windowMinQuality, minQualityLead,
                     minQualityTrail, minReadLength, numBpCutFront,
                     dispOutput, logFilePath);
