@@ -53,8 +53,7 @@ void trimBulk(const std::vector<SRA> & sras, std::string threads,
               std::string logFilePath, const INI_MAP & cfgIni);
 
 void filtForeignBulk(const std::vector<SRA> & sras, std::vector<std::string> krakenDbs,
-                     std::string krakenConf, std::string threads,
-                     bool dispOutput, bool compressFiles, bool retainInterFiles,
+                     std::string threads, bool dispOutput, bool compressFiles, bool retainInterFiles,
                      std::string logFilePath, const INI_MAP & cfgIni);
 
 void remOverrepBulk(const std::vector<SRA> & sras, std::string threads, std::string ram_gb,

@@ -28,14 +28,17 @@ void pre_summary(SRA sra, std::string db, std::string logFile) {
 // Output both the classified and unclassified reads to new files
 void run_kraken2(std::pair<std::string, std::string> sraRunIn,
                  std::string sraRunOut, std::string repFile,
-                 std::string threads, std::string db, std::string conf_threshold,
+                 std::string threads, std::string db, std::string confThreshold,
+                 std::string minBaseQuality, std::string minHitGroups,
                  bool dispOutput, bool compressFiles, std::string logFile) {
 
   std::string inFile1 = sraRunIn.first;
   std::string inFile2 = sraRunIn.second;
   std::string outDir = std::string(fs::path(sraRunOut).parent_path().c_str());
   std::string krakCmd(PATH_KRAK2 + " --db " + db);
-  std::string krakFlags("--threads " + threads + " --confidence " + conf_threshold);
+  std::string krakFlags(" --threads " + threads + " --confidence " + confThreshold +
+                        " --minimum-base-quality " + minBaseQuality +
+                        " --minimum-hit-groups " + minHitGroups);
   std::string krakOutput;
   std::string printOut;
   std::string sraRunOutDir = fs::path(sraRunOut.c_str()).parent_path().c_str();

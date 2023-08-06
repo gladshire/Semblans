@@ -25,8 +25,8 @@ void print_intro(std::string logFile) {
 void print_help() {
   std::cout << "USAGE:\n" << std::endl;
   std::cout << "  semblans [--help/-h] [COMMAND] [--config/-cfg]\n"
-            << "           [--threads/-t] [--ram/-r] [--multi/-m]\n"
-            << "           [--retain/-f] [--verbose/-v]\n" << std::endl;
+            << "           [--threads/-t] [--ram/-r] [--retain/-f]\n"
+            << "           [--verbose/-v]\n" << std::endl;
   std::cout << "ARGUMENTS:\n" << std::endl;
   std::cout << "  [COMMAND]" << std::endl;
   std::cout << "    preprocess       Performs pre-assembly steps only" << std::endl;
@@ -36,7 +36,6 @@ void print_help() {
   std::cout << "  -cfg, --config     Specifies path to configuration file (REQUIRED)" << std::endl;
   std::cout << "  -t,   --threads    Specifies number of threads/CPU cores to employ" << std::endl;
   std::cout << "  -r,   --ram        Specifies ammount of memory/RAM (GB) to dedicate" << std::endl;
-  std::cout << "  -m,   --multi      Perform assembly from multiple SRA runs" << std::endl;
   std::cout << "  -f,   --retain     Prevents deletion of intermediate files in pipeline" << std::endl;
   std::cout << "  -v,   --verbose    Prints all output from Semblans and sub-programs" << std::endl;
   std::cout << "  -h,   --help       Displays this help screen" << std::endl;
@@ -51,7 +50,7 @@ int main(int argc, char * argv[]) {
   int ram;
   std::string pathConfig;
   std::string command;
-  bool multAssembly;
+  //bool multAssembly;
   bool useLocalData;
   bool retainInterFiles;
   bool verboseOutput;
@@ -75,7 +74,7 @@ int main(int argc, char * argv[]) {
     ram = 1;
     std::string pathConfig = "";
     std::string command = "";
-    multAssembly = false;
+    //multAssembly = false;
     retainInterFiles = false;
     verboseOutput = false;
 
@@ -181,6 +180,7 @@ int main(int argc, char * argv[]) {
       }
 
       // Check if user specified a multi-SRA assembly
+/*
       else if (strcmp("--multi", argv[i]) == 0 ||
                strcmp("--Multi", argv[i]) == 0 ||
                strcmp("--mult", argv[i]) == 0 ||
@@ -189,7 +189,7 @@ int main(int argc, char * argv[]) {
                strcmp("-M", argv[i]) == 0) {
         multAssembly = true;
       }
-
+*/
       else if (strcmp("--retain", argv[i]) == 0 ||
                strcmp("--Retain", argv[i]) == 0 ||
                strcmp("-f", argv[i]) == 0 ||
@@ -245,12 +245,12 @@ int main(int argc, char * argv[]) {
     std::string assCmd = PAANDO_DIR + "assemble " + pathConfig + " " +
                          std::to_string(numThreads) + " " +
                          std::to_string(ram);
-    if (multAssembly) {
+    /*if (multAssembly) {
       assCmd += " true";
     }
     else {
       assCmd += " false";
-    }
+    }*/
     assCmd += retain;
     assCmd += verbose;
     std::string postCmd = PAANDO_DIR + "postprocess " + pathConfig + " " +

@@ -16,4 +16,9 @@ namespace dl = boost::dll;
 void run_trimmomatic(std::pair<std::string, std::string> sraRunIn,
                      std::pair<std::string, std::string> sraRunOutP,
                      std::pair<std::string, std::string> sraRunOutU,
-                     std::string threads, bool dispOutput, std::string logFile);
+                     std::string threads, std::string maxSeedMismatch,
+                     std::string minMatchPaired, std::string minMatchAny,
+                     std::string windowSize, std::string windowMinQuality,
+                     std::string minQualityLead, std::string minQualityTrail,
+                     std::string minReadLength, std::string numBpCutFront,
+                     bool dispOutput, std::string logFile);

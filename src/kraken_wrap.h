@@ -21,7 +21,8 @@ void pre_summary(SRA sra, std::string db, std::string logFile);
 */
 void run_kraken2(std::pair<std::string, std::string> sraRunIn,
                  std::string sraRunOut, std::string repFile,
-                 std::string threads, std::string db, std::string conf_threshold,
+                 std::string threads, std::string db, std::string confThreshold,
+                 std::string minBaseQuality, std::string minHitGroups,
                  bool dispOutput, bool compressFiles, std::string logFile);
 
 

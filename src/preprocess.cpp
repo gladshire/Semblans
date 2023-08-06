@@ -288,9 +288,19 @@ void trimBulk(const std::vector<SRA> & sras, std::string threads,
               std::string logFilePath, const INI_MAP & cfgIni) {
   logOutput("\nStarting adapter sequence trimming", logFilePath);
   INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
+  INI_MAP_ENTRY trimmSettings = cfgIni.at("Trimmomatic settings");
   std::pair<std::string, std::string> currTrimIn;
   std::pair<std::string, std::string> currTrimOutP;
   std::pair<std::string, std::string> currTrimOutU;
+  std::string maxSeedMismatch = trimmSettings.at("max_allowed_seed_mismatch");
+  std::string minMatchPaired = trimmSettings.at("min_matches_for_paired");
+  std::string minMatchAny = trimmSettings.at("min_matches_for_any");
+  std::string windowSize = trimmSettings.at("sliding_window_size");
+  std::string windowMinQuality = trimmSettings.at("sliding_window_min_quality");
+  std::string minQualityLead = trimmSettings.at("min_quality_leading");
+  std::string minQualityTrail = trimmSettings.at("min_quality_trailing");
+  std::string minReadLength = trimmSettings.at("min_read_length");
+  std::string numBpCutFront = trimmSettings.at("cut_number_bp_from_front");
   for (auto sra : sras) {
     currTrimIn.first = sra.get_sra_path_corr_fix().first.c_str();
     currTrimIn.second = sra.get_sra_path_corr_fix().second.c_str();   
@@ -322,6 +332,9 @@ void trimBulk(const std::vector<SRA> & sras, std::string threads,
     procRunning = true;
     std::thread trimThread(progressAnim,2);
     run_trimmomatic(currTrimIn, currTrimOutP, currTrimOutU, threads,
+                    maxSeedMismatch, minMatchPaired, minMatchAny,
+                    windowSize, windowMinQuality, minQualityLead,
+                    minQualityTrail, minReadLength, numBpCutFront,
                     dispOutput, logFilePath);
     procRunning = false;
     trimThread.join();
@@ -346,11 +359,14 @@ void trimBulk(const std::vector<SRA> & sras, std::string threads,
 // Given a vector of SRA run objects, attempt to classify the reads from each sequence data
 // against several input databases
 void filtForeignBulk(const std::vector<SRA> & sras, std::vector<std::string> krakenDbs,
-                     std::string krakenConf, std::string threads,
-                     bool dispOutput, bool compressFiles, bool retainInterFiles,
+                     std::string threads, bool dispOutput, bool compressFiles, bool retainInterFiles,
                      std::string logFilePath, const INI_MAP & cfgIni) {
   logOutput("\nStarting foreign sequence filtering", logFilePath);
   INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
+  INI_MAP_ENTRY krakenSettings = cfgIni.at("Kraken2 settings");
+  std::string confThreshold = krakenSettings.at("confidence_threshold");
+  std::string minBaseQuality = krakenSettings.at("min_base_quality");
+  std::string minHitGroups = krakenSettings.at("min_hit_groups");
   std::pair<std::string, std::string> firstKrakIn;
   std::pair<std::string, std::string> currKrakIn;
   std::string krakOutDir;
@@ -408,9 +424,10 @@ void filtForeignBulk(const std::vector<SRA> & sras, std::vector<std::string> kra
         currKrakOut = krakOutDir + "/TMP.fq";
       }
       procRunning = true;
-      std::thread krakThread(progressAnim,2);
+      std::thread krakThread(progressAnim, 2);
       run_kraken2(currKrakIn, currKrakOut, repFile, threads, krakenDbs[i],
-                  krakenConf, dispOutput, compressFiles, logFilePath);
+                  confThreshold, minBaseQuality, minHitGroups,
+                  dispOutput, compressFiles, logFilePath);
       procRunning = false;
       krakThread.join();
 
@@ -694,7 +711,7 @@ int main(int argc, char * argv[]) {
     if (ini_get_bool(cfgPipeline.at("filter_foreign_reads").c_str(), 0)) {
       std::vector<std::string> krakenDbs = get_kraken2_dbs(cfgIni);
       std::string krakenConf = get_kraken2_conf(cfgIni);
-      filtForeignBulk(sras, krakenDbs, krakenConf, threads,
+      filtForeignBulk(sras, krakenDbs, threads,
                       dispOutput, compressFiles, retainInterFiles, logFilePath, cfgIni);
     }
 

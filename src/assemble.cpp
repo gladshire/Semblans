@@ -454,7 +454,7 @@ int main(int argc, char * argv[]) {
     std::string ram_gb = argv[3];
 
     // Get boolean for multiple sra processing
-    bool mult_sra = stringToBool(argv[4]);
+    // bool mult_sra = stringToBool(argv[4]);
 
     // Get boolean for intermediate file fate
     bool retainInterFiles = stringToBool(argv[5]);
