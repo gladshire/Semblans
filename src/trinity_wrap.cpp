@@ -154,11 +154,13 @@ void run_trinity_comb(std::vector<std::pair<std::string, std::string>> sraRuns,
              " --no_normalize_reads" + " --run_as_paired" + " --output " + outFile + printOut; 
   
   // Run Trinity assembly
-  procRunning = true;
-  std::thread trinProgThread(progressAnim,2);
-  result = system(trin_cmd.c_str());
-  procRunning = false;
-  trinProgThread.join();
+  if (!dispOutput) {
+    procRunning = true;
+    std::thread trinProgThread(progressAnim,2);
+    result = system(trin_cmd.c_str());
+    procRunning = false;
+    trinProgThread.join();
+  }
 
   if (WIFSIGNALED(result)) {
     system("setterm -cursor on");
