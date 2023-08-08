@@ -79,14 +79,12 @@ void blastxDiamBulk(const std::vector<transcript> & transVec, std::string thread
     // Run BlastX
     currBlastDbName = std::string(fs::path(refProt.c_str()).stem().c_str());
    
-    if (!dispOutput) { 
-      procRunning = true;
-      std::thread blastxThread(progressAnim, 2);
-      blastxDiam(currTransInDiam, blastDbDir + currBlastDbName, threads,
-                 blastDbDir, dispOutput, logFilePath);
-      procRunning = false;
-      blastxThread.join();
-    }
+    procRunning = true;
+    std::thread blastxThread(progressAnim, 2);
+    blastxDiam(currTransInDiam, blastDbDir + currBlastDbName, threads,
+               blastDbDir, dispOutput, logFilePath);
+    procRunning = false;
+    blastxThread.join();
 
     // Create BlastX checkpoint
     trans.makeCheckpoint("blastx");
@@ -122,15 +120,13 @@ void remChimeraBulk(const std::vector<transcript> & transVec, std::string ram_gb
     currTransCut = trans.get_trans_path_ccut().c_str();
     chimOutDir = trans.get_trans_path_chimera().parent_path().c_str();
 
-    if (!dispOutput) {
-      procRunning = true;
-      std::thread chimeraThread(progressAnim, 2);
-      detect_chimera(currBlastx, chimOutDir);
-      removeChimera(currTransInChim, currTransOutChim, currTransInfo, currTransCut, ram_gb,
-                    logFilePath);
-      procRunning = false;
-      chimeraThread.join();
-    }
+    procRunning = true;
+    std::thread chimeraThread(progressAnim, 2);
+    detect_chimera(currBlastx, chimOutDir);
+    removeChimera(currTransInChim, currTransOutChim, currTransInfo, currTransCut, ram_gb,
+                  logFilePath);
+    procRunning = false;
+    chimeraThread.join();
 
     // Create chimera removal checkpoint
     trans.makeCheckpoint("chim.fix");
@@ -191,13 +187,11 @@ void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
       summarize_sing_trans(trans, logFilePath, 4);
 
       // Create index of assembled transcripts
-      if (!dispOutput) {
-        procRunning = true;
-        std::thread salmIdxThread(progressAnim, 2);
-        salmon_index(currTransInSalm, currIndex, threads, dispOutput, logFilePath);
-        procRunning = false;
-        salmIdxThread.join();
-      }
+      procRunning = true;
+      std::thread salmIdxThread(progressAnim, 2);
+      salmon_index(currTransInSalm, currIndex, threads, dispOutput, logFilePath);
+      procRunning = false;
+      salmIdxThread.join();
 
       // Create index checkpoint
       trans.makeCheckpoint("index");
@@ -213,14 +207,12 @@ void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
       summarize_sing_trans(trans, logFilePath, 4);
 
       // Quantify reads mapped to transcript index
-      if (!dispOutput) {
-        procRunning = true;
-        std::thread salmQntThread(progressAnim, 2);
-        salmon_quant(currTransInSalm, currIndex, currQuant, currSraRunsIn, threads,
-                     dispOutput, logFilePath);
-        procRunning = false;
-        salmQntThread.join();
-      }
+      procRunning = true;
+      std::thread salmQntThread(progressAnim, 2);
+      salmon_quant(currTransInSalm, currIndex, currQuant, currSraRunsIn, threads,
+                   dispOutput, logFilePath);
+      procRunning = false;
+      salmQntThread.join();
 
       // Create salmon quant checkpoint
       trans.makeCheckpoint("quant");
@@ -271,14 +263,12 @@ void corsetBulk(const std::vector<transcript> & transVec, std::string ram_gb,
     currOutDir = trans.get_trans_path_clust().parent_path().c_str();
    
     // Perform corset run
-    if (!dispOutput) {
-      procRunning = true;
-      std::thread clustThread(progressAnim, 2);
-      corset_eq_classes(trans.get_file_prefix(), currEqClassFile, currOutDir,
-                        dispOutput, logFilePath);
-      procRunning = false;
-      clustThread.join();
-    }
+    procRunning = true;
+    std::thread clustThread(progressAnim, 2);
+    corset_eq_classes(trans.get_file_prefix(), currEqClassFile, currOutDir,
+                      dispOutput, logFilePath);
+    procRunning = false;
+    clustThread.join();
 
     // Create corset run checkpoint
     trans.makeCheckpoint("clust");
@@ -355,16 +345,14 @@ void transdecBulk(const std::vector<transcript> & transVec, std::string threads,
     currOutDirTD = trans.get_trans_path_cds().parent_path().c_str();
        
     // Perform transdecoder run to obtain coding sequences / peptides
-    if (!dispOutput) {
-      procRunning = true;
-      std::thread transDecThread(progressAnim, 2);
-      run_transdecoder(currTransInTD, currTransCds, currTransPep, threads, ram_b,
-                       currDb, currOutDirTD, dispOutput, logFilePath);
-      // Create coding region prediction checkpoint
-      trans.makeCheckpoint("cdr.predict");
-      procRunning = false;
-      transDecThread.join();
-    }
+    procRunning = true;
+    std::thread transDecThread(progressAnim, 2);
+    run_transdecoder(currTransInTD, currTransCds, currTransPep, threads, ram_b,
+                     currDb, currOutDirTD, dispOutput, logFilePath);
+    // Create coding region prediction checkpoint
+    trans.makeCheckpoint("cdr.predict");
+    procRunning = false;
+    transDecThread.join();
   }
 }
 
@@ -392,14 +380,12 @@ void annotateBulk(const std::vector<transcript> & transVec, std::string threads,
     currTransOut = trans.get_trans_path_annot().c_str();
 
     // Perform annotation of transcript
-    if (!dispOutput) {
-      procRunning = true;
-      std::thread annotThread(progressAnim, 2);
-      annotateTranscript(currTransIn, currTransPep, currTransOut,
-                         threads, ram_gb, dispOutput, logFilePath, email);
-      procRunning = false;
-      annotThread.join();
-    }
+    procRunning = true;
+    std::thread annotThread(progressAnim, 2);
+    annotateTranscript(currTransIn, currTransPep, currTransOut,
+                       threads, ram_gb, dispOutput, logFilePath, email);
+    procRunning = false;
+    annotThread.join();
 
     // Create annotation checkpoint
     trans.makeCheckpoint("annotate");
