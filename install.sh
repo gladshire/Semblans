@@ -191,7 +191,7 @@ tar -xf salmon.tar.gz -C ./external/
 mv ./external/salmon* ./external/salmon
 cd ./external/salmon
 wget -q https://raw.githubusercontent.com/COMBINE-lab/salmon/master/LICENSE
-cd ../../../
+cd ../../
 rm salmon.tar.gz
 
 # Install TransDecoder
