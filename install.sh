@@ -149,6 +149,7 @@ wget -q --output-document trinity.tar.gz https://github.com/trinityrnaseq/trinit
 tar -xf trinity.tar.gz -C ./external/
 mv ./external/trinityrnaseq-v2.15.1 ./external/trinityrnaseq
 cd ./external/trinityrnaseq/
+echo -e "#include <string>\n$(cat trinity-plugins/bamsifter/sift_bam_max_cov.cpp)" > trinity-plugins/bamsifter/sift_bam_max_cov.cpp
 make
 cd ../../
 rm trinity.tar.gz
@@ -185,16 +186,11 @@ rm corset.tar.gz
 
 # Install Salmon
 echo "Installing Salmon ..."
-wget -q --output-document salmon.tar.gz https://github.com/COMBINE-lab/salmon/archive/refs/tags/v1.10.1.tar.gz
+wget -q --output-document salmon.tar.gz https://github.com/COMBINE-lab/salmon/releases/download/v1.10.0/salmon-1.10.0_linux_x86_64.tar.gz
 tar -xf salmon.tar.gz -C ./external/
-mv ./external/salmon-1.10.1 ./external/salmon
+mv ./external/salmon* ./external/salmon
 cd ./external/salmon
 wget -q https://raw.githubusercontent.com/COMBINE-lab/salmon/master/LICENSE
-mkdir build
-cd build
-cmake -DNO_IPO=TRUE -DBOOST_INCLUDEDIR="$(dirname "$(dirname "$(dirname "$PWD")")")/include" -DBOOST_LIBRARYDIR="$(dirname "$(dirname "$(dirname "$PWD")")")/lib" -S ../ -B .
-make
-make install
 cd ../../../
 rm salmon.tar.gz
 
