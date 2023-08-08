@@ -99,7 +99,7 @@ rm -rf data.pantherdb.org
 echo "Installing SRA-Tools ..."
 wget -q --output-document sratoolkit.tar.gz https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/current/sratoolkit.current-ubuntu64.tar.gz
 tar -xf sratoolkit.tar.gz -C ./external/
-mv ./external/sratoolkit.3.0.5* ./external/sratoolkit
+mv ./external/sratoolkit* ./external/sratoolkit
 cd ./external/sratoolkit
 wget -q https://raw.githubusercontent.com/ncbi/sra-tools/master/LICENSE
 cd ../../
