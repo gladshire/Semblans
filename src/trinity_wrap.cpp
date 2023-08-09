@@ -122,12 +122,18 @@ void run_trinity_comb(std::vector<std::pair<std::string, std::string>> sraRuns,
   std::string outComb(std::string(fs::path(outFile.c_str()).stem().c_str()) + ".comb.fastq");
   std::string outFileComb(std::string(fs::path(outFile.c_str()).parent_path().c_str()) + "/" +
                           outComb);
-  // Prepare combined SRA file for multiple assembly 
-  procRunning = true;
-  std::thread combProgThread(progressAnim,2);
-  std::string inFile = combine_reads(sraRuns, outFileComb, ram_b, logFile);
-  procRunning = false;
-  combProgThread.join();
+  // Prepare combined SRA file for multiple assembly
+  std::string inFile;
+  if (!dispOutput) {
+    procRunning = true;
+    std::thread combProgThread(progressAnim,2);
+    inFile = combine_reads(sraRuns, outFileComb, ram_b, logFile);
+    procRunning = false;
+    combProgThread.join();
+  }
+  else {
+    inFile = combine_reads(sraRuns, outFileComb, ram_b, logFile);
+  }
 
   // Summarize Trinity assembly job 
   logOutput("  Now assembling de-novo transcriptome for:\n", logFile);
