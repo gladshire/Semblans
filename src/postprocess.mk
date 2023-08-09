@@ -1,4 +1,4 @@
-CC = g++
+CC = g++ -std=c++11
 CFLAGS = '-Wl,-rpath,$$ORIGIN/../lib/' -g -pthread
 LIBS = -L../lib -lboost_system -lboost_filesystem -lboost_iostreams -ldl -lconfini -lcurl
 INCLUDE_PATH = -I../lib/ -I../include
