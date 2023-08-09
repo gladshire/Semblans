@@ -44,7 +44,7 @@ void errorCorrBulk(const std::vector<SRA> & sras, std::string threads,
                    bool dispOutput, bool retainInterFiles, bool compressFiles,
                    std::string logFilePath, const INI_MAP & cfgIni);
 
-void remUnfixBulk(const std::vector<SRA> & sras, std::string threads, std::string ram_gb,
+bool remUnfixBulk(const std::vector<SRA> & sras, std::string threads, std::string ram_gb,
                   bool dispOutput, bool retainInterFiles, bool compressFiles,
                   std::string logFilePath, const INI_MAP & cfgIni);
 
@@ -56,6 +56,6 @@ void filtForeignBulk(const std::vector<SRA> & sras, std::vector<std::string> kra
                      std::string threads, bool dispOutput, bool compressFiles, bool retainInterFiles,
                      std::string logFilePath, const INI_MAP & cfgIni);
 
-void remOverrepBulk(const std::vector<SRA> & sras, std::string threads, std::string ram_gb,
+bool remOverrepBulk(const std::vector<SRA> & sras, std::string threads, std::string ram_gb,
                     bool dispOutput, bool retainInterFiles, bool compressFiles,
                     std::string logFilePath, const INI_MAP & cfgIni);

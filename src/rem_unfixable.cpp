@@ -4,7 +4,7 @@
 
 // Given a paired-end SRA run's sequence data files post-Rcorrector,
 // remove all reads Rcorrector flagged as "unfixable error"
-void rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
+bool rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
                   std::pair<std::string, std::string> sraRunOut,
                   uintmax_t ram_b, bool compressFiles) {
   std::ifstream inFile1;
@@ -148,6 +148,11 @@ void rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
       outFile2.write(writeStart2, &inFile2Data[0] + s2 - writeStart2);
     }
   }
+  if (!inputStream1.good() || !inputStream2.good() || !inFile1.good() || !inFile2.good()) {
+    std::cerr << "ERROR: Writing output failed for:\n  "
+              << sraRunIn.first << "\n  " << sraRunIn.second << std::endl;
+    return false;
+  }
   if (!compressFiles) {
     inFile1.close();
     inFile2.close();
@@ -160,11 +165,12 @@ void rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
   }
   outFile1.close();
   outFile2.close();
+  return true;
 }
 
 // Given a single-end SRA run's sequence data file post-Rcorrector,
 // remove all reads Rcorrector flagged as "unfixable error"
-void rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
+bool rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
                   uintmax_t ram_b, bool compressFiles) {
 
   std::ifstream inFile;
@@ -242,6 +248,10 @@ void rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
         writeStart = nlPos;
       }
     }
+    if (!inFile.good() || !inputStream.good()) {
+      std::cerr << "ERROR: Writing output failed for:\n  " << sraRunIn << std::endl;
+      return false;
+    }
     if (compressFiles) {
       outputStream.write(writeStart, writeEnd + s - writeStart);
     }
@@ -257,4 +267,5 @@ void rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
     io::close(gzOutBuffer);
   }
   outFile.close();
+  return true;
 }

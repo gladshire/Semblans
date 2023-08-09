@@ -296,12 +296,13 @@ int main(int argc, char * argv[]) {
     if (command == "all") {
       logOutput("Performing entire assembly", logFilePath);
       result = system(preCmd.c_str());
-      if (WIFSIGNALED(result)) {
+      if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
+        std::cerr << "Preprocess exited" << std::endl;
         exit(1);
       }
       result = system(assCmd.c_str());
       if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
-        std::cout << "Assembly exited" << std::endl;
+        std::cerr << "Assembly exited" << std::endl;
         exit(1);
       }
       result = system(postCmd.c_str());

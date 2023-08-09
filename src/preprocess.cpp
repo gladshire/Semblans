@@ -264,13 +264,14 @@ void errorCorrBulk(const std::vector<SRA> & sras, std::string threads,
 
 // Given a vector of SRA run objects post-Rcorrector, remove all "unfixable error" reads
 // identified by Rcorrector
-void remUnfixBulk(const std::vector<SRA> & sras, std::string threads, std::string ram_gb,
+bool remUnfixBulk(const std::vector<SRA> & sras, std::string threads, std::string ram_gb,
                   bool dispOutput, bool retainInterFiles, bool compressFiles,
                   std::string logFilePath, const INI_MAP & cfgIni) {
   logOutput("\nStarting post-correction removal of unfixable reads", logFilePath);
   std::pair<std::string, std::string> currCorrFixIn;
   std::pair<std::string, std::string> currCorrFixOut;
   uintmax_t ram_b = (uintmax_t)stoi(ram_gb) * 1000000000;
+  bool writeSuccess;
   for (auto sra : sras) {
     currCorrFixIn.first = sra.get_sra_path_corr().first.c_str();
     currCorrFixIn.second = sra.get_sra_path_corr().second.c_str();
@@ -289,23 +290,25 @@ void remUnfixBulk(const std::vector<SRA> & sras, std::string threads, std::strin
       procRunning = true;
       std::thread fixThread(progressAnim,2);
       if (sra.is_paired()) {
-        rem_unfix_pe(currCorrFixIn, currCorrFixOut, ram_b, compressFiles); 
+        writeSuccess = rem_unfix_pe(currCorrFixIn, currCorrFixOut, ram_b, compressFiles); 
       }
       else {
-        rem_unfix_se(currCorrFixIn.first, currCorrFixOut.first, ram_b, compressFiles);
+        writeSuccess = rem_unfix_se(currCorrFixIn.first, currCorrFixOut.first, ram_b, compressFiles);
       }
       procRunning = false;
       fixThread.join();
     }
     else {
       if (sra.is_paired()) {
-        rem_unfix_pe(currCorrFixIn, currCorrFixOut, ram_b, compressFiles); 
+        writeSuccess = rem_unfix_pe(currCorrFixIn, currCorrFixOut, ram_b, compressFiles); 
       }
       else {
-        rem_unfix_se(currCorrFixIn.first, currCorrFixOut.first, ram_b, compressFiles);
+        writeSuccess = rem_unfix_se(currCorrFixIn.first, currCorrFixOut.first, ram_b, compressFiles);
       }
     }
-
+    if (!writeSuccess) {
+      return false;
+    }
     // Make checkpoint file
     sra.makeCheckpoint("corr.fix");
 
@@ -317,6 +320,7 @@ void remUnfixBulk(const std::vector<SRA> & sras, std::string threads, std::strin
       }
     }
   }
+  return true;
 }
 
 // Given a vector of SRA run objects, trim adapter sequences from the reads in each's sequence
@@ -555,7 +559,7 @@ void filtForeignBulk(const std::vector<SRA> & sras, std::vector<std::string> kra
 
 // Given a vector of SRA run objects post-FastQC, remove any reads containing overrepresented
 // sequences from each's sequence data, as identified by FastQC
-void remOverrepBulk(const std::vector<SRA> & sras, std::string threads, std::string ram_gb,
+bool remOverrepBulk(const std::vector<SRA> & sras, std::string threads, std::string ram_gb,
                     bool dispOutput, bool retainInterFiles, bool compressFiles,
                     std::string logFilePath, const INI_MAP & cfgIni) {
   INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
@@ -567,6 +571,7 @@ void remOverrepBulk(const std::vector<SRA> & sras, std::string threads, std::str
   std::pair<std::string, std::string> currOrepOut;
   fs::path fastqcDir;
 
+  bool writeSuccess;
   for (auto sra : sras) {
     // Check for checkpoint file
     if (sra.checkpointExists("orep.fix")) {
@@ -604,23 +609,26 @@ void remOverrepBulk(const std::vector<SRA> & sras, std::string threads, std::str
       std::thread orepThread(progressAnim, 2);
       if (sra.is_paired()) {
         currOrepSeqsPe = get_overrep_seqs_pe(sra);
-        rem_overrep_pe(currOrepIn, currOrepOut, ram_b, compressFiles, currOrepSeqsPe);
+        writeSuccess = rem_overrep_pe(currOrepIn, currOrepOut, ram_b, compressFiles, currOrepSeqsPe);
       }
       else {
         currOrepSeqsSe = get_overrep_seqs_se(sra);
-        rem_overrep_se(currOrepIn.first, currOrepOut.first, ram_b, compressFiles, currOrepSeqsSe);
+        writeSuccess = rem_overrep_se(currOrepIn.first, currOrepOut.first, ram_b, compressFiles, currOrepSeqsSe);
       }
       orepThread.join();
     }
     else {
       if (sra.is_paired()) {
         currOrepSeqsPe = get_overrep_seqs_pe(sra);
-        rem_overrep_pe(currOrepIn, currOrepOut, ram_b, compressFiles, currOrepSeqsPe);
+        writeSuccess = rem_overrep_pe(currOrepIn, currOrepOut, ram_b, compressFiles, currOrepSeqsPe);
       }
       else {
         currOrepSeqsSe = get_overrep_seqs_se(sra);
-        rem_overrep_se(currOrepIn.first, currOrepOut.first, ram_b, compressFiles, currOrepSeqsSe);
+        writeSuccess = rem_overrep_se(currOrepIn.first, currOrepOut.first, ram_b, compressFiles, currOrepSeqsSe);
       }
+    }
+    if (!writeSuccess) {
+      return false;
     }
 
     // Make checkpoint file
@@ -639,6 +647,7 @@ void remOverrepBulk(const std::vector<SRA> & sras, std::string threads, std::str
     fs::remove_all(fs::path(currOrepIn.first.c_str()).parent_path());
     fs::remove_all(fs::path(fastqcDir));
   }
+  return true;
 }
 
 int main(int argc, char * argv[]) {
@@ -708,6 +717,7 @@ int main(int argc, char * argv[]) {
       localDataDir += "/";
     }
     size_t pos;
+    bool stepSucess;
     for (auto sraRun : localDataFiles) {
       sraRunsLocal.first = "";
       sraRunsLocal.second = "";
@@ -760,7 +770,10 @@ int main(int argc, char * argv[]) {
       errorCorrBulk(sras, threads, dispOutput, retainInterFiles, compressFiles, logFilePath, cfgIni);
     
       // Remove reads with unfixable errors
-      remUnfixBulk(sras, threads, ram_gb, dispOutput, retainInterFiles, compressFiles, logFilePath, cfgIni);
+      stepSuccess = remUnfixBulk(sras, threads, ram_gb, dispOutput, retainInterFiles, compressFiles, logFilePath, cfgIni);
+      if (!stepSuccess) {
+        exit(1);
+      }
     }
 
     // Adapter sequence trimming stage
@@ -781,7 +794,10 @@ int main(int argc, char * argv[]) {
 
     // Remove reads with over-represented sequences
     if (ini_get_bool(cfgPipeline.at("remove_overrepresented").c_str(), 0)) {
-      remOverrepBulk(sras, threads, ram_gb, dispOutput, retainInterFiles, compressFiles, logFilePath, cfgIni);
+      stepSuccess = remOverrepBulk(sras, threads, ram_gb, dispOutput, retainInterFiles, compressFiles, logFilePath, cfgIni);
+      if (!stepSuccess) {
+        exit(1);
+      }
     }
   }
   system("setterm -cursor on");

@@ -76,7 +76,7 @@ std::vector<std::string> get_overrep_seqs_se(SRA sra) {
 
 // Given a paired-end SRA run's sequence data files and vectors containing its
 // overrepresented sequences, parse the files and remove reads containing these sequences
-void rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
+bool rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
                     std::pair<std::string, std::string> sraRunOut,
                     uintmax_t ram_b, bool compressFiles,
                     std::pair<std::vector<std::string>, std::vector<std::string>> overrepSeqs) {
@@ -259,6 +259,11 @@ void rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
       outFile2.write(writeStart2, &inFile2Data[0] + s2 - writeStart2);
     }
   }
+  if (!inputStream1.good() || !inputStream2.good() || !inFile1.good() || !inFile2.good()) {
+    std::cerr << "ERROR: Writing output failed for:\n  "
+              << sraRunIn.first << "\n  " << sraRunIn.second << std::endl;
+    return false;
+  }
   if (!compressFiles) {
     inFile1.close();
     inFile2.close();
@@ -271,12 +276,12 @@ void rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
   }
   outFile1.close();
   outFile2.close();
-
+  return true;
 }
 
 // Given a single-end SRA run's sequence data file and a vector containing its
 // overrepresented sequences, parse the file and remove reads containing these sequences
-void rem_overrep_se(std::string sraRunIn, std::string sraRunOut,
+bool rem_overrep_se(std::string sraRunIn, std::string sraRunOut,
                     uintmax_t ram_b, bool compressFiles,
                     std::vector<std::string> overrepSeqs) {
   std::ifstream inFile(sraRunIn);
@@ -372,6 +377,9 @@ void rem_overrep_se(std::string sraRunIn, std::string sraRunOut,
       outFile.write(writeStart, &inFileData[0] + s - writeStart);
     }
   }
+  if (!inFile.good() || !inputStream.good()) {
+    return false;
+  }
   if (!compressFiles) {
     inFile.close();
   }
@@ -380,6 +388,6 @@ void rem_overrep_se(std::string sraRunIn, std::string sraRunOut,
     io::close(gzOutBuffer);
   }
   outFile.close();
-
+  return true;
 }
 

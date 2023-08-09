@@ -14,9 +14,9 @@
 namespace io = boost::iostreams;
 
 
-void rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
+bool rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
                   std::pair<std::string, std::string> sraRunOut,
                   uintmax_t ram_b, bool compressFiles);
 
-void rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
+bool rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
                   uintmax_t ram_b, bool compressFiles);
