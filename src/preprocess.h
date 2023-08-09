@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <boost/filesystem.hpp>
 #include <boost/dll.hpp>
+#include <boost/regex.hpp>
 #include "sra.h"
 #include "ini_parse.h"
 #include "sra_toolkit.h"

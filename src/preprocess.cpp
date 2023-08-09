@@ -334,6 +334,12 @@ void trimBulk(const std::vector<SRA> & sras, std::string threads,
   std::pair<std::string, std::string> currTrimIn;
   std::pair<std::string, std::string> currTrimOutP;
   std::pair<std::string, std::string> currTrimOutU;
+  std::pair<std::string, std::string> currSraFastqc;
+  std::ifstream inFile1;
+  std::ifstream inFile2;
+  std::string currLine;
+  std::string::const_iterator sStart, sEnd;
+  bool inFilesGood;
   std::string maxSeedMismatch = trimmSettings.at("max_allowed_seed_mismatch");
   std::string minScorePaired = trimmSettings.at("min_score_paired");
   std::string minScoreSingle = trimmSettings.at("min_score_single");
@@ -352,6 +358,40 @@ void trimBulk(const std::vector<SRA> & sras, std::string threads,
       currTrimIn.second = sra.get_sra_path_raw().second.c_str();
     }
 
+    // Check SRA FastQC output to discern whether trimming is necessary
+    currSraFastqc.first = std::string(sra.get_fastqc_dir_1().first.c_str()) + "_fastqc.html";
+    currSraFastqc.second = std::string(sra.get_fastqc_dir_1().second.c_str()) + "_fastqc.html";
+    inFile1.open(currSraFastqc.first);
+    inFile2.open(currSraFastqc.second);
+
+    boost::regex rgx("(?<=\[)(.*?)(Adapter Content)");
+    boost::smatch res;
+
+    while (getline(inFile1, currLine));
+    sStart = currLine.begin();
+    sEnd = currLine.end();
+    boost::regex_search(sStart, sEnd, res, rgx);
+    if (res.str().substr(0, 2) == "OK") {
+      inFilesGood = true;
+    }
+    else {
+      inFilesGood = false;
+    }
+
+    if (sra.is_paired()) {
+      while (getline(inFile2, currLine));
+      sStart = currLine.begin();
+      sEnd = currLine.end();
+      boost::regex_search(sStart, sEnd, res, rgx);
+      if (res.str().substr(0, 2) == "OK") {
+        inFilesGood = true;
+      }
+      else {
+        inFilesGood = false;
+      }
+    }
+
+    // Create strings for output file paths
     currTrimOutU.first = sra.get_sra_path_trim_u().first.c_str();
     currTrimOutU.second = "";
 
@@ -363,6 +403,18 @@ void trimBulk(const std::vector<SRA> & sras, std::string threads,
       currTrimOutP.first = sra.get_sra_path_trim_p().first.c_str();
       currTrimOutP.second = sra.get_sra_path_trim_p().second.c_str();
     }
+
+    // If both files pass for adapter contamination check, skip SRA run
+    if (inFilesGood) {
+      if (sra.is_paired()) {
+        system(("cp " + currTrimIn.first + " " + currTrimOutU.first).c_str());
+      }
+      else {
+        system(("cp " + currTrimIn.first + " " + currTrimOutP.first).c_str());
+        system(("cp " + currTrimIn.second + " " + currTrimOutP.second).c_str());
+      }
+    }
+
     // Check for checkpoint file
     if (sra.checkpointExists("trim")) {
       logOutput("  Adapter trimming checkpoint found for: " + sra.get_accession(), logFilePath);
