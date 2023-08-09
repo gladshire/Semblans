@@ -717,7 +717,7 @@ int main(int argc, char * argv[]) {
       localDataDir += "/";
     }
     size_t pos;
-    bool stepSucess;
+    bool stepSuccess;
     for (auto sraRun : localDataFiles) {
       sraRunsLocal.first = "";
       sraRunsLocal.second = "";
@@ -761,9 +761,9 @@ int main(int argc, char * argv[]) {
     preSummary(sras, logFilePath, threads, ram_gb, retainInterFiles, compressFiles);
 
     // Run initial fastqc on reads
-    if (ini_get_bool(cfgPipeline.at("pre_quality_check").c_str(), 0)) {
-      fastqcBulk1(sras, threads, dispOutput, logFilePath);
-    }
+    //if (ini_get_bool(cfgPipeline.at("pre_quality_check").c_str(), 0)) {
+    fastqcBulk1(sras, threads, dispOutput, logFilePath);
+    //}
 
     // Error-correction stage
     if (ini_get_bool(cfgPipeline.at("error_correction").c_str(), 0)) {

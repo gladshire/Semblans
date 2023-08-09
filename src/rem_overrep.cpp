@@ -96,7 +96,7 @@ bool rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
   if (overrepSeqs.first.empty() && overrepSeqs.second.empty()) {
     system(std::string("cp " + sraRunIn.first + " " + sraRunOut.first).c_str());
     system(std::string("cp " + sraRunIn.second + " " + sraRunOut.second).c_str());
-    return;
+    return true;
   }
 
   size_t lenOverrep1 = 0;
@@ -289,7 +289,7 @@ bool rem_overrep_se(std::string sraRunIn, std::string sraRunOut,
 
   if (overrepSeqs.empty()) {
     system(std::string("cp " + sraRunIn + " " + sraRunOut).c_str());
-    return;
+    return true;
   }
 
   size_t lenOverrep = overrepSeqs.front().size();
