@@ -77,6 +77,7 @@ void make_proj_space(const INI_MAP &iniFile, std::string pipeStage) {
   stepNum++;
 
   // If pipeline running pre-quality check, create its directory
+  /*
   currNum = getStepNum(stepNum);
   if (ini_get_bool(pipeSteps.at("pre_quality_check").c_str(), -1)) {
     stepDirs.push_back(currNum + "-" + allSteps[1]);
@@ -85,7 +86,11 @@ void make_proj_space(const INI_MAP &iniFile, std::string pipeStage) {
   }
   else {
     stepDirs.push_back(allSteps[1]);
-  }
+  }*/
+
+  stepDirs.push_back(currNum + "-" + allSteps[1]);
+  system(("mkdir " + projDir + currNum + "-" + allSteps[1] + " > /dev/null 2>&1").c_str());
+  stepNum++;
   
   // If pipeline running error correction, create its directory
   currNum = getStepNum(stepNum);
