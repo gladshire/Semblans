@@ -259,7 +259,7 @@ bool rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
       outFile2.write(writeStart2, &inFile2Data[0] + s2 - writeStart2);
     }
   }
-  if (!inputStream1.good() || !inputStream2.good() || !inFile1.good() || !inFile2.good()) {
+  if (!outputStream1.good() || !outputStream2.good() || !outFile1.good() || !outFile2.good()) {
     std::cerr << "ERROR: Writing output failed for:\n  "
               << sraRunIn.first << "\n  " << sraRunIn.second << std::endl;
     return false;
@@ -377,7 +377,7 @@ bool rem_overrep_se(std::string sraRunIn, std::string sraRunOut,
       outFile.write(writeStart, &inFileData[0] + s - writeStart);
     }
   }
-  if (!inFile.good() || !inputStream.good()) {
+  if (!outFile.good() || !outputStream.good()) {
     return false;
   }
   if (!compressFiles) {

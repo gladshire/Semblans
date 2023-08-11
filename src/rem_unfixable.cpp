@@ -148,7 +148,7 @@ bool rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
       outFile2.write(writeStart2, &inFile2Data[0] + s2 - writeStart2);
     }
   }
-  if (!inputStream1.good() || !inputStream2.good() || !inFile1.good() || !inFile2.good()) {
+  if (!outputStream1.good() || !outputStream2.good() || !outFile1.good() || !outFile2.good()) {
     std::cerr << "ERROR: Writing output failed for:\n  "
               << sraRunIn.first << "\n  " << sraRunIn.second << std::endl;
     return false;
@@ -248,7 +248,7 @@ bool rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
         writeStart = nlPos;
       }
     }
-    if (!inFile.good() || !inputStream.good()) {
+    if (!outFile.good() || !outputStream.good()) {
       std::cerr << "ERROR: Writing output failed for:\n  " << sraRunIn << std::endl;
       return false;
     }
