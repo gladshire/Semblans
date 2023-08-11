@@ -71,7 +71,6 @@ bool rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
   std::ostream outputStream2(&gzOutBuffer2);
  
   int numUnfix = 0;
- 
   while  ((!inputStream1.eof() && !inputStream2.eof() && !inFile1.eof() && !inFile2.eof()) &&
          (inputStream1.good() && inputStream2.good() && inFile1.good() && inFile2.good())) {
 
@@ -105,35 +104,34 @@ bool rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
       align_file_buffer(inFile1, inFile2, &inFile1Data[0], &inFile2Data[0], s1, s2);
     }
 
+    uintmax_t ct = 0;
     while (nlPos1 != inFile1L && nlPos2 != inFile2L) {
       nlPos1Prev = nlPos1;
       nlPos2Prev = nlPos2;
       nlPos1 = std::find(nlPos1 + 1, inFile1L, '\n');
       nlPos2 = std::find(nlPos2 + 1, inFile2L, '\n');
+      ct++;
       if (strncmp(nlPos1 - 5, "error", 5) == 0 ||
           strncmp(nlPos2 - 5, "error", 5) == 0) {
         numUnfix++;
-        if (numUnfix == 1) {
-          writeEnd1 = nlPos1Prev - 1;
-          writeEnd2 = nlPos2Prev - 1;
-        }
-        else {
-          writeEnd1 = nlPos1Prev;
-          writeEnd2 = nlPos2Prev;
-        }
+        writeEnd1 = nlPos1Prev;
+        writeEnd2 = nlPos2Prev;
  
-        if (compressFiles) {
-          outputStream1.write(writeStart1, writeEnd1 - writeStart1);
-          outputStream2.write(writeStart2, writeEnd2 - writeStart2);
-        }
-        else {
-          outFile1.write(writeStart1, writeEnd1 - writeStart1);
-          outFile2.write(writeStart2, writeEnd2 - writeStart2);
+        if (ct > 1) {
+          if (compressFiles) {
+            outputStream1.write(writeStart1, writeEnd1 - writeStart1);
+            outputStream2.write(writeStart2, writeEnd2 - writeStart2);
+          }
+          else {
+            outFile1.write(writeStart1, writeEnd1 - writeStart1);
+            outFile2.write(writeStart2, writeEnd2 - writeStart2);
+          }
         }
 
         for (int i = 0; i < 3; i++) {
           nlPos1 = std::find(nlPos1 + 1, inFile1L, '\n');
           nlPos2 = std::find(nlPos2 + 1, inFile2L, '\n');
+          ct++;
         }
         writeStart1 = nlPos1;
         writeStart2 = nlPos2;
@@ -230,20 +228,25 @@ bool rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
       }
     }
 
+    uintmax_t ct = 0;
     while (nlPos != inFileL) {
       nlPosPrev = nlPos;
       nlPos = std::find(nlPos + 1, inFileL, '\n');
+      ct++;
       if (strncmp(nlPos - 5, "error", 4) == 0) {
         writeEnd = nlPosPrev;
-        if (compressFiles) {
-          outputStream.write(writeStart, writeEnd - writeStart);
-        }
-        else {
-          outFile.write(writeStart, writeEnd - writeStart);
+        if (ct > 1) {
+          if (compressFiles) {
+            outputStream.write(writeStart, writeEnd - writeStart);
+          }
+          else {
+            outFile.write(writeStart, writeEnd - writeStart);
+          }
         }
 
         for (int i = 0; i < 3; i++) {
           nlPos = std::find(nlPos + 1, inFileL, '\n');
+          ct++;
         }
         writeStart = nlPos;
       }
