@@ -12,6 +12,9 @@ std::vector<SRA> get_sras(const INI_MAP &iniFile, bool dispOutput, bool compress
   if (!iniFile.at("SRA accessions").empty()) {
     for (auto sra : iniFile.at("SRA accessions")) {
       sras.push_back(SRA(sra.first, iniFile, dispOutput, compressFiles, logFile));
+      if (sras.back().get_accession() == "FAILURE") {
+        sras.pop_back();
+      }
     }
   }
   return sras;

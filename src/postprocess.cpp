@@ -516,7 +516,8 @@ int main(int argc, char * argv[]) {
       }
     }
     if (sras.empty()) {
-      std::cout << "ERROR: No SRA runs specified. Please check config file" << std::endl;
+      std::cout << "ERROR: No valid SRA data. Please check the configuration file." << std::endl;
+      exit(1);
     }
     
     std::vector<transcript> transVec;

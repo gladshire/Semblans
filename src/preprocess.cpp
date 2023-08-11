@@ -797,9 +797,10 @@ int main(int argc, char * argv[]) {
       }
     }
     
-    // Check if no SRAs specified
+    // Check for failure to obtain SRAs
     if (sras.empty()) {
-      logOutput("ERROR: No SRA runs specified. Please check config file", logFilePath);
+      logOutput("ERROR: No valid SRA data. Please check the configuration file.", logFilePath);
+      exit(1);
     }
 
     logOutput("\nRaw sequence data prepared for pre-assembly processing", logFilePath);

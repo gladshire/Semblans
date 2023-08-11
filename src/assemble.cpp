@@ -537,7 +537,8 @@ int main(int argc, char * argv[]) {
 
     // Check if no SRAs specified
     if (sras.empty()) {
-      std::cout << "ERROR: No SRA runs specified. Please check config file" << std::endl;
+      std::cout << "ERROR: No valid SRA data. Please check the configuration file." << std::endl;
+      exit(1);
     }
 
     // Get group specifications for SRAs

@@ -47,6 +47,12 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool dispOutput,
   int result;
   int numRetries = 0;
   while (true) {
+    // After 5 unsuccessful retries, 
+    if (numRetries == 5) {
+      logOutput("ERROR: Could not retrieve accession \'" + sra_accession + "\'", logFile);
+      this->sra_accession = "FAILURE";
+      break;
+    }
     system(curlCmdStr.c_str());
     std::this_thread::sleep_for(queryLim);
   
@@ -107,82 +113,85 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool dispOutput,
         logOutput("Throttled: too many requests. Retrying.", logFile);
       }
       queryLim *= 2;
+      fs::remove(fs::path(".tmp.xml"));
     }
   }
-  if (dispOutput) {
-    logOutput("Successfully retrieved information for: " + sra_accession, logFile);
-  }
-  fs::remove(fs::path(".tmp.xml"));
+  if (this->sra_accession != "FAILURE") {
+    if (dispOutput) {
+      logOutput("Successfully retrieved information for: " + sra_accession, logFile);
+    }
+    fs::remove(fs::path(".tmp.xml"));
 
-  std::string fileBase = make_file_str();
-  if (paired) {
-    file_prefix_1 = fileBase + "_1";
-    file_prefix_2 = fileBase + "_2";
-  }
-  else {
-    file_prefix_1 = fileBase;
-    file_prefix_2 = "";
-  }
-
-  std::string projPath((fs::path(outDir.c_str()) / fs::path(projName.c_str())).c_str());
-  projPath += "/";
-
-  extern std::vector<std::string> stepDirs;
-
-  if (compressedFiles) {
-    compressExt = ".gz";
-  }
-  else {
-    compressExt = "";
-  }
-
-  sra_path_raw_1  = (projPath + stepDirs[0] + fileBase + ".fastq" + compressExt).c_str();
-  fastqc_dir_1_1  = (projPath + stepDirs[1] + fileBase + "/" + fileBase).c_str();
-  sra_path_corr_1 = (projPath + stepDirs[2] + fileBase + ".cor.fq" + compressExt).c_str();
-  sra_path_corr_fix_1 = (projPath + stepDirs[2] + fileBase + ".cor.fix.fq" + compressExt).c_str();
-  sra_path_trim_u1 = (projPath + stepDirs[3] + fileBase + ".trim.fq" + compressExt).c_str();
-  sra_path_trim_p1 = (projPath + stepDirs[3] + fileBase + ".trim.fq" + compressExt).c_str();
-  sra_path_for_filt_1 = (projPath + stepDirs[4] + fileBase + ".filt.fq" + compressExt).c_str();
-  fastqc_dir_1_2 = (projPath + stepDirs[5] + fileBase + "/" + fileBase).c_str();
-  sra_path_orep_filt_1 = (projPath + stepDirs[6] + fileBase + ".orep.filt.fq" + compressExt).c_str();
- 
-  if (paired) {
-    std::string sra_path_raw_1_str(sra_path_raw_1.c_str());
-    std::string fastqc_dir_1_1_str(fastqc_dir_1_1.c_str());
-    std::string sra_path_corr_1_str(sra_path_corr_1.c_str());
-    std::string sra_path_corr_fix_1_str(sra_path_corr_fix_1.c_str());
-    std::string sra_path_trim_u1_str(sra_path_trim_u1.c_str());
-    std::string sra_path_trim_p1_str(sra_path_trim_u1.c_str());
-    std::string sra_path_for_filt_1_str(sra_path_for_filt_1.c_str());
-    std::string fastqc_dir_1_2_str(fastqc_dir_1_2.c_str());
-    std::string sra_path_orep_filt_1_str(sra_path_orep_filt_1.c_str());
-
-    int extIndMod;
-    if (compressedFiles) {
-      extIndMod = 3;
+    std::string fileBase = make_file_str();
+    if (paired) {
+      file_prefix_1 = fileBase + "_1";
+      file_prefix_2 = fileBase + "_2";
     }
     else {
-      extIndMod = 0;
+      file_prefix_1 = fileBase;
+      file_prefix_2 = "";
     }
-    sra_path_raw_1 = (sra_path_raw_1_str.insert(sra_path_raw_1_str.length() - 6 - extIndMod, "_1")).c_str();
-    fastqc_dir_1_1 = (fastqc_dir_1_1_str.insert(fastqc_dir_1_1_str.length(), "_1")).c_str();
-    sra_path_corr_1 = (sra_path_corr_1_str.insert(sra_path_corr_1_str.length() - 7 - extIndMod, "_1")).c_str();
-    sra_path_corr_fix_1 = (sra_path_corr_fix_1_str.insert(sra_path_corr_fix_1_str.length() - 11 - extIndMod, "_1")).c_str();
-    sra_path_trim_u1 = (sra_path_trim_u1_str.insert(sra_path_trim_u1_str.length() - 8 - extIndMod, "_1.unpaired")).c_str();
-    sra_path_trim_p1 = (sra_path_trim_p1_str.insert(sra_path_trim_p1_str.length() - 8 - extIndMod, "_1.paired")).c_str();
-    sra_path_for_filt_1 = (sra_path_for_filt_1_str.insert(sra_path_for_filt_1_str.length() - 8 - extIndMod, "_1")).c_str();
-    fastqc_dir_1_2 = (fastqc_dir_1_2_str.insert(fastqc_dir_1_2_str.length(), "_1")).c_str();
-    sra_path_orep_filt_1 = (sra_path_orep_filt_1_str.insert(sra_path_orep_filt_1_str.length() - 13 - extIndMod, "_1")).c_str();
 
-    sra_path_raw_2 = (projPath + stepDirs[0] + fileBase + "_2.fastq" + compressExt).c_str();
-    fastqc_dir_2_1 = (projPath + stepDirs[1] + fileBase + "/" + fileBase + "_2").c_str();
-    sra_path_corr_2 = (projPath + stepDirs[2] + fileBase + "_2.cor.fq" + compressExt).c_str();
-    sra_path_corr_fix_2 = (projPath + stepDirs[2] + fileBase + "_2.cor.fix.fq" + compressExt).c_str();
-    sra_path_trim_u2 = (projPath + stepDirs[3] + fileBase + "_2.unpaired.trim.fq" + compressExt).c_str();
-    sra_path_trim_p2 = (projPath + stepDirs[3] + fileBase + "_2.paired.trim.fq" + compressExt).c_str();
-    sra_path_for_filt_2 = (projPath + stepDirs[4] + fileBase + "_2.filt.fq" + compressExt).c_str();
-    fastqc_dir_2_2 = (projPath + stepDirs[5] + fileBase + "/" + fileBase + "_2").c_str();
-    sra_path_orep_filt_2 = (projPath + stepDirs[6] + fileBase + "_2.orep.filt.fq" + compressExt).c_str();
+    std::string projPath((fs::path(outDir.c_str()) / fs::path(projName.c_str())).c_str());
+    projPath += "/";
+
+    extern std::vector<std::string> stepDirs;
+
+    if (compressedFiles) {
+      compressExt = ".gz";
+    }
+    else {
+      compressExt = "";
+    }
+
+    sra_path_raw_1  = (projPath + stepDirs[0] + fileBase + ".fastq" + compressExt).c_str();
+    fastqc_dir_1_1  = (projPath + stepDirs[1] + fileBase + "/" + fileBase).c_str();
+    sra_path_corr_1 = (projPath + stepDirs[2] + fileBase + ".cor.fq" + compressExt).c_str();
+    sra_path_corr_fix_1 = (projPath + stepDirs[2] + fileBase + ".cor.fix.fq" + compressExt).c_str();
+    sra_path_trim_u1 = (projPath + stepDirs[3] + fileBase + ".trim.fq" + compressExt).c_str();
+    sra_path_trim_p1 = (projPath + stepDirs[3] + fileBase + ".trim.fq" + compressExt).c_str();
+    sra_path_for_filt_1 = (projPath + stepDirs[4] + fileBase + ".filt.fq" + compressExt).c_str();
+    fastqc_dir_1_2 = (projPath + stepDirs[5] + fileBase + "/" + fileBase).c_str();
+    sra_path_orep_filt_1 = (projPath + stepDirs[6] + fileBase + ".orep.filt.fq" + compressExt).c_str();
+
+    if (paired) {
+      std::string sra_path_raw_1_str(sra_path_raw_1.c_str());
+      std::string fastqc_dir_1_1_str(fastqc_dir_1_1.c_str());
+      std::string sra_path_corr_1_str(sra_path_corr_1.c_str());
+      std::string sra_path_corr_fix_1_str(sra_path_corr_fix_1.c_str());
+      std::string sra_path_trim_u1_str(sra_path_trim_u1.c_str());
+      std::string sra_path_trim_p1_str(sra_path_trim_u1.c_str());
+      std::string sra_path_for_filt_1_str(sra_path_for_filt_1.c_str());
+      std::string fastqc_dir_1_2_str(fastqc_dir_1_2.c_str());
+      std::string sra_path_orep_filt_1_str(sra_path_orep_filt_1.c_str());
+
+      int extIndMod;
+      if (compressedFiles) {
+	extIndMod = 3;
+      }
+      else {
+	extIndMod = 0;
+      }
+      sra_path_raw_1 = (sra_path_raw_1_str.insert(sra_path_raw_1_str.length() - 6 - extIndMod, "_1")).c_str();
+      fastqc_dir_1_1 = (fastqc_dir_1_1_str.insert(fastqc_dir_1_1_str.length(), "_1")).c_str();
+      sra_path_corr_1 = (sra_path_corr_1_str.insert(sra_path_corr_1_str.length() - 7 - extIndMod, "_1")).c_str();
+      sra_path_corr_fix_1 = (sra_path_corr_fix_1_str.insert(sra_path_corr_fix_1_str.length() - 11 - extIndMod, "_1")).c_str();
+      sra_path_trim_u1 = (sra_path_trim_u1_str.insert(sra_path_trim_u1_str.length() - 8 - extIndMod, "_1.unpaired")).c_str();
+      sra_path_trim_p1 = (sra_path_trim_p1_str.insert(sra_path_trim_p1_str.length() - 8 - extIndMod, "_1.paired")).c_str();
+      sra_path_for_filt_1 = (sra_path_for_filt_1_str.insert(sra_path_for_filt_1_str.length() - 8 - extIndMod, "_1")).c_str();
+      fastqc_dir_1_2 = (fastqc_dir_1_2_str.insert(fastqc_dir_1_2_str.length(), "_1")).c_str();
+      sra_path_orep_filt_1 = (sra_path_orep_filt_1_str.insert(sra_path_orep_filt_1_str.length() - 13 - extIndMod, "_1")).c_str();
+
+      sra_path_raw_2 = (projPath + stepDirs[0] + fileBase + "_2.fastq" + compressExt).c_str();
+      fastqc_dir_2_1 = (projPath + stepDirs[1] + fileBase + "/" + fileBase + "_2").c_str();
+      sra_path_corr_2 = (projPath + stepDirs[2] + fileBase + "_2.cor.fq" + compressExt).c_str();
+      sra_path_corr_fix_2 = (projPath + stepDirs[2] + fileBase + "_2.cor.fix.fq" + compressExt).c_str();
+      sra_path_trim_u2 = (projPath + stepDirs[3] + fileBase + "_2.unpaired.trim.fq" + compressExt).c_str();
+      sra_path_trim_p2 = (projPath + stepDirs[3] + fileBase + "_2.paired.trim.fq" + compressExt).c_str();
+      sra_path_for_filt_2 = (projPath + stepDirs[4] + fileBase + "_2.filt.fq" + compressExt).c_str();
+      fastqc_dir_2_2 = (projPath + stepDirs[5] + fileBase + "/" + fileBase + "_2").c_str();
+      sra_path_orep_filt_2 = (projPath + stepDirs[6] + fileBase + "_2.orep.filt.fq" + compressExt).c_str();
+    }
   }
 }
 
