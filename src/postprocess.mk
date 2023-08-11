@@ -2,13 +2,15 @@ CC = g++ -std=c++11
 CFLAGS = '-Wl,-rpath,$$ORIGIN/../lib/' -g -pthread
 LIBS = -L../lib -lboost_system -lboost_filesystem -lboost_iostreams -ldl -lconfini -lcurl
 INCLUDE_PATH = -I../lib/ -I../include
-OBJ_LINK = postprocess.o sra.o sra_toolkit.o ini_parse.o transcript.o seq.o llist.o seq_hash.o ncbi_blast.o diamond.o rem_chimera.o salmon_wrap.o corset_wrap.o filter_corset.o transdecoder_wrap.o print_info.o thread_pool.o ips_client.o ips_job_man.o panther_score.o annotate.o
+OBJ_LINK = postprocess.o log.o sra.o sra_toolkit.o ini_parse.o transcript.o seq.o llist.o seq_hash.o ncbi_blast.o diamond.o rem_chimera.o salmon_wrap.o corset_wrap.o filter_corset.o transdecoder_wrap.o print_info.o thread_pool.o ips_client.o ips_job_man.o panther_score.o annotate.o
 
 
 ../bin/postprocess: $(OBJ_LINK)
 	$(CC) $(OBJ_LINK) $(CFLAGS) -o ../bin/postprocess $(LIBS)
 postprocess.o: postprocess.cpp postprocess.h
 	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c postprocess.cpp $(LIBS)
+log.o: log.cpp log.h
+	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c log.cpp $(LIBS)
 sra.o: sra.cpp sra.h
 	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c sra.cpp $(LIBS)
 sra_toolkit.o: sra_toolkit.cpp sra_toolkit.h

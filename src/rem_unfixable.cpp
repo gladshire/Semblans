@@ -161,6 +161,8 @@ bool rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
     io::close(gzOutBuffer1);
     io::close(gzOutBuffer2);
   }
+  inFile1Data.clear();
+  inFile2Data.clear();
   outFile1.close();
   outFile2.close();
   return true;

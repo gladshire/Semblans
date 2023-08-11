@@ -482,7 +482,7 @@ int main(int argc, char * argv[]) {
     // Retrieve SRA objects, convert to transcripts
     std::vector<SRA> sras;
     std::vector<std::string> localDataFiles;
-    sras = get_sras(cfgIni, compressFiles);
+    sras = get_sras(cfgIni, dispOutput, compressFiles);
     for (auto fqFileName : cfgIni.at("Local files")) {
       localDataFiles.push_back(fqFileName.first);
     }

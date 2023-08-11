@@ -20,6 +20,7 @@
 #include "trimm_wrap.h"
 #include "kraken_wrap.h"
 #include "rem_overrep.h"
+#include "log.h"
 #include "print_info.h"
 
 #define PATH_PIGZ std::string((dl::program_location().parent_path() / fs::path(std::string("../external/pigz/pigz"))).c_str())

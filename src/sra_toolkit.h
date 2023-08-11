@@ -13,7 +13,7 @@ namespace fs = boost::filesystem;
 #define PATH_FASTERQ std::string(PATH_SRA_BIN + "fasterq-dump")
 #define PATH_PIGZ std::string((dl::program_location().parent_path() / fs::path(std::string("../external/pigz/pigz"))).c_str())
 
-std::vector<SRA> get_sras(const INI_MAP &iniFile, bool compressFiles);
+std::vector<SRA> get_sras(const INI_MAP &iniFile, bool dispOutput, bool compressFiles);
 
 void prefetch_sra(SRA sra, bool dispOutput,
                   std::string logFile);

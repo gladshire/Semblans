@@ -29,7 +29,8 @@ SRA::SRA() {
 // SRA accession number constructor for SRA object
 // Takes SRA accession number string as input
 // Fills object members with correct values using NCBI eutils API
-SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool compressedFiles) {
+SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool dispOutput,
+         bool compressedFiles, std::string logFile) {
   std::string outDir(fs::canonical(fs::path(cfgIni["General"]["output_directory"].c_str())).c_str());
   std::string projName(cfgIni["General"]["project_name"]);
   std::string apiKey(cfgIni["General"]["ncbi_api_key"]);
@@ -41,16 +42,17 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool compressedFiles) {
   }
 
   // Download temp XML file for SRA accession, containing information for object members
-  std::string curlCmdStr = "curl -s -o tmp.xml \"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?rettype=runinfo&db=sra&id=\"" +
+  std::string curlCmdStr = "curl -s -o .tmp.xml \"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?rettype=runinfo&db=sra&id=\"" +
                            sra_accession + "&api_key=" + apiKey;
   int result;
+  int numRetries = 0;
   while (true) {
     system(curlCmdStr.c_str());
     std::this_thread::sleep_for(queryLim);
   
     // Parse XML file for object information
     try {
-      rapidxml::file<> sra_xml("tmp.xml");
+      rapidxml::file<> sra_xml(".tmp.xml");
       rapidxml::xml_document<> sra_doc;
       sra_doc.parse<0>(sra_xml.data());
       rapidxml::xml_node<> * parse_node = sra_doc.first_node()->first_node()->first_node();
@@ -100,11 +102,18 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool compressedFiles) {
       break;
     }
     catch (const std::runtime_error & e) {
-      std::cout << "Throttled: too many requests. Retrying ..." << std::endl;
-      std::this_thread::sleep_for(5 * queryLim);
+      numRetries++;
+      if (dispOutput) {
+        logOutput("Throttled: too many requests. Retrying.", logFile);
+      }
+      queryLim *= 2;
     }
   }
-  
+  if (dispOutput) {
+    logOutput("Successfully retrieved information for: " + sra_accession, logFile);
+  }
+  fs::remove(fs::path(".tmp.xml"));
+
   std::string fileBase = make_file_str();
   if (paired) {
     file_prefix_1 = fileBase + "_1";
@@ -175,7 +184,6 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool compressedFiles) {
     fastqc_dir_2_2 = (projPath + stepDirs[5] + fileBase + "/" + fileBase + "_2").c_str();
     sra_path_orep_filt_2 = (projPath + stepDirs[6] + fileBase + "_2.orep.filt.fq" + compressExt).c_str();
   }
-  system("rm tmp.xml");
 }
 
 

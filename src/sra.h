@@ -9,6 +9,7 @@
 #include <rapidxml/rapidxml.hpp>
 #include <rapidxml/rapidxml_utils.hpp>
 #include "ini_parse.h"
+#include "log.h"
 
 namespace fs = boost::filesystem;
 
@@ -46,7 +47,8 @@ class SRA {
     fs::path sra_path_orep_filt_2;
   public:
     SRA();
-    SRA(std::string sra_accession, INI_MAP cfgIni, bool compressedFiles);
+    SRA(std::string sra_accession, INI_MAP cfgIni, bool dispOutput,
+        bool compressedFiles, std::string logFile);
     SRA(std::string fileName1, std::string fileName2, INI_MAP cfgIni, bool compressedFiles);
     std::string get_accession();
     std::string get_org_name();

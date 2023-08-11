@@ -364,7 +364,7 @@ void trimBulk(const std::vector<SRA> & sras, std::string threads,
     inFile1.open(currSraFastqc.first);
     inFile2.open(currSraFastqc.second);
 
-    boost::regex rgx("(?<=\[)(.*?)(Adapter Content)");
+    boost::regex rgx("(?<=\\[)(.*?)(Adapter Content)");
     boost::smatch res;
 
     while (getline(inFile1, currLine));
@@ -746,7 +746,7 @@ int main(int argc, char * argv[]) {
     std::vector<std::string> localDataFiles;
 
     // Create vector of SRA objects from SRA accessions, using NCBI web API
-    sras = get_sras(cfgIni, compressFiles);
+    sras = get_sras(cfgIni, dispOutput, compressFiles);
 
     // Obtain terminal window size for printing purposes
     struct winsize w;

@@ -1,6 +1,7 @@
 #include "print_info.h"
 
 // Given a string, output it to stdout as well as a log file
+/*
 void logOutput(std::string input, std::string logFile) {
   std::ofstream logStream;
   logStream.open(logFile, std::ios_base::app);
@@ -8,7 +9,7 @@ void logOutput(std::string input, std::string logFile) {
   teeStream loggerStream(logger);
   
   loggerStream << input << std::endl;
-}
+}*/
 
 // Given an SRA run object, output basic information to stdout and
 // a log file

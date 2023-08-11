@@ -3,11 +3,15 @@
 
 // Given a Semblans config INI file, construct and extract SRA objects
 // based on accession numbers
-std::vector<SRA> get_sras(const INI_MAP &iniFile, bool compressFiles) {
+std::vector<SRA> get_sras(const INI_MAP &iniFile, bool dispOutput, bool compressFiles) {
+  INI_MAP_ENTRY genSettings = iniFile.at("General");
+  std::string logFile((fs::canonical((fs::path(genSettings.at("output_directory").c_str()))) /
+                       fs::path(genSettings.at("project_name").c_str()) /
+                       fs::path(genSettings.at("log_file").c_str())).c_str());
   std::vector<SRA> sras;
   if (!iniFile.at("SRA accessions").empty()) {
     for (auto sra : iniFile.at("SRA accessions")) {
-      sras.push_back(SRA(sra.first, iniFile, compressFiles));
+      sras.push_back(SRA(sra.first, iniFile, dispOutput, compressFiles, logFile));
     }
   }
   return sras;

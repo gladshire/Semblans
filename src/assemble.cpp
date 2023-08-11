@@ -502,7 +502,7 @@ int main(int argc, char * argv[]) {
     make_proj_space(cfgIni, "assemble");
 
     // Obtain SRAs
-    sras = get_sras(cfgIni, compressFiles);
+    sras = get_sras(cfgIni, dispOutput, compressFiles);
     
     for (auto fqFileName : cfgIni.at("Local files")) {
       localDataFiles.push_back(fqFileName.first);
