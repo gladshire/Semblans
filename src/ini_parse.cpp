@@ -88,6 +88,7 @@ void make_proj_space(const INI_MAP &iniFile, std::string pipeStage) {
     stepDirs.push_back(allSteps[1]);
   }*/
 
+  currNum = getStepNum(stepNum);
   stepDirs.push_back(currNum + "-" + allSteps[1]);
   system(("mkdir " + projDir + currNum + "-" + allSteps[1] + " > /dev/null 2>&1").c_str());
   stepNum++;
