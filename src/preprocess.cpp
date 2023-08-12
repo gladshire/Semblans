@@ -290,20 +290,24 @@ bool remUnfixBulk(const std::vector<SRA> & sras, std::string threads, std::strin
       procRunning = true;
       std::thread fixThread(progressAnim,2);
       if (sra.is_paired()) {
-        writeSuccess = rem_unfix_pe(currCorrFixIn, currCorrFixOut, ram_b, compressFiles); 
+        writeSuccess = rem_unfix_pe(currCorrFixIn, currCorrFixOut, ram_b,
+                                    dispOutput, compressFiles, logFilePath); 
       }
       else {
-        writeSuccess = rem_unfix_se(currCorrFixIn.first, currCorrFixOut.first, ram_b, compressFiles);
+        writeSuccess = rem_unfix_se(currCorrFixIn.first, currCorrFixOut.first, ram_b,
+                                    dispOutput, compressFiles, logFilePath);
       }
       procRunning = false;
       fixThread.join();
     }
     else {
       if (sra.is_paired()) {
-        writeSuccess = rem_unfix_pe(currCorrFixIn, currCorrFixOut, ram_b, compressFiles); 
+        writeSuccess = rem_unfix_pe(currCorrFixIn, currCorrFixOut, ram_b,
+                                    dispOutput, compressFiles, logFilePath); 
       }
       else {
-        writeSuccess = rem_unfix_se(currCorrFixIn.first, currCorrFixOut.first, ram_b, compressFiles);
+        writeSuccess = rem_unfix_se(currCorrFixIn.first, currCorrFixOut.first, ram_b,
+                                    dispOutput, compressFiles, logFilePath);
       }
     }
     if (!writeSuccess) {

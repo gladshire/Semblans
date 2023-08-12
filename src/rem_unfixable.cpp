@@ -6,7 +6,8 @@
 // remove all reads Rcorrector flagged as "unfixable error"
 bool rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
                   std::pair<std::string, std::string> sraRunOut,
-                  uintmax_t ram_b, bool compressFiles) {
+                  uintmax_t ram_b, bool dispOutput, bool compressFiles,
+                  std::string logFile) {
   std::ifstream inFile1;
   std::ifstream inFile2;
   std::ofstream outFile1(sraRunOut.first);
@@ -70,7 +71,9 @@ bool rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
   std::ostream outputStream1(&gzOutBuffer1);
   std::ostream outputStream2(&gzOutBuffer2);
  
-  int numUnfix = 0;
+  uintmax_t numUnfix = 0;
+  uintmax_t numReads = 0;
+  std::string readName;
   while  ((!inputStream1.eof() && !inputStream2.eof() && !inFile1.eof() && !inFile2.eof()) &&
           (inputStream1.good() && inputStream2.good() && inFile1.good() && inFile2.good())) {
 
@@ -126,6 +129,10 @@ bool rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
             outFile2.write(writeStart2, writeEnd2 - writeStart2);
           }
         }
+        if (dispOutput) {
+          readName = std::string(nlPos1Prev + 1, nlPos1);
+          logOutput("  Unfixable read removed: " + readName.substr(1, readName.find(" ")), logFile);
+        }
 
         for (int i = 0; i < 3; i++) {
           nlPos1 = std::find(nlPos1 + 1, inFile1L, '\n');
@@ -147,6 +154,7 @@ bool rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
           nlPos2 = std::find(nlPos2 + 1, inFile2L, '\n');
         }
       }
+      numReads++;
     }
     if (compressFiles) {
       outputStream1.write(writeStart1, &inFile1Data[0] + s1 - writeStart1);
@@ -176,13 +184,29 @@ bool rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
   inFile2Data.clear();
   outFile1.close();
   outFile2.close();
+
+  if (dispOutput) {
+    std::stringstream percentStream;
+    percentStream << std::fixed << std::setprecision(2)
+                  << float(numUnfix) / float(numUnfix + numReads);
+    logOutput("Removal of unfixable reads finished", logFile);
+    logOutput("\n  SUMMARY", logFile);
+    logOutput("    " + std::to_string(numUnfix) + " unfixable reads removed (" +
+              percentStream.str() + ") %", logFile);
+    percentStream.str("");
+    percentStream << std::fixed << std::setprecision(2)
+                  << float(numReads) / float(numUnfix + numReads);
+    logOutput("    " + std::to_string(numReads - numUnfix) + " reads retained (" +
+              percentStream.str() + ") %", logFile);
+  }
   return true;
 }
 
 // Given a single-end SRA run's sequence data file post-Rcorrector,
 // remove all reads Rcorrector flagged as "unfixable error"
 bool rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
-                  uintmax_t ram_b, bool compressFiles) {
+                  uintmax_t ram_b, bool dispOutput, bool compressFiles,
+                  std::string logFile) {
 
   std::ifstream inFile;
   std::ofstream outFile(sraRunOut);
@@ -219,6 +243,9 @@ bool rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
   gzOutBuffer.push(outFile);
   std::ostream outputStream(&gzOutBuffer);
 
+  uintmax_t numUnfix = 0;
+  uintmax_t numReads = 0;
+  std::string readName;
   while ((!inputStream.eof() && !inFile.eof()) && (inputStream.good() && inFile.good())) {
     if (compressFiles) {
       inputStream.read(inFileData, ram_b);
@@ -241,14 +268,14 @@ bool rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
       }
     }
 
-    uintmax_t ct = 0;
+    uintmax_t okReads = 0;
     while (nlPos != inFileL) {
       nlPosPrev = nlPos;
       nlPos = std::find(nlPos + 1, inFileL, '\n');
-      ct++;
       if (strncmp(nlPos - 5, "error", 4) == 0) {
+        numUnfix++;
         writeEnd = nlPosPrev;
-        if (ct > 1) {
+        if (okReads > 0) {
           if (compressFiles) {
             outputStream.write(writeStart, writeEnd - writeStart);
           }
@@ -257,12 +284,23 @@ bool rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
           }
         }
 
+        if (dispOutput) {
+          readName = std::string(nlPosPrev + 1, nlPos);
+          logOutput("  Unfixable read removed: " + readName.substr(1, readName.find(" ")), logFile);
+        }
+
         for (int i = 0; i < 3; i++) {
           nlPos = std::find(nlPos + 1, inFileL, '\n');
-          ct++;
         }
         writeStart = nlPos;
       }
+      else {
+        okReads++;
+        for (int i = 0; i < 3; i++) {
+          nlPos = std::find(nlPos + 1, inFileL, '\n');
+        }
+      }
+      numReads++;
     }
     if (!outFile.good() || !outputStream.good()) {
       std::cerr << "ERROR: Writing output failed for:\n  " << sraRunIn << std::endl;
@@ -275,6 +313,7 @@ bool rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
       outFile.write(writeStart, inFileData + s - writeStart);
     }
   }
+  delete inFileData;
   if (!compressFiles) {
     inFile.close();
   }
@@ -283,5 +322,20 @@ bool rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
     io::close(gzOutBuffer);
   }
   outFile.close();
+
+  if (dispOutput) {
+    std::stringstream percentStream;
+    percentStream << std::fixed << std::setprecision(2)
+                  << float(numUnfix) / float(numUnfix + numReads);
+    logOutput("Removal of unfixable reads finished", logFile);
+    logOutput("\n  SUMMARY", logFile);
+    logOutput("    " + std::to_string(numUnfix) + " unfixable reads removed (" +
+              percentStream.str() + ") %", logFile);
+    percentStream.str("");
+    percentStream << std::fixed << std::setprecision(2)
+                  << float(numReads) / float(numUnfix + numReads);
+    logOutput("    " + std::to_string(numReads - numUnfix) + " reads retained (" +
+              percentStream.str() + ") %", logFile);
+  }
   return true;
 }

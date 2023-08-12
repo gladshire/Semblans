@@ -1,5 +1,7 @@
 #pragma once
 #include <iostream>
+#include <iomanip>
+#include <sstream>
 #include <cstring>
 #include <algorithm>
 #include <fstream>
@@ -16,7 +18,9 @@ namespace io = boost::iostreams;
 
 bool rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
                   std::pair<std::string, std::string> sraRunOut,
-                  uintmax_t ram_b, bool compressFiles);
+                  uintmax_t ram_b, bool dispOutput, bool compressFiles,
+                  std::string logFile);
 
 bool rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
-                  uintmax_t ram_b, bool compressFiles);
+                  uintmax_t ram_b, bool dispOutput, bool compressFiles,
+                  std::string logFile);
