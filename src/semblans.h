@@ -6,6 +6,7 @@
 #include <signal.h>
 #include <boost/filesystem.hpp>
 #include <boost/dll.hpp>
+#include "log.h"
 #include "print_info.h"
 #include "ini_parse.h"
 #include "sra.h"

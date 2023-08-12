@@ -72,7 +72,7 @@ bool rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
  
   int numUnfix = 0;
   while  ((!inputStream1.eof() && !inputStream2.eof() && !inFile1.eof() && !inFile2.eof()) &&
-         (inputStream1.good() && inputStream2.good() && inFile1.good() && inFile2.good())) {
+          (inputStream1.good() && inputStream2.good() && inFile1.good() && inFile2.good())) {
 
     if (compressFiles) {
       inputStream1.read(&inFile1Data[0], ram_b_per_file);
@@ -104,20 +104,19 @@ bool rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
       align_file_buffer(inFile1, inFile2, &inFile1Data[0], &inFile2Data[0], s1, s2);
     }
 
-    uintmax_t ct = 0;
+    uintmax_t okReads = 0;
     while (nlPos1 != inFile1L && nlPos2 != inFile2L) {
       nlPos1Prev = nlPos1;
       nlPos2Prev = nlPos2;
       nlPos1 = std::find(nlPos1 + 1, inFile1L, '\n');
       nlPos2 = std::find(nlPos2 + 1, inFile2L, '\n');
-      ct++;
       if (strncmp(nlPos1 - 5, "error", 5) == 0 ||
           strncmp(nlPos2 - 5, "error", 5) == 0) {
         numUnfix++;
         writeEnd1 = nlPos1Prev;
         writeEnd2 = nlPos2Prev;
  
-        if (ct > 1) {
+        if (okReads > 0) {
           if (compressFiles) {
             outputStream1.write(writeStart1, writeEnd1 - writeStart1);
             outputStream2.write(writeStart2, writeEnd2 - writeStart2);
@@ -131,10 +130,22 @@ bool rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
         for (int i = 0; i < 3; i++) {
           nlPos1 = std::find(nlPos1 + 1, inFile1L, '\n');
           nlPos2 = std::find(nlPos2 + 1, inFile2L, '\n');
-          ct++;
         }
-        writeStart1 = nlPos1;
-        writeStart2 = nlPos2;
+        if (okReads == 0) {
+          writeStart1 = nlPos1 + 1;
+          writeStart2 = nlPos2 + 1;
+        }
+        else {
+          writeStart1 = nlPos1;
+          writeStart2 = nlPos2;
+        }
+      }
+      else {
+        okReads++;
+        for (int i = 0; i < 3; i++) {
+          nlPos1 = std::find(nlPos1 + 1, inFile1L, '\n');
+          nlPos2 = std::find(nlPos2 + 1, inFile2L, '\n');
+        }
       }
     }
     if (compressFiles) {

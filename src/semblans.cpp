@@ -298,15 +298,19 @@ int main(int argc, char * argv[]) {
       result = system(preCmd.c_str());
       if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
         std::cerr << "Preprocess exited" << std::endl;
+        system("setterm -cursor on");
         exit(1);
       }
       result = system(assCmd.c_str());
       if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
         std::cerr << "Assembly exited" << std::endl;
+        system("setterm -cursor on");
         exit(1);
       }
       result = system(postCmd.c_str());
-      if (WIFSIGNALED(result)) {
+      if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
+        std::cerr << "Postprocess exited" << std::endl;
+        system("setterm -cursor on");
         exit(1);
       }
       exit(0);
