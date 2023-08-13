@@ -198,6 +198,7 @@ bool rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
       align_file_buffer(inFile1, inFile2, &inFile1Data[0], &inFile2Data[0], s1, s2);
     }
 
+    uintmax_t okReads = 0;
     while (nlPos1 != inFile1L && nlPos2 != inFile2L) {
       nlPos1Prev = nlPos1;
       nlPos2Prev = nlPos2;
@@ -234,15 +235,23 @@ bool rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
         if (dispOutput) {
           logOutput("Overrepresented read removed: " + readName.substr(1, readName.find(" ")), logFile);
         }
-        writeEnd1 = nlPos1Prev;
-        writeEnd2 = nlPos2Prev;
-        if (compressFiles) {
-          outputStream1.write(writeStart1, writeEnd1 - writeStart1);
-          outputStream2.write(writeStart2, writeEnd2 - writeStart2);
+        if (okReads == 0) {
+          writeEnd1 = nlPos1Prev + 1;
+          writeEnd2 = nlPos2Prev + 1;
         }
         else {
-          outFile1.write(writeStart1, writeEnd1 - writeStart1);
-          outFile2.write(writeStart2, writeEnd2 - writeStart2);
+          writeEnd1 = nlPos1Prev;
+          writeEnd2 = nlPos2Prev;
+        }
+        if (okReads > 0) {
+          if (compressFiles) {
+            outputStream1.write(writeStart1, writeEnd1 - writeStart1);
+            outputStream2.write(writeStart2, writeEnd2 - writeStart2);
+          }
+          else {
+            outFile1.write(writeStart1, writeEnd1 - writeStart1);
+            outFile2.write(writeStart2, writeEnd2 - writeStart2);
+          }
         }
  
         numReads++;
@@ -250,11 +259,18 @@ bool rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
           nlPos1 = std::find(nlPos1 + 1, inFile1L, '\n');
           nlPos2 = std::find(nlPos2 + 1, inFile2L, '\n');
         }
-        writeStart1 = nlPos1;
-        writeStart2 = nlPos2;
+        if (okReads == 0) {
+          writeStart1 = nlPos1 + 1;
+          writeStart2 = nlPos2 + 1;
+        }
+        else {
+          writeStart1 = nlPos1;
+          writeStart2 = nlPos2;
+        }
       }
       else {
         numReads++;
+        okReads++;
         for (int i = 0; i < 2; i++) {
           nlPos1 = std::find(nlPos1 + 1, inFile1L, '\n');
           nlPos2 = std::find(nlPos2 + 1, inFile2L, '\n');
@@ -366,6 +382,7 @@ bool rem_overrep_se(std::string sraRunIn, std::string sraRunOut,
 
     inFileL = &inFileData[0] + s;
 
+    uintmax_t okReads = 0;
     while (nlPos != inFileL) {
       nlPosPrev = nlPos;
       nlPosHead = std::find(nlPos + 1, inFileL, '\n');
@@ -386,7 +403,12 @@ bool rem_overrep_se(std::string sraRunIn, std::string sraRunOut,
         if (dispOutput) {
           logOutput("Overrepresented read removed: " + readName.substr(1, readName.find(" ")), logFile);
         }
-        writeEnd = nlPosPrev;
+        if (okReads == 0) {
+          writeEnd = nlPosPrev + 1;
+        }
+        else {
+          writeEnd = nlPosPrev;
+        }
         if (compressFiles) {
           outputStream.write(writeStart, writeEnd - writeStart);
         }
@@ -398,10 +420,16 @@ bool rem_overrep_se(std::string sraRunIn, std::string sraRunOut,
         for (int i = 0; i < 2; i++) {
           nlPos = std::find(nlPos + 1, inFileL, '\n');
         }
-        writeStart = nlPos;
+        if (okReads == 0) {
+          writeStart = nlPos + 1;
+        }
+        else {
+          writeStart = nlPos;
+        }
       }
       else {
         numReads++;
+        okReads++;
         for (int i = 0; i < 2; i++) {
           nlPos = std::find(nlPos + 1, inFileL, '\n');
         }
