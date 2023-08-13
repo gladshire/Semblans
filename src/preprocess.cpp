@@ -57,7 +57,7 @@ void preSummary(const std::vector<SRA> sras,
 
 // Given a vector of SRA run objects, retrieve their raw data from NCBI using
 // sratoolkit
-void retrieveSraData(const std::vector<SRA> & sras, std::string threads,
+void retrieveSraData(std::vector<SRA> & sras, std::string threads,
                      bool dispOutput, bool compressOutput,
                      bool retainInterFiles,
                      std::string logFilePath) {
@@ -136,7 +136,7 @@ void print_help() {
 }
 
 // Given a vector of SRAs, perform a pre-assembly FastQC quality analysis on their sequence data
-void fastqcBulk1(const std::vector<SRA> & sras, std::string threads, bool dispOutput,
+void fastqcBulk1(std::vector<SRA> & sras, std::string threads, bool dispOutput,
                  std::string logFilePath) {
   logOutput("\nStarting initial quality analysis", logFilePath);
   std::pair<std::string, std::string> currFastqcIn1;
@@ -170,7 +170,7 @@ void fastqcBulk1(const std::vector<SRA> & sras, std::string threads, bool dispOu
 }
 
 // Given a vector of SRAs, perform a FastQC quality analysis just prior to assembly
-void fastqcBulk2(const std::vector<SRA> & sras, std::string threads, bool dispOutput,
+void fastqcBulk2(std::vector<SRA> & sras, std::string threads, bool dispOutput,
                  std::string logFilePath, const INI_MAP & cfgIni) {
   logOutput("\nStarting second quality analysis", logFilePath);
   INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
@@ -222,7 +222,7 @@ void fastqcBulk2(const std::vector<SRA> & sras, std::string threads, bool dispOu
 
 // Given a vector of SRA run objects, perform base error correction on each's sequence
 // data using Rcorrector
-void errorCorrBulk(const std::vector<SRA> & sras, std::string threads,
+void errorCorrBulk(std::vector<SRA> & sras, std::string threads,
                    bool dispOutput, bool retainInterFiles, bool compressFiles,
                    std::string logFilePath, const INI_MAP & cfgIni) {
   logOutput("\nStarting error correction", logFilePath);
@@ -264,7 +264,7 @@ void errorCorrBulk(const std::vector<SRA> & sras, std::string threads,
 
 // Given a vector of SRA run objects post-Rcorrector, remove all "unfixable error" reads
 // identified by Rcorrector
-bool remUnfixBulk(const std::vector<SRA> & sras, std::string threads, std::string ram_gb,
+bool remUnfixBulk(std::vector<SRA> & sras, std::string threads, std::string ram_gb,
                   bool dispOutput, bool retainInterFiles, bool compressFiles,
                   std::string logFilePath, const INI_MAP & cfgIni) {
   logOutput("\nStarting post-correction removal of unfixable reads", logFilePath);
@@ -329,7 +329,7 @@ bool remUnfixBulk(const std::vector<SRA> & sras, std::string threads, std::strin
 
 // Given a vector of SRA run objects, trim adapter sequences from the reads in each's sequence
 // data
-void trimBulk(const std::vector<SRA> & sras, std::string threads,
+void trimBulk(std::vector<SRA> & sras, std::string threads,
               bool dispOutput, bool retainInterFiles,
               std::string logFilePath, const INI_MAP & cfgIni) {
   logOutput("\nStarting adapter sequence trimming", logFilePath);
@@ -465,7 +465,7 @@ void trimBulk(const std::vector<SRA> & sras, std::string threads,
 
 // Given a vector of SRA run objects, attempt to classify the reads from each sequence data
 // against several input databases
-void filtForeignBulk(const std::vector<SRA> & sras, std::vector<std::string> krakenDbs,
+void filtForeignBulk(std::vector<SRA> & sras, std::vector<std::string> krakenDbs,
                      std::string threads, bool dispOutput, bool compressFiles, bool retainInterFiles,
                      std::string logFilePath, const INI_MAP & cfgIni) {
   logOutput("\nStarting foreign sequence filtering", logFilePath);
@@ -615,7 +615,7 @@ void filtForeignBulk(const std::vector<SRA> & sras, std::vector<std::string> kra
 
 // Given a vector of SRA run objects post-FastQC, remove any reads containing overrepresented
 // sequences from each's sequence data, as identified by FastQC
-bool remOverrepBulk(const std::vector<SRA> & sras, std::string threads, std::string ram_gb,
+bool remOverrepBulk(std::vector<SRA> & sras, std::string threads, std::string ram_gb,
                     bool dispOutput, bool retainInterFiles, bool compressFiles,
                     std::string logFilePath, const INI_MAP & cfgIni) {
   INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
@@ -665,22 +665,26 @@ bool remOverrepBulk(const std::vector<SRA> & sras, std::string threads, std::str
       std::thread orepThread(progressAnim, 2);
       if (sra.is_paired()) {
         currOrepSeqsPe = get_overrep_seqs_pe(sra);
-        writeSuccess = rem_overrep_pe(currOrepIn, currOrepOut, ram_b, compressFiles, currOrepSeqsPe);
+        writeSuccess = rem_overrep_pe(currOrepIn, currOrepOut, ram_b, dispOutput,
+                                      compressFiles, currOrepSeqsPe, logFilePath);
       }
       else {
         currOrepSeqsSe = get_overrep_seqs_se(sra);
-        writeSuccess = rem_overrep_se(currOrepIn.first, currOrepOut.first, ram_b, compressFiles, currOrepSeqsSe);
+        writeSuccess = rem_overrep_se(currOrepIn.first, currOrepOut.first, ram_b, dispOutput,
+                                      compressFiles, currOrepSeqsSe, logFilePath);
       }
       orepThread.join();
     }
     else {
       if (sra.is_paired()) {
         currOrepSeqsPe = get_overrep_seqs_pe(sra);
-        writeSuccess = rem_overrep_pe(currOrepIn, currOrepOut, ram_b, compressFiles, currOrepSeqsPe);
+        writeSuccess = rem_overrep_pe(currOrepIn, currOrepOut, ram_b, dispOutput,
+                                      compressFiles, currOrepSeqsPe, logFilePath);
       }
       else {
         currOrepSeqsSe = get_overrep_seqs_se(sra);
-        writeSuccess = rem_overrep_se(currOrepIn.first, currOrepOut.first, ram_b, compressFiles, currOrepSeqsSe);
+        writeSuccess = rem_overrep_se(currOrepIn.first, currOrepOut.first, ram_b, dispOutput,
+                                      compressFiles, currOrepSeqsSe, logFilePath);
       }
     }
     if (!writeSuccess) {

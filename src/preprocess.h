@@ -28,7 +28,7 @@
 
 void progressAnim(int numSpace);
 
-void retrieve_sra_data(const std::vector<SRA> & sras, std::string threads,
+void retrieve_sra_data(std::vector<SRA> & sras, std::string threads,
                        bool dispOutput, bool retainInterFiles,
                        bool compressOutput, std::string logFile);
 
@@ -36,28 +36,28 @@ bool stringToBool(std::string boolStr);
 
 void print_help();
 
-void fastqcBulk1(const std::vector<SRA> & sras, std::string threads, bool dispOutput,
+void fastqcBulk1(std::vector<SRA> & sras, std::string threads, bool dispOutput,
                  std::string logFilePath);
 
-void fastqcBulk2(const std::vector<SRA> & sras, std::string threads, bool dispOutput,
+void fastqcBulk2(std::vector<SRA> & sras, std::string threads, bool dispOutput,
                  std::string logFilePath, const INI_MAP & cfgIni);
 
-void errorCorrBulk(const std::vector<SRA> & sras, std::string threads,
+void errorCorrBulk(std::vector<SRA> & sras, std::string threads,
                    bool dispOutput, bool retainInterFiles, bool compressFiles,
                    std::string logFilePath, const INI_MAP & cfgIni);
 
-bool remUnfixBulk(const std::vector<SRA> & sras, std::string threads, std::string ram_gb,
+bool remUnfixBulk(std::vector<SRA> & sras, std::string threads, std::string ram_gb,
                   bool dispOutput, bool retainInterFiles, bool compressFiles,
                   std::string logFilePath, const INI_MAP & cfgIni);
 
-void trimBulk(const std::vector<SRA> & sras, std::string threads,
+void trimBulk(std::vector<SRA> & sras, std::string threads,
               bool dispOutput, bool retainInterFiles,
               std::string logFilePath, const INI_MAP & cfgIni);
 
-void filtForeignBulk(const std::vector<SRA> & sras, std::vector<std::string> krakenDbs,
+void filtForeignBulk(std::vector<SRA> & sras, std::vector<std::string> krakenDbs,
                      std::string threads, bool dispOutput, bool compressFiles, bool retainInterFiles,
                      std::string logFilePath, const INI_MAP & cfgIni);
 
-bool remOverrepBulk(const std::vector<SRA> & sras, std::string threads, std::string ram_gb,
+bool remOverrepBulk(std::vector<SRA> & sras, std::string threads, std::string ram_gb,
                     bool dispOutput, bool retainInterFiles, bool compressFiles,
                     std::string logFilePath, const INI_MAP & cfgIni);

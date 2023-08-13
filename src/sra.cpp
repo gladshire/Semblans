@@ -19,7 +19,7 @@ SRA::SRA() {
   tax_id = "";
   spots = -1;
   spots_m = -1;
-  bp = -1;
+  bp = 0;
   paired = false;
   compressedFiles = true;
   file_prefix_1 = "";
@@ -216,7 +216,7 @@ SRA::SRA(std::string fileName1, std::string fileName2, INI_MAP cfgIni, bool comp
   tax_id = "";
   spots = -1;
   spots_m = -1;
-  bp = -1;
+  bp = 0;
   paired = (fileName2 == "") ? false : true;
   this->compressedFiles = compressedFiles;
 
@@ -251,97 +251,134 @@ SRA::SRA(std::string fileName1, std::string fileName2, INI_MAP cfgIni, bool comp
     sra_path_orep_filt_2 = (projPath + stepDirs[6] + fileBase2 + ".orep.filt.fq" + compressExt).c_str();
   }
 }
+
+// Copy constructor for SRA object
+SRA::SRA(const SRA & sra) {
+  sra_accession = sra.get_accession();
+  org_name = sra.get_org_name();
+  tax_id = sra.get_tax_id();
+  spots = sra.get_num_reads();
+  spots_m = sra.get_bp();
+  paired = sra.is_paired();
+  compressedFiles = false;
+  file_prefix_1 = sra.get_file_prefix().first;
+  file_prefix_2 = sra.get_file_prefix().second;
+  fastqc_dir_1_1 = sra.get_fastqc_dir_1().first;
+  fastqc_dir_2_1 = sra.get_fastqc_dir_1().second;
+  sra_path_raw_1 = sra.get_sra_path_raw().first;
+  sra_path_raw_2 = sra.get_sra_path_raw().second;
+  sra_path_corr_1 = sra.get_sra_path_corr().first;
+  sra_path_corr_2 = sra.get_sra_path_corr().second;
+  sra_path_corr_fix_1 = sra.get_sra_path_corr_fix().first;
+  sra_path_corr_fix_2 = sra.get_sra_path_corr_fix().second;
+  sra_path_trim_u1 = sra.get_sra_path_trim_u().first;
+  sra_path_trim_u2 = sra.get_sra_path_trim_u().second;
+  sra_path_trim_p1 = sra.get_sra_path_trim_p().first;
+  sra_path_trim_p2 = sra.get_sra_path_trim_p().second;
+  sra_path_for_filt_1 = sra.get_sra_path_for_filt().first;
+  sra_path_for_filt_2 = sra.get_sra_path_for_filt().second;
+  fastqc_dir_1_2 = sra.get_fastqc_dir_2().first;
+  fastqc_dir_2_2 = sra.get_fastqc_dir_2().second;
+  sra_path_orep_filt_1 = sra.get_sra_path_orep_filt().first;
+  sra_path_orep_filt_2 = sra.get_sra_path_orep_filt().second;
+}
+
 // Getter function for object SRA accession number
-std::string SRA::get_accession() {
+std::string SRA::get_accession() const {
   return sra_accession;
 }
 
 // Getter function for object organism name
-std::string SRA::get_org_name() {
+std::string SRA::get_org_name() const {
   return org_name;
 }
 
 // Getter function for object taxonomic ID
-std::string SRA::get_tax_id() {
+std::string SRA::get_tax_id() const {
   return tax_id;
 }
 
 // Getter function for object number of read spots
-int SRA::get_spots() {
+long int SRA::get_num_reads() const {
   return spots;
 }
 
 // Getter function for object number of read spots that are paired
-int SRA::get_spots_m() {
+int SRA::get_spots_m() const {
   return spots_m;
 }
 
 // Getter function for object number of base pairs in SRA run
-long int SRA::get_bp() {
+uintmax_t SRA::get_bp() const {
   return bp;
 }
 
 // Getter function for object single-end or paired-end layout
-bool SRA::is_paired() {
+bool SRA::is_paired() const {
   return paired;
 }
 
-std::pair<std::string, std::string> SRA::get_file_prefix() {
+std::pair<std::string, std::string> SRA::get_file_prefix() const {
   std::pair<std::string, std::string> file_prefix(file_prefix_1, file_prefix_2);
   return file_prefix;
 }
 
 // Getter function for path to SRA FastQC analysis directory
-std::pair<fs::path, fs::path> SRA::get_fastqc_dir_1() {
+std::pair<fs::path, fs::path> SRA::get_fastqc_dir_1() const {
   std::pair<fs::path, fs::path> fastqc_dir_1(fastqc_dir_1_1, fastqc_dir_2_1);
   return fastqc_dir_1;
 }
 
 // Getter function for path to raw SRA reads sequence
-std::pair<fs::path, fs::path> SRA::get_sra_path_raw() {
+std::pair<fs::path, fs::path> SRA::get_sra_path_raw() const {
   std::pair<fs::path, fs::path> sra_path_raw(sra_path_raw_1, sra_path_raw_2);
   return sra_path_raw;
 }
 
 // Getter function for path to error-corrected SRA sequence
-std::pair<fs::path, fs::path> SRA::get_sra_path_corr() {
+std::pair<fs::path, fs::path> SRA::get_sra_path_corr() const {
   std::pair<fs::path, fs::path> sra_path_corr(sra_path_corr_1, sra_path_corr_2);
   return sra_path_corr;
 }
 
-std::pair<fs::path, fs::path> SRA::get_sra_path_corr_fix() {
+std::pair<fs::path, fs::path> SRA::get_sra_path_corr_fix() const {
   std::pair<fs::path, fs::path> sra_path_corr_fix(sra_path_corr_fix_1, sra_path_corr_fix_2);
   return sra_path_corr_fix;
 }
 
 // Getter function for path to trimmed unpaired SRA sequence
-std::pair<fs::path, fs::path> SRA::get_sra_path_trim_u() {
+std::pair<fs::path, fs::path> SRA::get_sra_path_trim_u() const {
   std::pair<fs::path, fs::path> sra_path_trim_u(sra_path_trim_u1, sra_path_trim_u2);
   return sra_path_trim_u;
 }
 
 // Getter function for path to trimmed paired SRA sequence
-std::pair<fs::path, fs::path> SRA::get_sra_path_trim_p() {
+std::pair<fs::path, fs::path> SRA::get_sra_path_trim_p() const {
   std::pair<fs::path, fs::path> sra_path_trim_p(sra_path_trim_p1, sra_path_trim_p2);
   return sra_path_trim_p;
 }
 
 // Getter function for path to foreign-filtered SRA sequence
-std::pair<fs::path, fs::path> SRA::get_sra_path_for_filt() {
+std::pair<fs::path, fs::path> SRA::get_sra_path_for_filt() const {
   std::pair<fs::path, fs::path> sra_path_for_filt(sra_path_for_filt_1, sra_path_for_filt_2);
   return sra_path_for_filt;
 }
 
 // Getter function for fastqc directory 2
-std::pair<fs::path, fs::path> SRA::get_fastqc_dir_2() {
+std::pair<fs::path, fs::path> SRA::get_fastqc_dir_2() const {
   std::pair<fs::path, fs::path> fastqc_dir_2(fastqc_dir_1_2, fastqc_dir_2_2);
   return fastqc_dir_2;
 }
 
 // Getter function for path to overrep-filtered SRA sequence
-std::pair<fs::path, fs::path> SRA::get_sra_path_orep_filt() {
+std::pair<fs::path, fs::path> SRA::get_sra_path_orep_filt() const {
   std::pair<fs::path, fs::path> sra_path_orep_filt(sra_path_orep_filt_1, sra_path_orep_filt_2);
   return sra_path_orep_filt;
+}
+
+// Setter function for number of reads in SRA run
+void SRA::set_num_reads(long int numReads) {
+  this->spots = numReads;
 }
 
 // Setter function for path to SRA FastQC analysis directory

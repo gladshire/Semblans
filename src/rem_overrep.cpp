@@ -12,7 +12,7 @@ std::pair<std::vector<std::string>, std::vector<std::string>> get_overrep_seqs_p
   std::ifstream inFile1(inFile1Str);
   std::ifstream inFile2(inFile2Str);
 
-  boost::regex rgx("(?<=<tr><td>)[ATCG]*(?=\<\/td>)");
+  boost::regex rgx("(?<=<tr><td>)[ATCG]*(?=\\<\\/td>)");
   boost::smatch res;
 
   std::string inFile1Data;
@@ -53,7 +53,7 @@ std::vector<std::string> get_overrep_seqs_se(SRA sra) {
 
   std::ifstream inFile(inFileStr);
 
-  boost::regex rgx("(?<=<tr><td>)[ATCG]*(?=\<\/td>)");
+  boost::regex rgx("(?<=<tr><td>)[ATCG]*(?=\\<\\/td>)");
   boost::smatch res;
 
   std::string inFileData;
@@ -78,8 +78,9 @@ std::vector<std::string> get_overrep_seqs_se(SRA sra) {
 // overrepresented sequences, parse the files and remove reads containing these sequences
 bool rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
                     std::pair<std::string, std::string> sraRunOut,
-                    uintmax_t ram_b, bool compressFiles,
-                    std::pair<std::vector<std::string>, std::vector<std::string>> overrepSeqs) {
+                    uintmax_t ram_b, bool dispOutput, bool compressFiles,
+                    std::pair<std::vector<std::string>, std::vector<std::string>> overrepSeqs,
+                    std::string logFile) {
   std::ifstream inFile1;
   std::ifstream inFile2;
   std::ofstream outFile1(sraRunOut.first);
@@ -161,6 +162,9 @@ bool rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
   std::ostream outputStream1(&gzOutBuffer1);
   std::ostream outputStream2(&gzOutBuffer2);
 
+  uintmax_t numOrep = 0;
+  uintmax_t numReads = 0;
+  std::string readName;
   while  ((!inputStream1.eof() && !inputStream2.eof() && !inFile1.eof() && !inFile2.eof()) &&
          (inputStream1.good() && inputStream2.good() && inFile1.good() && inFile2.good())) {
 
@@ -170,7 +174,6 @@ bool rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
   
       s1 = inputStream1.gcount();
       s2 = inputStream2.gcount();
-
     }
     else {
       inFile1.read(&inFile1Data[0], ram_b_per_file);
@@ -202,6 +205,7 @@ bool rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
       nlPos2Head = std::find(nlPos2 + 1, inFile2L, '\n');
       nlPos1 = std::find(nlPos1Head + 1, inFile1L, '\n');
       nlPos2 = std::find(nlPos2Head + 1, inFile2L, '\n');
+
       seqLength = nlPos1 - nlPos1Head - 1;
       overRep = false;
       if (!overrepSeqs.first.empty()) {
@@ -225,6 +229,11 @@ bool rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
         }
       }
       checkOverrep:if (overRep) {
+        numOrep++;
+        readName = std::string(nlPos1Prev + 1, nlPos1Head);
+        if (dispOutput) {
+          logOutput("Overrepresented read removed: " + readName.substr(1, readName.find(" ")), logFile);
+        }
         writeEnd1 = nlPos1Prev;
         writeEnd2 = nlPos2Prev;
         if (compressFiles) {
@@ -236,6 +245,7 @@ bool rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
           outFile2.write(writeStart2, writeEnd2 - writeStart2);
         }
  
+        numReads++;
         for (int i = 0; i < 2; i++) {
           nlPos1 = std::find(nlPos1 + 1, inFile1L, '\n');
           nlPos2 = std::find(nlPos2 + 1, inFile2L, '\n');
@@ -244,6 +254,7 @@ bool rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
         writeStart2 = nlPos2;
       }
       else {
+        numReads++;
         for (int i = 0; i < 2; i++) {
           nlPos1 = std::find(nlPos1 + 1, inFile1L, '\n');
           nlPos2 = std::find(nlPos2 + 1, inFile2L, '\n');
@@ -276,14 +287,30 @@ bool rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
   }
   outFile1.close();
   outFile2.close();
+
+  if (dispOutput) {
+    std::stringstream percentStream;
+    percentStream << std::fixed << std::setprecision(2)
+                  << (float(numOrep) * 100) / float(numOrep + numReads);
+    logOutput("Removal of overrepresented reads finished", logFile);
+    logOutput("\n  SUMMARY", logFile);
+    logOutput("    " + std::to_string(numOrep) + " reads removed (" +
+              percentStream.str() + " %)", logFile);
+    percentStream.str("");
+    percentStream << std::fixed << std::setprecision(2)
+                  << (float(numReads) * 100) / (float(numOrep + numReads));
+    logOutput("    " + std::to_string(numReads - numOrep) + " reads retained (" +
+              percentStream.str() + " %)", logFile);
+  }
   return true;
 }
 
 // Given a single-end SRA run's sequence data file and a vector containing its
 // overrepresented sequences, parse the file and remove reads containing these sequences
 bool rem_overrep_se(std::string sraRunIn, std::string sraRunOut,
-                    uintmax_t ram_b, bool compressFiles,
-                    std::vector<std::string> overrepSeqs) {
+                    uintmax_t ram_b, bool dispOutput, bool compressFiles,
+                    std::vector<std::string> overrepSeqs,
+                    std::string logFile) {
   std::ifstream inFile(sraRunIn);
   std::ofstream outFile(sraRunOut);
 
@@ -321,6 +348,9 @@ bool rem_overrep_se(std::string sraRunIn, std::string sraRunOut,
   gzOutBuffer.push(outFile);
   std::ostream outputStream(&gzOutBuffer);
 
+  uintmax_t numOrep = 0;
+  uintmax_t numReads = 0;
+  std::string readName;
   while ((!inputStream.eof() && !inFile.eof()) && (inputStream.good() && inFile.good())) {
     if (compressFiles) {
       inputStream.read(&inFileData[0], ram_b);
@@ -351,6 +381,11 @@ bool rem_overrep_se(std::string sraRunIn, std::string sraRunOut,
         }
       }
       checkOverrep:if (overRep) {
+        numOrep++;
+        readName = std::string(nlPosPrev + 1, nlPosHead);
+        if (dispOutput) {
+          logOutput("Overrepresented read removed: " + readName.substr(1, readName.find(" ")), logFile);
+        }
         writeEnd = nlPosPrev;
         if (compressFiles) {
           outputStream.write(writeStart, writeEnd - writeStart);
@@ -359,12 +394,14 @@ bool rem_overrep_se(std::string sraRunIn, std::string sraRunOut,
           outFile.write(writeStart, writeEnd - writeStart);
         }
 
+        numReads++;
         for (int i = 0; i < 2; i++) {
           nlPos = std::find(nlPos + 1, inFileL, '\n');
         }
         writeStart = nlPos;
       }
       else {
+        numReads++;
         for (int i = 0; i < 2; i++) {
           nlPos = std::find(nlPos + 1, inFileL, '\n');
         }
@@ -388,6 +425,21 @@ bool rem_overrep_se(std::string sraRunIn, std::string sraRunOut,
     io::close(gzOutBuffer);
   }
   outFile.close();
+
+  if (dispOutput) {
+    std::stringstream percentStream;
+    percentStream << std::fixed << std::setprecision(2)
+                  << (float(numOrep) * 100) / float(numOrep + numReads);
+    logOutput("Removal of overrepresented reads finished", logFile);
+    logOutput("\n  SUMMARY", logFile);
+    logOutput("    " + std::to_string(numOrep) + " reads removed (" +
+              percentStream.str() + " %)", logFile);
+    percentStream.str("");
+    percentStream << std::fixed << std::setprecision(2)
+                  << (float(numReads) * 100) / (float(numOrep + numReads));
+    logOutput("    " + std::to_string(numReads - numOrep) + " reads retained (" +
+              percentStream.str() + " %)", logFile);
+  }
   return true;
 }
 
