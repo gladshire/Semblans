@@ -579,6 +579,9 @@ int main(int argc, char * argv[]) {
       // Annotate transcriptome
       annotateBulk(transVec, threads, ram_gb, retainInterFiles, dispOutput, logFilePath, cfgIni);
     }
+    if (dispOutput) {
+      logOutput("Postprocess finished successfully.", logFilePath);
+    }
   }
   else {
   

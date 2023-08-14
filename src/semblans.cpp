@@ -245,12 +245,6 @@ int main(int argc, char * argv[]) {
     std::string assCmd = PAANDO_DIR + "assemble " + pathConfig + " " +
                          std::to_string(numThreads) + " " +
                          std::to_string(ram);
-    /*if (multAssembly) {
-      assCmd += " true";
-    }
-    else {
-      assCmd += " false";
-    }*/
     assCmd += retain;
     assCmd += verbose;
     std::string postCmd = PAANDO_DIR + "postprocess " + pathConfig + " " +

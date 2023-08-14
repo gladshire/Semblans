@@ -453,14 +453,11 @@ int main(int argc, char * argv[]) {
     // Get RAM in GB
     std::string ram_gb = argv[3];
 
-    // Get boolean for multiple sra processing
-    // bool mult_sra = stringToBool(argv[4]);
-
     // Get boolean for intermediate file fate
-    bool retainInterFiles = stringToBool(argv[5]);
+    bool retainInterFiles = stringToBool(argv[4]);
     
     // Get boolean for verbose printing
-    bool dispOutput = stringToBool(argv[6]);
+    bool dispOutput = stringToBool(argv[5]);
   
     // Get sequences of interest from config
     bool selectiveAssembly = false;
@@ -621,10 +618,15 @@ int main(int argc, char * argv[]) {
     run_trinity_bulk(sraGroups, threads, ram_gb, assembleInterest, 
                      assembleOthers, assembleAllSeqs, fastaSeqs, dispOutput,
                      retainInterFiles, logFilePath, cfgIni);
+
+    if (dispOutput) {
+      logOutput("Assemble finished successfully.", logFilePath);
+    }
   }
   else {
     print_help();
   }
+
   system("setterm -cursor on");
   return 0;
 }

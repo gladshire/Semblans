@@ -354,6 +354,11 @@ void trimBulk(std::vector<SRA> & sras, std::string threads,
   std::string minReadLength = trimmSettings.at("min_read_length");
   std::string numBpCutFront = trimmSettings.at("cut_number_bp_from_front");
   for (auto sra : sras) {
+    // Check for checkpoint file
+    if (sra.checkpointExists("trim")) {
+      logOutput("  Adapter trimming checkpoint found for: " + sra.get_accession(), logFilePath);
+      continue;
+    }
     currTrimIn.first = sra.get_sra_path_corr_fix().first.c_str();
     currTrimIn.second = sra.get_sra_path_corr_fix().second.c_str();   
 
@@ -419,11 +424,7 @@ void trimBulk(std::vector<SRA> & sras, std::string threads,
       }
     }
 
-    // Check for checkpoint file
-    if (sra.checkpointExists("trim")) {
-      logOutput("  Adapter trimming checkpoint found for: " + sra.get_accession(), logFilePath);
-      continue;
-    }
+
     logOutput("  Running adapter sequence trimming for:", logFilePath);
     summarize_sing_sra(sra, logFilePath, 4);
 
@@ -860,7 +861,12 @@ int main(int argc, char * argv[]) {
         exit(1);
       }
     }
+
+    if (dispOutput) {
+      logOutput("Preprocess finished successfully.", logFilePath);
+    }
   }
+
   system("setterm -cursor on");
   return 0;
 }

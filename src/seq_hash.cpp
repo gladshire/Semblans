@@ -81,18 +81,18 @@ seqHash::seqHash(uintmax_t lenTable, fs::path transFilePath, uintmax_t ram_b) {
       if (*(seqEndPos + 1) == '+') {
         currSequence = std::string(seqStartPos, seqEndPos);
         qualityStartPos = std::find(seqEndPos + 1, inFileL, '\n') + 1;
-        qualityEndPos = std::find(qualityStartPos, inFileL, headChar);
+        qualityEndPos = std::find(qualityStartPos, inFileL, '\n');
         if (qualityEndPos == inFileL) {
           currQuality = std::string(qualityStartPos, (int)(inFileL - qualityStartPos));
         }
         else {
           currQuality = std::string(qualityStartPos, qualityEndPos - 1);
         }
-        headerStartPos = std::find(qualityStartPos, inFileL, headChar);
+        headerStartPos = std::find(qualityStartPos, inFileL, '\n') + 1;
         this->insertHash(currHeader, currSequence, currQuality);
       }
       else {
-        headerStartPos = std::find(seqStartPos, inFileL, headChar);
+        headerStartPos = std::find(seqStartPos, inFileL, '\n') + 1;
         currSequence = std::string(seqStartPos, headerStartPos - 1);
         this->insertHash(currHeader, currSequence);
       }
