@@ -30,7 +30,8 @@ void run_kraken2(std::pair<std::string, std::string> sraRunIn,
                  std::string sraRunOut, std::string repFile,
                  std::string threads, std::string db, std::string confThreshold,
                  std::string minBaseQuality, std::string minHitGroups,
-                 bool dispOutput, bool compressFiles, std::string logFile) {
+                 bool keepForeign, bool dispOutput, bool compressFiles,
+                 std::string logFile) {
 
   std::string inFile1 = sraRunIn.first;
   std::string inFile2 = sraRunIn.second;
@@ -59,10 +60,11 @@ void run_kraken2(std::pair<std::string, std::string> sraRunIn,
   if (compressFiles) {
     krakOutput = "";
   }
-  else {
-    
-    krakOutput = " --output - --unclassified-out " + sraRunOut +
-                 " --classified-out " + sraRunOutClass;
+  else {    
+    krakOutput = " --output - --unclassified-out " + sraRunOut;
+    if (keepForeign) {
+      krakOutput += " --classified-out " + sraRunOutClass;
+    }
   }
   if (dispOutput) {
     printOut = " 2>&1 | tee -a " + logFile;

@@ -42,6 +42,7 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool dispOutput,
   }
 
   if (fs::exists(".tmp.xml")) {
+    logOutput("Previous xml found. Deleting it.", logFile);
     fs::remove(fs::path(".tmp.xml"));
   }
 

@@ -475,6 +475,7 @@ void filtForeignBulk(std::vector<SRA> & sras, std::vector<std::string> krakenDbs
   std::string confThreshold = krakenSettings.at("confidence_threshold");
   std::string minBaseQuality = krakenSettings.at("min_base_quality");
   std::string minHitGroups = krakenSettings.at("min_hit_groups");
+  bool keepForeign = ini_get_bool(krakenSettings.at("save_foreign_reads").c_str(), 0);
   std::pair<std::string, std::string> firstKrakIn;
   std::pair<std::string, std::string> currKrakIn;
   std::string krakOutDir;
@@ -535,14 +536,14 @@ void filtForeignBulk(std::vector<SRA> & sras, std::vector<std::string> krakenDbs
         procRunning = true;
         std::thread krakThread(progressAnim, 2);
         run_kraken2(currKrakIn, currKrakOut, repFile, threads, krakenDbs[i],
-                    confThreshold, minBaseQuality, minHitGroups,
+                    confThreshold, minBaseQuality, minHitGroups, keepForeign,
                     dispOutput, compressFiles, logFilePath);
         procRunning = false;
         krakThread.join();
       }
       else {
         run_kraken2(currKrakIn, currKrakOut, repFile, threads, krakenDbs[i],
-                    confThreshold, minBaseQuality, minHitGroups,
+                    confThreshold, minBaseQuality, minHitGroups, keepForeign,
                     dispOutput, compressFiles, logFilePath);
       }
 

@@ -2,6 +2,7 @@
 #include <iomanip>
 #include <cstring>
 #include <string>
+#include <vector>
 #include <sys/ioctl.h>
 #include <signal.h>
 #include <boost/filesystem.hpp>
@@ -14,7 +15,7 @@
 namespace fs = boost::filesystem;
 namespace dl = boost::dll;
 
-#define PAANDO_DIR std::string((dl::program_location().parent_path()).c_str()) + "/"
+#define SEMBLANS_DIR std::string((dl::program_location().parent_path()).c_str()) + "/"
 
 
 void print_intro(std::string logFile);

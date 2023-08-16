@@ -178,18 +178,6 @@ int main(int argc, char * argv[]) {
           // No RAM ammount given, using 1 GB
         }
       }
-
-      // Check if user specified a multi-SRA assembly
-/*
-      else if (strcmp("--multi", argv[i]) == 0 ||
-               strcmp("--Multi", argv[i]) == 0 ||
-               strcmp("--mult", argv[i]) == 0 ||
-               strcmp("--Mult", argv[i]) == 0 ||
-               strcmp("-m", argv[i]) == 0 ||
-               strcmp("-M", argv[i]) == 0) {
-        multAssembly = true;
-      }
-*/
       else if (strcmp("--retain", argv[i]) == 0 ||
                strcmp("--Retain", argv[i]) == 0 ||
                strcmp("-f", argv[i]) == 0 ||
@@ -222,6 +210,17 @@ int main(int argc, char * argv[]) {
     fs::create_directory((fs::canonical(fs::path(cfgIniGen["output_directory"].c_str())) /
                           fs::path(cfgIniGen["project_name"].c_str())));
     std::ofstream logFile(logFilePath, std::ios_base::trunc);
+
+    bool serialProcess = ini_get_bool(cfgIniGen.at("serial_processing").c_str(), 0);
+    std::vector<std::string> sraRuns;
+    if (serialProcess) {
+      for (auto sraCode : cfgIni.at("SRA accessions")) {
+        sraRuns.push_back(sraCode.first);
+      }
+      for (auto sraFile : cfgIni.at("Local files")) {
+        sraRuns.push_back(sraFile.first);
+      }
+    }
  
     std::string verbose;
     std::string retain;
@@ -237,17 +236,17 @@ int main(int argc, char * argv[]) {
     else {
       retain = " false";
     }
-    std::string preCmd = PAANDO_DIR + "preprocess " + pathConfig + " " +
+    std::string preCmd = SEMBLANS_DIR + "preprocess " + pathConfig + " " +
                          std::to_string(numThreads) + " " +
                          std::to_string(ram);
     preCmd += retain;
     preCmd += verbose;
-    std::string assCmd = PAANDO_DIR + "assemble " + pathConfig + " " +
+    std::string assCmd = SEMBLANS_DIR + "assemble " + pathConfig + " " +
                          std::to_string(numThreads) + " " +
                          std::to_string(ram);
     assCmd += retain;
     assCmd += verbose;
-    std::string postCmd = PAANDO_DIR + "postprocess " + pathConfig + " " +
+    std::string postCmd = SEMBLANS_DIR + "postprocess " + pathConfig + " " +
                           std::to_string(numThreads) + " " +
                           std::to_string(ram);
     postCmd += retain;
@@ -288,26 +287,51 @@ int main(int argc, char * argv[]) {
     }
     // Case 4: all three
     if (command == "all") {
-      logOutput("Performing entire assembly", logFilePath);
-      result = system(preCmd.c_str());
-      if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
-        std::cerr << "Preprocess exited" << std::endl;
-        system("setterm -cursor on");
-        exit(1);
+      if (serialProcess) {
+        for (auto sra : sraRuns) {
+          logOutput("Performing entire assembly on: " + sra, logFilePath);
+          result = system((preCmd + " " + sra).c_str());
+          if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
+            std::cerr << "Preprocess exited" << std::endl;
+            system("setterm -cursor on");
+            exit(1);
+          }
+          result = system((assCmd + " " + sra).c_str());
+          if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
+            std::cerr << "Assembly exited" << std::endl;
+            system("setterm -cursor on");
+            exit(1);
+          }
+          result = system((postCmd + " " + sra).c_str());
+          if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
+           std::cerr << "Postprocess exited" << std::endl;
+           system("setterm -cursor on");
+           exit(1);
+          }
+        }
       }
-      result = system(assCmd.c_str());
-      if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
-        std::cerr << "Assembly exited" << std::endl;
-        system("setterm -cursor on");
-        exit(1);
+      else {
+        logOutput("Performing entire assembly", logFilePath);
+        result = system(preCmd.c_str());
+        if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
+          std::cerr << "Preprocess exited" << std::endl;
+          system("setterm -cursor on");
+          exit(1);
+        }
+        result = system(assCmd.c_str());
+        if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
+          std::cerr << "Assembly exited" << std::endl;
+          system("setterm -cursor on");
+          exit(1);
+        }
+        result = system(postCmd.c_str());
+        if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
+          std::cerr << "Postprocess exited" << std::endl;
+          system("setterm -cursor on");
+          exit(1);
+        }
+        exit(0);
       }
-      result = system(postCmd.c_str());
-      if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
-        std::cerr << "Postprocess exited" << std::endl;
-        system("setterm -cursor on");
-        exit(1);
-      }
-      exit(0);
     }
   }
 }
