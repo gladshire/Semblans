@@ -272,6 +272,7 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
   INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
   INI_MAP_ENTRY assembGroups = cfgIni.at("Assembly groups");
   std::string outDir;
+  std::string inDir;
   std::vector<std::pair<std::string, std::string>> sraRunsInTrin;
   std::vector<std::pair<std::string, std::string>> sraRunsInterest;
   std::vector<std::pair<std::string, std::string>> sraRunsNoInterest;
@@ -338,17 +339,18 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
         sraRunsInTrin.push_back(currTrinIn);
         outDir = fs::path(currTrinIn.first).parent_path().c_str();
       }
+      inDir = sra.get_sra_path_orep_filt().first.parent_path().c_str();
       if (assembSeqsInterest) {
-        currTrinIn.first = outDir + "/" + currFilePrefix1 + ".mapped.fq";
+        currTrinIn.first = inDir + "/" + currFilePrefix1 + ".mapped.fq";
         if (sra.is_paired()) {
-          currTrinIn.second = outDir + "/" + currFilePrefix2 + ".mapped.fq";
+          currTrinIn.second = inDir + "/" + currFilePrefix2 + ".mapped.fq";
         }
         sraRunsInterest.push_back(currTrinIn);
       }
       if (assembSeqsNoInterest) {
-        currTrinIn.first = outDir + "/" + currFilePrefix1 + ".unmapped.fq";
+        currTrinIn.first = inDir + "/" + currFilePrefix1 + ".unmapped.fq";
         if (sra.is_paired()) {
-          currTrinIn.second = outDir + "/" + currFilePrefix2 + ".unmapped.fq";
+          currTrinIn.second = inDir + "/" + currFilePrefix2 + ".unmapped.fq";
         }
         sraRunsNoInterest.push_back(currTrinIn);
       }

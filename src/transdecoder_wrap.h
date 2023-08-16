@@ -21,6 +21,7 @@ bool fasta_ok(std::string fastaFile, uintmax_t ram_b);
 bool blastpout_ok(std::string blastpFile);
 
 void run_transdecoder(std::string transIn, std::string transCds, std::string transPep,
+                      bool useBlast, std::string maxEvalue, std::string maxTargetSeqs,
                       std::string threads, uintmax_t ram_b,
                       std::string dbPath, std::string outDir,
                       bool dispOutput, std::string logFile);

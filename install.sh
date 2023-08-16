@@ -74,7 +74,7 @@ echo "Now installing required packages ..."
 echo "Installing HMMER ..."
 wget -q http://eddylab.org/software/hmmer/hmmer.tar.gz
 tar -xf hmmer.tar.gz -C ./external/
-mv ./external/hmmer-3.3.2 ./external/hmmer
+mv ./external/hmmer* ./external/hmmer
 cd ./external/hmmer
 ./configure --prefix "$PWD"
 make

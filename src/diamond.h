@@ -17,14 +17,16 @@ namespace dl = boost::dll;
 #define DBLASTX (PATH_DIAMOND + " blastx")
 #define DBLASTP (PATH_DIAMOND + " blastp")
 
-void makeDb(std::string pathProtRef, std::string outDir,
-            bool dispOutput, std::string logFile);
+void makeBlastDbDiam(std::string pathProtRef, std::string outDir,
+                     bool dispOutput, std::string logFile);
 
 void blastxDiam(std::string transIn, std::string blastDb,
+                std::string maxEvalue, std::string maxTargetSeqs,
                 std::string threads, std::string outDir,
                 bool dispOutput, std::string logFile);
 
 void blastpDiam(std::string pepFilePath, std::string blastDb,
+                std::string maxEvalue, std::string maxTargetSeqs,
                 std::string threads, std::string outFile,
                 bool dispOutput, std::string logFile);
 

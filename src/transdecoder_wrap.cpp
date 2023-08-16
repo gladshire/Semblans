@@ -53,6 +53,7 @@ bool blastpout_ok(std::string blastpFile) {
 // Given a transcripts file, predict the sequence data's coding regions using
 // TransDecoder
 void run_transdecoder(std::string transIn, std::string transCds, std::string transPep,
+                      bool useBlast, std::string maxEvalue, std::string maxTargetSeqs,
                       std::string threads, uintmax_t ram_b,
                       std::string dbPath, std::string outDir,
                       bool dispOutput, std::string logFile) {
@@ -101,8 +102,14 @@ void run_transdecoder(std::string transIn, std::string transCds, std::string tra
       logOutput("Skipping blastp", logFile);
     }
     else {
-      blastpDiam(std::string(allpep.c_str()), dbPath, threads, outDir + "/" + blastpout,
-                 dispOutput, logFile);
+      if (useBlast) {
+        blastp(std::string(allpep.c_str()), dbPath, maxEvalue, maxTargetSeqs, threads,
+               outDir + "/" + blastpout, dispOutput, logFile);
+      }
+      else {
+        blastpDiam(std::string(allpep.c_str()), dbPath, maxEvalue, maxTargetSeqs, threads,
+                   outDir + "/" + blastpout, dispOutput, logFile);
+      }
     }
     if (fasta_ok(std::string(cdsFilePath.c_str()), ram_b) &&
         fasta_ok(std::string(pepFilePath.c_str()), ram_b)) {
@@ -110,13 +117,11 @@ void run_transdecoder(std::string transIn, std::string transCds, std::string tra
     }
     else {
       std::string tdPredict_cmd = PATH_TRANSD_PREDICT + " -t " + transFilePath +
-                                  " --retain_blastp_hits " + outDir + "/" + blastpout + " --cpu " +
-                                  threads + printOut;
+                                  " --retain_blastp_hits " + outDir + "/" + blastpout +
+                                  " --cpu " + threads + printOut;
       fs::path currDir = fs::current_path();
       fs::current_path(fs::path(outDir.c_str()));
       int resultPD;
-
-      std::cout << tdPredict_cmd << std::endl;
 
       resultPD = system(tdPredict_cmd.c_str());
       if (WIFSIGNALED(resultPD)) {

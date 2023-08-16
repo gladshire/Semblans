@@ -49,20 +49,25 @@ bool stringToBool(std::string boolStr) {
 
 // Given a vector of transcript objects, perform a blastx alignment against the
 // user-provided reference proteome
-void blastxDiamBulk(const std::vector<transcript> & transVec, std::string threads,
-                    bool dispOutput, std::string logFilePath, const INI_MAP & cfgIni) {
+void blastxBulk(const std::vector<transcript> & transVec, std::string threads,
+                bool dispOutput, std::string logFilePath, const INI_MAP & cfgIni) {
   logOutput("\nStarting BLASTX alignment", logFilePath);
-  std::string currTransInDiam;
+  std::string currTransIn;
   std::string currBlastDbName;
-  std::string refProt = cfgIni.at("General").at("reference_proteome_path");
+  INI_MAP_ENTRY cfgGen = cfgIni.at("General");
+  INI_MAP_ENTRY cfgAlign = cfgIni.at("Alignment settings");
+  bool useBlast = ini_get_bool(cfgAlign.at("use_blast_instead_of_diamond").c_str(), 0);
+  std::string maxEvalue = cfgAlign.at("blastx_max_evalue");
+  std::string maxTargetSeqs = cfgAlign.at("blastx_max_target_seqs");
+  std::string refProt = cfgGen.at("reference_proteome_path");
   if (!fs::exists(fs::path(refProt.c_str()))) {
     logOutput("ERROR: Reference proteome: " + refProt + " not found", logFilePath);
     logOutput("  Please ensure its path is correctly specified in your config INI file", logFilePath);
     exit(1);
   }
   std::string blastDbDir;
-  blastDbDir = cfgIni.at("General").at("output_directory") + "/" +
-               cfgIni.at("General").at("project_name") + "/" +
+  blastDbDir = cfgGen.at("output_directory") + "/" +
+               cfgGen.at("project_name") + "/" +
                stepDirs[8] + "/";
   std::string blastDbName;
   blastDbName = std::string(fs::path(refProt.c_str()).stem().c_str());
@@ -74,22 +79,43 @@ void blastxDiamBulk(const std::vector<transcript> & transVec, std::string thread
     }
     logOutput("  Now running BLASTX alignment for:", logFilePath);
     summarize_sing_trans(trans, logFilePath, 4);
-    currTransInDiam = trans.get_trans_path_trinity().c_str();
-    makeDb(refProt, blastDbDir, dispOutput, logFilePath);
+    currTransIn = trans.get_trans_path_trinity().c_str();
+    if (useBlast) {
+      makeBlastDb(refProt, blastDbDir, dispOutput, logFilePath);
+    }
+    else {
+      makeBlastDbDiam(refProt, blastDbDir, dispOutput, logFilePath);
+    }
     // Run BlastX
     currBlastDbName = std::string(fs::path(refProt.c_str()).stem().c_str());
 
     if (!dispOutput) {
       procRunning = true;
       std::thread blastxThread(progressAnim, 2);
-      blastxDiam(currTransInDiam, blastDbDir + currBlastDbName, threads,
-                 blastDbDir, dispOutput, logFilePath);
+      if (useBlast) {
+        blastxDiam(currTransIn, blastDbDir + currBlastDbName,
+                   maxEvalue, maxTargetSeqs, threads,
+                   blastDbDir, dispOutput, logFilePath);
+      }
+      else {
+        blastx(currTransIn, blastDbDir + currBlastDbName,
+               maxEvalue, maxTargetSeqs, threads,
+               blastDbDir, dispOutput, logFilePath);
+      }
       procRunning = false;
       blastxThread.join();
     }
     else {
-       blastxDiam(currTransInDiam, blastDbDir + currBlastDbName, threads,
-                 blastDbDir, dispOutput, logFilePath);
+       if (useBlast) {
+         blastx(currTransIn, blastDbDir + currBlastDbName,
+                maxEvalue, maxTargetSeqs, threads,
+                blastDbDir, dispOutput, logFilePath);
+       }
+       else {
+         blastxDiam(currTransIn, blastDbDir + currBlastDbName,
+                    maxEvalue, maxTargetSeqs, threads,
+                    blastDbDir, dispOutput, logFilePath);
+       }
     }
 
     // Create BlastX checkpoint
@@ -338,7 +364,12 @@ void transdecBulk(const std::vector<transcript> & transVec, std::string threads,
   std::string currTransPep;
   std::string currDb;
   std::string currOutDirTD;
-  std::string refProt = cfgIni.at("General").at("reference_proteome_path");
+  INI_MAP_ENTRY cfgGen = cfgIni.at("General");
+  INI_MAP_ENTRY cfgAlign = cfgIni.at("Alignment settings");
+  bool useBlast = ini_get_bool(cfgAlign.at("use_blast_instead_of_diamond").c_str(), 0);
+  std::string maxEvalue = cfgAlign.at("blastp_max_evalue");
+  std::string maxTargetSeqs = cfgAlign.at("blastp_max_target_seqs");
+  std::string refProt = cfgGen.at("reference_proteome_path");
   if (!fs::exists(fs::path(refProt.c_str()))) {
     logOutput("ERROR: Reference proteome: " + refProt + " not found", logFilePath);
     logOutput("  Please ensure its path is correctly specified in your config INI file",
@@ -378,16 +409,18 @@ void transdecBulk(const std::vector<transcript> & transVec, std::string threads,
     if (!dispOutput) {
       procRunning = true;
       std::thread transDecThread(progressAnim, 2);
-      run_transdecoder(currTransInTD, currTransCds, currTransPep, threads, ram_b,
-                       currDb, currOutDirTD, dispOutput, logFilePath);
+      run_transdecoder(currTransInTD, currTransCds, currTransPep, useBlast, maxEvalue,
+                       maxTargetSeqs, threads, ram_b, currDb, currOutDirTD, dispOutput,
+                       logFilePath);
       // Create coding region prediction checkpoint
       trans.makeCheckpoint("cdr.predict");
       procRunning = false;
       transDecThread.join();
     }
     else {
-      run_transdecoder(currTransInTD, currTransCds, currTransPep, threads, ram_b,
-                       currDb, currOutDirTD, dispOutput, logFilePath);
+      run_transdecoder(currTransInTD, currTransCds, currTransPep, useBlast, maxEvalue,
+                       maxTargetSeqs, threads, ram_b, currDb, currOutDirTD, dispOutput,
+                       logFilePath);
     }
   }
 }
@@ -558,7 +591,7 @@ int main(int argc, char * argv[]) {
  
     if (ini_get_bool(cfgPipeline.at("remove_chimera_reads").c_str(), 0)) {
       // BlastX alignment of transcript to reference proteome
-      blastxDiamBulk(transVec, threads, dispOutput, logFilePath, cfgIni);
+      blastxBulk(transVec, threads, dispOutput, logFilePath, cfgIni);
 
       // Detect and remove chimeric transcripts
       remChimeraBulk(transVec, ram_gb, retainInterFiles, dispOutput, logFilePath, cfgIni);

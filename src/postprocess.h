@@ -26,8 +26,8 @@ std::vector<transcript> get_transcript(std::vector<SRA> sras);
 
 bool stringToBool(std::string boolStr);
 
-void blastxDiamBulk(const std::vector<transcript> & transVec, std::string threads,
-                    bool dispOutput, std::string logFilePath, const INI_MAP & cfgIni);
+void blastxBulk(const std::vector<transcript> & transVec, std::string threads,
+                bool dispOutput, std::string logFilePath, const INI_MAP & cfgIni);
 
 void remChimeraBulk(const std::vector<transcript> & transVec, std::string ram_gb,
                     bool retainInterFiles, bool dispOutput, std::string logFilePath,

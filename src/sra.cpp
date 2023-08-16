@@ -38,7 +38,11 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool dispOutput,
   std::string compressExt;
   std::chrono::milliseconds queryLim(500);
   if (apiKey != "") {
-    std::chrono::milliseconds queryLim(250);
+    std::chrono::milliseconds queryLim(100);
+  }
+
+  if (fs::exists(".tmp.xml")) {
+    fs::remove(fs::path(".tmp.xml"));
   }
 
   // Download temp XML file for SRA accession, containing information for object members
@@ -116,11 +120,11 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool dispOutput,
       fs::remove(fs::path(".tmp.xml"));
     }
   }
+  fs::remove(fs::path(".tmp.xml"));
   if (this->sra_accession != "FAILURE") {
     if (dispOutput) {
       logOutput("Successfully retrieved information for: " + sra_accession, logFile);
     }
-    fs::remove(fs::path(".tmp.xml"));
 
     std::string fileBase = make_file_str();
     if (paired) {

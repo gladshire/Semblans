@@ -86,7 +86,7 @@ seqHash::seqHash(uintmax_t lenTable, fs::path transFilePath, uintmax_t ram_b) {
           currQuality = std::string(qualityStartPos, (int)(inFileL - qualityStartPos));
         }
         else {
-          currQuality = std::string(qualityStartPos, qualityEndPos - 1);
+          currQuality = std::string(qualityStartPos, qualityEndPos);
         }
         headerStartPos = std::find(qualityStartPos, inFileL, '\n') + 1;
         this->insertHash(currHeader, currSequence, currQuality);

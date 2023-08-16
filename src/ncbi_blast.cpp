@@ -29,6 +29,7 @@ void makeBlastDb(std::string pathProtRef, std::string outDir,
 
 
 void blastx(std::string transIn, std::string blastDb,
+            std::string maxEvalue, std::string maxTargetSeqs,
             std::string threads, std::string outDir,
             bool dispOutput, std::string logFile) {
   fs::path pathTrans(transIn.c_str());
@@ -50,7 +51,7 @@ void blastx(std::string transIn, std::string blastDb,
     return;
   }
   std::string blastxCmd = BLASTX + " -db " + blastDb + " -query " + pathTransStr +
-                          " -evalue " + "0.01" +
+                          " -evalue " + maxEvalue + " -max_target_seqs " + maxTargetSeqs +
                           " -outfmt " + "\"6 qseqid qlen sseqid slen frames pident nident length mismatch gapopen qstart qend sstart send evalue bitscore\"" +
                           " -out " + outBlastxStr +
                           " -num_threads " + threads +
@@ -65,6 +66,7 @@ void blastx(std::string transIn, std::string blastDb,
 
 
 void blastp(std::string pepFilePath, std::string blastDb,
+            std::string maxEvalue, std::string maxTargetSeqs,
             std::string threads, std::string outFile,
             bool dispOutput, std::string logFile) {
   fs::path outBlastpFile(outFile.c_str());
@@ -81,8 +83,8 @@ void blastp(std::string pepFilePath, std::string blastDb,
     return;
   }
   std::string blastpCmd = BLASTP + " -query " + pepFilePath + " -db " + blastDb +
-                          " -max_target_seqs 1 -outfmt 6 -evalue 10 " + "-num_threads " +
-                          threads + " > " + outFile + printOut;
+                          " -evalue " + maxEvalue + " -max_target_seqs " + maxTargetSeqs + 
+                          " -outfmt 6 " + "-num_threads " + threads + " > " + outFile + printOut;
   result = system(blastpCmd.c_str());
   if (WIFSIGNALED(result)) {
     system("setterm -cursor on");

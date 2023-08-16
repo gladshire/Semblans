@@ -22,9 +22,11 @@ void makeBlastDb(std::string pathProtRef, std::string outDir,
                  bool dispOutput, std::string logFile);
 
 void blastx(std::string transIn, std::string blastDb,
+            std::string maxEvalue, std::string maxTargetSeqs,
             std::string threads, std::string outDir,
             bool dispOutput, std::string logFile);
 
 void blastp(std::string pepFilePath, std::string blastDb,
+            std::string maxEvalue, std::string maxTargetSeqs,
             std::string threads, std::string outFile,
             bool dispOutput, std::string logFile);
