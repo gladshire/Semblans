@@ -147,6 +147,11 @@ echo "Installing Trinity ..."
 wget -q --output-document trinity.tar.gz https://github.com/trinityrnaseq/trinityrnaseq/releases/download/Trinity-v2.15.1/trinityrnaseq-v2.15.1.FULL.tar.gz
 tar -xf trinity.tar.gz -C ./external/
 mv ./external/trinityrnaseq-v2.15.1 ./external/trinityrnaseq
+cd ./external/trinityrnaseq/trinity-plugins/bamsifter
+sed -i '1s/^/#include <string> \n/' sift_bam_max_cov.cpp
+cd ../../
+make
+cd ../../
 rm trinity.tar.gz
 
 # Install NCBI BLAST

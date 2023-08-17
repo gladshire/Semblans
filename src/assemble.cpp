@@ -51,8 +51,8 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
 
   std::string currSeqFilePrefix;
   for (auto seqFilePath : seqsInterest) {
-    logOutput("  Now isolating reads with " + seqFilePath, logFile);
     currSeqFilePrefix = std::string(fs::path(seqFilePath.c_str()).stem().c_str());
+    logOutput("  Now isolating reads that map to \"" + seqFilePath + "\"", logFile);
     // Create index of fastaInput with Salmon
     transcript transTemp(seqFilePath, cfgIni);
     // Check if indexing checkpoint exists
@@ -394,7 +394,7 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
             run_trinity(sraRunsInterest.at(0), currTrinOutInt, threads, ram_gb, dispOutput, logFile);
          }
           // Make file for mapped assembly containing associated SRAs
-          transInfoFileStr = std::string(fs::path(currTrinOutInt.c_str()).replace_extension(("." + currSeqFilePrefix + "ti").c_str()).c_str());
+          transInfoFileStr = std::string(fs::path(currTrinOutInt.c_str()).replace_extension(("." + currSeqFilePrefix + ".ti").c_str()).c_str());
           makeTransInfoFile(sraRunsInterest, transInfoFileStr);
   
           makeGroupCheckpoint(std::string(cpDir.c_str()), sraGroup.first + "." + currSeqFilePrefix + ".mapped");
@@ -417,7 +417,7 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
             run_trinity(sraRunsNoInterest.at(0), currTrinOutNon, threads, ram_gb, dispOutput, logFile);
           }
           // Make file for unmapped assembly containing associated SRAs
-          transInfoFileStr = std::string(fs::path(currTrinOutNon.c_str()).replace_extension(("." + currSeqFilePrefix + "ti").c_str()).c_str());
+          transInfoFileStr = std::string(fs::path(currTrinOutNon.c_str()).replace_extension(("." + currSeqFilePrefix + ".ti").c_str()).c_str());
           makeTransInfoFile(sraRunsNoInterest, transInfoFileStr);
 
           makeGroupCheckpoint(std::string(cpDir.c_str()), sraGroup.first + "." + currSeqFilePrefix + ".unmapped");
@@ -439,7 +439,7 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
             run_trinity(sraRunsInTrin.at(0), currTrinOutAll, threads, ram_gb, dispOutput, logFile);
           }
           // Make file for entire assembly containing associated SRAs
-          transInfoFileStr = std::string(fs::path(currTrinOutAll.c_str()).replace_extension(("." + currSeqFilePrefix + "ti").c_str()).c_str());
+          transInfoFileStr = std::string(fs::path(currTrinOutAll.c_str()).replace_extension(("." + currSeqFilePrefix + ".ti").c_str()).c_str());
           makeTransInfoFile(sraRunsInTrin, transInfoFileStr);
 
           makeGroupCheckpoint(std::string(cpDir.c_str()), sraGroup.first);
