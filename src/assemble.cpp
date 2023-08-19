@@ -28,6 +28,9 @@ void updateHeaders(std::string fastaFilePath, uintmax_t ram_b) {
 
 // Given a FASTA input, divide all SRA reads into those which map to it and those that do not.
 // Create two new files for containing the two.
+// TODO: Read isolation currently only creates a mapped and unmapped for each sequence file separately.
+//       Should generate single SRA read file containing the reads that map to none of the user-defined
+//       sequences.
 void isolateReads(const std::vector<SRA> & sras, std::string threads,
                   std::string ram_gb, bool dispOutput, const INI_MAP & cfgIni, std::string logFile) {
 
@@ -550,17 +553,17 @@ int main(int argc, char * argv[]) {
         pos = sraRun.find(" ");
         sraRunsLocal.second = sraRun.substr(0, pos);
       }
-      if (fs::exists(cfgIni["General"]["local_data_directory"] + sraRunsLocal.first) &&
-          fs::exists(cfgIni["General"]["local_data_directory"] + sraRunsLocal.second)) {
+      if (fs::exists(sraRunsLocal.first) &&
+          fs::exists(sraRunsLocal.second)) {
         sras.push_back(SRA(sraRunsLocal.first, sraRunsLocal.second, cfgIni, compressFiles));
       }
       else {
         if (sraRunsLocal.first != "" &&
-            !fs::exists(cfgIni["General"]["local_data_directory"] + sraRunsLocal.first)) {
+            !fs::exists(sraRunsLocal.first)) {
           logOutput("ERROR: Local run not found: \"" + sraRunsLocal.first + "\"", logFilePath);
         }
         if (sraRunsLocal.second != "" &&
-            !fs::exists(cfgIni["General"]["local_data_directory"] + sraRunsLocal.second)) {
+            !fs::exists(sraRunsLocal.second)) {
           logOutput("ERROR: Local run not found: \"" + sraRunsLocal.second + "\"", logFilePath);
         }
       }

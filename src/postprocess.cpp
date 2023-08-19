@@ -531,18 +531,18 @@ int main(int argc, char * argv[]) {
         pos = sraRun.find(" ");
         sraRunsLocal.second = sraRun.substr(0, pos);
       }
-      if (fs::exists(cfgIni["General"]["local_data_directory"] + sraRunsLocal.first) &&
-          fs::exists(cfgIni["General"]["local_data_directory"] + sraRunsLocal.second)) {
+      if (fs::exists(sraRunsLocal.first) &&
+          fs::exists(sraRunsLocal.second)) {
         sras.push_back(SRA(sraRunsLocal.first, sraRunsLocal.second, cfgIni, compressFiles));
       }
       else {
         if (sraRunsLocal.first != "" &&
-            !fs::exists(cfgIni["General"]["local_data_directory"] + sraRunsLocal.first)) {
+            !fs::exists(sraRunsLocal.first)) {
           std::cout << "ERROR: Local run not found: \"" << sraRunsLocal.first << "\""
                     << std::endl;
         }
         if (sraRunsLocal.second != "" &&
-            !fs::exists(cfgIni["General"]["local_data_directory"] + sraRunsLocal.second)) {
+            !fs::exists(sraRunsLocal.second)) {
           std::cout << "ERROR: Local run not found: \"" << sraRunsLocal.second << "\""
                     << std::endl;
         }

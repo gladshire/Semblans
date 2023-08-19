@@ -767,17 +767,20 @@ int main(int argc, char * argv[]) {
     }
     // Get single/paired filenames of local data
     for (auto fqFileName : cfgIni.at("Local files")) {
+      //if (fqFileName.first[0] == '~') {
+      //  fqFileName.first = std::string(home) + fqFileName.first.substr(1, fqFileName.first.size() - 1);
+      //}
       localDataFiles.push_back(fqFileName.first);
     }
     std::pair<std::string, std::string> sraRunsLocal;
-    std::string localDataDir = cfgIni["General"]["local_data_directory"];
-    if (localDataDir[0] == '~') {
-      localDataDir = std::string(home) + localDataDir.substr(1, localDataDir.size() - 1);
-    }
+    //std::string localDataDir = cfgIni["General"]["local_data_directory"];
+    //if (localDataDir[0] == '~') {
+    //  localDataDir = std::string(home) + localDataDir.substr(1, localDataDir.size() - 1);
+    //}
 
-    if (localDataDir[localDataDir.size() - 1] != '/') {
-      localDataDir += "/";
-    }
+    //if (localDataDir[localDataDir.size() - 1] != '/') {
+    //  localDataDir += "/";
+    //}
     size_t pos;
     bool stepSuccess;
     for (auto sraRun : localDataFiles) {
@@ -791,17 +794,17 @@ int main(int argc, char * argv[]) {
         sraRunsLocal.second = sraRun.substr(0, pos);
       }
       // Check if files in pair exist. If not, do not add to sras vector
-      if (fs::exists(localDataDir + sraRunsLocal.first) &&
-          fs::exists(localDataDir + sraRunsLocal.second)) {
+      if (fs::exists(sraRunsLocal.first) &&
+          fs::exists(sraRunsLocal.second)) {
         sras.push_back(SRA(sraRunsLocal.first, sraRunsLocal.second, cfgIni, compressFiles));
       }
       else {
         if (sraRunsLocal.first != "" &&
-            !fs::exists(localDataDir + sraRunsLocal.first)) {
+            !fs::exists(sraRunsLocal.first)) {
           logOutput("ERROR: Local run not found: \"" + sraRunsLocal.first + "\"", logFilePath);
         }
         if (sraRunsLocal.second != "" &&
-            !fs::exists(localDataDir + sraRunsLocal.second)) {
+            !fs::exists(sraRunsLocal.second)) {
           logOutput("ERROR: Local run not found: \"" + sraRunsLocal.second + "\"", logFilePath);
         }
       }
