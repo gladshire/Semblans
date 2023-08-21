@@ -47,36 +47,155 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
   
   uintmax_t ram_b = (uintmax_t)stoi(ram_gb) * 1000000000;
   std::pair<std::string, std::string> currSraIn;
+  std::vector<std::pair<std::string, std::string>> sraRunsIn;
   std::string outDir;
   std::string fastaQuant;
   std::string filePrefix1;
   std::string filePrefix2;
 
+
+  uintmax_t numBytesReads1;
+  uintmax_t lenReadsHash1;
+  uintmax_t numBytesReads2;
+  uintmax_t lenReadsHash2;
+  
+  std::string currLine;
+  sequence currSeq;
+  std::string currHead;
+  std::string currSeqData;
+  std::string currQual;
+
   std::string currSeqFilePrefix;
   // Iterate through sequences of interest, generating a Salmon index for each and quantifying
   // reads against them
-  /*
-  for (auto sesqFilePath : seqsInterest) {
-    currSeqFilePrefix = std::string(fs::path(seqFilePath.c_str()).stem().c_str());
+  for (int i = 0; i < seqsInterest.size(); i++) {
+    currSeqFilePrefix = std::string(fs::path(seqsInterest[i].c_str()).stem().c_str());
     logOutput("  Now creating mapping index for \"" + currSeqFilePrefix + "\"", logFile);
     // Create index of sequence file with Salmon
-    transcript dummyTrans(seqFilePath, cfgIni);
+    transcript dummyTrans(seqsInterest[i], cfgIni);
     fastaIndex = std::string(dummyTrans.get_trans_path_trinity().parent_path().c_str()) + "/" +
-                 std::string(fs::path(seqFilePath.c_str()).stem().c_str()) + "_index";
+                 std::string(fs::path(seqsInterest[i].c_str()).stem().c_str()) + "_index";
     // Check if indexing checkpoint exists. If not, generate index
-    if (!dummyTrans.checkpointEcists(currSeqFilePrefix + ".idx.iso")) {
-      salmon_index(seqFilePath, fastaIndex, threads, dispOutput, logFile);
+    if (!dummyTrans.checkpointExists(currSeqFilePrefix + ".idx.iso")) {
+      salmon_index(seqsInterest[i], fastaIndex, threads, dispOutput, logFile);
       dummyTrans.makeCheckpoint(currSeqFilePrefix + ".idx.iso");
     }
-
+    
     for (auto sra : sras) {
-      // if quant checkpoint does not exist for current SRA
-      //   Quantify transcript against current index
-      //   Create quant checkpoint for current SRA
+      outDir = sra.get_sra_path_orep_filt().first.parent_path().c_str();
+      if (i == 0) {
+        currSraIn.first = sra.get_sra_path_orep_filt().first.c_str();
+        currSraIn.second = sra.get_sra_path_orep_filt().second.c_str();
+
+        // Obtain read input files, based on pipeline preferences
+        if (!ini_get_bool(cfgPipeline.at("remove_overrepresented").c_str(), 0)) {
+          if (!ini_get_bool(cfgPipeline.at("filter_foreign_reads").c_str(), 0)) {
+            if (!ini_get_bool(cfgPipeline.at("trim_adapter_seqs").c_str(), 0)) {
+              if (!ini_get_bool(cfgPipeline.at("error_correction").c_str(), 0)) {
+                currSraIn.first = sra.get_sra_path_raw().first.c_str();
+                currSraIn.second = sra.get_sra_path_raw().second.c_str();
+                outDir = sra.get_sra_path_raw().first.parent_path().c_str();
+              }
+              else {
+                currSraIn.first = sra.get_sra_path_corr_fix().first.c_str();
+                currSraIn.second = sra.get_sra_path_corr_fix().second.c_str();
+                outDir = sra.get_sra_path_corr_fix().first.parent_path().c_str();
+              }
+            }
+            else {
+              currSraIn.first = sra.get_sra_path_trim_p().first.c_str();
+              currSraIn.second = sra.get_sra_path_trim_p().second.c_str();
+              outDir = sra.get_sra_path_trim_p().first.parent_path().c_str();
+            }
+          }
+          else {
+            currSraIn.first = sra.get_sra_path_for_filt().first.c_str();
+            currSraIn.second = sra.get_sra_path_for_filt().second.c_str();
+            outDir = sra.get_sra_path_for_filt().first.parent_path().c_str();
+          }
+        }
+        filePrefix1 = sra.get_file_prefix().first;
+        filePrefix2 = sra.get_file_prefix().second;
+        
+      }
+      else {
+        currSraIn.first = outDir + "/" + sra.get_file_prefix().first + ".unmapped.fq";
+        currSraIn.second = outDir + "/" + sra.get_file_prefix().second + ".unmapped.fq";
+      }
+      sraRunsIn.push_back(currSraIn);
+      fastaQuant = std::string(dummyTrans.get_trans_path_trinity().parent_path().c_str()) + "/" +
+                   std::string(fs::path(currSeqFilePrefix.c_str()).stem().c_str()) + "_" + 
+                   sra.get_file_prefix().first + "_quant";
+
+      if (!sra.checkpointExists(currSeqFilePrefix + ".qt.iso")) {
+        logOutput("  Mapping reads to sequences of interest", logFile); 
+        salmon_quant(seqsInterest[i], fastaIndex, fastaQuant, sraRunsIn, threads, dispOutput, logFile);
+        // Create checkpoint for salmon quant of SRA against seqs of interest
+        sra.makeCheckpoint(currSeqFilePrefix + ".qt.iso");
+      }
+
+      numBytesReads1 = fs::file_size(currSraIn.first.c_str());
+      lenReadsHash1 = numBytesReads1 / 160;
+      logOutput("  Creating hash table from forward-ended reads", logFile);
+      seqHash readHashTable1(lenReadsHash1, fs::path(currSraIn.first.c_str()), ram_b);
+      seqHash unmappedHash1(lenReadsHash1);
+
+      logOutput("  Now splitting reads into mapped and unmapped", logFile);
+      unmappedReadFile.open(fastaQuant + "/aux_info/unmapped_names.txt");
+
+      // Iterate through headers in unmapped reads file
+      // Fill hash tables accordingly
+      while (getline(unmappedReadFile, currLine)) {
+        currHead = currLine.substr(0, currLine.find(" "));
+        currSeq = readHashTable1.getSeq(currHead);
+        currHead = currSeq.get_header();
+
+        currSeqData = currSeq.get_sequence();
+        currQual = currSeq.get_quality();
+      
+        readHashTable1.deleteHash(currHead);
+        unmappedHash1.insertHash(currHead, currSeqData, currQual);
+      }
+      // Dump filled sequence hash tables to new files, containing the mapped
+      // and unmapped reads respectively
+      logOutput("  Dumping split reads to mapped and unmapped files", logFile);
+      readHashTable1.dump(outDir + "/" + filePrefix1 + "." + currSeqFilePrefix + ".mapped.fq");
+      unmappedHash1.dump(outDir + "/" + filePrefix1 + "." + currSeqFilePrefix + ".unmapped.fq");
+      logOutput("", logFile);
+      unmappedReadFile.close();
+
+      if (sra.is_paired()) {
+        numBytesReads2 = fs::file_size(currSraIn.second.c_str());
+        lenReadsHash2 = numBytesReads2 / 160;
+        logOutput("  Creating hash table from reverse-ended reads", logFile);
+
+        seqHash readHashTable2(lenReadsHash2, fs::path(currSraIn.second.c_str()), ram_b);
+        seqHash unmappedHash2(lenReadsHash2);
+
+        logOutput("  Now splitting reads into mapped and unmapped", logFile);
+        unmappedReadFile.open(fastaQuant + "/aux_info/unmapped_names.txt");
+        // Iterate through headers in unmapped reads file
+        // Fill hash tables accordingly
+        while (getline(unmappedReadFile, currLine)) {
+          currHead = currLine.substr(0, currLine.find(" "));
+          currSeq = readHashTable2.getSeq(currHead);
+          currHead = currSeq.get_header();
+
+          currSeqData = currSeq.get_sequence();
+          currQual = currSeq.get_quality();
+
+          readHashTable2.deleteHash(currHead);
+          unmappedHash2.insertHash(currHead, currSeqData, currQual);
+        }
+        logOutput("  Dumping split reads to mapped and unmapped files", logFile);
+        readHashTable2.dump(outDir + "/" + filePrefix2 + "." + currSeqFilePrefix + ".mapped.fq");
+        unmappedHash2.dump(outDir + "/" + filePrefix2 + "." + currSeqFilePrefix + ".unmapped.fq");
+        logOutput("", logFile);
+        unmappedReadFile.close();
+      }
+      sra.makeCheckpoint(currSeqFilePrefix + ".iso");
     }
-  }*/
-
-
+/*
   for (auto seqFilePath : seqsInterest) {
     currSeqFilePrefix = std::string(fs::path(seqFilePath.c_str()).stem().c_str());
     logOutput("  Now isolating reads that map to \"" + seqFilePath + "\"", logFile);
@@ -240,6 +359,7 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
       }
       sra.makeCheckpoint(currSeqFilePrefix + ".iso");
     }
+  }*/
   }
 }
 
