@@ -53,6 +53,30 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
   std::string filePrefix2;
 
   std::string currSeqFilePrefix;
+  // Iterate through sequences of interest, generating a Salmon index for each and quantifying
+  // reads against them
+  /*
+  for (auto sesqFilePath : seqsInterest) {
+    currSeqFilePrefix = std::string(fs::path(seqFilePath.c_str()).stem().c_str());
+    logOutput("  Now creating mapping index for \"" + currSeqFilePrefix + "\"", logFile);
+    // Create index of sequence file with Salmon
+    transcript dummyTrans(seqFilePath, cfgIni);
+    fastaIndex = std::string(dummyTrans.get_trans_path_trinity().parent_path().c_str()) + "/" +
+                 std::string(fs::path(seqFilePath.c_str()).stem().c_str()) + "_index";
+    // Check if indexing checkpoint exists. If not, generate index
+    if (!dummyTrans.checkpointEcists(currSeqFilePrefix + ".idx.iso")) {
+      salmon_index(seqFilePath, fastaIndex, threads, dispOutput, logFile);
+      dummyTrans.makeCheckpoint(currSeqFilePrefix + ".idx.iso");
+    }
+
+    for (auto sra : sras) {
+      // if quant checkpoint does not exist for current SRA
+      //   Quantify transcript against current index
+      //   Create quant checkpoint for current SRA
+    }
+  }*/
+
+
   for (auto seqFilePath : seqsInterest) {
     currSeqFilePrefix = std::string(fs::path(seqFilePath.c_str()).stem().c_str());
     logOutput("  Now isolating reads that map to \"" + seqFilePath + "\"", logFile);
