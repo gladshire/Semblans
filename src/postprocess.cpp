@@ -51,7 +51,7 @@ bool stringToBool(std::string boolStr) {
 // user-provided reference proteome
 void blastxBulk(const std::vector<transcript> & transVec, std::string threads,
                 bool dispOutput, std::string logFilePath, const INI_MAP & cfgIni) {
-  logOutput("\nStarting BLASTX alignment", logFilePath);
+  logOutput("\nStarting BLASTX alignment\n", logFilePath);
   std::string currTransIn;
   std::string currBlastDbName;
   INI_MAP_ENTRY cfgGen = cfgIni.at("General");
@@ -61,8 +61,9 @@ void blastxBulk(const std::vector<transcript> & transVec, std::string threads,
   std::string maxTargetSeqs = cfgAlign.at("blastx_max_target_seqs");
   std::string refProt = cfgGen.at("reference_proteome_path");
   if (!fs::exists(fs::path(refProt.c_str()))) {
-    logOutput("ERROR: Reference proteome: " + refProt + " not found", logFilePath);
-    logOutput("  Please ensure its path is correctly specified in your config INI file", logFilePath);
+    logOutput("ERROR: Reference proteome: " + refProt + " not found\n", logFilePath);
+    logOutput("  Please ensure its path is correctly specified in your config INI file\n",
+              logFilePath);
     exit(1);
   }
   std::string blastDbDir;
@@ -74,10 +75,11 @@ void blastxBulk(const std::vector<transcript> & transVec, std::string threads,
   for (auto trans : transVec) {
     // Check if BlastX checkpoint exists
     if (trans.checkpointExists("blastx")) {
-      logOutput("  BLASTX checkpoint found for: " + trans.get_file_prefix(), logFilePath);
+      logOutput("  BLASTX checkpoint found for: " +
+                trans.get_file_prefix() + "\n", logFilePath);
       continue;
     }
-    logOutput("  Now running BLASTX alignment for:", logFilePath);
+    logOutput("  Now running BLASTX alignment for:\n", logFilePath);
     summarize_sing_trans(trans, logFilePath, 4);
     currTransIn = trans.get_trans_path_trinity().c_str();
     if (useBlast) {
@@ -127,7 +129,7 @@ void blastxBulk(const std::vector<transcript> & transVec, std::string threads,
 void remChimeraBulk(const std::vector<transcript> & transVec, std::string ram_gb,
                     bool retainInterFiles, bool dispOutput, std::string logFilePath,
                     const INI_MAP & cfgIni) {
-  logOutput("\nStarting chimera removal", logFilePath);
+  logOutput("\nStarting chimera removal\n", logFilePath);
   std::string currTransInChim;
   std::string currTransOutChim;
   std::string currBlastx;
@@ -137,11 +139,11 @@ void remChimeraBulk(const std::vector<transcript> & transVec, std::string ram_gb
   for (auto trans : transVec) {
     // Check if chimera removal checkpoint exists 
     if (trans.checkpointExists("chim.fix")) {
-      logOutput("  Chimera removal checkpoint found for: " + trans.get_file_prefix(),
-                logFilePath);
+      logOutput("  Chimera removal checkpoint found for: " +
+                trans.get_file_prefix() + "\n", logFilePath);
       continue;
     }
-    logOutput("  Now running chimera removal for:", logFilePath);
+    logOutput("  Now running chimera removal for:\n", logFilePath);
     summarize_sing_trans(trans, logFilePath, 4);
 
    
@@ -177,7 +179,7 @@ void remChimeraBulk(const std::vector<transcript> & transVec, std::string ram_gb
 void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
                 bool retainInterFiles, bool dispOutput, std::string logFilePath,
                 const INI_MAP & cfgIni) {
-  logOutput("\nStarting transcript quantification", logFilePath);
+  logOutput("\nStarting transcript quantification\n", logFilePath);
   INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
   std::string currTransInSalm;
   std::string currIndex;
@@ -218,7 +220,8 @@ void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
 
     // Check if salmon index checkpoint exists
     if (trans.checkpointExists("index")) {
-      logOutput("  Indexing checkpoint found for: " + trans.get_file_prefix(), logFilePath);
+      logOutput("  Indexing checkpoint found for: " +
+                trans.get_file_prefix() + "\n", logFilePath);
     }
     else {
       // Summarize indexing job
@@ -243,11 +246,12 @@ void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
 
     // Check if salmon quant checkpoint exists
     if (trans.checkpointExists("quant")) {
-      logOutput("  Quant checkpoint found for: " + trans.get_file_prefix(), logFilePath);
+      logOutput("  Quant checkpoint found for: " +
+                trans.get_file_prefix() + "\n", logFilePath);
     }
     else {
       // Summarize quantification job
-      logOutput("  Now quantifying transcripts: ", logFilePath);
+      logOutput("  Now quantifying transcripts: \n", logFilePath);
       summarize_sing_trans(trans, logFilePath, 4);
 
       // Quantify reads mapped to transcript index
@@ -276,7 +280,7 @@ void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
 void corsetBulk(const std::vector<transcript> & transVec, std::string ram_gb,
                 bool retainInterFiles, bool dispOutput, std::string logFilePath,
                 const INI_MAP & cfgIni) {
-  logOutput("\nRemoving redundant transcripts", logFilePath);
+  logOutput("\nRemoving redundant transcripts\n", logFilePath);
   INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
   std::string currTransInCors;
   std::string currTransPrefix;
@@ -289,10 +293,11 @@ void corsetBulk(const std::vector<transcript> & transVec, std::string ram_gb,
   for (auto trans : transVec) {
     // Check if corset run checkpoint exists
     if (trans.checkpointExists("clust")) {
-      logOutput("  Corset checkpoint found for: " + trans.get_file_prefix(), logFilePath);
+      logOutput("  Corset checkpoint found for: " +
+                trans.get_file_prefix() + "\n", logFilePath);
       continue;
     }
-    logOutput("  Now clustering transcripts into genes:", logFilePath);
+    logOutput("  Now clustering transcripts into genes:\n", logFilePath);
     summarize_sing_trans(trans, logFilePath, 4);
     currTransInCors = trans.get_trans_path_chimera().c_str();
     if (!ini_get_bool(cfgPipeline.at("remove_chimera_reads").c_str(), 0)) {
@@ -331,12 +336,12 @@ void corsetBulk(const std::vector<transcript> & transVec, std::string ram_gb,
 
     // Check if corset filter checkpoint exists
     if (trans.checkpointExists("redund.fix")) {
-      logOutput("  Corset filtering checkpoint found for: " + trans.get_file_prefix(),
-      logFilePath);
+      logOutput("  Corset filtering checkpoint found for: " +
+                trans.get_file_prefix() + "\n", logFilePath);
       continue;
     }
     // Filter corset output
-    logOutput("  Now filtering redundant transcripts:", logFilePath);
+    logOutput("  Now filtering redundant transcripts:\n", logFilePath);
     summarize_sing_trans(trans, logFilePath, 4);
 
     if (!dispOutput) {
@@ -357,7 +362,7 @@ void corsetBulk(const std::vector<transcript> & transVec, std::string ram_gb,
 void transdecBulk(const std::vector<transcript> & transVec, std::string threads,
                   std::string ram_gb, bool retainInterFiles, bool dispOutput,
                   std::string logFilePath, const INI_MAP & cfgIni) {
-  logOutput("\nStarting prediction of coding regions", logFilePath);
+  logOutput("\nStarting prediction of coding regions\n", logFilePath);
   INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
   std::string currTransInTD;
   std::string currTransCds;
@@ -371,8 +376,8 @@ void transdecBulk(const std::vector<transcript> & transVec, std::string threads,
   std::string maxTargetSeqs = cfgAlign.at("blastp_max_target_seqs");
   std::string refProt = cfgGen.at("reference_proteome_path");
   if (!fs::exists(fs::path(refProt.c_str()))) {
-    logOutput("ERROR: Reference proteome: " + refProt + " not found", logFilePath);
-    logOutput("  Please ensure its path is correctly specified in your config INI file",
+    logOutput("ERROR: Reference proteome: " + refProt + " not found\n", logFilePath);
+    logOutput("  Please ensure its path is correctly specified in your config INI file\n",
               logFilePath);
     exit(1);
   }
@@ -384,11 +389,11 @@ void transdecBulk(const std::vector<transcript> & transVec, std::string threads,
   for (auto trans : transVec) {
     // Check if coding region prediction checkpoint exists
     if (trans.checkpointExists("cdr.predict")) {
-      logOutput("  Coding region prediction checkpoint found for: " + trans.get_file_prefix(),
-                logFilePath);
+      logOutput("  Coding region prediction checkpoint found for: " +
+                trans.get_file_prefix() + "\n", logFilePath);
       continue;
     }
-    logOutput("  Now predicting coding regions for:", logFilePath);
+    logOutput("  Now predicting coding regions for:\n", logFilePath);
     summarize_sing_trans(trans, logFilePath, 4);
     currTransInTD = trans.get_trans_path_largest().c_str();
     if (!ini_get_bool(cfgPipeline.at("cluster_filtering").c_str(), 0)) {
@@ -429,18 +434,18 @@ void transdecBulk(const std::vector<transcript> & transVec, std::string threads,
 void annotateBulk(const std::vector<transcript> & transVec, std::string threads,
                   std::string ram_gb, bool retainInterFiles, bool dispOutput,
                   std::string logFilePath, const INI_MAP & cfgIni) {
-  logOutput("\nStarting annotation of transcripts", logFilePath);
+  logOutput("\nStarting annotation of transcripts\n", logFilePath);
   std::string currTransIn;
   std::string currTransPep;
   std::string currTransOut;
-  std::string email = "gladshire@gmail.com";
   for (auto trans : transVec) {
     // Check if annotation checkpoint exists 
     if (trans.checkpointExists("annotate")) {
-      logOutput("  Annotation checkpoint found for: " + trans.get_file_prefix(), logFilePath);
+      logOutput("  Annotation checkpoint found for: " +
+                trans.get_file_prefix() + "\n", logFilePath);
       continue;
     }
-    logOutput("  Now running annotation on:", logFilePath);
+    logOutput("  Now running annotation on:\n", logFilePath);
     summarize_sing_trans(trans, logFilePath, 4);
 
     currTransIn = trans.get_trans_path_cds().c_str();
@@ -453,13 +458,13 @@ void annotateBulk(const std::vector<transcript> & transVec, std::string threads,
       procRunning = true;
       std::thread annotThread(progressAnim, 2);
       annotateTranscript(currTransIn, currTransPep, currTransOut,
-                         threads, ram_gb, dispOutput, logFilePath, email);
+                         threads, ram_gb, dispOutput, logFilePath);
       procRunning = false;
       annotThread.join();
     }
     else {
       annotateTranscript(currTransIn, currTransPep, currTransOut,
-                         threads, ram_gb, dispOutput, logFilePath, email);
+                         threads, ram_gb, dispOutput, logFilePath);
     }
 
     // Create annotation checkpoint
@@ -538,18 +543,19 @@ int main(int argc, char * argv[]) {
       else {
         if (sraRunsLocal.first != "" &&
             !fs::exists(sraRunsLocal.first)) {
-          std::cout << "ERROR: Local run not found: \"" << sraRunsLocal.first << "\""
-                    << std::endl;
+          logOutput("ERROR: Local run not found: \"" + sraRunsLocal.first + "\"\n",
+                    logFilePath);
         }
         if (sraRunsLocal.second != "" &&
             !fs::exists(sraRunsLocal.second)) {
-          std::cout << "ERROR: Local run not found: \"" << sraRunsLocal.second << "\""
-                    << std::endl;
+          logOutput("ERROR: Local run not found: \"" + sraRunsLocal.second + "\"\n",
+                    logFilePath);
         }
       }
     }
     if (sras.empty()) {
-      std::cout << "ERROR: No valid SRA data. Please check the configuration file." << std::endl;
+      logOutput("ERROR: No valid SRA data. Please check the configuration file.\n",
+                logFilePath);
       exit(1);
     }
     
@@ -579,11 +585,11 @@ int main(int argc, char * argv[]) {
     }
   
     // Summarize program execution parameters
-    logOutput("Semblans Postprocess started with following parameters:", logFilePath);
-    logOutput("  Config file:     " + std::string(argv[1]), logFilePath);
-    logOutput("  Threads (Cores): " + threads, logFilePath);
-    logOutput("  Memory (GB):     " + ram_gb, logFilePath);
-    logOutput("  Reference Prot:  " + refProt, logFilePath);
+    logOutput("Semblans Postprocess started with following parameters:\n", logFilePath);
+    logOutput("  Config file:     " + std::string(argv[1]) + "\n", logFilePath);
+    logOutput("  Threads (Cores): " + threads + "\n", logFilePath);
+    logOutput("  Memory (GB):     " + ram_gb + "\n", logFilePath);
+    logOutput("  Reference Prot:  " + refProt + "\n", logFilePath);
     logOutput("  SRA runs:\n", logFilePath);
     summarize_all_sras(sras, logFilePath, 6);
 
@@ -613,7 +619,7 @@ int main(int argc, char * argv[]) {
       annotateBulk(transVec, threads, ram_gb, retainInterFiles, dispOutput, logFilePath, cfgIni);
     }
     if (dispOutput) {
-      logOutput("Postprocess finished successfully.", logFilePath);
+      logOutput("Postprocess finished successfully.\n", logFilePath);
     }
   }
   else {

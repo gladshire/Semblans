@@ -48,13 +48,14 @@ class SRA {
   public:
     SRA();
     SRA(std::string sra_accession, INI_MAP cfgIni, bool dispOutput,
-        bool compressedFiles, std::string logFile);
+        bool compressedFiles, std::string logFile, int num);
     SRA(std::string fileName1, std::string fileName2, INI_MAP cfgIni, bool compressedFiles);
     SRA(const SRA & sra);
     std::string get_accession() const;
     std::string get_org_name() const;
     std::string get_tax_id() const;
-    long int get_num_reads() const;
+    long unsigned int get_num_reads() const;
+    void set_num_reads(long unsigned int numReads);
     int get_spots_m() const;
     uintmax_t get_bp() const;
     bool is_paired() const;

@@ -9,13 +9,17 @@ std::vector<SRA> get_sras(const INI_MAP &iniFile, bool dispOutput, bool compress
                        fs::path(genSettings.at("project_name").c_str()) /
                        fs::path(genSettings.at("log_file").c_str())).c_str());
   std::vector<SRA> sras;
+
+  int i;
   if (!iniFile.at("SRA accessions").empty()) {
     for (auto sra : iniFile.at("SRA accessions")) {
-      sras.push_back(SRA(sra.first, iniFile, dispOutput, compressFiles, logFile));
+      sras.push_back(SRA(sra.first, iniFile, dispOutput, compressFiles, logFile, i));
       if (sras.back().get_accession() == "FAILURE") {
         sras.pop_back();
       }
+      i++;
     }
+    system("rm .tmp*.xml");
   }
   return sras;
 }

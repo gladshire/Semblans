@@ -83,7 +83,7 @@ std::map<std::string, std::string> getGeneMatches(std::string annotFile) {
 // file, and then rename each transcript's header to one corresponding with its best hit
 void annotateTranscript(std::string transIn, std::string transPep, std::string transOut,
                         std::string threads, std::string ram_gb, bool dispOutput,
-                        std::string logFile, std::string email) {
+                        std::string logFile) {
   fs::path transPepPath(transPep.c_str());
   std::string transPepFileStr(transPepPath.c_str());
   

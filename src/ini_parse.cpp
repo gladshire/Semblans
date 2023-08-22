@@ -64,30 +64,19 @@ void make_proj_space(const INI_MAP &iniFile, std::string pipeStage) {
                        fs::path(iniFile.at("General").at("project_name").c_str())).c_str());
   projDir += "/";
   INI_MAP_ENTRY pipeSteps = iniFile.at("Pipeline");
-  if (!fs::exists(fs::path(projDir.c_str()) / "checkpoints")) {
-    system(("mkdir " + projDir + "/checkpoints/").c_str());
+  if (!fs::exists(fs::path(projDir.c_str()) / ".checkpoints")) {
+    system(("mkdir " + projDir + "/.checkpoints/").c_str());
   }
 
   int stepNum = 0;
   std::string currNum = "00";
 
-  // Add directory for raw reads
+  // Create directory for raw reads
   stepDirs.push_back(currNum + "-" + allSteps[0]);
   system(("mkdir " + projDir + currNum + "-" + allSteps[0] + " > /dev/null 2>&1").c_str());
   stepNum++;
 
-  // If pipeline running pre-quality check, create its directory
-  /*
-  currNum = getStepNum(stepNum);
-  if (ini_get_bool(pipeSteps.at("pre_quality_check").c_str(), -1)) {
-    stepDirs.push_back(currNum + "-" + allSteps[1]);
-    system(("mkdir " + projDir + currNum + "-" + allSteps[1] + " > /dev/null 2>&1").c_str());
-    stepNum++;
-  }
-  else {
-    stepDirs.push_back(allSteps[1]);
-  }*/
-
+  // Create directory for initial quality analysis by FastQC
   currNum = getStepNum(stepNum);
   stepDirs.push_back(currNum + "-" + allSteps[1]);
   system(("mkdir " + projDir + currNum + "-" + allSteps[1] + " > /dev/null 2>&1").c_str());

@@ -19,4 +19,4 @@ std::map<std::string, std::string> getGeneMatches(std::string annotFile);
 
 void annotateTranscript(std::string transIn, std::string transPep, std::string transOut,
                         std::string threads, std::string ram_gb, bool dispOutpu,
-                        std::string logFile, std::string email);
+                        std::string logFile);

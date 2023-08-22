@@ -42,7 +42,7 @@ void summarize_all_sras(const std::vector<SRA> & sras, std::string logFile,
                         int margin) {
   for (auto sra : sras) {
     summarize_sing_sra(sra, logFile, margin);
-    logOutput("", logFile);
+    logOutput("\n", logFile);
   }
 }
 
@@ -69,5 +69,6 @@ void summarize_all_trans(const std::vector<transcript> & transVec, std::string l
                          int margin) {
   for (auto trans : transVec) {
     summarize_sing_trans(trans, logFile, margin);
+    logOutput("\n", logFile);
   }
 }

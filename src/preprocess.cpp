@@ -27,12 +27,13 @@ void progressAnim(int numSpace) {
 void preSummary(const std::vector<SRA> sras, 
                 std::string logFilePath, std::string threads, std::string ram_gb,
                 bool retainInterFiles, bool compressFiles) {
-  logOutput("Semblans Preprocess started with following parameters:", logFilePath);
-  logOutput("  Config file:     " + std::string(fs::path(logFilePath.c_str()).filename().c_str()),
+  logOutput("Semblans Preprocess started with following parameters:\n", logFilePath);
+  logOutput("  Config file:     " +
+            std::string(fs::path(logFilePath.c_str()).filename().c_str()) + "\n",
             logFilePath);
-  logOutput("  Threads (Cores): " + threads, logFilePath);
-  logOutput("  Memory (GB):     " + ram_gb, logFilePath);
-  logOutput("  SRA runs:\n", logFilePath); 
+  logOutput("  Threads (Cores): " + threads + "\n", logFilePath);
+  logOutput("  Memory (GB):     " + ram_gb + "\n", logFilePath);
+  logOutput("  SRA runs:\n\n", logFilePath); 
   summarize_all_sras(sras, logFilePath, 6);
     
   std::string retainStr;
@@ -42,7 +43,7 @@ void preSummary(const std::vector<SRA> sras,
   else {
     retainStr = "NO";
   }
-  logOutput("  Retain intermediate files: " + retainStr, logFilePath);
+  logOutput("  Retain intermediate files: " + retainStr + "\n", logFilePath);
 
   std::string compressStr;
   if (compressFiles) {
@@ -61,16 +62,17 @@ void retrieveSraData(std::vector<SRA> & sras, std::string threads,
                      bool dispOutput, bool compressOutput,
                      bool retainInterFiles,
                      std::string logFilePath) {
-  logOutput("\nStarting retrieval of raw sequence data", logFilePath);
+  logOutput("\nStarting retrieval of raw sequence data\n", logFilePath);
   // Prefetch raw data
   for (auto sra : sras) {
     // Check for checkpoint file
     if (sra.checkpointExists("sra")) {
-      logOutput("  Prefetch checkpoint found for: " + sra.get_accession(), logFilePath);
+      logOutput("  Prefetch checkpoint found for: " +
+                sra.get_accession() + "\n", logFilePath);
       continue;
     }
     else {
-      logOutput("  Downloading raw data for: ", logFilePath);
+      logOutput("  Downloading raw data for: \n", logFilePath);
       summarize_sing_sra(sra, logFilePath, 4);
 
       if (!dispOutput) {
@@ -91,11 +93,12 @@ void retrieveSraData(std::vector<SRA> & sras, std::string threads,
   for (auto sra : sras) {
     // Check for checkpoint file
     if (sra.checkpointExists("dump")) {
-      logOutput("  Raw dump checkpoint found for: " + sra.get_accession(), logFilePath);
+      logOutput("  Raw dump checkpoint found for: " +
+                sra.get_accession() + "\n", logFilePath);
       continue;
     }
     else {
-      logOutput("  Dumping to FASTQ file: ", logFilePath);
+      logOutput("  Dumping to FASTQ file: \n", logFilePath);
       summarize_sing_sra(sra, logFilePath, 4);
 
       if (!dispOutput) {
@@ -138,7 +141,7 @@ void print_help() {
 // Given a vector of SRAs, perform a pre-assembly FastQC quality analysis on their sequence data
 void fastqcBulk1(std::vector<SRA> & sras, std::string threads, bool dispOutput,
                  std::string logFilePath) {
-  logOutput("\nStarting initial quality analysis", logFilePath);
+  logOutput("\nStarting initial quality analysis\n", logFilePath);
   std::pair<std::string, std::string> currFastqcIn1;
   std::string currFastqcOut1;
   for (auto sra : sras) {
@@ -147,10 +150,11 @@ void fastqcBulk1(std::vector<SRA> & sras, std::string threads, bool dispOutput,
     currFastqcOut1 = sra.get_fastqc_dir_1().first.parent_path().c_str();
     // Check for checkpoint file
     if (sra.checkpointExists("fastqc1")) {
-      logOutput("  Quality analysis checkpoint found for: " + sra.get_accession(), logFilePath);
+      logOutput("  Quality analysis checkpoint found for: " +
+                sra.get_accession() + "\n", logFilePath);
       continue;
     }
-    logOutput("  Now running quality analysis for:", logFilePath);
+    logOutput("  Now running quality analysis for:\n", logFilePath);
     summarize_sing_sra(sra, logFilePath, 4);
 
     if (!dispOutput) {
@@ -172,7 +176,7 @@ void fastqcBulk1(std::vector<SRA> & sras, std::string threads, bool dispOutput,
 // Given a vector of SRAs, perform a FastQC quality analysis just prior to assembly
 void fastqcBulk2(std::vector<SRA> & sras, std::string threads, bool dispOutput,
                  std::string logFilePath, const INI_MAP & cfgIni) {
-  logOutput("\nStarting second quality analysis", logFilePath);
+  logOutput("\nStarting second quality analysis\n", logFilePath);
   INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
   std::pair<std::string, std::string> currFastqcIn;
   std::string currFastqcOut;
@@ -198,10 +202,11 @@ void fastqcBulk2(std::vector<SRA> & sras, std::string threads, bool dispOutput,
     currFastqcOut = sra.get_fastqc_dir_2().first.parent_path().c_str();
     // Check for checkpoint file
     if (sra.checkpointExists("fastqc2")) {
-      logOutput("  Quality analysis checkpoint found for: " + sra.get_accession(), logFilePath);
+      logOutput("  Quality analysis checkpoint found for: " +
+                sra.get_accession() + "\n", logFilePath);
       continue;
     }
-    logOutput("  Now running quality analysis for:", logFilePath);
+    logOutput("  Now running quality analysis for:\n", logFilePath);
     summarize_sing_sra(sra, logFilePath, 4);
 
     if (!dispOutput) {
@@ -239,10 +244,11 @@ void errorCorrBulk(std::vector<SRA> & sras, std::string threads,
      
     // Check for checkpoint file
     if (sra.checkpointExists("corr")) {
-      logOutput("  Error-correction checkpoint found for: " + sra.get_accession(), logFilePath);
+      logOutput("  Error-correction checkpoint found for: " +
+                sra.get_accession() + "\n", logFilePath);
       continue;
     }
-    logOutput("  Now running error correction for:", logFilePath);
+    logOutput("  Now running error correction for:\n", logFilePath);
     summarize_sing_sra(sra, logFilePath, 4);
 
     if (!dispOutput) {
@@ -267,7 +273,7 @@ void errorCorrBulk(std::vector<SRA> & sras, std::string threads,
 bool remUnfixBulk(std::vector<SRA> & sras, std::string threads, std::string ram_gb,
                   bool dispOutput, bool retainInterFiles, bool compressFiles,
                   std::string logFilePath, const INI_MAP & cfgIni) {
-  logOutput("\nStarting post-correction removal of unfixable reads", logFilePath);
+  logOutput("\nStarting post-correction removal of unfixable reads\n", logFilePath);
   std::pair<std::string, std::string> currCorrFixIn;
   std::pair<std::string, std::string> currCorrFixOut;
   uintmax_t ram_b = (uintmax_t)stoi(ram_gb) * 1000000000;
@@ -280,10 +286,11 @@ bool remUnfixBulk(std::vector<SRA> & sras, std::string threads, std::string ram_
 
     // Check for checkpoint file
     if (sra.checkpointExists("corr.fix")) {
-      logOutput("  Unfixable error fix checkpoint found for: " + sra.get_accession(), logFilePath);
+      logOutput("  Unfixable error fix checkpoint found for: " +
+                sra.get_accession() + "\n", logFilePath);
       continue;
     }
-    logOutput("  Now removing unfixable reads for:", logFilePath);
+    logOutput("  Now removing unfixable reads for:\n", logFilePath);
     summarize_sing_sra(sra, logFilePath, 4);
 
     if (!dispOutput) {
@@ -332,7 +339,7 @@ bool remUnfixBulk(std::vector<SRA> & sras, std::string threads, std::string ram_
 void trimBulk(std::vector<SRA> & sras, std::string threads,
               bool dispOutput, bool retainInterFiles,
               std::string logFilePath, const INI_MAP & cfgIni) {
-  logOutput("\nStarting adapter sequence trimming", logFilePath);
+  logOutput("\nStarting adapter sequence trimming\n", logFilePath);
   INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
   INI_MAP_ENTRY trimmSettings = cfgIni.at("Trimmomatic settings");
   std::pair<std::string, std::string> currTrimIn;
@@ -356,7 +363,8 @@ void trimBulk(std::vector<SRA> & sras, std::string threads,
   for (auto sra : sras) {
     // Check for checkpoint file
     if (sra.checkpointExists("trim")) {
-      logOutput("  Adapter trimming checkpoint found for: " + sra.get_accession(), logFilePath);
+      logOutput("  Adapter trimming checkpoint found for: " +
+                sra.get_accession() + "\n", logFilePath);
       continue;
     }
     currTrimIn.first = sra.get_sra_path_corr_fix().first.c_str();
@@ -425,7 +433,7 @@ void trimBulk(std::vector<SRA> & sras, std::string threads,
     }
 
 
-    logOutput("  Running adapter sequence trimming for:", logFilePath);
+    logOutput("  Running adapter sequence trimming for:\n", logFilePath);
     summarize_sing_sra(sra, logFilePath, 4);
 
     if (!dispOutput) {
@@ -469,7 +477,7 @@ void trimBulk(std::vector<SRA> & sras, std::string threads,
 void filtForeignBulk(std::vector<SRA> & sras, std::vector<std::string> krakenDbs,
                      std::string threads, bool dispOutput, bool compressFiles, bool retainInterFiles,
                      std::string logFilePath, const INI_MAP & cfgIni) {
-  logOutput("\nStarting foreign sequence filtering", logFilePath);
+  logOutput("\nStarting foreign sequence filtering\n", logFilePath);
   INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
   INI_MAP_ENTRY krakenSettings = cfgIni.at("Kraken2 settings");
   std::string confThreshold = krakenSettings.at("confidence_threshold");
@@ -487,15 +495,16 @@ void filtForeignBulk(std::vector<SRA> & sras, std::vector<std::string> krakenDbs
   
   for (int i = 0; i < krakenDbs.size(); i++) {
     logOutput("  Now filtering with database: " +
-              std::string(fs::path(krakenDbs[i].c_str()).filename().c_str()),
+              std::string(fs::path(krakenDbs[i].c_str()).filename().c_str()) + "\n",
               logFilePath);
     for (auto sra : sras) {
       // Check for checkpoint file
       if (sra.checkpointExists(std::string(fs::path(krakenDbs[i]).stem().c_str()) + ".filt")) {
-        logOutput("    Filter checkpoint found for: " + sra.get_accession(), logFilePath);
+        logOutput("    Filter checkpoint found for: " +
+                  sra.get_accession() + "\n", logFilePath);
         continue;
       }
-      logOutput("    Running filter of:", logFilePath);
+      logOutput("    Running filter of:\n", logFilePath);
       summarize_sing_sra(sra, logFilePath, 4);
       krakOutDir = sra.get_sra_path_for_filt().first.parent_path().c_str();
       if (sra.get_accession() == "") {
@@ -621,7 +630,7 @@ bool remOverrepBulk(std::vector<SRA> & sras, std::string threads, std::string ra
                     bool dispOutput, bool retainInterFiles, bool compressFiles,
                     std::string logFilePath, const INI_MAP & cfgIni) {
   INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
-  logOutput("\nStarting removal of overrepresented reads", logFilePath);
+  logOutput("\nStarting removal of overrepresented reads\n", logFilePath);
   uintmax_t ram_b = (uintmax_t)stoi(ram_gb) * 1000000000;
   std::pair<std::vector<std::string>, std::vector<std::string>> currOrepSeqsPe;
   std::vector<std::string> currOrepSeqsSe;
@@ -633,10 +642,11 @@ bool remOverrepBulk(std::vector<SRA> & sras, std::string threads, std::string ra
   for (auto sra : sras) {
     // Check for checkpoint file
     if (sra.checkpointExists("orep.fix")) {
-      logOutput("  Overrepresented-removed checkpoint found for: " + sra.get_accession(), logFilePath);
+      logOutput("  Overrepresented-removed checkpoint found for: " +
+                sra.get_accession() + "\n", logFilePath);
       continue;
     }
-    logOutput("  Running removal of overrepresented reads for:", logFilePath);
+    logOutput("  Running removal of overrepresented reads for:\n", logFilePath);
     summarize_sing_sra(sra, logFilePath, 4);
     currOrepIn.first = sra.get_sra_path_for_filt().first.c_str();
     currOrepIn.second = sra.get_sra_path_for_filt().second.c_str();
@@ -783,6 +793,7 @@ int main(int argc, char * argv[]) {
     //}
     size_t pos;
     bool stepSuccess;
+
     for (auto sraRun : localDataFiles) {
       sraRunsLocal.first = "";
       sraRunsLocal.second = "";
@@ -801,22 +812,22 @@ int main(int argc, char * argv[]) {
       else {
         if (sraRunsLocal.first != "" &&
             !fs::exists(sraRunsLocal.first)) {
-          logOutput("ERROR: Local run not found: \"" + sraRunsLocal.first + "\"", logFilePath);
+          logOutput("ERROR: Local run not found: \"" + sraRunsLocal.first + "\"\n", logFilePath);
         }
         if (sraRunsLocal.second != "" &&
             !fs::exists(sraRunsLocal.second)) {
-          logOutput("ERROR: Local run not found: \"" + sraRunsLocal.second + "\"", logFilePath);
+          logOutput("ERROR: Local run not found: \"" + sraRunsLocal.second + "\"\n", logFilePath);
         }
       }
     }
     
     // Check for failure to obtain SRAs
     if (sras.empty()) {
-      logOutput("ERROR: No valid SRA data. Please check the configuration file.", logFilePath);
+      logOutput("ERROR: No valid SRA data. Please check the configuration file.\n", logFilePath);
       exit(1);
     }
 
-    logOutput("\nRaw sequence data prepared for pre-assembly processing", logFilePath);
+    logOutput("\nRaw sequence data prepared for pre-assembly processing\n", logFilePath);
     
     std::string fastqc_dir_1(sras[0].get_fastqc_dir_1().first.parent_path().parent_path().c_str());
     std::string fastqc_dir_2(sras[0].get_fastqc_dir_2().first.parent_path().parent_path().c_str());
@@ -867,7 +878,7 @@ int main(int argc, char * argv[]) {
     }
 
     if (dispOutput) {
-      logOutput("Preprocess finished successfully.", logFilePath);
+      logOutput("Preprocess finished successfully.\n", logFilePath);
     }
   }
 

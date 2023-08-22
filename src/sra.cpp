@@ -17,7 +17,7 @@ SRA::SRA() {
   sra_accession = "";
   org_name = "";
   tax_id = "";
-  spots = -1;
+  spots = 0;
   spots_m = -1;
   bp = 0;
   paired = false;
@@ -30,7 +30,7 @@ SRA::SRA() {
 // Takes SRA accession number string as input
 // Fills object members with correct values using NCBI eutils API
 SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool dispOutput,
-         bool compressedFiles, std::string logFile) {
+         bool compressedFiles, std::string logFile, int num) {
   std::string outDir(fs::canonical(fs::path(cfgIni["General"]["output_directory"].c_str())).c_str());
   std::string projName(cfgIni["General"]["project_name"]);
   std::string apiKey(cfgIni["General"]["ncbi_api_key"]);
@@ -38,32 +38,30 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool dispOutput,
   std::string compressExt;
   std::chrono::milliseconds queryLim(500);
   if (apiKey != "") {
-    std::chrono::milliseconds queryLim(100);
-  }
-
-  if (fs::exists(".tmp.xml")) {
-    logOutput("Previous xml found. Deleting it.", logFile);
-    fs::remove(fs::path(".tmp.xml"));
+    std::chrono::milliseconds queryLim(250);
   }
 
   // Download temp XML file for SRA accession, containing information for object members
-  std::string curlCmdStr = "curl -s -o .tmp.xml \"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?rettype=runinfo&db=sra&id=\"" +
+  std::string curlCmdStr = "curl -s -o .tmp" + std::to_string(num) + ".xml \"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?rettype=runinfo&db=sra&id=\"" +
                            sra_accession + "&api_key=" + apiKey;
   int result;
   int numRetries = 0;
+
   while (true) {
     // After 5 unsuccessful retries, 
     if (numRetries == 5) {
-      logOutput("ERROR: Could not retrieve accession \'" + sra_accession + "\'", logFile);
+      logOutput("ERROR: Could not retrieve accession \"" + sra_accession + "\"\n", logFile);
       this->sra_accession = "FAILURE";
       break;
     }
     system(curlCmdStr.c_str());
     std::this_thread::sleep_for(queryLim);
+
+    //std::this_thread::sleep_for(std::chrono::milliseconds(500));
   
     // Parse XML file for object information
     try {
-      rapidxml::file<> sra_xml(".tmp.xml");
+      rapidxml::file<> sra_xml((".tmp" + std::to_string(num) + ".xml").c_str());
       rapidxml::xml_document<> sra_doc;
       sra_doc.parse<0>(sra_xml.data());
       rapidxml::xml_node<> * parse_node = sra_doc.first_node()->first_node()->first_node();
@@ -115,16 +113,18 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool dispOutput,
     catch (const std::runtime_error & e) {
       numRetries++;
       if (dispOutput) {
-        logOutput("Throttled: too many requests. Retrying.", logFile);
+        logOutput("Throttled: too many requests. Retrying.\n", logFile);
       }
       queryLim *= 2;
-      fs::remove(fs::path(".tmp.xml"));
+    }
+    catch (const rapidxml::parse_error & e) {
+      numRetries++;
+      queryLim *= 2;
     }
   }
-  fs::remove(fs::path(".tmp.xml"));
   if (this->sra_accession != "FAILURE") {
     if (dispOutput) {
-      logOutput("Successfully retrieved information for: " + sra_accession, logFile);
+      logOutput("  Successfully retrieved information for: " + sra_accession + "\n", logFile);
     }
 
     std::string fileBase = make_file_str();
@@ -219,7 +219,7 @@ SRA::SRA(std::string fileName1, std::string fileName2, INI_MAP cfgIni, bool comp
   sra_accession = "";
   org_name = "";
   tax_id = "";
-  spots = -1;
+  spots = 0;
   spots_m = -1;
   bp = 0;
   paired = (fileName2 == "") ? false : true;
@@ -304,8 +304,12 @@ std::string SRA::get_tax_id() const {
 }
 
 // Getter function for object number of read spots
-long int SRA::get_num_reads() const {
+long unsigned int SRA::get_num_reads() const {
   return spots;
+}
+
+void SRA::set_num_reads(long unsigned int numReads) {
+  spots = numReads;
 }
 
 // Getter function for object number of read spots that are paired
@@ -454,7 +458,7 @@ std::string SRA::make_file_str() {
 std::string SRA::makeCheckpointName(std::string ext) {
   fs::path outDir;
   std::string cpFileName;
-  outDir = get_fastqc_dir_2().first.parent_path().parent_path().parent_path() / "checkpoints";
+  outDir = get_fastqc_dir_2().first.parent_path().parent_path().parent_path() / ".checkpoints";
   if (get_accession() == "") {
     cpFileName = std::string(outDir.c_str()) + "/" + get_file_prefix().first + "." + ext + ".ok";
   }

@@ -6,5 +6,5 @@ void logOutput(std::string input, std::string logFile) {
   teedev logger(logStream, std::cout);
   teeStream loggerStream(logger);
 
-  loggerStream << input << std::endl;
+  loggerStream << input << std::flush;
 }
