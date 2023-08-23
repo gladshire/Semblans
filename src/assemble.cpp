@@ -365,7 +365,7 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
       outDir = std::string(pathTrinDir.c_str());
       currTrinOutAll = outDir + "/" + sraGroup.first + ".Trinity.fasta";
       currTrinOutInt = outDir + "/" + sraGroup.first + "." + currSeqFilePrefix + ".mapped.Trinity.fasta";
-      currTrinOutNon = outDir + "/" + sraGroup.first + "." + currSeqFilePrefix + ".unmapped.Trinity.fasta";
+      currTrinOutNon = outDir + "/" + sraGroup.first + ".unmapped.Trinity.fasta";
   
       std::string currFilePrefix1;
       std::string currFilePrefix2;
@@ -409,9 +409,9 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
           sraRunsInterest.push_back(currTrinIn);
         }
         if (assembSeqsNoInterest) {
-          currTrinIn.first = inDir + "/" + currFilePrefix1 + "." + currSeqFilePrefix + ".unmapped.fq";
+          currTrinIn.first = inDir + "/" + currFilePrefix1 + ".unmapped.fq";
           if (sra.is_paired()) {
-            currTrinIn.second = inDir + "/" + currFilePrefix2 + "." + currSeqFilePrefix + ".unmapped.fq";
+            currTrinIn.second = inDir + "/" + currFilePrefix2 + ".unmapped.fq";
           }
           sraRunsNoInterest.push_back(currTrinIn);
         }
@@ -444,8 +444,7 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
       // Perform assembly for reads of no interest (those that DO NOT map to provided FASTA)
       if (assembSeqsNoInterest) {
         logOutput("  Now assembling reads that do not map to:\n\n  " + seqFilePath, logFile);
-        if (!groupCheckpointExists(std::string(cpDir.c_str()), sraGroup.first + "." + 
-                                   currSeqFilePrefix + ".unmapped")) {
+        if (!groupCheckpointExists(std::string(cpDir.c_str()), sraGroup.first + ".unmapped")) {
           if (sraRunsNoInterest.size() > 1) {
             run_trinity_comb(sraRunsNoInterest, currTrinOutNon, threads, ram_gb, dispOutput, logFile);
           }
@@ -456,7 +455,7 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
           transInfoFileStr = std::string(fs::path(currTrinOutNon.c_str()).replace_extension(("." + currSeqFilePrefix + ".ti").c_str()).c_str());
           makeTransInfoFile(sraRunsNoInterest, transInfoFileStr);
 
-          makeGroupCheckpoint(std::string(cpDir.c_str()), sraGroup.first + "." + currSeqFilePrefix + ".unmapped");
+          makeGroupCheckpoint(std::string(cpDir.c_str()), sraGroup.first + ".unmapped");
           //updateHeaders(currTrinOutNon, ram_b);
         }
         else {
