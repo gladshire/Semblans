@@ -197,7 +197,7 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
       }
       logOutput("      Dumping split reads to mapped and unmapped files ...", logFile);
       readHashTable1.dump(outDir + "/" + filePrefix1 + "." + currSeqFilePrefix + ".mapped.fq");
-      unmappedHash1.dump(outDir + "/" + filePrefix1 + "." + currSeqFilePrefix + ".unmapped.fq");
+      unmappedHash1.dump(outDir + "/" + filePrefix1 + ".unmapped.fq");
       logOutput("done\n", logFile);
       unmappedReadFile.close();
 
@@ -242,7 +242,7 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
         }
         logOutput("      Dumping split reads to mapped and unmapped files ...", logFile);
         readHashTable2.dump(outDir + "/" + filePrefix2 + "." + currSeqFilePrefix + ".mapped.fq");
-        unmappedHash2.dump(outDir + "/" + filePrefix2 + "." + currSeqFilePrefix + ".unmapped.fq");
+        unmappedHash2.dump(outDir + "/" + filePrefix2 + ".unmapped.fq");
         logOutput("done\n", logFile);
         unmappedReadFile.close();
       }
