@@ -342,13 +342,12 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
       cpDir = dummySra.get_fastqc_dir_2().first.parent_path().parent_path().parent_path() / "checkpoints";
 
       // Check whether checkpoint exists
-      /*
       if (groupCheckpointExists(std::string(cpDir.c_str()), sraGroup.first)) {
-        logOutput("Assembly found for group: " + sraGroup.first, logFile);
+        logOutput("Assembly found for: " + sraGroup.first, logFile);
         logOutput("  Containing:", logFile);
         summarize_all_sras(sraGroup.second, logFile, 4);
         continue;
-      }*/
+      }
 
       transcript dummyTrans(dummySra);
       fs::path pathTrinDir = dummyTrans.get_trans_path_trinity().parent_path();
@@ -407,7 +406,6 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
           sraRunsNoInterest.push_back(currTrinIn);
         }
       }
-      // TODO: fix updating of headers in Trinity output
 
       // Perform assembly for reads of interest (those that map to provided FASTA)
       if (assembSeqsInterest) {
@@ -476,6 +474,9 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
         }
         sraRunsInTrin.clear();
       }
+
+      // Make assembly group checkpoint
+      makeGroupCheckpoint(std::string(cpDir.c_str()), sraGroup.first);
     }
   }
 }
