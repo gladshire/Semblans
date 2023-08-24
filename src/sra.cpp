@@ -202,7 +202,8 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool dispOutput,
 
 
 // Constructor for if local paired-end data used
-SRA::SRA(std::string fileName1, std::string fileName2, INI_MAP cfgIni, bool compressedFiles) {
+SRA::SRA(std::string fileName1, std::string fileName2, INI_MAP cfgIni, bool compressedFiles,
+         std::string logFile) {
   std::string outDir(fs::canonical(fs::path(cfgIni["General"]["output_directory"].c_str())).c_str());
   std::string projName(cfgIni["General"]["project_name"]);
   std::string projPath((fs::path(outDir.c_str()) / fs::path(projName.c_str())).c_str());
@@ -231,7 +232,64 @@ SRA::SRA(std::string fileName1, std::string fileName2, INI_MAP cfgIni, bool comp
   else {
     compressExt = "";
   }
-  
+ 
+  std::ifstream sraFile1;
+  std::ifstream sraFile2;
+  std::streamsize s; 
+
+  uintmax_t numReads1 = 0;
+  uintmax_t numReads2 = 0;
+
+  std::string buffer;
+  buffer.reserve(1000000000);
+
+  sraFile1.open(fileName1);
+  if (paired) {
+    sraFile2.open(fileName2);
+  }
+
+  char * nlPos;
+  char * inFileL;
+
+  while (!sraFile1.eof() && !sraFile1.good()) {
+    sraFile1.read(&buffer[0], 1000000000);
+    s = sraFile1.gcount();
+    
+    nlPos = &buffer[0];
+    inFileL = &buffer[0] + s;
+    while (nlPos != inFileL) {
+      nlPos = std::find(nlPos + 1, inFileL, '\n');
+      if (nlPos != inFileL) {
+        numReads1++;
+      }
+    }
+  }
+  numReads1 /= 4;
+
+  if (paired) {
+    while (!sraFile2.eof() && !sraFile2.good()) {
+      sraFile2.read(&buffer[0], 1000000000);
+      s = sraFile2.gcount();
+
+      nlPos = &buffer[0];
+      inFileL = &buffer[0] + s;
+      while (nlPos != inFileL) {
+        nlPos = std::find(nlPos + 1, inFileL, '\n');
+        if (nlPos != inFileL) {
+          numReads2++;
+        }
+      }
+    }
+    numReads2 /= 4;
+  }
+
+  if (paired && (numReads1 != numReads2)) {
+    logOutput("ERROR: Forward and reverse files do not have the same number of reads.", logFile);
+    exit(1);
+  }
+
+  spots = numReads1;
+
   sra_path_raw_1 = (localDataDir + fileBase1 + ".fastq" + compressExt).c_str();
   fastqc_dir_1_1  = (projPath + stepDirs[1] + fileBase1 + "/" + fileBase1).c_str();
   sra_path_corr_1 = (projPath + stepDirs[2] + fileBase1 + ".cor.fq" + compressExt).c_str();

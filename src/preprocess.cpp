@@ -277,7 +277,7 @@ bool remUnfixBulk(std::vector<SRA> & sras, std::string threads, std::string ram_
   std::pair<std::string, std::string> currCorrFixIn;
   std::pair<std::string, std::string> currCorrFixOut;
   uintmax_t ram_b = (uintmax_t)stoi(ram_gb) * 1000000000;
-  bool writeSuccess;
+  long int readsRemoved;
   for (auto sra : sras) {
     currCorrFixIn.first = sra.get_sra_path_corr().first.c_str();
     currCorrFixIn.second = sra.get_sra_path_corr().second.c_str();
@@ -297,11 +297,11 @@ bool remUnfixBulk(std::vector<SRA> & sras, std::string threads, std::string ram_
       procRunning = true;
       std::thread fixThread(progressAnim,2);
       if (sra.is_paired()) {
-        writeSuccess = rem_unfix_pe(currCorrFixIn, currCorrFixOut, ram_b,
+        readsRemoved = rem_unfix_pe(currCorrFixIn, currCorrFixOut, ram_b,
                                     dispOutput, compressFiles, logFilePath); 
       }
       else {
-        writeSuccess = rem_unfix_se(currCorrFixIn.first, currCorrFixOut.first, ram_b,
+        readsRemoved = rem_unfix_se(currCorrFixIn.first, currCorrFixOut.first, ram_b,
                                     dispOutput, compressFiles, logFilePath);
       }
       procRunning = false;
@@ -309,15 +309,15 @@ bool remUnfixBulk(std::vector<SRA> & sras, std::string threads, std::string ram_
     }
     else {
       if (sra.is_paired()) {
-        writeSuccess = rem_unfix_pe(currCorrFixIn, currCorrFixOut, ram_b,
+        readsRemoved = rem_unfix_pe(currCorrFixIn, currCorrFixOut, ram_b,
                                     dispOutput, compressFiles, logFilePath); 
       }
       else {
-        writeSuccess = rem_unfix_se(currCorrFixIn.first, currCorrFixOut.first, ram_b,
+        readsRemoved = rem_unfix_se(currCorrFixIn.first, currCorrFixOut.first, ram_b,
                                     dispOutput, compressFiles, logFilePath);
       }
     }
-    if (!writeSuccess) {
+    if (readsRemoved == -1) {
       return false;
     }
     // Make checkpoint file
@@ -807,7 +807,8 @@ int main(int argc, char * argv[]) {
       // Check if files in pair exist. If not, do not add to sras vector
       if (fs::exists(sraRunsLocal.first) &&
           fs::exists(sraRunsLocal.second)) {
-        sras.push_back(SRA(sraRunsLocal.first, sraRunsLocal.second, cfgIni, compressFiles));
+        sras.push_back(SRA(sraRunsLocal.first, sraRunsLocal.second, cfgIni, compressFiles,
+                           logFilePath));
       }
       else {
         if (sraRunsLocal.first != "" &&

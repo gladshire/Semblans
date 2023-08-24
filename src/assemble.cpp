@@ -182,19 +182,15 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
        
         if (numUnmapped % 500000 == 0) {
           numHalfMil++;
-          if (dispOutput) {
-            logOutput("\r        Unmapped read count: " + std::to_string(numHalfMil * 500000) +
-                      " ...",
-                      logFile);
-          }
+          logOutput("\r        Unmapped read count: " + std::to_string(numHalfMil * 500000) +
+                    " ...",
+                    logFile);
         } 
       }
       // Dump filled sequence hash tables to new files, containing the mapped
       // and unmapped reads respectively
-      if (dispOutput) {
-        logOutput("\r        Unmapped read count: " + std::to_string(numUnmapped) +
-                  "      \n", logFile);
-      }
+      logOutput("\r        Unmapped read count: " + std::to_string(numUnmapped) +
+                "      \n", logFile);
       logOutput("      Dumping split reads to mapped and unmapped files ...", logFile);
       readHashTable1.dump(outDir + "/" + filePrefix1 + "." + currSeqFilePrefix + ".mapped.fq");
       unmappedHash1.dump(outDir + "/" + filePrefix1 + ".unmapped.fq");
@@ -229,17 +225,13 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
 
           if (numUnmapped % 500000 == 0) {
             numHalfMil++;
-            if (dispOutput) {
-              logOutput("\r        Unmapped read count: " + std::to_string(numHalfMil * 500000) +
-                        " ...",
-                        logFile);
-            }
+            logOutput("\r        Unmapped read count: " + std::to_string(numHalfMil * 500000) +
+                      " ...",
+                      logFile);
           }
         }
-        if (dispOutput) {
-          logOutput("\r        Unmapped read count: " + std::to_string(numUnmapped) +
-                    "      \n", logFile);
-        }
+        logOutput("\r        Unmapped read count: " + std::to_string(numUnmapped) +
+                  "      \n", logFile);
         logOutput("      Dumping split reads to mapped and unmapped files ...", logFile);
         readHashTable2.dump(outDir + "/" + filePrefix2 + "." + currSeqFilePrefix + ".mapped.fq");
         unmappedHash2.dump(outDir + "/" + filePrefix2 + ".unmapped.fq");
@@ -430,7 +422,7 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
             run_trinity(sraRunsInterest.at(0), currTrinOutInt, threads, ram_gb, dispOutput, logFile);
          }
           // Make file for mapped assembly containing associated SRAs
-          transInfoFileStr = std::string(fs::path(currTrinOutInt.c_str()).replace_extension(("." + currSeqFilePrefix + ".ti").c_str()).c_str());
+          transInfoFileStr = std::string(fs::path(currTrinOutInt.c_str()).replace_extension(".ti").c_str());
           makeTransInfoFile(sraRunsInterest, transInfoFileStr);
   
           makeGroupCheckpoint(std::string(cpDir.c_str()), sraGroup.first + "." + currSeqFilePrefix + ".mapped");
@@ -452,7 +444,7 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
             run_trinity(sraRunsNoInterest.at(0), currTrinOutNon, threads, ram_gb, dispOutput, logFile);
           }
           // Make file for unmapped assembly containing associated SRAs
-          transInfoFileStr = std::string(fs::path(currTrinOutNon.c_str()).replace_extension(("." + currSeqFilePrefix + ".ti").c_str()).c_str());
+          transInfoFileStr = std::string(fs::path(currTrinOutNon.c_str()).replace_extension(".ti").c_str());
           makeTransInfoFile(sraRunsNoInterest, transInfoFileStr);
 
           makeGroupCheckpoint(std::string(cpDir.c_str()), sraGroup.first + ".unmapped");
@@ -474,7 +466,7 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
             run_trinity(sraRunsInTrin.at(0), currTrinOutAll, threads, ram_gb, dispOutput, logFile);
           }
           // Make file for entire assembly containing associated SRAs
-          transInfoFileStr = std::string(fs::path(currTrinOutAll.c_str()).replace_extension(("." + currSeqFilePrefix + ".ti").c_str()).c_str());
+          transInfoFileStr = std::string(fs::path(currTrinOutAll.c_str()).replace_extension(".ti").c_str());
           makeTransInfoFile(sraRunsInTrin, transInfoFileStr);
 
           makeGroupCheckpoint(std::string(cpDir.c_str()), sraGroup.first);
@@ -584,7 +576,8 @@ int main(int argc, char * argv[]) {
       }
       if (fs::exists(sraRunsLocal.first) &&
           fs::exists(sraRunsLocal.second)) {
-        sras.push_back(SRA(sraRunsLocal.first, sraRunsLocal.second, cfgIni, compressFiles));
+        sras.push_back(SRA(sraRunsLocal.first, sraRunsLocal.second, cfgIni, compressFiles,
+                           logFilePath));
       }
       else {
         if (sraRunsLocal.first != "" &&

@@ -4,10 +4,10 @@
 
 // Given a paired-end SRA run's sequence data files post-Rcorrector,
 // remove all reads Rcorrector flagged as "unfixable error"
-bool rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
-                  std::pair<std::string, std::string> sraRunOut,
-                  uintmax_t ram_b, bool dispOutput, bool compressFiles,
-                  std::string logFile) {
+long int rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
+                      std::pair<std::string, std::string> sraRunOut,
+                      uintmax_t ram_b, bool dispOutput, bool compressFiles,
+                      std::string logFile) {
   std::ifstream inFile1;
   std::ifstream inFile2;
   std::ofstream outFile1(sraRunOut.first);
@@ -174,7 +174,7 @@ bool rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
   if (!outputStream1.good() || !outputStream2.good() || !outFile1.good() || !outFile2.good()) {
     std::cerr << "ERROR: Writing output failed for:\n  "
               << sraRunIn.first << "\n  " << sraRunIn.second << std::endl;
-    return false;
+    return -1;
   }
   if (!compressFiles) {
     inFile1.close();
@@ -205,14 +205,14 @@ bool rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
     logOutput("    " + std::to_string(numReads - numUnfix) + " reads retained (" +
               percentStream.str() + " %)", logFile);
   }
-  return true;
+  return numUnfix;
 }
 
 // Given a single-end SRA run's sequence data file post-Rcorrector,
 // remove all reads Rcorrector flagged as "unfixable error"
-bool rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
-                  uintmax_t ram_b, bool dispOutput, bool compressFiles,
-                  std::string logFile) {
+long int rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
+                      uintmax_t ram_b, bool dispOutput, bool compressFiles,
+                      std::string logFile) {
 
   std::ifstream inFile;
   std::ofstream outFile(sraRunOut);
@@ -310,7 +310,7 @@ bool rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
     }
     if (!outFile.good() || !outputStream.good()) {
       std::cerr << "ERROR: Writing output failed for:\n  " << sraRunIn << std::endl;
-      return false;
+      return -1;
     }
     if (compressFiles) {
       outputStream.write(writeStart, writeEnd + s - writeStart);
@@ -343,5 +343,5 @@ bool rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
     logOutput("    " + std::to_string(numReads - numUnfix) + " reads retained (" +
               percentStream.str() + " %)", logFile);
   }
-  return true;
+  return numUnfix;
 }

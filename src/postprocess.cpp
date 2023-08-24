@@ -538,7 +538,8 @@ int main(int argc, char * argv[]) {
       }
       if (fs::exists(sraRunsLocal.first) &&
           fs::exists(sraRunsLocal.second)) {
-        sras.push_back(SRA(sraRunsLocal.first, sraRunsLocal.second, cfgIni, compressFiles));
+        sras.push_back(SRA(sraRunsLocal.first, sraRunsLocal.second, cfgIni, compressFiles,
+                           logFilePath));
       }
       else {
         if (sraRunsLocal.first != "" &&
