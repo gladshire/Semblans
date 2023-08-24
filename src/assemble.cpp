@@ -2,16 +2,15 @@
 
 
 // Update Trinity output transcript headers
-void updateHeaders(std::string fastaFilePath, uintmax_t ram_b) {
+void updateHeaders(std::string fastaFilePath, std::string newPrefix,
+                   uintmax_t ram_b) {
   uintmax_t numBytesFasta = fs::file_size(fastaFilePath.c_str());
   uintmax_t lenHashTable = numBytesFasta / 160;
 
   seqHash fastaHashTable(lenHashTable, fastaFilePath, ram_b);
 
-  //std::vector<sequence> * hashData = fastaHashTable.getHashData();
   linkedList * hashData = fastaHashTable.getHashData();
 
-  std::string newPrefix(fs::path(fastaFilePath.c_str()).stem().stem().c_str());
   std::string currOldHeader;
   std::string currNewHeader;
   sequence currSeq;
@@ -426,7 +425,7 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
           makeTransInfoFile(sraRunsInterest, transInfoFileStr);
   
           makeGroupCheckpoint(std::string(cpDir.c_str()), sraGroup.first + "." + currSeqFilePrefix + ".mapped");
-          //updateHeaders(currTrinOutInt, ram_b);
+          updateHeaders(currTrinOutInt, sraGroup.first + "_" + currSeqFilePrefix + "_mapped", ram_b);
         }
         else {
           logOutput("    Mapped assembly checkpoint found for: \n" + sraGroup.first, logFile);
@@ -448,7 +447,7 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
           makeTransInfoFile(sraRunsNoInterest, transInfoFileStr);
 
           makeGroupCheckpoint(std::string(cpDir.c_str()), sraGroup.first + ".unmapped");
-          //updateHeaders(currTrinOutNon, ram_b);
+          updateHeaders(currTrinOutNon, sraGroup.first + "_" + currSeqFilePrefix + "_unmapped", ram_b);
         }
         else {
           logOutput("    Unmapped assembly checkpoint found for:\n " + sraGroup.first, logFile);
@@ -470,7 +469,7 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
           makeTransInfoFile(sraRunsInTrin, transInfoFileStr);
 
           makeGroupCheckpoint(std::string(cpDir.c_str()), sraGroup.first);
-          //updateHeaders(currTrinOutAll, ram_b);
+          updateHeaders(currTrinOutAll, sraGroup.first, ram_b);
         }
         else {
           logOutput("    Global assembly checkpoint found for:\n " + sraGroup.first, logFile);

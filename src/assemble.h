@@ -19,7 +19,8 @@
 #include "seq.h"
 #include "seq_hash.h"
 
-void updateHeaders(std::string fastaFilePath, uintmax_t ram_b);
+void updateHeaders(std::string fastaFilePath, std::string newPrefix,
+                   uintmax_t ram_b);
 
 std::vector<transcript> get_transcript(std::vector<SRA> sras);
 
