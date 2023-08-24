@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"  ?>
+<SraRunInfo>
+<Row>
+<Run>SRR6435279</Run>
+<ReleaseDate>2018-01-02 16:28:57</ReleaseDate>
+<LoadDate>2018-04-16 16:40:59</LoadDate>
+<spots>23632522</spots>
+<bases>5955395544</bases>
+<spots_with_mates>23632522</spots_with_mates>
+<avgLength>252</avgLength>
+<size_MB>3082</size_MB>
+<download_path>https://sra-downloadb.be-md.ncbi.nlm.nih.gov/sos5/sra-pub-zq-11/SRR006/435/SRR6435279/SRR6435279.sralite.1</download_path>
+<Experiment>SRX3526915</Experiment>
+<LibraryName>MJM3164</LibraryName>
+<LibraryStrategy>RNA-Seq</LibraryStrategy>
+<LibrarySelection>unspecified</LibrarySelection>
+<LibrarySource>TRANSCRIPTOMIC</LibrarySource>
+<LibraryLayout>PAIRED</LibraryLayout>
+<InsertSize>0</InsertSize>
+<InsertDev>0</InsertDev>
+<Platform>ILLUMINA</Platform>
+<Model>Illumina HiSeq 2500</Model>
+<SRAStudy>SRP127816</SRAStudy>
+<BioProject>PRJNA428216</BioProject>
+<Study_Pubmed_id>2</Study_Pubmed_id>
+<ProjectID>428216</ProjectID>
+<Sample>SRS2802632</Sample>
+<BioSample>SAMN08284189</BioSample>
+<SampleType>simple</SampleType>
+<TaxID>1214394</TaxID>
+<ScientificName>Sidotheca caryophylloides</ScientificName>
+<SampleName>MJM3164</SampleName>
+<Tumor>no</Tumor>
+<CenterName>UNIVERSITY OF MICHIGAN</CenterName>
+<Submission>SRA643082</Submission>
+<Consent>public</Consent>
+<RunHash>865149E0336A5D87F29118604A15C9EC</RunHash>
+<ReadHash>2BCE36BF175C0E1A2688D5943B333EE7</ReadHash>
+</Row>
+</SraRunInfo>

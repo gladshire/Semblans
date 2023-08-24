@@ -309,7 +309,7 @@ int main(int argc, char * argv[]) {
         }
       }
       else {
-        logOutput("Performing entire assembly", logFilePath);
+        logOutput("Performing entire assembly\n", logFilePath);
         result = system(preCmd.c_str());
         if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
           std::cerr << "Preprocess exited" << std::endl;

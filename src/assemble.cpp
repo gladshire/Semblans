@@ -567,6 +567,9 @@ int main(int argc, char * argv[]) {
       procRunning = false;
       sraRetrieve.join();
     }
+    else {
+      sras = get_sras(cfgIni, dispOutput, compressFiles);
+    }
     
     for (auto fqFileName : cfgIni.at("Local files")) {
       localDataFiles.push_back(fqFileName.first);

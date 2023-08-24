@@ -753,6 +753,9 @@ int main(int argc, char * argv[]) {
       procRunning = false;
       sraRetrieve.join();
     }
+    else {
+      sras = get_sras(cfgIni, dispOutput, compressFiles);
+    }
 
     // Obtain terminal window size for printing purposes
     struct winsize w;
