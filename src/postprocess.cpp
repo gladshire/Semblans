@@ -5,26 +5,6 @@
 std::atomic<bool> procRunning(false);
 extern std::vector<std::string> stepDirs;
 
-// Output cosmetic function: Animate an ellipsis
-void progressAnim(int numSpace) {
-  const std::string anim[] = {".  ", ".. ", "..."};
-  int animIndex = 0;
-
-  while (procRunning) {
-    std::cout << "\r";
-    for (int i = 0; i < numSpace; i++) {
-      std::cout << " ";
-    }
-    std::cout << anim[animIndex] << std::flush;
-    animIndex = (animIndex +1) % 3;
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-  }
-  std::cout << "\r";
-  for (int i = 0; i < numSpace; i++) {
-    std::cout << " ";
-  }
-  std::cout << "   " << std::endl;
-}
 
 // Given a vector of SRAs, instantiate transcript objects constructed
 // off of them
@@ -93,7 +73,7 @@ void blastxBulk(const std::vector<transcript> & transVec, std::string threads,
 
     if (!dispOutput) {
       procRunning = true;
-      std::thread blastxThread(progressAnim, 2);
+      std::thread blastxThread(progressAnim, "  ");
       if (useBlast) {
         blastxDiam(currTransIn, blastDbDir + currBlastDbName,
                    maxEvalue, maxTargetSeqs, threads,
@@ -156,7 +136,7 @@ void remChimeraBulk(const std::vector<transcript> & transVec, std::string ram_gb
 
     if (!dispOutput) {
       procRunning = true;
-      std::thread chimeraThread(progressAnim, 2);
+      std::thread chimeraThread(progressAnim, "  ");
       detect_chimera(currBlastx, chimOutDir);
       removeChimera(currTransInChim, currTransOutChim, currTransInfo, currTransCut, ram_gb,
                     logFilePath);
@@ -231,7 +211,7 @@ void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
       // Create index of assembled transcripts
       if (!dispOutput) {
         procRunning = true;
-        std::thread salmIdxThread(progressAnim, 2);
+        std::thread salmIdxThread(progressAnim, "  ");
         salmon_index(currTransInSalm, currIndex, threads, dispOutput, logFilePath);
         procRunning = false;
         salmIdxThread.join();
@@ -257,7 +237,7 @@ void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
       // Quantify reads mapped to transcript index
       if (!dispOutput) {
         procRunning = true;
-        std::thread salmQntThread(progressAnim, 2);
+        std::thread salmQntThread(progressAnim, "  ");
         salmon_quant(currTransInSalm, currIndex, currQuant, currSraRunsIn, threads,
                      dispOutput, logFilePath);
         procRunning = false;
@@ -320,7 +300,7 @@ void corsetBulk(const std::vector<transcript> & transVec, std::string ram_gb,
     // Perform corset run
     if (!dispOutput) {
       procRunning = true;
-      std::thread clustThread(progressAnim, 2);
+      std::thread clustThread(progressAnim, "  ");
       corset_eq_classes(trans.get_file_prefix(), currEqClassFile, currOutDir,
                         dispOutput, logFilePath);
       procRunning = false;
@@ -346,7 +326,7 @@ void corsetBulk(const std::vector<transcript> & transVec, std::string ram_gb,
 
     if (!dispOutput) {
       procRunning = true;
-      std::thread clustFiltThread(progressAnim, 2);
+      std::thread clustFiltThread(progressAnim, "  ");
       filterCorset(currTransInCors, currTransClust, currTransLargestClust, currTransRedund,
                    ram_b, currOutDir, logFilePath);
       procRunning = false;
@@ -413,7 +393,7 @@ void transdecBulk(const std::vector<transcript> & transVec, std::string threads,
     // Perform transdecoder run to obtain coding sequences / peptides
     if (!dispOutput) {
       procRunning = true;
-      std::thread transDecThread(progressAnim, 2);
+      std::thread transDecThread(progressAnim, "  ");
       run_transdecoder(currTransInTD, currTransCds, currTransPep, useBlast, maxEvalue,
                        maxTargetSeqs, threads, ram_b, currDb, currOutDirTD, dispOutput,
                        logFilePath);
@@ -456,7 +436,7 @@ void annotateBulk(const std::vector<transcript> & transVec, std::string threads,
     // Perform annotation of transcript
     if (!dispOutput) {
       procRunning = true;
-      std::thread annotThread(progressAnim, 2);
+      std::thread annotThread(progressAnim, "  ");
       annotateTranscript(currTransIn, currTransPep, currTransOut,
                          threads, ram_gb, dispOutput, logFilePath);
       procRunning = false;
@@ -619,9 +599,7 @@ int main(int argc, char * argv[]) {
       // Annotate transcriptome
       annotateBulk(transVec, threads, ram_gb, retainInterFiles, dispOutput, logFilePath, cfgIni);
     }
-    if (dispOutput) {
-      logOutput("Postprocess finished successfully.\n", logFilePath);
-    }
+    logOutput("\nPostprocess finished successfully\n\n", logFilePath);
   }
   else {
   

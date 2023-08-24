@@ -77,6 +77,7 @@ void linkedList::updateSeqHead(const std::string & newPrefix) {
     currHead = currNode->seqEntry.get_header();
     newHead = newPrefix + currHead.substr(currHead.find("_"));
     setSeqHead(currHead, newHead);
+    currNode = currNode->next;
   }
 }
 

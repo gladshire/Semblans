@@ -1,15 +1,20 @@
 #include "print_info.h"
 
-// Given a string, output it to stdout as well as a log file
-/*
-void logOutput(std::string input, std::string logFile) {
-  std::ofstream logStream;
-  logStream.open(logFile, std::ios_base::app);
-  teedev logger(logStream, std::cout);
-  teeStream loggerStream(logger);
-  
-  loggerStream << input << std::endl;
-}*/
+
+void progressAnim(std::string precedeString) {
+  const std::string anim[] = {".  ", ".. ", "..."};
+  int animIndex = 0;
+
+  while (procRunning) {
+    std::cout << "\r" << precedeString;
+    std::cout << anim[animIndex] << std::flush;
+    animIndex = (animIndex + 1) % 3;
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+  }
+  std::cout << "\r" << precedeString;
+  std::cout << "   " << std::endl;
+}
+
 
 // Given an SRA run object, output basic information to stdout and
 // a log file

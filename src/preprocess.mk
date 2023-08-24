@@ -48,3 +48,4 @@ clean:
 	rm trimm_wrap.o
 	rm kraken_wrap.o
 	rm rem_overrep.o
+	rm print_info.o

@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include <iomanip>
+#include <thread>
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <boost/filesystem.hpp>
@@ -20,7 +21,6 @@
 #include "annotate.h"
 #include "print_info.h"
 
-void progressAnim(int numSpace);
 
 std::vector<transcript> get_transcript(std::vector<SRA> sras);
 

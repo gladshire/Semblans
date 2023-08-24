@@ -92,7 +92,7 @@ seqHash::seqHash(uintmax_t lenTable, fs::path transFilePath, uintmax_t ram_b) {
         this->insertHash(currHeader, currSequence, currQuality);
       }
       else {
-        headerStartPos = std::find(seqStartPos, inFileL, '\n') + 1;
+        headerStartPos = std::find(seqStartPos, inFileL, headChar);
         currSequence = std::string(seqStartPos, headerStartPos - 1);
         this->insertHash(currHeader, currSequence);
       }

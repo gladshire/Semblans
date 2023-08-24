@@ -1,5 +1,6 @@
 #include "assemble.h"
 
+std::atomic<bool> procRunning(false);
 
 // Update Trinity output transcript headers
 void updateHeaders(std::string fastaFilePath, std::string newPrefix,
@@ -339,7 +340,7 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
     currSeqFilePrefix = std::string(fs::path(seqFilePath.c_str()).stem().c_str());
     for (auto sraGroup : sraGroups) {
       SRA dummySra = sraGroup.second.at(0);
-      cpDir = dummySra.get_fastqc_dir_2().first.parent_path().parent_path().parent_path() / "checkpoints";
+      cpDir = dummySra.get_fastqc_dir_2().first.parent_path().parent_path().parent_path() / ".checkpoints";
 
       // Check whether checkpoint exists
       if (groupCheckpointExists(std::string(cpDir.c_str()), sraGroup.first)) {
@@ -409,9 +410,9 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
 
       // Perform assembly for reads of interest (those that map to provided FASTA)
       if (assembSeqsInterest) {
-        logOutput("  Now assembling reads that map to:\n\n  " + currSeqFilePrefix, logFile);
-        if (!groupCheckpointExists(std::string(cpDir.c_str()), sraGroup.first + currSeqFilePrefix +
-                                   "." + ".mapped")) {
+        logOutput("  Now assembling reads that map to: \"" + seqFilePath + "\"\n", logFile);
+        if (!groupCheckpointExists(std::string(cpDir.c_str()), sraGroup.first + "." +
+                                   currSeqFilePrefix + ".mapped")) {
           if (sraRunsInterest.size() > 1) {
             run_trinity_comb(sraRunsInterest, currTrinOutInt, threads, ram_gb, dispOutput, logFile);
           }
@@ -422,17 +423,19 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
           transInfoFileStr = std::string(fs::path(currTrinOutInt.c_str()).replace_extension(".ti").c_str());
           makeTransInfoFile(sraRunsInterest, transInfoFileStr);
   
-          makeGroupCheckpoint(std::string(cpDir.c_str()), sraGroup.first + "." + currSeqFilePrefix + ".mapped");
+          makeGroupCheckpoint(std::string(cpDir.c_str()), sraGroup.first + "." +
+                              currSeqFilePrefix + ".mapped");
+
           updateHeaders(currTrinOutInt, sraGroup.first + "_" + currSeqFilePrefix + "_mapped", ram_b);
         }
         else {
-          logOutput("    Mapped assembly checkpoint found for: \n" + sraGroup.first, logFile);
+          logOutput("    Mapped assembly checkpoint found for: " + sraGroup.first + "\n\n", logFile);
         }
         sraRunsInterest.clear();
       }
       // Perform assembly for reads of no interest (those that DO NOT map to provided FASTA)
       if (assembSeqsNoInterest) {
-        logOutput("  Now assembling reads that do not map to:\n\n  " + seqFilePath, logFile);
+        logOutput("  Now assembling reads that do not map to: \"" + seqFilePath + "\"\n", logFile);
         if (!groupCheckpointExists(std::string(cpDir.c_str()), sraGroup.first + ".unmapped")) {
           if (sraRunsNoInterest.size() > 1) {
             run_trinity_comb(sraRunsNoInterest, currTrinOutNon, threads, ram_gb, dispOutput, logFile);
@@ -557,7 +560,13 @@ int main(int argc, char * argv[]) {
     make_proj_space(cfgIni, "assemble");
 
     // Obtain SRAs
-    sras = get_sras(cfgIni, dispOutput, compressFiles);
+    if (!dispOutput) {
+      procRunning = true;
+      std::thread sraRetrieve(progressAnim, "  Obtaining read information from NCBI ");
+      sras = get_sras(cfgIni, dispOutput, compressFiles);
+      procRunning = false;
+      sraRetrieve.join();
+    }
     
     for (auto fqFileName : cfgIni.at("Local files")) {
       localDataFiles.push_back(fqFileName.first);
@@ -679,9 +688,7 @@ int main(int argc, char * argv[]) {
                      assembleOthers, assembleAllSeqs, dispOutput,
                      retainInterFiles, logFilePath, cfgIni);
 
-    if (dispOutput) {
-      logOutput("Assemble finished successfully.\n", logFilePath);
-    }
+    logOutput("\nAssemble finished successfully\n\n", logFilePath);
   }
   else {
     logOutput("ERROR: Assemble invoked improperly.\n", logFilePath);

@@ -7,12 +7,9 @@
 #include "sra.h"
 #include "transcript.h"
 
-//typedef boost::iostreams::tee_device<std::ostream, std::ostream> teedev;
-//typedef boost::iostreams::stream<teedev, std::char_traits<typename std::ostream::char_type>,
-//                                 std::allocator<typename std::ostream::char_type>> teeStream;
+extern std::atomic<bool> procRunning;
 
-
-//void logOutput(std::string input, std::string logFile);
+void progressAnim(std::string precedeString);
 
 void summarize_sing_sra(SRA sra, std::string logFile,
                         int margin);

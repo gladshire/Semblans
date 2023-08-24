@@ -1,24 +1,22 @@
 #include "semblans.h"
 
+std::atomic<bool> procRunning(false);
 
-// TODO: Pull out genes of interest
-// TODO: Differential gene expression
-// TODO: Perform assembly of targeted gene families
 
 void print_intro(std::string logFile) {
   winsize w;
   ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-  logOutput("", logFile);
-  logOutput("                          |     |                     ", logFile);
-  logOutput("    __|   _ \\  __ `__ \\   __ \\  |   _` |  __ \\    __| ", logFile);
-  logOutput("  \\__ \\   __/  |   |   |  |   | |  (   |  |   | \\__ \\ ", logFile);
-  logOutput("  ____/ \\___| _|  _|  _| _.__/ _| \\__,_| _|  _| ____/ ", logFile); 
-  logOutput("", logFile);
-  logOutput("    ───────────────────────────────────────────────\n", logFile);
-  logOutput("    A C++ package enabling the bulk retrieval,", logFile);
-  logOutput("    assembly, and analysis of de novo transcriptomes", logFile);
-  logOutput("    from multiple individuals\n", logFile);
-  logOutput("    ───────────────────────────────────────────────\n", logFile);
+  logOutput("\n", logFile);
+  logOutput("                          |     |                     \n", logFile);
+  logOutput("    __|   _ \\  __ `__ \\   __ \\  |   _` |  __ \\    __| \n", logFile);
+  logOutput("  \\__ \\   __/  |   |   |  |   | |  (   |  |   | \\__ \\ \n", logFile);
+  logOutput("  ____/ \\___| _|  _|  _| _.__/ _| \\__,_| _|  _| ____/ \n", logFile); 
+  logOutput("\n", logFile);
+  logOutput("    ───────────────────────────────────────────────\n\n", logFile);
+  logOutput("    A C++ package enabling the bulk retrieval,\n", logFile);
+  logOutput("    assembly, and analysis of de novo transcriptomes\n", logFile);
+  logOutput("    from multiple individuals\n\n", logFile);
+  logOutput("    ───────────────────────────────────────────────\n\n", logFile);
 }
 
 
