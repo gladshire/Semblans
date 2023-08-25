@@ -73,7 +73,7 @@ void blastxBulk(const std::vector<transcript> & transVec, std::string threads,
 
     if (!dispOutput) {
       procRunning = true;
-      std::thread blastxThread(progressAnim, "  ");
+      std::thread blastxThread(progressAnim, "  ", logFilePath);
       if (useBlast) {
         blastxDiam(currTransIn, blastDbDir + currBlastDbName,
                    maxEvalue, maxTargetSeqs, threads,
@@ -136,7 +136,7 @@ void remChimeraBulk(const std::vector<transcript> & transVec, std::string ram_gb
 
     if (!dispOutput) {
       procRunning = true;
-      std::thread chimeraThread(progressAnim, "  ");
+      std::thread chimeraThread(progressAnim, "  ", logFilePath);
       detect_chimera(currBlastx, chimOutDir);
       removeChimera(currTransInChim, currTransOutChim, currTransInfo, currTransCut, ram_gb,
                     logFilePath);
@@ -211,7 +211,7 @@ void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
       // Create index of assembled transcripts
       if (!dispOutput) {
         procRunning = true;
-        std::thread salmIdxThread(progressAnim, "  ");
+        std::thread salmIdxThread(progressAnim, "  ", logFilePath);
         salmon_index(currTransInSalm, currIndex, threads, dispOutput, logFilePath);
         procRunning = false;
         salmIdxThread.join();
@@ -237,7 +237,7 @@ void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
       // Quantify reads mapped to transcript index
       if (!dispOutput) {
         procRunning = true;
-        std::thread salmQntThread(progressAnim, "  ");
+        std::thread salmQntThread(progressAnim, "  ", logFilePath);
         salmon_quant(currTransInSalm, currIndex, currQuant, currSraRunsIn, threads,
                      dispOutput, logFilePath);
         procRunning = false;
@@ -300,7 +300,7 @@ void corsetBulk(const std::vector<transcript> & transVec, std::string ram_gb,
     // Perform corset run
     if (!dispOutput) {
       procRunning = true;
-      std::thread clustThread(progressAnim, "  ");
+      std::thread clustThread(progressAnim, "  ", logFilePath);
       corset_eq_classes(trans.get_file_prefix(), currEqClassFile, currOutDir,
                         dispOutput, logFilePath);
       procRunning = false;
@@ -326,7 +326,7 @@ void corsetBulk(const std::vector<transcript> & transVec, std::string ram_gb,
 
     if (!dispOutput) {
       procRunning = true;
-      std::thread clustFiltThread(progressAnim, "  ");
+      std::thread clustFiltThread(progressAnim, "  ", logFilePath);
       filterCorset(currTransInCors, currTransClust, currTransLargestClust, currTransRedund,
                    ram_b, currOutDir, logFilePath);
       procRunning = false;
@@ -393,7 +393,7 @@ void transdecBulk(const std::vector<transcript> & transVec, std::string threads,
     // Perform transdecoder run to obtain coding sequences / peptides
     if (!dispOutput) {
       procRunning = true;
-      std::thread transDecThread(progressAnim, "  ");
+      std::thread transDecThread(progressAnim, "  ", logFilePath);
       run_transdecoder(currTransInTD, currTransCds, currTransPep, useBlast, maxEvalue,
                        maxTargetSeqs, threads, ram_b, currDb, currOutDirTD, dispOutput,
                        logFilePath);
@@ -436,7 +436,7 @@ void annotateBulk(const std::vector<transcript> & transVec, std::string threads,
     // Perform annotation of transcript
     if (!dispOutput) {
       procRunning = true;
-      std::thread annotThread(progressAnim, "  ");
+      std::thread annotThread(progressAnim, "  ", logFilePath);
       annotateTranscript(currTransIn, currTransPep, currTransOut,
                          threads, ram_gb, dispOutput, logFilePath);
       procRunning = false;

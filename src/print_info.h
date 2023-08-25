@@ -9,7 +9,7 @@
 
 extern std::atomic<bool> procRunning;
 
-void progressAnim(std::string precedeString);
+void progressAnim(std::string precedeString, std::string logFile);
 
 void summarize_sing_sra(SRA sra, std::string logFile,
                         int margin);

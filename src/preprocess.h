@@ -26,8 +26,6 @@
 #define PATH_PIGZ std::string((dl::program_location().parent_path() / fs::path(std::string("../external/pigz/pigz"))).c_str())
 
 
-void progressAnim(std::string precedeString);
-
 void retrieve_sra_data(std::vector<SRA> & sras, std::string threads,
                        bool dispOutput, bool retainInterFiles,
                        bool compressOutput, std::string logFile);

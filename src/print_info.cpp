@@ -1,10 +1,12 @@
 #include "print_info.h"
 
 
-void progressAnim(std::string precedeString) {
+void progressAnim(std::string precedeString, std::string logFile) {
+
   const std::string anim[] = {".  ", ".. ", "..."};
   int animIndex = 0;
 
+  logOutput(precedeString, logFile);
   while (procRunning) {
     std::cout << "\r" << precedeString;
     std::cout << anim[animIndex] << std::flush;

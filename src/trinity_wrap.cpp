@@ -81,7 +81,7 @@ void run_trinity(std::pair<std::string, std::string> sraRun, std::string outFile
 
   if (!dispOutput) {
     procRunning = true;
-    std::thread assembleThread(progressAnim, "    ");
+    std::thread assembleThread(progressAnim, "    ", logFile);
     result = system(trin_cmd.c_str());
     procRunning = false;
     assembleThread.join();
@@ -113,7 +113,7 @@ void run_trinity_comb(std::vector<std::pair<std::string, std::string>> sraRuns,
   std::string inFile;
   if (!dispOutput) {
     procRunning = true;
-    std::thread combProgThread(progressAnim, "    ");
+    std::thread combProgThread(progressAnim, "    ", logFile);
     inFile = combine_reads(sraRuns, outFileComb, ram_b, logFile);
     procRunning = false;
     combProgThread.join();
@@ -148,7 +148,7 @@ void run_trinity_comb(std::vector<std::pair<std::string, std::string>> sraRuns,
   
   // Run Trinity assembly
   procRunning = true;
-  std::thread trinProgThread(progressAnim, "    ");
+  std::thread trinProgThread(progressAnim, "    ", logFile);
   result = system(trin_cmd.c_str());
   procRunning = false;
   trinProgThread.join();

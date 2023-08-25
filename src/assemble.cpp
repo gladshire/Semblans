@@ -156,12 +156,17 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
 
       numBytesReads1 = fs::file_size(currSraIn.first.c_str());
       lenReadsHash1 = numBytesReads1 / 160;
-      logOutput("\n      Creating hash table from forward-ended reads ...", logFile);
+      //logOutput("\n      Creating hash table from forward-ended reads ...", logFile);
+      
+      procRunning = true;
+      std::thread constructHash(progressAnim, "      Creating hash table from forward-ended reads ", logFile);
       seqHash readHashTable1(lenReadsHash1, fs::path(currSraIn.first.c_str()), ram_b);
-      logOutput("done\n", logFile);
+      procRunning = false;
+      constructHash.join();
+      
       seqHash unmappedHash1(lenReadsHash1);
 
-      logOutput("      Now splitting reads into mapped and unmapped\n", logFile);
+      logOutput("\n      Now splitting reads into mapped and unmapped\n", logFile);
       unmappedReadFile.open(fastaQuant + "/aux_info/unmapped_names.txt");
 
       // Iterate through headers in unmapped reads file
@@ -191,21 +196,30 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
       // and unmapped reads respectively
       logOutput("\r        Unmapped read count: " + std::to_string(numUnmapped) +
                 "      \n", logFile);
-      logOutput("      Dumping split reads to mapped and unmapped files ...", logFile);
+
+      procRunning = true;
+      std::thread dumpHash(progressAnim, "      Dumping split reads to mapped and unmapped files ", logFile);
       readHashTable1.dump(outDir + "/" + filePrefix1 + "." + currSeqFilePrefix + ".mapped.fq");
       unmappedHash1.dump(outDir + "/" + filePrefix1 + ".unmapped.fq");
-      logOutput("done\n", logFile);
+      procRunning = false;
+      dumpHash.join();
+      
       unmappedReadFile.close();
 
       if (sra.is_paired()) {
+        logOutput("\n", logFile);
         numBytesReads2 = fs::file_size(currSraIn.second.c_str());
         lenReadsHash2 = numBytesReads2 / 160;
-        logOutput("\n      Creating hash table from reverse-ended reads ...", logFile);
+        
+        procRunning = true;
+        std::thread constructHash(progressAnim, "      Creating hash table from reverse-ended reads ", logFile);
         seqHash readHashTable2(lenReadsHash2, fs::path(currSraIn.second.c_str()), ram_b);
-        logOutput("done\n", logFile);
+        procRunning = false;
+        constructHash.join();
+     
         seqHash unmappedHash2(lenReadsHash2);
 
-        logOutput("      Now splitting reads into mapped and unmapped\n", logFile);
+        logOutput("\n      Now splitting reads into mapped and unmapped\n", logFile);
         unmappedReadFile.open(fastaQuant + "/aux_info/unmapped_names.txt");
         // Iterate through headers in unmapped reads file
         // Fill hash tables accordingly
@@ -232,10 +246,14 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
         }
         logOutput("\r        Unmapped read count: " + std::to_string(numUnmapped) +
                   "      \n", logFile);
-        logOutput("      Dumping split reads to mapped and unmapped files ...", logFile);
+
+        procRunning = true;
+        std::thread dumpHash(progressAnim, "      Dumping split reads to mapped and unmapped files ", logFile);
         readHashTable2.dump(outDir + "/" + filePrefix2 + "." + currSeqFilePrefix + ".mapped.fq");
         unmappedHash2.dump(outDir + "/" + filePrefix2 + ".unmapped.fq");
-        logOutput("done\n", logFile);
+        procRunning = false;
+        dumpHash.join();
+
         unmappedReadFile.close();
       }
       sraRunsIn.clear();
@@ -562,7 +580,7 @@ int main(int argc, char * argv[]) {
     // Obtain SRAs
     if (!dispOutput) {
       procRunning = true;
-      std::thread sraRetrieve(progressAnim, "  Obtaining read information from NCBI ");
+      std::thread sraRetrieve(progressAnim, "  Obtaining read information from NCBI ", logFilePath);
       sras = get_sras(cfgIni, dispOutput, compressFiles);
       procRunning = false;
       sraRetrieve.join();

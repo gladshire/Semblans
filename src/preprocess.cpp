@@ -7,13 +7,13 @@ std::atomic<bool> procRunning(false);
 void preSummary(const std::vector<SRA> sras, 
                 std::string logFilePath, std::string threads, std::string ram_gb,
                 bool retainInterFiles, bool compressFiles) {
-  logOutput("Semblans Preprocess started with following parameters:\n", logFilePath);
-  logOutput("  Config file:     " +
+  logOutput("\nSemblans Preprocess started with following parameters:\n", logFilePath);
+  logOutput("\n  Config file:     " +
             std::string(fs::path(logFilePath.c_str()).filename().c_str()) + "\n",
             logFilePath);
-  logOutput("  Threads (Cores): " + threads + "\n", logFilePath);
-  logOutput("  Memory (GB):     " + ram_gb + "\n", logFilePath);
-  logOutput("  SRA runs:\n\n", logFilePath); 
+  logOutput("\n  Threads (Cores): " + threads + "\n", logFilePath);
+  logOutput("\n  Memory (GB):     " + ram_gb + "\n", logFilePath);
+  logOutput("\n  SRA runs:\n\n", logFilePath); 
   summarize_all_sras(sras, logFilePath, 6);
     
   std::string retainStr;
@@ -23,7 +23,7 @@ void preSummary(const std::vector<SRA> sras,
   else {
     retainStr = "NO";
   }
-  logOutput("  Retain intermediate files: " + retainStr + "\n", logFilePath);
+  logOutput("\n  Retain intermediate files: " + retainStr + "\n", logFilePath);
 
   std::string compressStr;
   if (compressFiles) {
@@ -47,17 +47,17 @@ void retrieveSraData(std::vector<SRA> & sras, std::string threads,
   for (auto sra : sras) {
     // Check for checkpoint file
     if (sra.checkpointExists("sra")) {
-      logOutput("  Prefetch checkpoint found for: " +
+      logOutput("\n  Prefetch checkpoint found for: " +
                 sra.get_accession() + "\n", logFilePath);
       continue;
     }
     else {
-      logOutput("  Downloading raw data for: \n", logFilePath);
+      logOutput("\n  Downloading raw data for: \n", logFilePath);
       summarize_sing_sra(sra, logFilePath, 4);
 
       if (!dispOutput) {
         procRunning = true;
-        std::thread prefProgThread(progressAnim, "  ");
+        std::thread prefProgThread(progressAnim, "  ", logFilePath);
         prefetch_sra(sra, dispOutput, logFilePath);
         procRunning = false;
         prefProgThread.join();
@@ -78,12 +78,12 @@ void retrieveSraData(std::vector<SRA> & sras, std::string threads,
       continue;
     }
     else {
-      logOutput("  Dumping to FASTQ file: \n", logFilePath);
+      logOutput("\n  Dumping to FASTQ file: \n", logFilePath);
       summarize_sing_sra(sra, logFilePath, 4);
 
       if (!dispOutput) {
         procRunning = true;
-        std::thread fqdumpThread(progressAnim, "  ");
+        std::thread fqdumpThread(progressAnim, "  ", logFilePath);
         fasterq_sra(sra, threads, dispOutput, compressOutput, logFilePath);
         procRunning = false;
         fqdumpThread.join();
@@ -134,12 +134,12 @@ void fastqcBulk1(std::vector<SRA> & sras, std::string threads, bool dispOutput,
                 sra.get_accession() + "\n", logFilePath);
       continue;
     }
-    logOutput("  Now running quality analysis for:\n", logFilePath);
+    logOutput("\n  Now running quality analysis for:\n", logFilePath);
     summarize_sing_sra(sra, logFilePath, 4);
 
     if (!dispOutput) {
       procRunning = true;
-      std::thread fqcThread(progressAnim, "  ");
+      std::thread fqcThread(progressAnim, "  ", logFilePath);
       run_fastqc(currFastqcIn1, threads, currFastqcOut1, dispOutput, logFilePath);
       procRunning = false;
       fqcThread.join();
@@ -186,12 +186,12 @@ void fastqcBulk2(std::vector<SRA> & sras, std::string threads, bool dispOutput,
                 sra.get_accession() + "\n", logFilePath);
       continue;
     }
-    logOutput("  Now running quality analysis for:\n", logFilePath);
+    logOutput("\n  Now running quality analysis for:\n", logFilePath);
     summarize_sing_sra(sra, logFilePath, 4);
 
     if (!dispOutput) {
       procRunning = true;
-      std::thread fqcThread(progressAnim, "  ");
+      std::thread fqcThread(progressAnim, "  ", logFilePath);
       run_fastqc(currFastqcIn, threads, currFastqcOut, dispOutput, logFilePath);
       procRunning = false;
       fqcThread.join();
@@ -228,12 +228,12 @@ void errorCorrBulk(std::vector<SRA> & sras, std::string threads,
                 sra.get_accession() + "\n", logFilePath);
       continue;
     }
-    logOutput("  Now running error correction for:\n", logFilePath);
+    logOutput("\n  Now running error correction for:\n", logFilePath);
     summarize_sing_sra(sra, logFilePath, 4);
 
     if (!dispOutput) {
       procRunning = true;
-      std::thread rcorrThread(progressAnim, "  ");
+      std::thread rcorrThread(progressAnim, "  ", logFilePath);
       run_rcorr(currRcorrIn, rcorrOutDir, threads, kmerLength, maxCorrK, weakProportion,
                 dispOutput, compressFiles, logFilePath);
       procRunning = false;
@@ -270,12 +270,12 @@ bool remUnfixBulk(std::vector<SRA> & sras, std::string threads, std::string ram_
                 sra.get_accession() + "\n", logFilePath);
       continue;
     }
-    logOutput("  Now removing unfixable reads for:\n", logFilePath);
+    logOutput("\n  Now removing unfixable reads for:\n", logFilePath);
     summarize_sing_sra(sra, logFilePath, 4);
 
     if (!dispOutput) {
       procRunning = true;
-      std::thread fixThread(progressAnim, "  ");
+      std::thread fixThread(progressAnim, "  ", logFilePath);
       if (sra.is_paired()) {
         readsRemoved = rem_unfix_pe(currCorrFixIn, currCorrFixOut, ram_b,
                                     dispOutput, compressFiles, logFilePath); 
@@ -413,12 +413,12 @@ void trimBulk(std::vector<SRA> & sras, std::string threads,
     }
 
 
-    logOutput("  Running adapter sequence trimming for:\n", logFilePath);
+    logOutput("\n  Running adapter sequence trimming for:\n", logFilePath);
     summarize_sing_sra(sra, logFilePath, 4);
 
     if (!dispOutput) {
       procRunning = true;
-      std::thread trimThread(progressAnim, "  ");
+      std::thread trimThread(progressAnim, "  ", logFilePath);
       run_trimmomatic(currTrimIn, currTrimOutP, currTrimOutU, threads,
                       maxSeedMismatch, minScorePaired, minScoreSingle,
                       windowSize, windowMinQuality, minQualityLead,
@@ -474,7 +474,7 @@ void filtForeignBulk(std::vector<SRA> & sras, std::vector<std::string> krakenDbs
 
   
   for (int i = 0; i < krakenDbs.size(); i++) {
-    logOutput("  Now filtering with database: " +
+    logOutput("\n  Now filtering with database: " +
               std::string(fs::path(krakenDbs[i].c_str()).filename().c_str()) + "\n",
               logFilePath);
     for (auto sra : sras) {
@@ -523,7 +523,7 @@ void filtForeignBulk(std::vector<SRA> & sras, std::vector<std::string> krakenDbs
       }
       if (!dispOutput) {
         procRunning = true;
-        std::thread krakThread(progressAnim, "  ");
+        std::thread krakThread(progressAnim, "  ", logFilePath);
         run_kraken2(currKrakIn, currKrakOut, repFile, threads, krakenDbs[i],
                     confThreshold, minBaseQuality, minHitGroups, keepForeign,
                     dispOutput, compressFiles, logFilePath);
@@ -626,7 +626,7 @@ bool remOverrepBulk(std::vector<SRA> & sras, std::string threads, std::string ra
                 sra.get_accession() + "\n", logFilePath);
       continue;
     }
-    logOutput("  Running removal of overrepresented reads for:\n", logFilePath);
+    logOutput("\n  Running removal of overrepresented reads for:\n", logFilePath);
     summarize_sing_sra(sra, logFilePath, 4);
     currOrepIn.first = sra.get_sra_path_for_filt().first.c_str();
     currOrepIn.second = sra.get_sra_path_for_filt().second.c_str();
@@ -654,7 +654,7 @@ bool remOverrepBulk(std::vector<SRA> & sras, std::string threads, std::string ra
 
     if (!dispOutput) {
       procRunning = true;
-      std::thread orepThread(progressAnim, "  ");
+      std::thread orepThread(progressAnim, "  ", logFilePath);
       if (sra.is_paired()) {
         currOrepSeqsPe = get_overrep_seqs_pe(sra);
         writeSuccess = rem_overrep_pe(currOrepIn, currOrepOut, ram_b, dispOutput,
@@ -748,7 +748,7 @@ int main(int argc, char * argv[]) {
     // Create vector of SRA objects from SRA accessions, using NCBI web API
     if (!dispOutput) {
       procRunning = true;
-      std::thread sraRetrieve(progressAnim, "  Obtaining read information from NCBI ");
+      std::thread sraRetrieve(progressAnim, "  Obtaining read information from NCBI ", logFilePath);
       sras = get_sras(cfgIni, dispOutput, compressFiles);
       procRunning = false;
       sraRetrieve.join();

@@ -137,7 +137,7 @@ long int rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
         }
         if (dispOutput) {
           readName = std::string(nlPos1Prev + 1, nlPos1);
-          logOutput("  Unfixable read removed: " + readName.substr(1, readName.find(" ")), logFile);
+          logOutput("\n  Unfixable read removed: " + readName.substr(1, readName.find(" ")), logFile);
         }
 
         for (int i = 0; i < 3; i++) {
@@ -195,14 +195,14 @@ long int rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
     std::stringstream percentStream;
     percentStream << std::fixed << std::setprecision(2)
                   << (float(numUnfix) * 100) / float(numUnfix + numReads);
-    logOutput("Removal of unfixable reads finished", logFile);
+    logOutput("\nRemoval of unfixable reads finished\n", logFile);
     logOutput("\n  SUMMARY", logFile);
-    logOutput("    " + std::to_string(numUnfix) + " reads removed (" +
+    logOutput("\n    " + std::to_string(numUnfix) + " reads removed (" +
               percentStream.str() + " %)", logFile);
     percentStream.str("");
     percentStream << std::fixed << std::setprecision(2)
                   << (float(numReads) * 100) / float(numUnfix + numReads);
-    logOutput("    " + std::to_string(numReads - numUnfix) + " reads retained (" +
+    logOutput("\n    " + std::to_string(numReads - numUnfix) + " reads retained (" +
               percentStream.str() + " %)", logFile);
   }
   return numUnfix;
@@ -292,7 +292,7 @@ long int rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
 
         if (dispOutput) {
           readName = std::string(nlPosPrev + 1, nlPos);
-          logOutput("  Unfixable read removed: " + readName.substr(1, readName.find(" ")), logFile);
+          logOutput("\n  Unfixable read removed: " + readName.substr(1, readName.find(" ")), logFile);
         }
 
         for (int i = 0; i < 3; i++) {
@@ -333,14 +333,14 @@ long int rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
     std::stringstream percentStream;
     percentStream << std::fixed << std::setprecision(2)
                   << (float(numUnfix) * 100) / float(numUnfix + numReads);
-    logOutput("Removal of unfixable reads finished", logFile);
+    logOutput("\nRemoval of unfixable reads finished", logFile);
     logOutput("\n  SUMMARY", logFile);
-    logOutput("    " + std::to_string(numUnfix) + " reads removed (" +
+    logOutput("\n    " + std::to_string(numUnfix) + " reads removed (" +
               percentStream.str() + " %)", logFile);
     percentStream.str("");
     percentStream << std::fixed << std::setprecision(2)
                   << (float(numReads) * 100) / float(numUnfix + numReads);
-    logOutput("    " + std::to_string(numReads - numUnfix) + " reads retained (" +
+    logOutput("\n    " + std::to_string(numReads - numUnfix) + " reads retained (" +
               percentStream.str() + " %)", logFile);
   }
   return numUnfix;
