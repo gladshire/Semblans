@@ -8,12 +8,12 @@ void preSummary(const std::vector<SRA> sras,
                 std::string logFilePath, std::string threads, std::string ram_gb,
                 bool retainInterFiles, bool compressFiles) {
   logOutput("\nSemblans Preprocess started with following parameters:\n", logFilePath);
-  logOutput("\n  Config file:     " +
+  logOutput("  Config file:     " +
             std::string(fs::path(logFilePath.c_str()).filename().c_str()) + "\n",
             logFilePath);
-  logOutput("\n  Threads (Cores): " + threads + "\n", logFilePath);
-  logOutput("\n  Memory (GB):     " + ram_gb + "\n", logFilePath);
-  logOutput("\n  SRA runs:\n\n", logFilePath); 
+  logOutput("  Threads (Cores): " + threads + "\n", logFilePath);
+  logOutput("  Memory (GB):     " + ram_gb + "\n", logFilePath);
+  logOutput("  SRA runs:\n", logFilePath); 
   summarize_all_sras(sras, logFilePath, 6);
     
   std::string retainStr;
@@ -48,7 +48,7 @@ void retrieveSraData(std::vector<SRA> & sras, std::string threads,
     // Check for checkpoint file
     if (sra.checkpointExists("sra")) {
       logOutput("\n  Prefetch checkpoint found for: " +
-                sra.get_accession() + "\n", logFilePath);
+                sra.get_accession(), logFilePath);
       continue;
     }
     else {
