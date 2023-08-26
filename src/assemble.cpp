@@ -47,7 +47,8 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
   }
   
   uintmax_t ram_b = (uintmax_t)stoi(ram_gb) * 1000000000;
-  std::pair<std::string, std::string> currSraIn;
+  std::pair<std::string, std::string> currSraOrig;
+  std::pair<std::string, std::string> currSraUmap;
   std::vector<std::pair<std::string, std::string>> sraRunsIn;
   std::string outDir;
   std::string fastaQuant;
@@ -103,47 +104,49 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
       logOutput("\n    Extracting reads from:\n", logFile);
       summarize_sing_sra(sra, logFile, 4);
       outDir = sra.get_sra_path_orep_filt().first.parent_path().c_str();
-      if (i == 0) {
-        currSraIn.first = sra.get_sra_path_orep_filt().first.c_str();
-        currSraIn.second = sra.get_sra_path_orep_filt().second.c_str();
 
-        // Obtain read input files, based on pipeline preferences
-        if (!ini_get_bool(cfgPipeline.at("remove_overrepresented").c_str(), 0)) {
-          if (!ini_get_bool(cfgPipeline.at("filter_foreign_reads").c_str(), 0)) {
-            if (!ini_get_bool(cfgPipeline.at("trim_adapter_seqs").c_str(), 0)) {
-              if (!ini_get_bool(cfgPipeline.at("error_correction").c_str(), 0)) {
-                currSraIn.first = sra.get_sra_path_raw().first.c_str();
-                currSraIn.second = sra.get_sra_path_raw().second.c_str();
-                outDir = sra.get_sra_path_raw().first.parent_path().c_str();
-              }
-              else {
-                currSraIn.first = sra.get_sra_path_corr_fix().first.c_str();
-                currSraIn.second = sra.get_sra_path_corr_fix().second.c_str();
-                outDir = sra.get_sra_path_corr_fix().first.parent_path().c_str();
-              }
+      currSraOrig.first = sra.get_sra_path_orep_filt().first.c_str();
+      currSraOrig.second = sra.get_sra_path_orep_filt().second.c_str();
+
+      // Obtain read input files, based on pipeline preferences
+      if (!ini_get_bool(cfgPipeline.at("remove_overrepresented").c_str(), 0)) {
+        if (!ini_get_bool(cfgPipeline.at("filter_foreign_reads").c_str(), 0)) {
+          if (!ini_get_bool(cfgPipeline.at("trim_adapter_seqs").c_str(), 0)) {
+            if (!ini_get_bool(cfgPipeline.at("error_correction").c_str(), 0)) {
+              currSraOrig.first = sra.get_sra_path_raw().first.c_str();
+              currSraOrig.second = sra.get_sra_path_raw().second.c_str();
+              outDir = sra.get_sra_path_raw().first.parent_path().c_str();
             }
             else {
-              currSraIn.first = sra.get_sra_path_trim_p().first.c_str();
-              currSraIn.second = sra.get_sra_path_trim_p().second.c_str();
-              outDir = sra.get_sra_path_trim_p().first.parent_path().c_str();
+              currSraOrig.first = sra.get_sra_path_corr_fix().first.c_str();
+              currSraOrig.second = sra.get_sra_path_corr_fix().second.c_str();
+              outDir = sra.get_sra_path_corr_fix().first.parent_path().c_str();
             }
           }
           else {
-            currSraIn.first = sra.get_sra_path_for_filt().first.c_str();
-            currSraIn.second = sra.get_sra_path_for_filt().second.c_str();
-            outDir = sra.get_sra_path_for_filt().first.parent_path().c_str();
+            currSraOrig.first = sra.get_sra_path_trim_p().first.c_str();
+            currSraOrig.second = sra.get_sra_path_trim_p().second.c_str();
+            outDir = sra.get_sra_path_trim_p().first.parent_path().c_str();
           }
         }
-        filePrefix1 = sra.get_file_prefix().first;
-        filePrefix2 = sra.get_file_prefix().second;
+        else {
+          currSraOrig.first = sra.get_sra_path_for_filt().first.c_str();
+          currSraOrig.second = sra.get_sra_path_for_filt().second.c_str();
+          outDir = sra.get_sra_path_for_filt().first.parent_path().c_str();
+        }
+      }
+      filePrefix1 = sra.get_file_prefix().first;
+      filePrefix2 = sra.get_file_prefix().second;
         
-      }
-      else {
-        currSraIn.first = outDir + "/" + sra.get_file_prefix().first + ".unmapped.fq";
-        currSraIn.second = outDir + "/" + sra.get_file_prefix().second + ".unmapped.fq";
-      }
-
-      sraRunsIn.push_back(currSraIn);
+      currSraUmap.first = outDir + "/" + sra.get_file_prefix().first + ".unmapped.fq";
+      currSraUmap.second = outDir + "/" + sra.get_file_prefix().second + ".unmapped.fq";
+      
+      //if (i == 0) {
+      sraRunsIn.push_back(currSraOrig);
+      //}
+      //else {
+      //  sraRunsIn.push_back(currSraUmap);
+      //}
       
       if (!sra.is_paired()) {
         fastaQuant = std::string(dummyTrans.get_trans_path_trinity().parent_path().c_str()) + "/" +
@@ -175,12 +178,13 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
         sra.makeCheckpoint(currSeqFilePrefix + ".qt.iso");
       }
 
-      numBytesReads1 = fs::file_size(currSraIn.first.c_str());
+      numBytesReads1 = fs::file_size(sraRunsIn[0].first.c_str());
       lenReadsHash1 = numBytesReads1 / 160;
       
       procRunning = true;
       std::thread constructHash(progressAnim, "      Creating hash table from forward-ended reads ", logFile);
-      seqHash readHashTable1(lenReadsHash1, fs::path(currSraIn.first.c_str()), ram_b);
+      seqHash readHashTable1(lenReadsHash1, fs::path(sraRunsIn[0].first.c_str()), ram_b);
+      seqHash prevHashTable1(lenReadsHash1, fs::path(currSraUmap.first.c_str()), ram_b);
       procRunning = false;
       constructHash.join();
       
@@ -204,7 +208,14 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
           currQual = currSeq.get_quality();
     
           readHashTable1.deleteHash(currHead);
-          unmappedHash1.insertHash(currHead, currSeqData, currQual);
+          if (i == 0) {
+            unmappedHash1.insertHash(currHead, currSeqData, currQual);
+          }
+          else {
+            if (prevHashTable1.inHashTable(currHead)) {
+              unmappedHash1.insertHash(currHead, currSeqData, currQual);
+            }
+          }
         }
        
         if (numUnmapped % 500000 == 0) {
@@ -230,12 +241,13 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
 
       if (sra.is_paired()) {
         logOutput("\n", logFile);
-        numBytesReads2 = fs::file_size(currSraIn.second.c_str());
+        numBytesReads2 = fs::file_size(sraRunsIn[0].second.c_str());
         lenReadsHash2 = numBytesReads2 / 160;
         
         procRunning = true;
         std::thread constructHash(progressAnim, "      Creating hash table from reverse-ended reads ", logFile);
-        seqHash readHashTable2(lenReadsHash2, fs::path(currSraIn.second.c_str()), ram_b);
+        seqHash readHashTable2(lenReadsHash2, fs::path(sraRunsIn[0].second.c_str()), ram_b);
+        seqHash prevHashTable2(lenReadsHash2, fs::path(currSraUmap.second.c_str()), ram_b);
         procRunning = false;
         constructHash.join();
      
@@ -258,7 +270,14 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
             currQual = currSeq.get_quality();
 
             readHashTable2.deleteHash(currHead);
-            unmappedHash2.insertHash(currHead, currSeqData, currQual);
+            if (i == 0) {
+              unmappedHash2.insertHash(currHead, currSeqData, currQual);
+            }
+            else {
+              if (prevHashTable2.inHashTable(currHead)) {
+                unmappedHash2.insertHash(currHead, currSeqData, currQual);
+              }
+            }
           }
 
           if (numUnmapped % 500000 == 0) {
