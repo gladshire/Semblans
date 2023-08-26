@@ -1,6 +1,6 @@
-// TODO: BUTTON UP READ ISOLATION/ASSEMBLY ALGORITHM
-//       SHOULD ASSEMBLE ALL MAPPED, THEN ONE FINAL
-//       UNMAPPED
+// TODO: FIX READ ISOLATION ALGORITHM
+//       SHOULD QUANTIFY AGAINST ORIGINAL READS
+//       BUT PRODUCE SINGLE, UNMAPPED FILES
 
 #include "assemble.h"
 
@@ -186,7 +186,7 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
       
       seqHash unmappedHash1(lenReadsHash1);
 
-      logOutput("\n      Now splitting reads into mapped and unmapped\n", logFile);
+      logOutput("      Now splitting reads into mapped and unmapped\n", logFile);
       unmappedReadFile.open(fastaQuant + "/aux_info/unmapped_names.txt");
 
       // Iterate through headers in unmapped reads file
@@ -241,7 +241,7 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
      
         seqHash unmappedHash2(lenReadsHash2);
 
-        logOutput("\n      Now splitting reads into mapped and unmapped\n", logFile);
+        logOutput("      Now splitting reads into mapped and unmapped\n", logFile);
         unmappedReadFile.open(fastaQuant + "/aux_info/unmapped_names.txt");
         // Iterate through headers in unmapped reads file
         // Fill hash tables accordingly
