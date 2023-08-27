@@ -385,7 +385,9 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
   fs::path trinDir;
   std::string transInfoFileStr;
   std::vector<std::string> seqsInterest;
-  
+  std::string currFilePrefix1;
+  std::string currFilePrefix2;
+ 
   const char * home = std::getenv("HOME");
   std::string currSeqFilePath;
   for (auto seqFilePath : cfgSeqsInt) {
@@ -397,7 +399,151 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
   }
   uintmax_t ram_b = (uintmax_t)stoi(ram_gb) * 1000000000;
   std::string currSeqFilePrefix;
-  for (auto seqFilePath : seqsInterest) {
+  for (auto sraGroup : sraGroups) {
+    cpDir = sraGroup.second[0].get_fastqc_dir_2().first.parent_path().parent_path().parent_path() / ".checkpoints";
+    trinDir = transcript(sraGroup.second[0]).get_trans_path_trinity().parent_path();
+    outDir = std::string(trinDir.c_str());
+
+    currTrinOutNon = outDir + "/" + sraGroup.first + ".unmapped.Trinity.fasta";
+    currTrinOutAll = outDir + "/" + sraGroup.first + ".Trinity.fasta";
+
+    for (auto sra : sraGroup.second) {
+      currFilePrefix1 = sra.get_sra_path_orep_filt().first.filename().stem().stem().stem().c_str();
+      currFilePrefix2 = sra.get_sra_path_orep_filt().second.filename().stem().stem().stem().c_str();
+      currTrinIn.first = sra.get_sra_path_orep_filt().first.c_str();
+      currTrinIn.second = sra.get_sra_path_orep_filt().second.c_str();
+      if (assembAllSeqs) {
+        if (!ini_get_bool(cfgPipeline.at("remove_overrepresented").c_str(), 0)) {
+          if (!ini_get_bool(cfgPipeline.at("filter_foreign_reads").c_str(), 0)) {
+            if (!ini_get_bool(cfgPipeline.at("trim_adapter_seqs").c_str(), 0)) {
+              if (!ini_get_bool(cfgPipeline.at("error_correction").c_str(), 0)) {
+                currTrinIn.first = sra.get_sra_path_raw().first.c_str();
+                currTrinIn.second = sra.get_sra_path_raw().second.c_str();
+              }
+              else {
+                currTrinIn.first = sra.get_sra_path_corr_fix().first.c_str();
+                currTrinIn.second = sra.get_sra_path_corr_fix().second.c_str();
+              }  
+            }
+            else {
+              currTrinIn.first = sra.get_sra_path_trim_p().first.c_str();
+              currTrinIn.second = sra.get_sra_path_trim_p().second.c_str();
+            }
+          }
+          else {
+            currTrinIn.first = sra.get_sra_path_for_filt().first.c_str();
+            currTrinIn.second = sra.get_sra_path_for_filt().second.c_str();
+          }
+        }
+        sraRunsInTrin.push_back(currTrinIn);
+        outDir = fs::path(currTrinIn.first).parent_path().c_str();
+      }
+      inDir = sra.get_sra_path_orep_filt().first.parent_path().c_str();
+      if (assembSeqsNoInterest) {
+        currTrinIn.first = inDir + "/" + currFilePrefix1 + ".unmapped.fq";
+        if (sra.is_paired()) {
+          currTrinIn.second = inDir + "/" + currFilePrefix2 + ".unmapped.fq";
+        }
+        sraRunsNoInterest.push_back(currTrinIn);
+      }
+
+      for (auto seqFilePath : seqsInterest) {
+        currSeqFilePrefix = std::string(fs::path(seqFilePath.c_str()).stem().c_str());
+        currTrinOutInt = outDir + "/" + sraGroup.first + "." + currSeqFilePrefix + ".mapped.Trinity.fasta";
+
+        // Check whether assembly group checkpoint exists
+        if (groupCheckpointExists(std::string(cpDir.c_str()), sraGroup.first)) {
+          logOutput("Assembly found for: " + sraGroup.first, logFile);
+          logOutput("  Containing:", logFile);
+          summarize_all_sras(sraGroup.second, logFile, 4);
+          continue;
+        }
+
+        if (assembSeqsInterest) {
+          currTrinIn.first = inDir + "/" + currFilePrefix1 + "." + currSeqFilePrefix + ".mapped.fq";
+          if (sra.is_paired()) {
+            currTrinIn.second = inDir + "/" + currFilePrefix2 + "." + currSeqFilePrefix + ".mapped.fq";
+          }
+          sraRunsInterest.push_back(currTrinIn);
+        }
+
+      
+        // Perform assembly for reads of interest (those that map to provided FASTA)
+        if (assembSeqsInterest) {
+          logOutput("  Now assembling reads that map to: \"" + seqFilePath + "\"\n", logFile);
+          if (!groupCheckpointExists(std::string(cpDir.c_str()), sraGroup.first + "." +
+                                     currSeqFilePrefix + ".mapped")) {
+            if (sraRunsInterest.size() > 1) {
+              run_trinity_comb(sraRunsInterest, currTrinOutInt, threads, ram_gb, dispOutput, logFile);
+            }
+            else {
+              run_trinity(sraRunsInterest.at(0), currTrinOutInt, threads, ram_gb, dispOutput, logFile);
+            }
+            // Make file for mapped assembly containing associated SRAs
+            transInfoFileStr = std::string(fs::path(currTrinOutInt.c_str()).replace_extension(".ti").c_str());
+            makeTransInfoFile(sraRunsInterest, transInfoFileStr);
+  
+            makeGroupCheckpoint(std::string(cpDir.c_str()), sraGroup.first + "." +
+                                currSeqFilePrefix + ".mapped");
+
+            updateHeaders(currTrinOutInt, sraGroup.first + "_" + currSeqFilePrefix + "_mapped", ram_b);
+          }
+          else {
+            logOutput("    Mapped assembly checkpoint found for: " + sraGroup.first + "\n\n", logFile);
+          }
+          sraRunsInterest.clear();
+        }
+      }
+    }
+
+
+
+    // Perform assembly for reads of no interest (those that DO NOT map to provided FASTA)
+    if (assembSeqsNoInterest) {
+      logOutput("  Now assembling reads that do not map to sequences of interest\n", logFile);
+      if (!groupCheckpointExists(std::string(cpDir.c_str()), sraGroup.first + ".unmapped")) {
+        if (sraRunsNoInterest.size() > 1) {
+          run_trinity_comb(sraRunsNoInterest, currTrinOutNon, threads, ram_gb, dispOutput, logFile);
+        }
+        else {
+          run_trinity(sraRunsNoInterest.at(0), currTrinOutNon, threads, ram_gb, dispOutput, logFile);
+        }
+        // Make file for unmapped assembly containing associated SRAs
+        transInfoFileStr = std::string(fs::path(currTrinOutNon.c_str()).replace_extension(".ti").c_str());
+        makeTransInfoFile(sraRunsNoInterest, transInfoFileStr);
+
+        makeGroupCheckpoint(std::string(cpDir.c_str()), sraGroup.first + ".unmapped");
+        updateHeaders(currTrinOutNon, sraGroup.first + "_" + currSeqFilePrefix + "_unmapped", ram_b);
+      }
+      else {
+        logOutput("    Unmapped assembly checkpoint found for:\n " + sraGroup.first, logFile);
+      }
+      sraRunsNoInterest.clear();
+    }
+    // Perform assembly for all reads
+    if (assembAllSeqs) {
+      logOutput("  Now assembling all reads", logFile);
+      if (!groupCheckpointExists(std::string(cpDir.c_str()), sraGroup.first)) {
+        if (sraRunsInTrin.size() > 1) {
+          run_trinity_comb(sraRunsInTrin, currTrinOutAll, threads, ram_gb, dispOutput, logFile);
+        }
+        else {
+          run_trinity(sraRunsInTrin.at(0), currTrinOutAll, threads, ram_gb, dispOutput, logFile);
+        }
+        // Make file for entire assembly containing associated SRAs
+        transInfoFileStr = std::string(fs::path(currTrinOutAll.c_str()).replace_extension(".ti").c_str());
+        makeTransInfoFile(sraRunsInTrin, transInfoFileStr);
+
+        makeGroupCheckpoint(std::string(cpDir.c_str()), sraGroup.first);
+        updateHeaders(currTrinOutAll, sraGroup.first, ram_b);
+      }
+      else {
+        logOutput("    Global assembly checkpoint found for:\n " + sraGroup.first, logFile);
+      }
+      sraRunsInTrin.clear();
+    }
+  }
+  /*for (auto seqFilePath : seqsInterest) {
     currSeqFilePrefix = std::string(fs::path(seqFilePath.c_str()).stem().c_str());
     for (auto sraGroup : sraGroups) {
       SRA dummySra = sraGroup.second.at(0);
@@ -542,7 +688,7 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
       // Make assembly group checkpoint
       makeGroupCheckpoint(std::string(cpDir.c_str()), sraGroup.first);
     }
-  }
+  }*/
 }
 
 
