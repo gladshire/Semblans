@@ -300,6 +300,9 @@ bool remUnfixBulk(std::vector<SRA> & sras, std::string threads, std::string ram_
     if (readsRemoved == -1) {
       return false;
     }
+
+    sra.set_num_reads(sra.get_num_reads() - readsRemoved);
+
     // Make checkpoint file
     sra.makeCheckpoint("corr.fix");
 

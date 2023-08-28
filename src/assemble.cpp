@@ -1,12 +1,8 @@
-// TODO: FIX READ ISOLATION ALGORITHM
-//       SHOULD QUANTIFY AGAINST ORIGINAL READS
-//       BUT PRODUCE SINGLE, UNMAPPED FILES
-
 #include "assemble.h"
 
 std::atomic<bool> procRunning(false);
 
-// Update Trinity output transcript headers
+// Update Trinity output transcript headers according to a given prefix string
 void updateHeaders(std::string fastaFilePath, std::string newPrefix,
                    uintmax_t ram_b) {
   uintmax_t numBytesFasta = fs::file_size(fastaFilePath.c_str());
@@ -41,6 +37,8 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
   std::ifstream unmappedReadFile;
   std::string fastaIndex;
   transcript dummyTrans;
+
+  // Create string vector of user-defined FASTA files containing sequences to extract
   std::vector<std::string> seqsInterest;
   for (auto seqFilePath : cfgSeqsInt) {
     seqsInterest.push_back(seqFilePath.first);
@@ -54,7 +52,6 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
   std::string fastaQuant;
   std::string filePrefix1;
   std::string filePrefix2;
-
 
   uintmax_t numBytesReads1;
   uintmax_t lenReadsHash1;
@@ -93,9 +90,11 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
       }
       dummyTrans.makeCheckpoint(currSeqFilePrefix + ".idx.iso");
     }
-   
+  
+    uintmax_t numReads; 
     uintmax_t numUnmapped;
     int numHalfMil;
+    // Iterate through SRA runs, quantifying each against the salmon index we just created
     for (auto sra : sras) {
       if (sra.checkpointExists(currSeqFilePrefix + ".iso")) {
         logOutput("    Read isolation checkpoint found for: " + sra.get_accession() + "\n", logFile);
@@ -141,13 +140,9 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
       currSraUmap.first = outDir + "/" + sra.get_file_prefix().first + ".unmapped.fq";
       currSraUmap.second = outDir + "/" + sra.get_file_prefix().second + ".unmapped.fq";
       
-      //if (i == 0) {
       sraRunsIn.push_back(currSraOrig);
-      //}
-      //else {
-      //  sraRunsIn.push_back(currSraUmap);
-      //}
-      
+
+      // Define name of salmon quantification output file      
       if (!sra.is_paired()) {
         fastaQuant = std::string(dummyTrans.get_trans_path_trinity().parent_path().c_str()) + "/" +
                      std::string(fs::path(currSeqFilePrefix.c_str()).stem().c_str()) + "_" + 
@@ -160,6 +155,8 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
                      "quant";
       }
 
+      // Determine whether checkpoint exists for salmon quant of current reads against current index.
+      // If not, perform a quant run
       if (!sra.checkpointExists(currSeqFilePrefix + ".qt.iso")) {
         if (!dispOutput) {
           procRunning = true;
@@ -178,6 +175,14 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
         sra.makeCheckpoint(currSeqFilePrefix + ".qt.iso");
       }
 
+      // The salmon quant run has produced a text file 'unmapped_names.txt', which lists all the reads in
+      // the SRA run that did NOT map to the index.
+      
+      // Create sequence hash tables for rapid accession of each read by name
+      // Then iterate through all unmapped reads listed in 'unmapped_names.txt', and maintain two sequence hash tables:
+      
+      //   Unmapped hash table - will contain all reads that did not map to the salmon index (updated after each index)
+      //     Mapped hash table - will contain all reads that mapped to the salmon index
       numBytesReads1 = fs::file_size(sraRunsIn[0].first.c_str());
       lenReadsHash1 = numBytesReads1 / 160;
       
@@ -195,12 +200,13 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
 
       // Iterate through headers in unmapped reads file
       // Fill hash tables accordingly
+      numReads = sra.get_num_reads();
       numUnmapped = 0;
       numHalfMil = 0;
       while (getline(unmappedReadFile, currLine)) {
         numUnmapped++;
         currHead = currLine.substr(0, currLine.find(" "));
-   
+  
         if (readHashTable1.inHashTable(currHead)) {
           currSeq = readHashTable1.getSeq(currHead);
           currHead = currSeq.get_header();
@@ -208,6 +214,11 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
           currQual = currSeq.get_quality();
     
           readHashTable1.deleteHash(currHead);
+          // If a previous iteration of read extraction has already been performed, only add the unmapped
+          // read if it has been identified as unmapped in the prior steps.
+
+          // This enables iterative removal, resulting in a final unmapped reads file, containing none of the
+          // user-defined FASTA sequences
           if (i == 0) {
             unmappedHash1.insertHash(currHead, currSeqData, currQual);
           }
@@ -218,6 +229,7 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
           }
         }
        
+        // Print number of unmapped reads identified every half million
         if (numUnmapped % 500000 == 0) {
           numHalfMil++;
           logOutput("\r        Unmapped read count: " + std::to_string(numHalfMil * 500000) +
@@ -229,6 +241,8 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
       // and unmapped reads respectively
       logOutput("\r        Unmapped read count: " + std::to_string(numUnmapped) +
                 "      \n", logFile);
+      logOutput("        Mapped read count: " + std::to_string(numReads - numUnmapped) +
+                "\n", logFile);
 
       procRunning = true;
       std::thread dumpHash(progressAnim, "      Dumping split reads to mapped and unmapped files ", logFile);
@@ -239,6 +253,7 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
       
       unmappedReadFile.close();
 
+      // If SRA run is paired, perform the same steps as above for the reverse-ended FASTQ file
       if (sra.is_paired()) {
         logOutput("\n", logFile);
         numBytesReads2 = fs::file_size(sraRunsIn[0].second.c_str());
@@ -280,6 +295,7 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
             }
           }
 
+          // Print number of unmapped reads identified every half million
           if (numUnmapped % 500000 == 0) {
             numHalfMil++;
             logOutput("\r        Unmapped read count: " + std::to_string(numHalfMil * 500000) +
@@ -287,8 +303,12 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
                       logFile);
           }
         }
+        // Dump filled sequence hash tables to new files, containing the mapped
+        // and unmapped reads respectively
         logOutput("\r        Unmapped read count: " + std::to_string(numUnmapped) +
                   "      \n", logFile);
+        logOutput("        Mapped read count: " + std::to_string(numReads - numUnmapped) +
+                  "\n", logFile);
 
         procRunning = true;
         std::thread dumpHash(progressAnim, "      Dumping split reads to mapped and unmapped files ", logFile);
@@ -388,6 +408,7 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
   std::string currFilePrefix1;
   std::string currFilePrefix2;
  
+  // Obtain a string vector containing paths to user-defined FASTA sequences for read extraction
   const char * home = std::getenv("HOME");
   std::string currSeqFilePath;
   for (auto seqFilePath : cfgSeqsInt) {
@@ -496,8 +517,6 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
       }
     }
 
-
-
     // Perform assembly for reads of no interest (those that DO NOT map to provided FASTA)
     if (assembSeqsNoInterest) {
       logOutput("  Now assembling reads that do not map to sequences of interest\n", logFile);
@@ -543,152 +562,6 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
       sraRunsInTrin.clear();
     }
   }
-  /*for (auto seqFilePath : seqsInterest) {
-    currSeqFilePrefix = std::string(fs::path(seqFilePath.c_str()).stem().c_str());
-    for (auto sraGroup : sraGroups) {
-      SRA dummySra = sraGroup.second.at(0);
-      cpDir = dummySra.get_fastqc_dir_2().first.parent_path().parent_path().parent_path() / ".checkpoints";
-
-      // Check whether checkpoint exists
-      if (groupCheckpointExists(std::string(cpDir.c_str()), sraGroup.first)) {
-        logOutput("Assembly found for: " + sraGroup.first, logFile);
-        logOutput("  Containing:", logFile);
-        summarize_all_sras(sraGroup.second, logFile, 4);
-        continue;
-      }
-
-      transcript dummyTrans(dummySra);
-      fs::path pathTrinDir = dummyTrans.get_trans_path_trinity().parent_path();
-    
-      outDir = std::string(pathTrinDir.c_str());
-      currTrinOutAll = outDir + "/" + sraGroup.first + ".Trinity.fasta";
-      currTrinOutInt = outDir + "/" + sraGroup.first + "." + currSeqFilePrefix + ".mapped.Trinity.fasta";
-      currTrinOutNon = outDir + "/" + sraGroup.first + ".unmapped.Trinity.fasta";
-  
-      std::string currFilePrefix1;
-      std::string currFilePrefix2;
-      for (auto sra : sraGroup.second) {
-        currFilePrefix1 = sra.get_sra_path_orep_filt().first.filename().stem().stem().stem().c_str();
-        currFilePrefix2 = sra.get_sra_path_orep_filt().second.filename().stem().stem().stem().c_str();
-        currTrinIn.first = sra.get_sra_path_orep_filt().first.c_str();
-        currTrinIn.second = sra.get_sra_path_orep_filt().second.c_str();
-        if (assembAllSeqs) {
-          if (!ini_get_bool(cfgPipeline.at("remove_overrepresented").c_str(), 0)) {
-            if (!ini_get_bool(cfgPipeline.at("filter_foreign_reads").c_str(), 0)) {
-              if (!ini_get_bool(cfgPipeline.at("trim_adapter_seqs").c_str(), 0)) {
-                if (!ini_get_bool(cfgPipeline.at("error_correction").c_str(), 0)) {
-                  currTrinIn.first = sra.get_sra_path_raw().first.c_str();
-                  currTrinIn.second = sra.get_sra_path_raw().second.c_str();
-                }
-                else {
-                  currTrinIn.first = sra.get_sra_path_corr_fix().first.c_str();
-                  currTrinIn.second = sra.get_sra_path_corr_fix().second.c_str();
-                }  
-              }
-              else {
-                currTrinIn.first = sra.get_sra_path_trim_p().first.c_str();
-                currTrinIn.second = sra.get_sra_path_trim_p().second.c_str();
-              }
-            }
-            else {
-              currTrinIn.first = sra.get_sra_path_for_filt().first.c_str();
-              currTrinIn.second = sra.get_sra_path_for_filt().second.c_str();
-            }
-          }
-          sraRunsInTrin.push_back(currTrinIn);
-          outDir = fs::path(currTrinIn.first).parent_path().c_str();
-        }
-        inDir = sra.get_sra_path_orep_filt().first.parent_path().c_str();
-        if (assembSeqsInterest) {
-          currTrinIn.first = inDir + "/" + currFilePrefix1 + "." + currSeqFilePrefix + ".mapped.fq";
-          if (sra.is_paired()) {
-            currTrinIn.second = inDir + "/" + currFilePrefix2 + "." + currSeqFilePrefix + ".mapped.fq";
-          }
-          sraRunsInterest.push_back(currTrinIn);
-        }
-        if (assembSeqsNoInterest) {
-          currTrinIn.first = inDir + "/" + currFilePrefix1 + ".unmapped.fq";
-          if (sra.is_paired()) {
-            currTrinIn.second = inDir + "/" + currFilePrefix2 + ".unmapped.fq";
-          }
-          sraRunsNoInterest.push_back(currTrinIn);
-        }
-      }
-
-      // Perform assembly for reads of interest (those that map to provided FASTA)
-      if (assembSeqsInterest) {
-        logOutput("  Now assembling reads that map to: \"" + seqFilePath + "\"\n", logFile);
-        if (!groupCheckpointExists(std::string(cpDir.c_str()), sraGroup.first + "." +
-                                   currSeqFilePrefix + ".mapped")) {
-          if (sraRunsInterest.size() > 1) {
-            run_trinity_comb(sraRunsInterest, currTrinOutInt, threads, ram_gb, dispOutput, logFile);
-          }
-          else {
-            run_trinity(sraRunsInterest.at(0), currTrinOutInt, threads, ram_gb, dispOutput, logFile);
-         }
-          // Make file for mapped assembly containing associated SRAs
-          transInfoFileStr = std::string(fs::path(currTrinOutInt.c_str()).replace_extension(".ti").c_str());
-          makeTransInfoFile(sraRunsInterest, transInfoFileStr);
-  
-          makeGroupCheckpoint(std::string(cpDir.c_str()), sraGroup.first + "." +
-                              currSeqFilePrefix + ".mapped");
-
-          updateHeaders(currTrinOutInt, sraGroup.first + "_" + currSeqFilePrefix + "_mapped", ram_b);
-        }
-        else {
-          logOutput("    Mapped assembly checkpoint found for: " + sraGroup.first + "\n\n", logFile);
-        }
-        sraRunsInterest.clear();
-      }
-      // Perform assembly for reads of no interest (those that DO NOT map to provided FASTA)
-      if (assembSeqsNoInterest) {
-        logOutput("  Now assembling reads that do not map to: \"" + seqFilePath + "\"\n", logFile);
-        if (!groupCheckpointExists(std::string(cpDir.c_str()), sraGroup.first + ".unmapped")) {
-          if (sraRunsNoInterest.size() > 1) {
-            run_trinity_comb(sraRunsNoInterest, currTrinOutNon, threads, ram_gb, dispOutput, logFile);
-          }
-          else {
-            run_trinity(sraRunsNoInterest.at(0), currTrinOutNon, threads, ram_gb, dispOutput, logFile);
-          }
-          // Make file for unmapped assembly containing associated SRAs
-          transInfoFileStr = std::string(fs::path(currTrinOutNon.c_str()).replace_extension(".ti").c_str());
-          makeTransInfoFile(sraRunsNoInterest, transInfoFileStr);
-
-          makeGroupCheckpoint(std::string(cpDir.c_str()), sraGroup.first + ".unmapped");
-          updateHeaders(currTrinOutNon, sraGroup.first + "_" + currSeqFilePrefix + "_unmapped", ram_b);
-        }
-        else {
-          logOutput("    Unmapped assembly checkpoint found for:\n " + sraGroup.first, logFile);
-        }
-        sraRunsNoInterest.clear();
-      }
-      // Perform assembly for all reads
-      if (assembAllSeqs) {
-        logOutput("  Now assembling all reads", logFile);
-        if (!groupCheckpointExists(std::string(cpDir.c_str()), sraGroup.first)) {
-          if (sraRunsInTrin.size() > 1) {
-            run_trinity_comb(sraRunsInTrin, currTrinOutAll, threads, ram_gb, dispOutput, logFile);
-          }
-          else {
-            run_trinity(sraRunsInTrin.at(0), currTrinOutAll, threads, ram_gb, dispOutput, logFile);
-          }
-          // Make file for entire assembly containing associated SRAs
-          transInfoFileStr = std::string(fs::path(currTrinOutAll.c_str()).replace_extension(".ti").c_str());
-          makeTransInfoFile(sraRunsInTrin, transInfoFileStr);
-
-          makeGroupCheckpoint(std::string(cpDir.c_str()), sraGroup.first);
-          updateHeaders(currTrinOutAll, sraGroup.first, ram_b);
-        }
-        else {
-          logOutput("    Global assembly checkpoint found for:\n " + sraGroup.first, logFile);
-        }
-        sraRunsInTrin.clear();
-      }
-
-      // Make assembly group checkpoint
-      makeGroupCheckpoint(std::string(cpDir.c_str()), sraGroup.first);
-    }
-  }*/
 }
 
 
