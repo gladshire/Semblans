@@ -270,6 +270,7 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
 
         logOutput("      Now splitting reads into mapped and unmapped\n", logFile);
         unmappedReadFile.open(fastaQuant + "/aux_info/unmapped_names.txt");
+
         // Iterate through headers in unmapped reads file
         // Fill hash tables accordingly
         numUnmapped = 0;
@@ -389,6 +390,8 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
                       bool dispOutput, bool retainInterFiles,
                       std::string logFile, const INI_MAP & cfgIni) {
   logOutput("\nStarting de-novo assembly\n", logFile);
+
+  // Obtain sections from the config file as map objects
   INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
   INI_MAP_ENTRY cfgSeqsInt = cfgIni.at("Sequences of interest");
   INI_MAP_ENTRY assembGroups = cfgIni.at("Assembly groups");
@@ -420,7 +423,11 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
   }
   uintmax_t ram_b = (uintmax_t)stoi(ram_gb) * 1000000000;
   std::string currSeqFilePrefix;
+
+  // Iterate over assembly groups obtained from the "Assembly Groups" section of the config file, which define
+  // the SRA runs which should be assembled together, and pass their FASTQ read files into Trinity
   for (auto sraGroup : sraGroups) {
+    // Define paths for checkpoint and trinity output directories
     cpDir = sraGroup.second[0].get_fastqc_dir_2().first.parent_path().parent_path().parent_path() / ".checkpoints";
     trinDir = transcript(sraGroup.second[0]).get_trans_path_trinity().parent_path();
     outDir = std::string(trinDir.c_str());
@@ -428,42 +435,47 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
     currTrinOutNon = outDir + "/" + sraGroup.first + ".unmapped.Trinity.fasta";
     currTrinOutAll = outDir + "/" + sraGroup.first + ".Trinity.fasta";
 
+    // Iterate over all SRA runs in current assembly group, preparing vectors containing input files for them,
+    // as well as their mapped and unmapped read files generated during read isolation/extraction
     for (auto sra : sraGroup.second) {
-      currFilePrefix1 = sra.get_sra_path_orep_filt().first.filename().stem().stem().stem().c_str();
-      currFilePrefix2 = sra.get_sra_path_orep_filt().second.filename().stem().stem().stem().c_str();
+      //currFilePrefix1 = sra.get_sra_path_orep_filt().first.filename().stem().stem().stem().c_str();
+      //currFilePrefix2 = sra.get_sra_path_orep_filt().second.filename().stem().stem().stem().c_str();
       currTrinIn.first = sra.get_sra_path_orep_filt().first.c_str();
       currTrinIn.second = sra.get_sra_path_orep_filt().second.c_str();
-      if (assembAllSeqs) {
-        if (!ini_get_bool(cfgPipeline.at("remove_overrepresented").c_str(), 0)) {
-          if (!ini_get_bool(cfgPipeline.at("filter_foreign_reads").c_str(), 0)) {
-            if (!ini_get_bool(cfgPipeline.at("trim_adapter_seqs").c_str(), 0)) {
-              if (!ini_get_bool(cfgPipeline.at("error_correction").c_str(), 0)) {
-                currTrinIn.first = sra.get_sra_path_raw().first.c_str();
-                currTrinIn.second = sra.get_sra_path_raw().second.c_str();
-              }
-              else {
-                currTrinIn.first = sra.get_sra_path_corr_fix().first.c_str();
-                currTrinIn.second = sra.get_sra_path_corr_fix().second.c_str();
-              }  
+      //if (assembAllSeqs) {
+      if (!ini_get_bool(cfgPipeline.at("remove_overrepresented").c_str(), 0)) {
+        if (!ini_get_bool(cfgPipeline.at("filter_foreign_reads").c_str(), 0)) {
+          if (!ini_get_bool(cfgPipeline.at("trim_adapter_seqs").c_str(), 0)) {
+            if (!ini_get_bool(cfgPipeline.at("error_correction").c_str(), 0)) {
+              currTrinIn.first = sra.get_sra_path_raw().first.c_str();
+              currTrinIn.second = sra.get_sra_path_raw().second.c_str();
             }
             else {
-              currTrinIn.first = sra.get_sra_path_trim_p().first.c_str();
-              currTrinIn.second = sra.get_sra_path_trim_p().second.c_str();
-            }
+              currTrinIn.first = sra.get_sra_path_corr_fix().first.c_str();
+              currTrinIn.second = sra.get_sra_path_corr_fix().second.c_str();
+            }  
           }
           else {
-            currTrinIn.first = sra.get_sra_path_for_filt().first.c_str();
-            currTrinIn.second = sra.get_sra_path_for_filt().second.c_str();
+            currTrinIn.first = sra.get_sra_path_trim_p().first.c_str();
+            currTrinIn.second = sra.get_sra_path_trim_p().second.c_str();
           }
         }
-        sraRunsInTrin.push_back(currTrinIn);
-        outDir = fs::path(currTrinIn.first).parent_path().c_str();
+        else {
+          currTrinIn.first = sra.get_sra_path_for_filt().first.c_str();
+          currTrinIn.second = sra.get_sra_path_for_filt().second.c_str();
+        }
       }
+      currFilePrefix1 = fs::path(currTrinIn.first).filename().stem().stem().stem().c_str();
+      currFilePrefix2 = fs::path(currTrinIn.second).filename().stem().stem().stem().c_str();
+      sraRunsInTrin.push_back(currTrinIn);
+      outDir = fs::path(currTrinIn.first).parent_path().c_str();
+      //}
       inDir = sra.get_sra_path_orep_filt().first.parent_path().c_str();
+      
       if (assembSeqsNoInterest) {
-        currTrinIn.first = inDir + "/" + currFilePrefix1 + ".unmapped.fq";
+        currTrinIn.first = outDir + "/" + currFilePrefix1 + ".unmapped.fq";
         if (sra.is_paired()) {
-          currTrinIn.second = inDir + "/" + currFilePrefix2 + ".unmapped.fq";
+          currTrinIn.second = outDir + "/" + currFilePrefix2 + ".unmapped.fq";
         }
         sraRunsNoInterest.push_back(currTrinIn);
       }
@@ -481,9 +493,9 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
         }
 
         if (assembSeqsInterest) {
-          currTrinIn.first = inDir + "/" + currFilePrefix1 + "." + currSeqFilePrefix + ".mapped.fq";
+          currTrinIn.first = outDir + "/" + currFilePrefix1 + "." + currSeqFilePrefix + ".mapped.fq";
           if (sra.is_paired()) {
-            currTrinIn.second = inDir + "/" + currFilePrefix2 + "." + currSeqFilePrefix + ".mapped.fq";
+            currTrinIn.second = outDir + "/" + currFilePrefix2 + "." + currSeqFilePrefix + ".mapped.fq";
           }
           sraRunsInterest.push_back(currTrinIn);
         }
