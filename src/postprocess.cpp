@@ -208,16 +208,18 @@ void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
       logOutput("  Now producing index for: ", logFilePath);
       summarize_sing_trans(trans, logFilePath, 4);
 
+      std::string decoy = "";
+
       // Create index of assembled transcripts
       if (!dispOutput) {
         procRunning = true;
         std::thread salmIdxThread(progressAnim, "  ", logFilePath);
-        salmon_index(currTransInSalm, currIndex, threads, dispOutput, logFilePath);
+        salmon_index(currTransInSalm, currIndex, decoy, threads, dispOutput, logFilePath);
         procRunning = false;
         salmIdxThread.join();
       }
       else {
-        salmon_index(currTransInSalm, currIndex, threads, dispOutput, logFilePath);
+        salmon_index(currTransInSalm, currIndex, decoy, threads, dispOutput, logFilePath);
       }
 
       // Create index checkpoint

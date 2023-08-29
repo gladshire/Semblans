@@ -75,18 +75,25 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
     fastaIndex = std::string(dummyTrans.get_trans_path_trinity().parent_path().c_str()) + "/" +
                  std::string(fs::path(seqsInterest[i].c_str()).stem().c_str()) + "_index";
     // Check if indexing checkpoint exists. If not, generate index
+
+    std::string decoy = "";
+
     if (!dummyTrans.checkpointExists(currSeqFilePrefix + ".idx.iso")) {
       
       if (!dispOutput) {
         procRunning = true;
         std::thread seqIndex(progressAnim, "    Now creating mapping index for \"" + currSeqFilePrefix + "\"\n", logFile);
-        salmon_index(seqsInterest[i], fastaIndex, threads, dispOutput, logFile);
+
+        salmon_index(seqsInterest[i], fastaIndex, decoy, threads, dispOutput, logFile);
+
         procRunning = false;
         seqIndex.join();
       }
       else {
         logOutput("    Now creating mapping index for \"" + currSeqFilePrefix + "\"\n", logFile);
-        salmon_index(seqsInterest[i], fastaIndex, threads, dispOutput, logFile);
+
+        salmon_index(seqsInterest[i], fastaIndex, decoy, threads, dispOutput, logFile);
+
       }
       dummyTrans.makeCheckpoint(currSeqFilePrefix + ".idx.iso");
     }

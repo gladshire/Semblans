@@ -1,11 +1,53 @@
 #include "salmon_wrap.h"
 
 
+void prepareIndexFiles(std::vector<std::string> desiredFiles, 
+                       std::vector<std::string> decoyFiles,
+                       std::string preIndexOutput,
+                       std::string decoyFileOutput) {
+  std::ifstream currSeqFile;
+  std::ofstream decoyFile(decoyFileOutput);
+  std::ofstream preIndexFile(preIndexOutput);
+  std::string currBuf;
+  std::streamsize s;
+  // Iterate through files with sequence targets for mapping
+  for (auto currTarget : desiredFiles) {
+    currSeqFile.open(currTarget);
+    while (currSeqFile.read(&currBuf[0], 1000000000)) {
+      s = currSeqFile.gcount();
+      preIndexFile.write(&currBuf[0], s);
+    }
+    preIndexFile << std::endl;
+    currSeqFile.close();
+  }
+  // Iterate through files with decoy sequences
+  std::string::const_iterator sStart, sEnd;
+  boost::regex rgxHeader("^(>|@)(.*)");
+  boost::smatch resHeader;
+  for (auto currDecoy : decoyFiles) {
+    currSeqFile.open(currDecoy);
+    while (currSeqFile.read(&currBuf[0], 1000000000)) {
+      // Write decoy file to pre-index file
+      s = currSeqFile.gcount();
+      preIndexFile.write(&currBuf[0], s);
+      // Write headers of decoy sequences to decoy text file
+      sStart = currBuf.begin();
+      sEnd = currBuf.end();
+      while (boost::regex_search(sStart, sEnd, resHeader, rgxHeader)) {
+        decoyFile << resHeader.str() << std::endl;
+        sStart = resHeader.suffix().first;
+      }
+    }
+    preIndexFile << std::endl;
+    currSeqFile.close();
+  }
+  decoyFile.close();
+  preIndexFile.close();
+}
+
 // Index reads from sequence data using Salmon
-void salmon_index(std::string transIn, std::string transIndex,
+void salmon_index(std::string transIn, std::string transIndex, std::string decoys,
                   std::string threads, bool dispOutput, std::string logFile) {
-  std::string transFilePath(transIn);
-  std::string indexFilePath(transIndex);
   std::string printOut;
   if (dispOutput) {
     printOut = " 2>&1 | tee -a " + logFile;
@@ -15,8 +57,8 @@ void salmon_index(std::string transIn, std::string transIndex,
   }
   int result;
 
-  std::string salm_cmd = PATH_SALMON + " index" + " -t " + transFilePath +
-                         " -i " + indexFilePath + " -p " + threads +
+  std::string salm_cmd = PATH_SALMON + " index" + " -t " + transIn +
+                         " -i " + transIndex + " -p " + threads +
                          printOut;
   result = system(salm_cmd.c_str());
   if (WIFSIGNALED(result)) {
