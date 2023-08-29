@@ -1,9 +1,14 @@
+// Header file for the simple, singly-linked list class for storing
+// FASTA or FASTQ sequence data
+
 #pragma once
 #include <iostream>
 #include <fstream>
 #include "seq.h"
 
 
+// Struct definition for a sequence node, capable of storing a FASTA/FASTQ
+// entry's HEADER, SEQUENCE, and QUALITY strings
 struct Node {
   sequence seqEntry;
   Node * next;
@@ -22,7 +27,7 @@ struct Node {
 
 };
 
-
+// Class definition for the singly-linked list for storing FASTA/FASTQ data
 class linkedList {
   private:
     Node * head;

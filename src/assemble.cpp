@@ -45,7 +45,7 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
   }
   
   uintmax_t ram_b = (uintmax_t)stoi(ram_gb) * 1000000000;
-  std::pair<std::string, std::string> currSraOrig;
+  std::pair<std::string, std::string> currSraIn;
   std::pair<std::string, std::string> currSraUmap;
   std::vector<std::pair<std::string, std::string>> sraRunsIn;
   std::string outDir;
@@ -104,43 +104,45 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
       summarize_sing_sra(sra, logFile, 4);
       outDir = sra.get_sra_path_orep_filt().first.parent_path().c_str();
 
-      currSraOrig.first = sra.get_sra_path_orep_filt().first.c_str();
-      currSraOrig.second = sra.get_sra_path_orep_filt().second.c_str();
+      currSraIn.first = sra.get_sra_path_orep_filt().first.c_str();
+      currSraIn.second = sra.get_sra_path_orep_filt().second.c_str();
 
       // Obtain read input files, based on pipeline preferences
       if (!ini_get_bool(cfgPipeline.at("remove_overrepresented").c_str(), 0)) {
         if (!ini_get_bool(cfgPipeline.at("filter_foreign_reads").c_str(), 0)) {
           if (!ini_get_bool(cfgPipeline.at("trim_adapter_seqs").c_str(), 0)) {
             if (!ini_get_bool(cfgPipeline.at("error_correction").c_str(), 0)) {
-              currSraOrig.first = sra.get_sra_path_raw().first.c_str();
-              currSraOrig.second = sra.get_sra_path_raw().second.c_str();
+              currSraIn.first = sra.get_sra_path_raw().first.c_str();
+              currSraIn.second = sra.get_sra_path_raw().second.c_str();
               outDir = sra.get_sra_path_raw().first.parent_path().c_str();
             }
             else {
-              currSraOrig.first = sra.get_sra_path_corr_fix().first.c_str();
-              currSraOrig.second = sra.get_sra_path_corr_fix().second.c_str();
+              currSraIn.first = sra.get_sra_path_corr_fix().first.c_str();
+              currSraIn.second = sra.get_sra_path_corr_fix().second.c_str();
               outDir = sra.get_sra_path_corr_fix().first.parent_path().c_str();
             }
           }
           else {
-            currSraOrig.first = sra.get_sra_path_trim_p().first.c_str();
-            currSraOrig.second = sra.get_sra_path_trim_p().second.c_str();
+            currSraIn.first = sra.get_sra_path_trim_p().first.c_str();
+            currSraIn.second = sra.get_sra_path_trim_p().second.c_str();
             outDir = sra.get_sra_path_trim_p().first.parent_path().c_str();
           }
         }
         else {
-          currSraOrig.first = sra.get_sra_path_for_filt().first.c_str();
-          currSraOrig.second = sra.get_sra_path_for_filt().second.c_str();
+          currSraIn.first = sra.get_sra_path_for_filt().first.c_str();
+          currSraIn.second = sra.get_sra_path_for_filt().second.c_str();
           outDir = sra.get_sra_path_for_filt().first.parent_path().c_str();
         }
       }
       filePrefix1 = sra.get_file_prefix().first;
       filePrefix2 = sra.get_file_prefix().second;
-        
-      currSraUmap.first = outDir + "/" + sra.get_file_prefix().first + ".unmapped.fq";
-      currSraUmap.second = outDir + "/" + sra.get_file_prefix().second + ".unmapped.fq";
       
-      sraRunsIn.push_back(currSraOrig);
+      if (i > 0) {
+        currSraIn.first = outDir + "/" + sra.get_file_prefix().first + ".unmapped.fq";
+        currSraIn.second = outDir + "/" + sra.get_file_prefix().second + ".unmapped.fq";
+      }
+
+      sraRunsIn.push_back(currSraIn);
 
       // Define name of salmon quantification output file      
       if (!sra.is_paired()) {
@@ -188,8 +190,7 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
       
       procRunning = true;
       std::thread constructHash(progressAnim, "      Creating hash table from forward-ended reads ", logFile);
-      seqHash readHashTable1(lenReadsHash1, fs::path(sraRunsIn[0].first.c_str()), ram_b);
-      seqHash prevHashTable1(lenReadsHash1, fs::path(currSraUmap.first.c_str()), ram_b);
+      seqHash readHashTable1(lenReadsHash1, fs::path(currSraIn.first.c_str()), ram_b);
       procRunning = false;
       constructHash.join();
       
@@ -214,19 +215,7 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
           currQual = currSeq.get_quality();
     
           readHashTable1.deleteHash(currHead);
-          // If a previous iteration of read extraction has already been performed, only add the unmapped
-          // read if it has been identified as unmapped in the prior steps.
-
-          // This enables iterative removal, resulting in a final unmapped reads file, containing none of the
-          // user-defined FASTA sequences
-          if (i == 0) {
-            unmappedHash1.insertHash(currHead, currSeqData, currQual);
-          }
-          else {
-            if (prevHashTable1.inHashTable(currHead)) {
-              unmappedHash1.insertHash(currHead, currSeqData, currQual);
-            }
-          }
+          unmappedHash1.insertHash(currHead, currSeqData, currQual);
         }
        
         // Print number of unmapped reads identified every half million
@@ -262,7 +251,6 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
         procRunning = true;
         std::thread constructHash(progressAnim, "      Creating hash table from reverse-ended reads ", logFile);
         seqHash readHashTable2(lenReadsHash2, fs::path(sraRunsIn[0].second.c_str()), ram_b);
-        seqHash prevHashTable2(lenReadsHash2, fs::path(currSraUmap.second.c_str()), ram_b);
         procRunning = false;
         constructHash.join();
      
@@ -286,14 +274,7 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
             currQual = currSeq.get_quality();
 
             readHashTable2.deleteHash(currHead);
-            if (i == 0) {
-              unmappedHash2.insertHash(currHead, currSeqData, currQual);
-            }
-            else {
-              if (prevHashTable2.inHashTable(currHead)) {
-                unmappedHash2.insertHash(currHead, currSeqData, currQual);
-              }
-            }
+            unmappedHash2.insertHash(currHead, currSeqData, currQual);
           }
 
           // Print number of unmapped reads identified every half million
@@ -471,7 +452,9 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
       outDir = fs::path(currTrinIn.first).parent_path().c_str();
       //}
       inDir = sra.get_sra_path_orep_filt().first.parent_path().c_str();
-      
+  
+      // If user preferences specify assembly of unmapped reads, push paths of unmapped read files for current
+      // SRA to vector containing the inputs for assembly with Trinity    
       if (assembSeqsNoInterest) {
         currTrinIn.first = outDir + "/" + currFilePrefix1 + ".unmapped.fq";
         if (sra.is_paired()) {
@@ -480,6 +463,8 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
         sraRunsNoInterest.push_back(currTrinIn);
       }
 
+      // Iterate through all user-defined FASTA sequence files, filling vector with paths to mapped input files for
+      // assembly with Trinity
       for (auto seqFilePath : seqsInterest) {
         currSeqFilePrefix = std::string(fs::path(seqFilePath.c_str()).stem().c_str());
         currTrinOutInt = outDir + "/" + sraGroup.first + "." + currSeqFilePrefix + ".mapped.Trinity.fasta";
@@ -492,6 +477,8 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
           continue;
         }
 
+        // If user preferences specify assembly of mapped reads, push paths of mapped read files for current
+        // SRA to vector containing the inputs for assembly with Trinity
         if (assembSeqsInterest) {
           currTrinIn.first = outDir + "/" + currFilePrefix1 + "." + currSeqFilePrefix + ".mapped.fq";
           if (sra.is_paired()) {
@@ -501,7 +488,7 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
         }
 
       
-        // Perform assembly for reads of interest (those that map to provided FASTA)
+        // Perform assembly for reads of interest (those that map to current user-defined FASTA)
         if (assembSeqsInterest) {
           logOutput("  Now assembling reads that map to: \"" + seqFilePath + "\"\n", logFile);
           if (!groupCheckpointExists(std::string(cpDir.c_str()), sraGroup.first + "." +
@@ -529,7 +516,7 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
       }
     }
 
-    // Perform assembly for reads of no interest (those that DO NOT map to provided FASTA)
+    // Perform assembly for reads of no interest (those that DO NOT map to current user-defined FASTA)
     if (assembSeqsNoInterest) {
       logOutput("  Now assembling reads that do not map to sequences of interest\n", logFile);
       if (!groupCheckpointExists(std::string(cpDir.c_str()), sraGroup.first + ".unmapped")) {

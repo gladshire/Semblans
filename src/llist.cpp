@@ -1,9 +1,12 @@
-// TODO: getSeq does not properly return sequence -> hash data cannot be updated
+// Implementation file for simple, singly-linked list class containing sequence
+// data
 
 #include "llist.h"
 
+// Default constructor for linked list
 linkedList::linkedList() : head(nullptr), tail(nullptr) {}
 
+// Insert function for appending a sequence node to the linked list
 void linkedList::insert(const sequence & seqData) {
   Node * newNode = new Node(seqData);
   Node * currNode = head;
@@ -18,6 +21,8 @@ void linkedList::insert(const sequence & seqData) {
   }
 }
 
+// Remove function for deleting a sequence node with a given header from
+// the linked list
 bool linkedList::remove(const std::string & header) {
   Node * currNode = head;
   Node * lastNode = nullptr;
@@ -41,6 +46,8 @@ bool linkedList::remove(const std::string & header) {
   return false;
 }
 
+// Getter function for returning a sequence with a given header from the
+// linked list
 sequence linkedList::getSeq(const std::string & header) {
   Node * currNode = head;
   std::string currHead;
@@ -57,6 +64,8 @@ sequence linkedList::getSeq(const std::string & header) {
   return sequence();
 }
 
+// Setter function for updating the header of a sequence node with
+// a given 'old header' to a 'new header' in the linked list
 void linkedList::setSeqHead(const std::string & oldHead,
                             const std::string & newHead) {
   Node * currNode = head;
@@ -69,6 +78,9 @@ void linkedList::setSeqHead(const std::string & oldHead,
   }
 }
 
+// Utility function for updating all headers in the linked list based on
+// a given prefix
+// Used primarily for updating FASTA transcript headers post-assembly
 void linkedList::updateSeqHead(const std::string & newPrefix) {
   Node * currNode = head;
   std::string currHead;
@@ -81,6 +93,8 @@ void linkedList::updateSeqHead(const std::string & newPrefix) {
   }
 }
 
+// Logical function for determining whether a sequence node with a given
+// header exists in the linked list
 bool linkedList::exists(const std::string & header) {
   Node * currNode = head;
   std::string currHead;
@@ -95,6 +109,7 @@ bool linkedList::exists(const std::string & header) {
   return false;
 }
 
+// Logical function for determining whether the linked list is empty
 bool linkedList::empty() {
   if (head == nullptr) {
     return true;
@@ -104,6 +119,8 @@ bool linkedList::empty() {
   }
 }
 
+// Utility function for writing all sequence data in the linked list to a
+// given output file
 void linkedList::dump(std::ofstream & outFile) {
   Node * currNode = head;
   std::string currHead;
@@ -123,6 +140,8 @@ void linkedList::dump(std::ofstream & outFile) {
   }
 }
 
+// Function for deleting and freeing all sequence data contained in the
+// linked list
 void linkedList::clear() {
   Node * tmpNode = head;
   Node * currNode = head;
