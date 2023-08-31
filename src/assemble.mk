@@ -2,7 +2,7 @@ CC = g++ -std=c++11
 CFLAGS = '-Wl,-rpath,$$ORIGIN/../lib/' -g -pthread
 LIBS = -L../lib/ -lboost_system -lboost_filesystem -lboost_iostreams -ldl -lconfini
 INCLUDE_PATH = -I../lib -I../include
-OBJ_LINK = assemble.o log.o sra.o sra_toolkit.o transcript.o ini_parse.o trinity_wrap.o salmon_wrap.o print_info.o seq.o llist.o seq_hash.o
+OBJ_LINK = assemble.o log.o sra.o sra_toolkit.o transcript.o ini_parse.o trinity_wrap.o star_wrap.o print_info.o seq.o llist.o seq_hash.o
 
 ../bin/assemble: $(OBJ_LINK)
 	$(CC) $(CFLAGS) -o ../bin/assemble $(OBJ_LINK) $(LIBS)
@@ -20,8 +20,8 @@ transcript.o: transcript.cpp transcript.h
 	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c transcript.cpp $(LIBS)
 trinity_wrap.o: trinity_wrap.cpp trinity_wrap.h
 	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c trinity_wrap.cpp $(LIBS)
-salmon_wrap.o: salmon_wrap.cpp salmon_wrap.h
-	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c salmon_wrap.cpp
+star_wrap.o: star_wrap.cpp star_wrap.h
+	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c star_wrap.cpp
 print_info.o: print_info.cpp print_info.h
 	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c print_info.cpp $(LIBS)
 seq.o: seq.cpp seq.h

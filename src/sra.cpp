@@ -112,9 +112,6 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool dispOutput,
     }
     catch (const std::runtime_error & e) {
       numRetries++;
-      if (dispOutput) {
-        logOutput("Throttled: too many requests. Retrying.\n", logFile);
-      }
       queryLim *= 2;
     }
     catch (const rapidxml::parse_error & e) {

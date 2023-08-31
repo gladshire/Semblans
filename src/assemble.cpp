@@ -34,12 +34,13 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
   logOutput("\nStarting isolation of reads of interest\n", logFile);
   INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
   INI_MAP_ENTRY cfgSeqsInt = cfgIni.at("Sequences of interest");
-  std::ifstream unmappedReadFile;
   std::string fastaIndex;
   transcript dummyTrans;
+  std::ifstream bamMapFile;
 
   // Create string vector of user-defined FASTA files containing sequences to extract
   std::vector<std::string> seqsInterest;
+  std::vector<std::string> seqsDecoy;
   for (auto seqFilePath : cfgSeqsInt) {
     seqsInterest.push_back(seqFilePath.first);
   }
@@ -58,33 +59,39 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
   uintmax_t numBytesReads2;
   uintmax_t lenReadsHash2;
   
-  std::string currLine;
   sequence currSeq;
   std::string currHead;
   std::string currSeqData;
   std::string currQual;
 
   std::string currSeqFilePrefix;
-  // Iterate through sequences of interest, generating a Salmon index for each and quantifying
+  std::string currLine;
+  uintmax_t numReadsSeqInterest = 0;
+  std::ifstream currSeqFile;
+  // Iterate through sequences of interest, generating a STAR index for each and mapping
   // reads against them
   for (int i = 0; i < seqsInterest.size(); i++) {
+    currSeqFile.open(seqsInterest[i]);
+    while (std::getline(currSeqFile, currLine)) {
+      if (currLine[0] == '>' || currLine[0] == '@') {
+        numReadsSeqInterest++;
+      }
+    }
     logOutput("  Now running read extraction using: \"" + seqsInterest[i] + "\"\n", logFile);
     currSeqFilePrefix = std::string(fs::path(seqsInterest[i].c_str()).stem().c_str());
-    // Create index of sequence file with Salmon
+    // Create index of sequence file with STAR
     transcript dummyTrans(seqsInterest[i], cfgIni);
     fastaIndex = std::string(dummyTrans.get_trans_path_trinity().parent_path().c_str()) + "/" +
                  std::string(fs::path(seqsInterest[i].c_str()).stem().c_str()) + "_index";
     // Check if indexing checkpoint exists. If not, generate index
-
-    std::string decoy = "";
-
     if (!dummyTrans.checkpointExists(currSeqFilePrefix + ".idx.iso")) {
-      
+      fs::create_directory(fastaIndex.c_str());
       if (!dispOutput) {
         procRunning = true;
         std::thread seqIndex(progressAnim, "    Now creating mapping index for \"" + currSeqFilePrefix + "\"\n", logFile);
-
-        salmon_index(seqsInterest[i], fastaIndex, decoy, threads, dispOutput, logFile);
+        
+        star_index(std::vector<std::string>(1, seqsInterest[i]), fastaIndex, threads,
+                   dispOutput, logFile);
 
         procRunning = false;
         seqIndex.join();
@@ -92,16 +99,17 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
       else {
         logOutput("    Now creating mapping index for \"" + currSeqFilePrefix + "\"\n", logFile);
 
-        salmon_index(seqsInterest[i], fastaIndex, decoy, threads, dispOutput, logFile);
-
+        star_index(std::vector<std::string>(1, seqsInterest[i]), fastaIndex, threads,
+                   dispOutput, logFile);
+        
       }
       dummyTrans.makeCheckpoint(currSeqFilePrefix + ".idx.iso");
     }
   
     uintmax_t numReads; 
-    uintmax_t numUnmapped;
+    uintmax_t numMapped;
     int numHalfMil;
-    // Iterate through SRA runs, quantifying each against the salmon index we just created
+    // Iterate through SRA runs, mapping each against the STAR index we just created
     for (auto sra : sras) {
       if (sra.checkpointExists(currSeqFilePrefix + ".iso")) {
         logOutput("    Read isolation checkpoint found for: " + sra.get_accession() + "\n", logFile);
@@ -151,7 +159,7 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
 
       sraRunsIn.push_back(currSraIn);
 
-      // Define name of salmon quantification output file      
+      // Define name of STAR mapping output file      
       if (!sra.is_paired()) {
         fastaQuant = std::string(dummyTrans.get_trans_path_trinity().parent_path().c_str()) + "/" +
                      std::string(fs::path(currSeqFilePrefix.c_str()).stem().c_str()) + "_" + 
@@ -164,34 +172,35 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
                      "quant";
       }
 
-      // Determine whether checkpoint exists for salmon quant of current reads against current index.
+      // Determine whether checkpoint exists for STAR map of current reads against current index.
       // If not, perform a quant run
-      if (!sra.checkpointExists(currSeqFilePrefix + ".qt.iso")) {
+      if (!sra.checkpointExists(currSeqFilePrefix + ".map.iso")) {
+        fs::create_directory(fastaQuant.c_str());
         if (!dispOutput) {
           procRunning = true;
-          std::thread seqQuant(progressAnim, "      Mapping reads to sequences of interest ", logFile);
-          salmon_quant(seqsInterest[i], fastaIndex, fastaQuant, sraRunsIn, threads, dispOutput, logFile);
+          std::thread seqQuant(progressAnim, "      Mapping reads to sequences of interest ",
+                               logFile);
+          star_map(fastaIndex, fastaQuant, currSraIn, threads, dispOutput, logFile);
           procRunning = false;
           seqQuant.join();
         }
         else {
-          logOutput("\n      Mapping reads to sequences of interest\n", logFile); 
-          salmon_quant(seqsInterest[i], fastaIndex, fastaQuant, sraRunsIn,
-                       threads, dispOutput, logFile);
+          logOutput("\n      Mapping reads to sequences of interest\n", logFile);
+          star_map(fastaIndex, fastaQuant, currSraIn, threads, dispOutput, logFile);
         }
 
-        // Create checkpoint for salmon quant of SRA against seqs of interest
-        sra.makeCheckpoint(currSeqFilePrefix + ".qt.iso");
+        // Create checkpoint for STAR mapping of SRA against seqs of interest
+        sra.makeCheckpoint(currSeqFilePrefix + ".map.iso");
       }
 
-      // The salmon quant run has produced a text file 'unmapped_names.txt', which lists all the reads in
+      // The STAR mapping run has produced a text file 'unmapped_names.txt', which lists all the reads in
       // the SRA run that did NOT map to the index.
       
       // Create sequence hash tables for rapid accession of each read by name
       // Then iterate through all unmapped reads listed in 'unmapped_names.txt', and maintain two sequence hash tables:
       
-      //   Unmapped hash table - will contain all reads that did not map to the salmon index (updated after each index)
-      //     Mapped hash table - will contain all reads that mapped to the salmon index
+      //   Unmapped hash table - will contain all reads that did not map to the STAR index (updated after each index)
+      //     Mapped hash table - will contain all reads that mapped to the STAR index
       numBytesReads1 = fs::file_size(sraRunsIn[0].first.c_str());
       lenReadsHash1 = numBytesReads1 / 160;
       
@@ -201,53 +210,44 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
       procRunning = false;
       constructHash.join();
       
-      seqHash unmappedHash1(lenReadsHash1);
+      seqHash mappedHash1(lenReadsHash1);
 
       logOutput("      Now splitting reads into mapped and unmapped\n", logFile);
-      unmappedReadFile.open(fastaQuant + "/aux_info/unmapped_names.txt");
+      bamMapFile.open(fastaQuant + "/Aligned.out.sam");
 
       // Iterate through headers in unmapped reads file
       // Fill hash tables accordingly
-      numReads = sra.get_num_reads();
-      numUnmapped = 0;
-      numHalfMil = 0;
-      while (getline(unmappedReadFile, currLine)) {
-        numUnmapped++;
-        currHead = currLine.substr(0, currLine.find(" "));
-  
-        if (readHashTable1.inHashTable(currHead)) {
-          currSeq = readHashTable1.getSeq(currHead);
+      for (int i = 0; i <= numReadsSeqInterest; i++) {
+        std::getline(bamMapFile, currLine);
+      }
+      std::string readName;
+      numMapped = 0;
+      numHalfMil = 0; 
+      while (std::getline(bamMapFile, currLine)) {
+        numMapped++;
+        readName = currLine.substr(0, currLine.find("\t"));
+        if (!mappedHash1.inHashTable(readName)) {
+          currSeq = readHashTable1.getSeq(readName);
           currHead = currSeq.get_header();
           currSeqData = currSeq.get_sequence();
           currQual = currSeq.get_quality();
-    
-          readHashTable1.deleteHash(currHead);
-          unmappedHash1.insertHash(currHead, currSeqData, currQual);
+
+          readHashTable1.deleteHash(readName);
+          mappedHash1.insertHash(currHead, currSeqData, currQual);
         }
-       
-        // Print number of unmapped reads identified every half million
-        if (numUnmapped % 500000 == 0) {
-          numHalfMil++;
-          logOutput("\r        Unmapped read count: " + std::to_string(numHalfMil * 500000) +
-                    " ...",
-                    logFile);
-        } 
+        logOutput("\r        Mapped read count: " + std::to_string(numMapped) + " ...", logFile);
       }
       // Dump filled sequence hash tables to new files, containing the mapped
       // and unmapped reads respectively
-      logOutput("\r        Unmapped read count: " + std::to_string(numUnmapped) +
-                "      \n", logFile);
-      logOutput("        Mapped read count: " + std::to_string(numReads - numUnmapped) +
-                "\n", logFile);
 
       procRunning = true;
       std::thread dumpHash(progressAnim, "      Dumping split reads to mapped and unmapped files ", logFile);
-      readHashTable1.dump(outDir + "/" + filePrefix1 + "." + currSeqFilePrefix + ".mapped.fq");
-      unmappedHash1.dump(outDir + "/" + filePrefix1 + ".unmapped.fq");
+      readHashTable1.dump(outDir + "/" + filePrefix1 + "." + currSeqFilePrefix + ".unmapped.fq");
+      mappedHash1.dump(outDir + "/" + filePrefix1 + ".mapped.fq");
       procRunning = false;
       dumpHash.join();
       
-      unmappedReadFile.close();
+      bamMapFile.close();
 
       // If SRA run is paired, perform the same steps as above for the reverse-ended FASTQ file
       if (sra.is_paired()) {
@@ -261,52 +261,45 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
         procRunning = false;
         constructHash.join();
      
-        seqHash unmappedHash2(lenReadsHash2);
+        seqHash mappedHash2(lenReadsHash2);
 
         logOutput("      Now splitting reads into mapped and unmapped\n", logFile);
-        unmappedReadFile.open(fastaQuant + "/aux_info/unmapped_names.txt");
+        bamMapFile.open(fastaQuant + "/Aligned.out.sam");
 
         // Iterate through headers in unmapped reads file
         // Fill hash tables accordingly
-        numUnmapped = 0;
+        for (int i = 0; i <= numReadsSeqInterest; i++) {
+          std::getline(bamMapFile, currLine);
+        }
+        numMapped = 0;
         numHalfMil = 0;
-        while (getline(unmappedReadFile, currLine)) {
-          numUnmapped++;
-          currHead = currLine.substr(0, currLine.find(" "));
-
-          if (readHashTable2.inHashTable(currHead)) {
+        while (std::getline(bamMapFile, currLine)) {
+          numMapped++;
+          readName = currLine.substr(0, currLine.find("\t"));
+          if (!mappedHash2.inHashTable(readName)) {
             currSeq = readHashTable2.getSeq(currHead);
             currHead = currSeq.get_header();
             currSeqData = currSeq.get_sequence();
             currQual = currSeq.get_quality();
 
             readHashTable2.deleteHash(currHead);
-            unmappedHash2.insertHash(currHead, currSeqData, currQual);
+            mappedHash2.insertHash(currHead, currSeqData, currQual);
           }
 
           // Print number of unmapped reads identified every half million
-          if (numUnmapped % 500000 == 0) {
-            numHalfMil++;
-            logOutput("\r        Unmapped read count: " + std::to_string(numHalfMil * 500000) +
-                      " ...",
-                      logFile);
-          }
+          logOutput("\r        Mapped read count: " + std::to_string(numMapped) + " ...", logFile);
         }
         // Dump filled sequence hash tables to new files, containing the mapped
         // and unmapped reads respectively
-        logOutput("\r        Unmapped read count: " + std::to_string(numUnmapped) +
-                  "      \n", logFile);
-        logOutput("        Mapped read count: " + std::to_string(numReads - numUnmapped) +
-                  "\n", logFile);
 
         procRunning = true;
         std::thread dumpHash(progressAnim, "      Dumping split reads to mapped and unmapped files ", logFile);
-        readHashTable2.dump(outDir + "/" + filePrefix2 + "." + currSeqFilePrefix + ".mapped.fq");
-        unmappedHash2.dump(outDir + "/" + filePrefix2 + ".unmapped.fq");
+        readHashTable2.dump(outDir + "/" + filePrefix2 + "." + currSeqFilePrefix + ".unmapped.fq");
+        mappedHash2.dump(outDir + "/" + filePrefix2 + ".mapped.fq");
         procRunning = false;
         dumpHash.join();
 
-        unmappedReadFile.close();
+        bamMapFile.close();
       }
       sraRunsIn.clear();
       sra.makeCheckpoint(currSeqFilePrefix + ".iso");

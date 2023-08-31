@@ -184,6 +184,16 @@ chmod -x COPYING
 cd ../../
 rm corset.tar.gz
 
+# Install STAR
+echo "Installing STAR ..."
+wget -q --output-document star.zip https://github.com/alexdobin/STAR/archive/refs/tags/2.7.11a.zip
+tar -xf star.tar.gz -C ./external/
+mv ./external/STAR* ./external/STAR
+cd ./external/STAR/source/
+make STAR
+cd ../../../
+rm star.tar.gz
+
 # Install Salmon
 echo "Installing Salmon ..."
 wget -q --output-document salmon.tar.gz https://github.com/COMBINE-lab/salmon/releases/download/v1.10.0/salmon-1.10.0_linux_x86_64.tar.gz

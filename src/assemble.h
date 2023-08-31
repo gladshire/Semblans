@@ -8,13 +8,14 @@
 #include <thread>
 #include <chrono>
 #include <atomic>
+#include <set>
 #include <signal.h>
 #include "sra.h"
 #include "transcript.h"
 #include "ini_parse.h"
 #include "sra_toolkit.h"
 #include "trinity_wrap.h"
-#include "salmon_wrap.h"
+#include "star_wrap.h"
 #include "print_info.h"
 #include "seq.h"
 #include "seq_hash.h"

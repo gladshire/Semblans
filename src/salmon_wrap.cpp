@@ -1,44 +1,45 @@
 #include "salmon_wrap.h"
 
-
-void prepareIndexFiles(std::vector<std::string> desiredFiles, 
-                       std::vector<std::string> decoyFiles,
-                       std::string preIndexOutput,
-                       std::string decoyFileOutput) {
+// TODO: Fix this function. Does not read files in properly
+void prepareDecoys(std::vector<std::string> desiredFiles, 
+                   std::vector<std::string> decoyFiles,
+                   std::string preIndexOutput,
+                   std::string decoyFileOutput) {
   std::ifstream currSeqFile;
   std::ofstream decoyFile(decoyFileOutput);
   std::ofstream preIndexFile(preIndexOutput);
-  std::string currBuf;
-  std::streamsize s;
+  std::string currLine;
   // Iterate through files with sequence targets for mapping
   for (auto currTarget : desiredFiles) {
     currSeqFile.open(currTarget);
-    while (currSeqFile.read(&currBuf[0], 1000000000)) {
-      s = currSeqFile.gcount();
-      preIndexFile.write(&currBuf[0], s);
+    while (std::getline(currSeqFile, currLine)) {
+      if (currLine[0] == '>' || currLine[0] == '@') {
+        /*for (int i = 0; i < currLine.size(); i++) {
+          if (currLine[i] == ' ') {
+            currLine[i] = '_';
+          }
+        }*/
+        currLine = currLine.substr(0, currLine.find(" "));
+      }
+      preIndexFile << currLine << std::endl;
     }
-    preIndexFile << std::endl;
     currSeqFile.close();
   }
   // Iterate through files with decoy sequences
-  std::string::const_iterator sStart, sEnd;
-  boost::regex rgxHeader("^(>|@)(.*)");
-  boost::smatch resHeader;
   for (auto currDecoy : decoyFiles) {
     currSeqFile.open(currDecoy);
-    while (currSeqFile.read(&currBuf[0], 1000000000)) {
-      // Write decoy file to pre-index file
-      s = currSeqFile.gcount();
-      preIndexFile.write(&currBuf[0], s);
-      // Write headers of decoy sequences to decoy text file
-      sStart = currBuf.begin();
-      sEnd = currBuf.end();
-      while (boost::regex_search(sStart, sEnd, resHeader, rgxHeader)) {
-        decoyFile << resHeader.str() << std::endl;
-        sStart = resHeader.suffix().first;
+    while (std::getline(currSeqFile, currLine)) {
+      if (currLine[0] == '>' || currLine[0] == '@') {
+        /*for (int i = 0; i < currLine.size(); i++) {
+          if (currLine[i] == ' ') {
+            currLine[i] = '_';
+          }
+        }*/
+        currLine = currLine.substr(0, currLine.find(" "));
+        decoyFile << currLine << std::endl;
       }
+      preIndexFile << currLine << std::endl;
     }
-    preIndexFile << std::endl;
     currSeqFile.close();
   }
   decoyFile.close();
@@ -48,6 +49,9 @@ void prepareIndexFiles(std::vector<std::string> desiredFiles,
 // Index reads from sequence data using Salmon
 void salmon_index(std::string transIn, std::string transIndex, std::string decoys,
                   std::string threads, bool dispOutput, std::string logFile) {
+  std::cout << transIn << std::endl;
+  std::cout << decoys << std::endl;
+
   std::string printOut;
   if (dispOutput) {
     printOut = " 2>&1 | tee -a " + logFile;
@@ -58,8 +62,8 @@ void salmon_index(std::string transIn, std::string transIndex, std::string decoy
   int result;
 
   std::string salm_cmd = PATH_SALMON + " index" + " -t " + transIn +
-                         " -i " + transIndex + " -p " + threads +
-                         printOut;
+                         " -i " + transIndex + " --decoys " + decoys +
+                         " -p " + threads + printOut;
   result = system(salm_cmd.c_str());
   if (WIFSIGNALED(result)) {
     logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
