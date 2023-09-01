@@ -156,9 +156,9 @@ rm trinity.tar.gz
 
 # Install NCBI BLAST
 echo "Installing NCBI-BLAST+ ..."
-wget -q --output-document ncbi-blast.tar.gz https://ftp.ncbi.nlm.nih.gov/blast/executables/LATEST/ncbi-blast-2.14.0+-x64-linux.tar.gz
+wget -q --output-document ncbi-blast.tar.gz https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/ncbi-blast-2.14.1+-x64-linux.tar.gz
 tar -xf ncbi-blast.tar.gz -C ./external/
-mv ./external/ncbi-blast-2.14.0+/ ./external/ncbi-blast+
+mv ./external/ncbi-blast* ./external/ncbi-blast+
 rm ncbi-blast.tar.gz
 
 # Install Diamond
