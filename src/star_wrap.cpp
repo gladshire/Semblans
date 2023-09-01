@@ -14,10 +14,10 @@ void star_index(std::vector<std::string> fastaFiles, std::string outDir, std::st
     fastasString += (fastaFile + " ");
   }
   int result;
-  std::string star_cmd = PATH_STAR + " --runMode genomeGenerate " +
+  std::string star_cmd = "( " + PATH_STAR + " --runMode genomeGenerate " +
                          " --genomeFastaFiles " + fastasString +
                          " --genomeDir " + outDir +
-                         " --runThreadN " + threads;
+                         " --runThreadN " + threads + " )" + printOut;
   result = system(star_cmd.c_str());
   if (WIFSIGNALED(result)) {
     logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
@@ -42,10 +42,10 @@ void star_map(std::string indexPath, std::string outMap,
     sraReadsString += (" " + sraReadsIn.second);
   }
   int result;
-  std::string star_cmd = PATH_STAR + " --genomeDir " + indexPath +
+  std::string star_cmd = "( " + PATH_STAR + " --genomeDir " + indexPath +
                          " --readFilesIn " + sraReadsString +
                          " --outFileNamePrefix " + outMap +
-                         " --runThreadN " + threads;
+                         " --runThreadN " + threads + " )" + printOut;
   result = system(star_cmd.c_str());
   if (WIFSIGNALED(result)) {
     logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);

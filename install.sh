@@ -186,7 +186,7 @@ rm corset.tar.gz
 
 # Install STAR
 echo "Installing STAR ..."
-wget -q --output-document star.zip https://github.com/alexdobin/STAR/archive/refs/tags/2.7.11a.zip
+wget -q --output-document star.tar.gz https://github.com/alexdobin/STAR/archive/refs/tags/2.7.11a.tar.gz
 tar -xf star.tar.gz -C ./external/
 mv ./external/STAR* ./external/STAR
 cd ./external/STAR/source/

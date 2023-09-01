@@ -35,6 +35,7 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
   INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
   INI_MAP_ENTRY cfgSeqsInt = cfgIni.at("Sequences of interest");
   std::string fastaIndex;
+  std::string fastaMap;
   transcript dummyTrans;
   std::ifstream bamMapFile;
 
@@ -50,7 +51,6 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
   std::pair<std::string, std::string> currSraUmap;
   std::vector<std::pair<std::string, std::string>> sraRunsIn;
   std::string outDir;
-  std::string fastaQuant;
   std::string filePrefix1;
   std::string filePrefix2;
 
@@ -88,7 +88,7 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
       fs::create_directory(fastaIndex.c_str());
       if (!dispOutput) {
         procRunning = true;
-        std::thread seqIndex(progressAnim, "    Now creating mapping index for \"" + currSeqFilePrefix + "\"\n", logFile);
+        std::thread seqIndex(progressAnim, "    Now creating mapping index for \"" + currSeqFilePrefix + "\"", logFile);
         
         star_index(std::vector<std::string>(1, seqsInterest[i]), fastaIndex, threads,
                    dispOutput, logFile);
@@ -97,7 +97,7 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
         seqIndex.join();
       }
       else {
-        logOutput("    Now creating mapping index for \"" + currSeqFilePrefix + "\"\n", logFile);
+        logOutput("    Now creating mapping index for \"" + currSeqFilePrefix + "\"", logFile);
 
         star_index(std::vector<std::string>(1, seqsInterest[i]), fastaIndex, threads,
                    dispOutput, logFile);
@@ -161,32 +161,32 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
 
       // Define name of STAR mapping output file      
       if (!sra.is_paired()) {
-        fastaQuant = std::string(dummyTrans.get_trans_path_trinity().parent_path().c_str()) + "/" +
+        fastaMap = std::string(dummyTrans.get_trans_path_trinity().parent_path().c_str()) + "/" +
                      std::string(fs::path(currSeqFilePrefix.c_str()).stem().c_str()) + "_" + 
-                     sra.get_file_prefix().first + "_quant";
+                     sra.get_file_prefix().first + "_mapping/";
       }
       else {
-        fastaQuant = std::string(dummyTrans.get_trans_path_trinity().parent_path().c_str()) + "/" +
+        fastaMap = std::string(dummyTrans.get_trans_path_trinity().parent_path().c_str()) + "/" +
                      std::string(fs::path(currSeqFilePrefix.c_str()).stem().c_str()) + "_" +
                      sra.get_file_prefix().first.substr(0, sra.get_file_prefix().first.size() - 1) +
-                     "quant";
+                     "mapping/";
       }
 
       // Determine whether checkpoint exists for STAR map of current reads against current index.
       // If not, perform a quant run
       if (!sra.checkpointExists(currSeqFilePrefix + ".map.iso")) {
-        fs::create_directory(fastaQuant.c_str());
+        fs::create_directory(fastaMap.c_str());
         if (!dispOutput) {
           procRunning = true;
           std::thread seqQuant(progressAnim, "      Mapping reads to sequences of interest ",
                                logFile);
-          star_map(fastaIndex, fastaQuant, currSraIn, threads, dispOutput, logFile);
+          star_map(fastaIndex, fastaMap, currSraIn, threads, dispOutput, logFile);
           procRunning = false;
           seqQuant.join();
         }
         else {
           logOutput("\n      Mapping reads to sequences of interest\n", logFile);
-          star_map(fastaIndex, fastaQuant, currSraIn, threads, dispOutput, logFile);
+          star_map(fastaIndex, fastaMap, currSraIn, threads, dispOutput, logFile);
         }
 
         // Create checkpoint for STAR mapping of SRA against seqs of interest
@@ -213,7 +213,7 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
       seqHash mappedHash1(lenReadsHash1);
 
       logOutput("      Now splitting reads into mapped and unmapped\n", logFile);
-      bamMapFile.open(fastaQuant + "/Aligned.out.sam");
+      bamMapFile.open(fastaMap + "/Aligned.out.sam");
 
       // Iterate through headers in unmapped reads file
       // Fill hash tables accordingly
@@ -264,7 +264,7 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
         seqHash mappedHash2(lenReadsHash2);
 
         logOutput("      Now splitting reads into mapped and unmapped\n", logFile);
-        bamMapFile.open(fastaQuant + "/Aligned.out.sam");
+        bamMapFile.open(fastaMap + "/Aligned.out.sam");
 
         // Iterate through headers in unmapped reads file
         // Fill hash tables accordingly
