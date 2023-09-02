@@ -72,6 +72,7 @@ long int rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
   std::ostream outputStream2(&gzOutBuffer2);
  
   uintmax_t numUnfix = 0;
+  uintmax_t numUnfix100k = 0;
   uintmax_t numReads = 0;
   std::string readName;
   while  ((!inputStream1.eof() && !inputStream2.eof() && !inFile1.eof() && !inFile2.eof()) &&
@@ -135,9 +136,10 @@ long int rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
             outFile2.write(writeStart2, writeEnd2 - writeStart2);
           }
         }
-        if (dispOutput) {
-          readName = std::string(nlPos1Prev + 1, nlPos1);
-          logOutput("\n  Unfixable read removed: " + readName.substr(1, readName.find(" ")), logFile);
+        if (numUnfix % 100000 == 0) {
+          numUnfix100k++;
+          logOutput("\r  Unfixable reads removed: " + std::to_string(numUnfix100k * 100000) +
+                    " ...     ", logFile);
         }
 
         for (int i = 0; i < 3; i++) {
@@ -250,6 +252,7 @@ long int rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
   std::ostream outputStream(&gzOutBuffer);
 
   uintmax_t numUnfix = 0;
+  uintmax_t numUnfix100k = 0;
   uintmax_t numReads = 0;
   std::string readName;
   while ((!inputStream.eof() && !inFile.eof()) && (inputStream.good() && inFile.good())) {
@@ -289,12 +292,11 @@ long int rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
             outFile.write(writeStart, writeEnd - writeStart);
           }
         }
-
-        if (dispOutput) {
-          readName = std::string(nlPosPrev + 1, nlPos);
-          logOutput("\n  Unfixable read removed: " + readName.substr(1, readName.find(" ")), logFile);
+        if (numUnfix % 100000 == 0) {
+          numUnfix100k++;
+          logOutput("\r  Unfixable reads removed: " + std::to_string(numUnfix100k * 100000) +
+                    " ...     ", logFile);
         }
-
         for (int i = 0; i < 3; i++) {
           nlPos = std::find(nlPos + 1, inFileL, '\n');
         }
