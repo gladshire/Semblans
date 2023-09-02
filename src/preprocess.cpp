@@ -210,7 +210,7 @@ void fastqcBulk2(std::vector<SRA> & sras, std::string threads, bool dispOutput,
 void errorCorrBulk(std::vector<SRA> & sras, std::string threads,
                    bool dispOutput, bool retainInterFiles, bool compressFiles,
                    std::string logFilePath, const INI_MAP & cfgIni) {
-  logOutput("\nStarting error correction", logFilePath);
+  logOutput("\nStarting error correction\n", logFilePath);
   INI_MAP_ENTRY rcorrSettings = cfgIni.at("Rcorrector settings");
   std::string kmerLength = rcorrSettings.at("kmer_length");
   std::string maxCorrK = rcorrSettings.at("max_corrections_per_kmer_window");

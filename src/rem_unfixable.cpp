@@ -178,7 +178,7 @@ long int rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
               << sraRunIn.first << "\n  " << sraRunIn.second << std::endl;
     return -1;
   }
-  logOutput("\r  Unfixable reads removed: " + std::to_string(numUnfix100k) +
+  logOutput("\r  Unfixable reads removed: " + std::to_string(numUnfix) +
             "         ", logFile);
 
   if (!compressFiles) {
@@ -317,7 +317,7 @@ long int rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
       std::cerr << "ERROR: Writing output failed for:\n  " << sraRunIn << std::endl;
       return -1;
     }
-    logOutput("\r  Unfixable reads removed: " + std::to_string(numUnfix100k) +
+    logOutput("\r  Unfixable reads removed: " + std::to_string(numUnfix) +
               "         ", logFile);
     if (compressFiles) {
       outputStream.write(writeStart, writeEnd + s - writeStart);
