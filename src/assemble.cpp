@@ -273,7 +273,7 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
 
         // Iterate through headers in unmapped reads file
         // Fill hash tables accordingly
-        for (int i = 0; i <= numReadsSeqInterest; i++) {
+        for (int i = 0; i < numReadsSeqInterest + 3; i++) {
           std::getline(bamMapFile, currLine);
         }
         numMapped = 0;
