@@ -97,7 +97,7 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
         seqIndex.join();
       }
       else {
-        logOutput("    Now creating mapping index for \"" + currSeqFilePrefix + "\"", logFile);
+        logOutput("    Now creating mapping index for \"" + currSeqFilePrefix + "\"\n", logFile);
 
         star_index(std::vector<std::string>(1, seqsInterest[i]), fastaIndex, threads,
                    dispOutput, logFile);
@@ -108,7 +108,7 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
   
     uintmax_t numReads; 
     uintmax_t numMapped;
-    int numHalfMil;
+    int num1k;
     // Iterate through SRA runs, mapping each against the STAR index we just created
     for (auto sra : sras) {
       if (sra.checkpointExists(currSeqFilePrefix + ".iso")) {
@@ -201,7 +201,7 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
       
       //   Unmapped hash table - will contain all reads that did not map to the STAR index (updated after each index)
       //     Mapped hash table - will contain all reads that mapped to the STAR index
-      numBytesReads1 = fs::file_size(sraRunsIn[0].first.c_str());
+      numBytesReads1 = fs::file_size(currSraIn.first.c_str());
       lenReadsHash1 = numBytesReads1 / 160;
       
       procRunning = true;
@@ -217,12 +217,12 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
 
       // Iterate through headers in unmapped reads file
       // Fill hash tables accordingly
-      for (int i = 0; i <= numReadsSeqInterest; i++) {
+      for (int i = 0; i < numReadsSeqInterest + 3; i++) {
         std::getline(bamMapFile, currLine);
       }
       std::string readName;
       numMapped = 0;
-      numHalfMil = 0; 
+      num1k = 0; 
       while (std::getline(bamMapFile, currLine)) {
         numMapped++;
         readName = currLine.substr(0, currLine.find("\t"));
@@ -235,15 +235,20 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
           readHashTable1.deleteHash(readName);
           mappedHash1.insertHash(currHead, currSeqData, currQual);
         }
-        logOutput("\r        Mapped read count: " + std::to_string(numMapped) + " ...", logFile);
+        if (numMapped % 1000 == 0) {
+          num1k++;
+          std::cout << "\r        Mapped read count: " +
+                       std::to_string(1000 * num1k) + " ..." << std::flush;
+        }
       }
+      logOutput("\r        Mapped read count: " + std::to_string(numMapped) + " ...\n", logFile);
       // Dump filled sequence hash tables to new files, containing the mapped
       // and unmapped reads respectively
 
       procRunning = true;
       std::thread dumpHash(progressAnim, "      Dumping split reads to mapped and unmapped files ", logFile);
-      readHashTable1.dump(outDir + "/" + filePrefix1 + "." + currSeqFilePrefix + ".unmapped.fq");
       mappedHash1.dump(outDir + "/" + filePrefix1 + ".mapped.fq");
+      readHashTable1.dump(outDir + "/" + filePrefix1 + "." + currSeqFilePrefix + ".unmapped.fq");
       procRunning = false;
       dumpHash.join();
       
@@ -252,12 +257,12 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
       // If SRA run is paired, perform the same steps as above for the reverse-ended FASTQ file
       if (sra.is_paired()) {
         logOutput("\n", logFile);
-        numBytesReads2 = fs::file_size(sraRunsIn[0].second.c_str());
+        numBytesReads2 = fs::file_size(currSraIn.second.c_str());
         lenReadsHash2 = numBytesReads2 / 160;
         
         procRunning = true;
         std::thread constructHash(progressAnim, "      Creating hash table from reverse-ended reads ", logFile);
-        seqHash readHashTable2(lenReadsHash2, fs::path(sraRunsIn[0].second.c_str()), ram_b);
+        seqHash readHashTable2(lenReadsHash2, fs::path(currSraIn.second.c_str()), ram_b);
         procRunning = false;
         constructHash.join();
      
@@ -272,7 +277,7 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
           std::getline(bamMapFile, currLine);
         }
         numMapped = 0;
-        numHalfMil = 0;
+        num1k = 0;
         while (std::getline(bamMapFile, currLine)) {
           numMapped++;
           readName = currLine.substr(0, currLine.find("\t"));
@@ -287,15 +292,21 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
           }
 
           // Print number of unmapped reads identified every half million
-          logOutput("\r        Mapped read count: " + std::to_string(numMapped) + " ...", logFile);
+          if (numMapped % 1000 == 0) {
+            num1k++;
+            std::cout << "\r        Mapped read count: " +
+                         std::to_string(1000 * num1k) + " ..." << std::flush;
+          }
         }
+        logOutput("\r        Mapped read count: " + std::to_string(numMapped) + " ...\n", logFile);
+
         // Dump filled sequence hash tables to new files, containing the mapped
         // and unmapped reads respectively
 
         procRunning = true;
         std::thread dumpHash(progressAnim, "      Dumping split reads to mapped and unmapped files ", logFile);
-        readHashTable2.dump(outDir + "/" + filePrefix2 + "." + currSeqFilePrefix + ".unmapped.fq");
         mappedHash2.dump(outDir + "/" + filePrefix2 + ".mapped.fq");
+        readHashTable2.dump(outDir + "/" + filePrefix2 + "." + currSeqFilePrefix + ".unmapped.fq");
         procRunning = false;
         dumpHash.join();
 
@@ -419,8 +430,6 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
     // Iterate over all SRA runs in current assembly group, preparing vectors containing input files for them,
     // as well as their mapped and unmapped read files generated during read isolation/extraction
     for (auto sra : sraGroup.second) {
-      //currFilePrefix1 = sra.get_sra_path_orep_filt().first.filename().stem().stem().stem().c_str();
-      //currFilePrefix2 = sra.get_sra_path_orep_filt().second.filename().stem().stem().stem().c_str();
       currTrinIn.first = sra.get_sra_path_orep_filt().first.c_str();
       currTrinIn.second = sra.get_sra_path_orep_filt().second.c_str();
       //if (assembAllSeqs) {

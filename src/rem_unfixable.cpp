@@ -138,8 +138,8 @@ long int rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
         }
         if (numUnfix % 100000 == 0) {
           numUnfix100k++;
-          logOutput("\r  Unfixable reads removed: " + std::to_string(numUnfix100k * 100000) +
-                    " ...     ", logFile);
+          std::cout << "\r  Unfixable reads removed: " + std::to_string(numUnfix100k * 100000) +
+                    " ...     " << std::flush;
         }
 
         for (int i = 0; i < 3; i++) {
@@ -297,8 +297,8 @@ long int rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
         }
         if (numUnfix % 100000 == 0) {
           numUnfix100k++;
-          logOutput("\r  Unfixable reads removed: " + std::to_string(numUnfix100k * 100000) +
-                    " ...     ", logFile);
+          std::cout << "\r  Unfixable reads removed: " + std::to_string(numUnfix100k * 100000) +
+                    " ...     " << std::flush;
         }
         for (int i = 0; i < 3; i++) {
           nlPos = std::find(nlPos + 1, inFileL, '\n');

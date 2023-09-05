@@ -14,7 +14,7 @@ void progressAnim(std::string precedeString, std::string logFile) {
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   }
   std::cout << "\r" << precedeString;
-  std::cout << "   " << std::endl;
+  std::cout << "    " << std::endl;
 }
 
 

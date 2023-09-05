@@ -290,19 +290,19 @@ int main(int argc, char * argv[]) {
           logOutput("Performing entire assembly on: " + sra, logFilePath);
           result = system((preCmd + " " + sra).c_str());
           if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
-            std::cerr << "Preprocess exited" << std::endl;
+            std::cerr << "\nPreprocess exited" << std::endl;
             system("setterm -cursor on");
             exit(1);
           }
           result = system((assCmd + " " + sra).c_str());
           if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
-            std::cerr << "Assembly exited" << std::endl;
+            std::cerr << "\nAssembly exited" << std::endl;
             system("setterm -cursor on");
             exit(1);
           }
           result = system((postCmd + " " + sra).c_str());
           if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
-           std::cerr << "Postprocess exited" << std::endl;
+           std::cerr << "\nPostprocess exited" << std::endl;
            system("setterm -cursor on");
            exit(1);
           }
@@ -312,19 +312,19 @@ int main(int argc, char * argv[]) {
         logOutput("Performing entire assembly\n", logFilePath);
         result = system(preCmd.c_str());
         if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
-          std::cerr << "Preprocess exited" << std::endl;
+          std::cerr << "\nPreprocess exited" << std::endl;
           system("setterm -cursor on");
           exit(1);
         }
         result = system(assCmd.c_str());
         if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
-          std::cerr << "Assembly exited" << std::endl;
+          std::cerr << "\nAssembly exited" << std::endl;
           system("setterm -cursor on");
           exit(1);
         }
         result = system(postCmd.c_str());
         if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
-          std::cerr << "Postprocess exited" << std::endl;
+          std::cerr << "\nPostprocess exited" << std::endl;
           system("setterm -cursor on");
           exit(1);
         }

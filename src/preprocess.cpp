@@ -406,12 +406,20 @@ void trimBulk(std::vector<SRA> & sras, std::string threads,
 
     // If both files pass for adapter contamination check, skip SRA run
     if (inFilesGood) {
-      if (sra.is_paired()) {
-        system(("cp " + currTrimIn.first + " " + currTrimOutU.first).c_str());
+      /*if (sra.is_paired()) {
+        //system(("cp " + currTrimIn.first + " " + currTrimOutU.first).c_str());
       }
       else {
-        system(("cp " + currTrimIn.first + " " + currTrimOutP.first).c_str());
-        system(("cp " + currTrimIn.second + " " + currTrimOutP.second).c_str());
+        //system(("cp " + currTrimIn.first + " " + currTrimOutP.first).c_str());
+        //system(("cp " + currTrimIn.second + " " + currTrimOutP.second).c_str());
+      }*/
+      if (sra.is_paired()) {
+        sra.set_sra_path_trim_p(std::pair<fs::path, fs::path>(currTrimIn.first.c_str(),
+                                                              currTrimIn.second.c_str()));
+      }
+      else {
+        sra.set_sra_path_trim_u(std::pair<fs::path, fs::path>(currTrimIn.first.c_str(),
+                                                              currTrimIn.second.c_str()));
       }
     }
 
