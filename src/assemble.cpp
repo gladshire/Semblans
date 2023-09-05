@@ -241,14 +241,14 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
                        std::to_string(1000 * num1k) + " ..." << std::flush;
         }
       }
-      logOutput("\r        Mapped read count: " + std::to_string(numMapped) + " ...\n", logFile);
+      logOutput("\r        Mapped read count: " + std::to_string(numMapped) + "    \n", logFile);
       // Dump filled sequence hash tables to new files, containing the mapped
       // and unmapped reads respectively
 
       procRunning = true;
       std::thread dumpHash(progressAnim, "      Dumping split reads to mapped and unmapped files ", logFile);
-      mappedHash1.dump(outDir + "/" + filePrefix1 + ".mapped.fq");
-      readHashTable1.dump(outDir + "/" + filePrefix1 + "." + currSeqFilePrefix + ".unmapped.fq");
+      mappedHash1.dump(outDir + "/" + filePrefix1 + "." + currSeqFilePrefix + ".mapped.fq");
+      readHashTable1.dump(outDir + "/" + filePrefix1 + ".unmapped.fq");
       procRunning = false;
       dumpHash.join();
       
@@ -298,15 +298,15 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
                          std::to_string(1000 * num1k) + " ..." << std::flush;
           }
         }
-        logOutput("\r        Mapped read count: " + std::to_string(numMapped) + " ...\n", logFile);
+        logOutput("\r        Mapped read count: " + std::to_string(numMapped) + "    \n", logFile);
 
         // Dump filled sequence hash tables to new files, containing the mapped
         // and unmapped reads respectively
 
         procRunning = true;
         std::thread dumpHash(progressAnim, "      Dumping split reads to mapped and unmapped files ", logFile);
-        mappedHash2.dump(outDir + "/" + filePrefix2 + ".mapped.fq");
-        readHashTable2.dump(outDir + "/" + filePrefix2 + "." + currSeqFilePrefix + ".unmapped.fq");
+        mappedHash2.dump(outDir + "/" + filePrefix2 + "." + currSeqFilePrefix + ".mapped.fq");
+        readHashTable2.dump(outDir + "/" + filePrefix2 + ".unmapped.fq");
         procRunning = false;
         dumpHash.join();
 
