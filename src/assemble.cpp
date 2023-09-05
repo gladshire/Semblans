@@ -282,7 +282,7 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
           numMapped++;
           readName = currLine.substr(0, currLine.find("\t"));
           if (!mappedHash2.inHashTable(readName)) {
-            currSeq = readHashTable2.getSeq(currHead);
+            currSeq = readHashTable2.getSeq(readName);
             currHead = currSeq.get_header();
             currSeqData = currSeq.get_sequence();
             currQual = currSeq.get_quality();
