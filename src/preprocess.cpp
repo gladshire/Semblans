@@ -73,8 +73,8 @@ void retrieveSraData(std::vector<SRA> & sras, std::string threads,
   for (auto sra : sras) {
     // Check for checkpoint file
     if (sra.checkpointExists("dump")) {
-      logOutput("  Raw dump checkpoint found for: " +
-                sra.get_accession() + "\n", logFilePath);
+      logOutput("\n  Raw dump checkpoint found for: " +
+                sra.get_accession(), logFilePath);
       continue;
     }
     else {
