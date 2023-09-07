@@ -47,8 +47,16 @@ void retrieveSraData(std::vector<SRA> & sras, std::string threads,
   for (auto sra : sras) {
     // Check for checkpoint file
     if (sra.checkpointExists("sra")) {
-      logOutput("\n  Prefetch checkpoint found for: " +
-                sra.get_accession(), logFilePath);
+      if (!sra.get_accession().empty()) {
+        logOutput("\n  Prefetch checkpoint found for: " +
+                  sra.get_accession(), logFilePath);
+      }
+      else {
+        logOutput(std::string("\n  Prefetch checkpoint found for:") +
+                  "\n    " + sra.get_file_prefix().first +
+                  "\n    " + sra.get_file_prefix().second,
+                  logFilePath);
+      }
       continue;
     }
     else {
@@ -73,8 +81,16 @@ void retrieveSraData(std::vector<SRA> & sras, std::string threads,
   for (auto sra : sras) {
     // Check for checkpoint file
     if (sra.checkpointExists("dump")) {
-      logOutput("\n  Raw dump checkpoint found for: " +
-                sra.get_accession(), logFilePath);
+      if (!sra.get_accession().empty()) {
+        logOutput("\n  Raw dump checkpoint found for: " +
+                  sra.get_accession(), logFilePath);
+      }
+      else {
+        logOutput(std::string("\n  Raw dump checkpoint found for: ") +
+                  "\n    " + sra.get_file_prefix().first +
+                  "\n    " + sra.get_file_prefix().second,
+                  logFilePath);
+      }
       continue;
     }
     else {
@@ -130,8 +146,16 @@ void fastqcBulk1(std::vector<SRA> & sras, std::string threads, bool dispOutput,
     currFastqcOut1 = sra.get_fastqc_dir_1().first.parent_path().c_str();
     // Check for checkpoint file
     if (sra.checkpointExists("fastqc1")) {
-      logOutput("  Quality analysis checkpoint found for: " +
-                sra.get_accession() + "\n", logFilePath);
+      if (!sra.get_accession().empty()) {
+        logOutput("\n  Quality analysis checkpoint found for: " +
+                  sra.get_accession(), logFilePath);
+      }
+      else {
+        logOutput(std::string("\n  Quality analysis checkpoint found for: ") +
+                  "\n    " + sra.get_file_prefix().first +
+                  "\n    " + sra.get_file_prefix().second,
+                  logFilePath);
+      }
       continue;
     }
     logOutput("\n  Now running quality analysis for:\n", logFilePath);
@@ -182,8 +206,16 @@ void fastqcBulk2(std::vector<SRA> & sras, std::string threads, bool dispOutput,
     currFastqcOut = sra.get_fastqc_dir_2().first.parent_path().c_str();
     // Check for checkpoint file
     if (sra.checkpointExists("fastqc2")) {
-      logOutput("  Quality analysis checkpoint found for: " +
-                sra.get_accession() + "\n", logFilePath);
+      if (!sra.get_accession().empty()) {
+        logOutput("\n  Quality analysis checkpoint found for: " +
+                  sra.get_accession(), logFilePath);
+      }
+      else {
+        logOutput(std::string("\n  Quality analysis checkpoint found for: ") +
+                  "\n    " + sra.get_file_prefix().first +
+                  "\n    " + sra.get_file_prefix().second,
+                  logFilePath);
+      }
       continue;
     }
     logOutput("\n  Now running quality analysis for:\n", logFilePath);
@@ -224,8 +256,16 @@ void errorCorrBulk(std::vector<SRA> & sras, std::string threads,
      
     // Check for checkpoint file
     if (sra.checkpointExists("corr")) {
-      logOutput("  Error-correction checkpoint found for: " +
-                sra.get_accession() + "\n", logFilePath);
+      if (!sra.get_accession().empty()) {
+        logOutput("\n  Error-correction checkpoint found for: " +
+                  sra.get_accession(), logFilePath);
+      }
+      else {
+        logOutput(std::string("\n  Error-correction checkpoint found for: ") +
+                  "\n    " + sra.get_file_prefix().first +
+                  "\n    " + sra.get_file_prefix().second,
+                  logFilePath);
+      }
       continue;
     }
     logOutput("\n  Now running error correction for:\n", logFilePath);
@@ -266,8 +306,16 @@ bool remUnfixBulk(std::vector<SRA> & sras, std::string threads, std::string ram_
 
     // Check for checkpoint file
     if (sra.checkpointExists("corr.fix")) {
-      logOutput("  Unfixable error fix checkpoint found for: " +
-                sra.get_accession() + "\n", logFilePath);
+      if (!sra.get_accession().empty()) {
+        logOutput("\n  Unfixable error fix checkpoint found for: " +
+                  sra.get_accession(), logFilePath);
+      }
+      else {
+        logOutput(std::string("\n  Unfixable error fix checkpoint found for: ") +
+                  "\n    " + sra.get_file_prefix().first +
+                  "\n    " + sra.get_file_prefix().second,
+                  logFilePath);
+      }
       continue;
     }
     logOutput("\n  Now removing unfixable reads for:\n", logFilePath);
@@ -346,8 +394,16 @@ void trimBulk(std::vector<SRA> & sras, std::string threads,
   for (auto sra : sras) {
     // Check for checkpoint file
     if (sra.checkpointExists("trim")) {
-      logOutput("  Adapter trimming checkpoint found for: " +
-                sra.get_accession() + "\n", logFilePath);
+      if (!sra.get_accession().empty()) {
+        logOutput("\n  Adapter trimming checkpoint found for: " +
+                  sra.get_accession(), logFilePath);
+      }
+      else {
+        logOutput(std::string("\n  Adapter trimming checkpoint found for: ") +
+                  "\n    " + sra.get_file_prefix().first + 
+                  "\n    " + sra.get_file_prefix().second,
+                  logFilePath);
+      }
       continue;
     }
     currTrimIn.first = sra.get_sra_path_corr_fix().first.c_str();
@@ -406,13 +462,6 @@ void trimBulk(std::vector<SRA> & sras, std::string threads,
 
     // If both files pass for adapter contamination check, skip SRA run
     if (inFilesGood) {
-      /*if (sra.is_paired()) {
-        //system(("cp " + currTrimIn.first + " " + currTrimOutU.first).c_str());
-      }
-      else {
-        //system(("cp " + currTrimIn.first + " " + currTrimOutP.first).c_str());
-        //system(("cp " + currTrimIn.second + " " + currTrimOutP.second).c_str());
-      }*/
       if (sra.is_paired()) {
         sra.set_sra_path_trim_p(std::pair<fs::path, fs::path>(currTrimIn.first.c_str(),
                                                               currTrimIn.second.c_str()));
@@ -486,13 +535,21 @@ void filtForeignBulk(std::vector<SRA> & sras, std::vector<std::string> krakenDbs
   
   for (int i = 0; i < krakenDbs.size(); i++) {
     logOutput("\n  Now filtering with database: " +
-              std::string(fs::path(krakenDbs[i].c_str()).filename().c_str()) + "\n",
+              std::string(fs::path(krakenDbs[i].c_str()).filename().c_str()),
               logFilePath);
     for (auto sra : sras) {
       // Check for checkpoint file
       if (sra.checkpointExists(std::string(fs::path(krakenDbs[i]).stem().c_str()) + ".filt")) {
-        logOutput("    Filter checkpoint found for: " +
-                  sra.get_accession() + "\n", logFilePath);
+        if (!sra.get_accession().empty()) {
+          logOutput("\n    Filter checkpoint found for: " +
+                    sra.get_accession(), logFilePath);
+        }
+        else {
+          logOutput(std::string("\n    Filter checkpoint found for: ") +
+                    "\n      " + sra.get_file_prefix().first +
+                    "\n      " + sra.get_file_prefix().second,
+                    logFilePath);
+        }
         continue;
       }
       logOutput("    Running filter of:\n", logFilePath);
@@ -633,8 +690,16 @@ bool remOverrepBulk(std::vector<SRA> & sras, std::string threads, std::string ra
   for (auto sra : sras) {
     // Check for checkpoint file
     if (sra.checkpointExists("orep.fix")) {
-      logOutput("  Overrepresented-removed checkpoint found for: " +
-                sra.get_accession() + "\n", logFilePath);
+      if (!sra.get_accession().empty()) {
+        logOutput("\n  Overrepresented-removed checkpoint found for: " +
+                  sra.get_accession(), logFilePath);
+      }
+      else {
+        logOutput(std::string("\n  Overrepresented-removed checkpoint found for: ") +
+                  "\n    " + sra.get_file_prefix().first +
+                  "\n    " + sra.get_file_prefix().second,
+                  logFilePath);
+      }
       continue;
     }
     logOutput("\n  Running removal of overrepresented reads for:\n", logFilePath);

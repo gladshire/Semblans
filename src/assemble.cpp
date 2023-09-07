@@ -112,7 +112,16 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
     // Iterate through SRA runs, mapping each against the STAR index we just created
     for (auto sra : sras) {
       if (sra.checkpointExists(currSeqFilePrefix + ".iso")) {
-        logOutput("    Read isolation checkpoint found for: " + sra.get_accession() + "\n", logFile);
+        if (!sra.get_accession().empty()) {
+          logOutput("\n    Read isolation checkpoint found for: " +
+                    sra.get_accession(), logFile);
+        }
+        else {
+          logOutput(std::string("\n    Read isolation checkpoint found for: ") +
+                    "\n      " + sra.get_file_prefix().first +
+                    "\n      " + sra.get_file_prefix().second,
+                    logFile);
+        }
         continue;
       }
       logOutput("\n    Extracting reads from:\n", logFile);

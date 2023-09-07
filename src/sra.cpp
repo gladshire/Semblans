@@ -121,7 +121,7 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool dispOutput,
   }
   if (this->sra_accession != "FAILURE") {
     if (dispOutput) {
-      logOutput("  Successfully retrieved information for: " + sra_accession + "\n", logFile);
+      logOutput("\n  Successfully retrieved information for: " + sra_accession, logFile);
     }
 
     std::string fileBase = make_file_str();

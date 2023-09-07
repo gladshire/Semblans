@@ -253,54 +253,199 @@ int main(int argc, char * argv[]) {
 
     print_intro(logFilePath);
 
+    std::ifstream cfgIniFile;
+    std::ofstream cfgIniSub;
+    std::string currLine;
+    std::string currCfgIniSub;
+    std::string currPreCmd;
+    std::string currAssCmd;
+    std::string currPostCmd;
+    size_t pos;
+
     // Case 1: preprocess
     if (command == "preprocess") {
-      logOutput("Performing preprocessing only", logFilePath);
-      result = system(preCmd.c_str());
-      if (WIFSIGNALED(result)) {
-        system("setterm -cursor on");
-        exit(1);
+      if (serialProcess) {
+        for (auto sraStr : sraRuns) {
+          currCfgIniSub = pathConfig.substr(0, pathConfig.rfind(".ini")).insert(pathConfig.rfind("/") + 1, ".") +
+                          "." + std::string(fs::path(sraStr.c_str()).stem().c_str()) + ".ini";
+          cfgIniFile.open(pathConfig);
+          cfgIniSub.open(currCfgIniSub);
+          while (std::getline(cfgIniFile, currLine)) {
+            for (auto sraStrOther : sraRuns) {
+              if (sraStrOther == sraStr) {
+                continue;
+              }
+              pos = currLine.find(sraStrOther);
+              if (pos != std::string::npos) {
+                currLine.replace(currLine.find(sraStrOther), sraStrOther.length(), "");
+              }
+            }
+            cfgIniSub << currLine << std::endl;
+          }
+          cfgIniFile.close();
+          cfgIniSub.close();
+        }
+
+        currPreCmd = SEMBLANS_DIR + "preprocess " + currCfgIniSub + " " +
+                     std::to_string(numThreads) + " " +
+                     std::to_string(ram) + retain + verbose;
+
+        logOutput("Performing preprocessing only", logFilePath);
+        result = system(preCmd.c_str());
+        if (WIFSIGNALED(result)) {
+          system("setterm -cursor on");
+          exit(1);
+        }
+      }
+      else {
+        logOutput("Performing preprocessing only", logFilePath);
+        result = system(preCmd.c_str());
+        if (WIFSIGNALED(result)) {
+          system("setterm -cursor on");
+          exit(1);
+        }
       }
       exit(0);
     }
     // Case 2: assemble
     if (command == "assemble") {
-      logOutput("Performing assembly only", logFilePath);
-      result = system(assCmd.c_str());
-      if (WIFSIGNALED(result)) {
-        system("setterm -cursor on");
-        exit(1);
+      if (serialProcess) {
+        for (auto sraStr : sraRuns) {
+          currCfgIniSub = pathConfig.substr(0, pathConfig.rfind(".ini")).insert(pathConfig.rfind("/") + 1, ".") +
+                          "." + std::string(fs::path(sraStr.c_str()).stem().c_str()) + ".ini";
+          cfgIniFile.open(pathConfig);
+          cfgIniSub.open(currCfgIniSub);
+          while (std::getline(cfgIniFile, currLine)) {
+            for (auto sraStrOther : sraRuns) {
+              if (sraStrOther == sraStr) {
+                continue;
+              }
+              pos = currLine.find(sraStrOther);
+              if (pos != std::string::npos) {
+                currLine.replace(currLine.find(sraStrOther), sraStrOther.length(), "");
+              }
+            }
+            cfgIniSub << currLine << std::endl;
+          }
+          cfgIniFile.close();
+          cfgIniSub.close();
+        }
+
+        currAssCmd = SEMBLANS_DIR + "assemble " + currCfgIniSub + " " +
+                     std::to_string(numThreads) + " " +
+                     std::to_string(ram) + retain + verbose;
+
+        logOutput("Performing assembly only", logFilePath);
+        result = system(assCmd.c_str());
+        if (WIFSIGNALED(result)) {
+          system("setterm -cursor on");
+          exit(1);
+        }
+      }
+      else {
+        logOutput("Performing assembly only", logFilePath);
+        result = system(assCmd.c_str());
+        if (WIFSIGNALED(result)) {
+          system("setterm -cursor on");
+          exit(1);
+        }
       }
       exit(0);
     }
     // Case 3: postprocess
     if (command == "postprocess") {
-      logOutput("Performing postprocess only", logFilePath);
-      result = system(postCmd.c_str());
-      if (WIFSIGNALED(result)) {
-        system("setterm -cursor on");
-        exit(1);
+      if (serialProcess) {
+        for (auto sraStr : sraRuns) {
+          currCfgIniSub = pathConfig.substr(0, pathConfig.rfind(".ini")).insert(pathConfig.rfind("/") + 1, ".") +
+                          "." + std::string(fs::path(sraStr.c_str()).stem().c_str()) + ".ini";
+          cfgIniFile.open(pathConfig);
+          cfgIniSub.open(currCfgIniSub);
+          while (std::getline(cfgIniFile, currLine)) {
+            for (auto sraStrOther : sraRuns) {
+              if (sraStrOther == sraStr) {
+                continue;
+              }
+              pos = currLine.find(sraStrOther);
+              if (pos != std::string::npos) {
+                currLine.replace(currLine.find(sraStrOther), sraStrOther.length(), "");
+              }
+            }
+            cfgIniSub << currLine << std::endl;
+          }
+          cfgIniFile.close();
+          cfgIniSub.close();
+        }
+
+        currPostCmd = SEMBLANS_DIR + "postprocess " + currCfgIniSub + " " +
+                      std::to_string(numThreads) + " " +
+                      std::to_string(ram) + retain + verbose;
+
+        logOutput("Performing postprocess only", logFilePath);
+        result = system(postCmd.c_str());
+        if (WIFSIGNALED(result)) {
+          system("setterm -cursor on");
+          exit(1);
+        }
+      }
+      else {
+        logOutput("Performing postprocess only", logFilePath);
+        result = system(postCmd.c_str());
+        if (WIFSIGNALED(result)) {
+          system("setterm -cursor on");
+          exit(1);
+        }
       }
       exit(0);
     }
     // Case 4: all three
     if (command == "all") {
       if (serialProcess) {
-        for (auto sra : sraRuns) {
-          logOutput("Performing entire assembly on: " + sra, logFilePath);
-          result = system((preCmd + " " + sra).c_str());
+        for (auto sraStr : sraRuns) {
+          currCfgIniSub = pathConfig.substr(0, pathConfig.rfind(".ini")).insert(pathConfig.rfind("/") + 1, ".") +
+                          "." + std::string(fs::path(sraStr.c_str()).stem().c_str()) + ".ini";
+          cfgIniFile.open(pathConfig);
+          cfgIniSub.open(currCfgIniSub);
+          while (std::getline(cfgIniFile, currLine)) {
+            for (auto sraStrOther : sraRuns) {
+              if (sraStrOther == sraStr) {
+                continue;
+              }
+              pos = currLine.find(sraStrOther);
+              if (pos != std::string::npos) {
+                currLine.replace(currLine.find(sraStrOther), sraStrOther.length(), "");
+              }
+            }
+            cfgIniSub << currLine << std::endl;
+          }
+          cfgIniFile.close();
+          cfgIniSub.close();
+
+          currPreCmd = SEMBLANS_DIR + "preprocess " + currCfgIniSub + " " +
+                       std::to_string(numThreads) + " " +
+                       std::to_string(ram) + retain + verbose;
+          
+          currAssCmd = SEMBLANS_DIR + "assemble " + currCfgIniSub + " " +
+                       std::to_string(numThreads) + " " +
+                       std::to_string(ram) + retain + verbose;
+
+          currPostCmd = SEMBLANS_DIR + "postprocess " + currCfgIniSub + " " +
+                        std::to_string(numThreads) + " " +
+                        std::to_string(ram) + retain + verbose;
+
+          logOutput("Performing entire assembly on: " + sraStr, logFilePath);
+          result = system(currPreCmd.c_str());
           if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
             std::cerr << "\nPreprocess exited" << std::endl;
             system("setterm -cursor on");
             exit(1);
           }
-          result = system((assCmd + " " + sra).c_str());
+          result = system(currAssCmd.c_str());
           if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
             std::cerr << "\nAssembly exited" << std::endl;
             system("setterm -cursor on");
             exit(1);
           }
-          result = system((postCmd + " " + sra).c_str());
+          result = system(currPostCmd.c_str());
           if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
            std::cerr << "\nPostprocess exited" << std::endl;
            system("setterm -cursor on");
