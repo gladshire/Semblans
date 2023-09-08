@@ -12,6 +12,7 @@ long int rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
   std::ifstream inFile2;
   std::ofstream outFile1(sraRunOut.first);
   std::ofstream outFile2(sraRunOut.second);
+  std::stringstream percentStream;
 
   if (compressFiles) {
     inFile1.open(sraRunIn.first, std::ios_base::binary);
@@ -74,6 +75,7 @@ long int rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
   uintmax_t numUnfix = 0;
   uintmax_t numUnfix100k = 0;
   uintmax_t numReads = 0;
+  float percentUnfix;
   std::string readName;
   while  ((!inputStream1.eof() && !inputStream2.eof() && !inFile1.eof() && !inFile2.eof()) &&
           (inputStream1.good() && inputStream2.good() && inFile1.good() && inFile2.good())) {
@@ -197,18 +199,16 @@ long int rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
   outFile2.close();
 
   if (dispOutput) {
-    std::stringstream percentStream;
-    percentStream << std::fixed << std::setprecision(2)
-                  << (float(numUnfix) * 100) / float(numUnfix + numReads);
+    percentUnfix = (float(numUnfix) * 100) / float(numReads);
+    percentStream << std::fixed << std::setprecision(2) << percentUnfix;
     logOutput("\nRemoval of unfixable reads finished\n", logFile);
     logOutput("\n  SUMMARY", logFile);
-    logOutput("\n    " + std::to_string(numUnfix) + " reads removed (" +
-              percentStream.str() + " %)", logFile);
+    logOutput("\n    Reads removed: " + std::to_string(numUnfix) +
+              "(" + percentStream.str() + "%)", logFile);
     percentStream.str("");
-    percentStream << std::fixed << std::setprecision(2)
-                  << (float(numReads) * 100) / float(numUnfix + numReads);
-    logOutput("\n    " + std::to_string(numReads - numUnfix) + " reads retained (" +
-              percentStream.str() + " %)", logFile);
+    percentStream << std::fixed << std::setprecision(2) << 100.0 - percentUnfix;
+    logOutput("\n    Reads retained: " + std::to_string(numReads - numUnfix) +
+              "(" + percentStream.str() + "%)", logFile);
   }
   return numUnfix;
 }
@@ -343,12 +343,12 @@ long int rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
     logOutput("\nRemoval of unfixable reads finished", logFile);
     logOutput("\n  SUMMARY", logFile);
     logOutput("\n    " + std::to_string(numUnfix) + " reads removed (" +
-              percentStream.str() + " %)", logFile);
+              percentStream.str() + "%)", logFile);
     percentStream.str("");
     percentStream << std::fixed << std::setprecision(2)
                   << (float(numReads) * 100) / float(numUnfix + numReads);
     logOutput("\n    " + std::to_string(numReads - numUnfix) + " reads retained (" +
-              percentStream.str() + " %)", logFile);
+              percentStream.str() + "%)", logFile);
   }
   return numUnfix;
 }

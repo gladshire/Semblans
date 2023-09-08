@@ -34,7 +34,7 @@ class seqHash {
     void setSeqHeader(std::string header, std::string newHeader);
     void dump(std::string filePath);
     uintmax_t getLength();
-    uintmax_t getSize();
+    uintmax_t getNumItems();
     void clear();
     linkedList * getHashData();    
     ~seqHash();

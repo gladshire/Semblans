@@ -119,8 +119,8 @@ bool linkedList::empty() {
   }
 }
 
-// Utility function for writing all sequence data in the linked list to a
-// given output file
+// Function for dumping all sequence data in the linked list to a
+// specified output stream
 void linkedList::dump(std::ofstream & outFile) {
   Node * currNode = head;
   std::string currHead;
@@ -130,7 +130,13 @@ void linkedList::dump(std::ofstream & outFile) {
     currHead = currNode->seqEntry.get_header();
     currSeq = currNode->seqEntry.get_sequence();
     currQual = currNode->seqEntry.get_quality();
-    outFile << ">" << currHead << '\n';
+    if (!currQual.empty()) {
+      outFile << "@";
+    }
+    else {
+      outFile << '>';
+    }
+    outFile << currHead << '\n';
     outFile << currSeq << std::endl;
     if (!currQual.empty()) {
       outFile << "+" << '\n';

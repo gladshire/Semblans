@@ -13,7 +13,7 @@ bool fasta_ok(std::string fastaFile, uintmax_t ram_b) {
   uintmax_t lenHashTable = numBytesTrans / 160;
   uintmax_t fasta_count = 0;
   seqHash fastaHash(lenHashTable, fastaFilePath, ram_b);
-  fasta_count = fastaHash.getSize();
+  fasta_count = fastaHash.getNumItems();
   if (fasta_count >= MIN_FASTA) {
     return true;
   }

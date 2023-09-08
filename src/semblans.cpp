@@ -7,16 +7,16 @@ void print_intro(std::string logFile) {
   winsize w;
   ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
   logOutput("\n", logFile);
-  logOutput("                          |     |                     \n", logFile);
-  logOutput("    __|   _ \\  __ `__ \\   __ \\  |   _` |  __ \\    __| \n", logFile);
-  logOutput("  \\__ \\   __/  |   |   |  |   | |  (   |  |   | \\__ \\ \n", logFile);
-  logOutput("  ____/ \\___| _|  _|  _| _.__/ _| \\__,_| _|  _| ____/ \n", logFile); 
+  logOutput("                            |     |                     \n", logFile);
+  logOutput("      __|   _ \\  __ `__ \\   __ \\  |   _` |  __ \\    __| \n", logFile);
+  logOutput("    \\__ \\   __/  |   |   |  |   | |  (   |  |   | \\__ \\ \n", logFile);
+  logOutput("    ____/ \\___| _|  _|  _| _.__/ _| \\__,_| _|  _| ____/ \n", logFile); 
   logOutput("\n", logFile);
-  logOutput("    ───────────────────────────────────────────────\n\n", logFile);
-  logOutput("    A C++ package enabling the bulk retrieval,\n", logFile);
-  logOutput("    assembly, and analysis of de novo transcriptomes\n", logFile);
-  logOutput("    from multiple individuals\n\n", logFile);
-  logOutput("    ───────────────────────────────────────────────\n\n", logFile);
+  logOutput("      ───────────────────────────────────────────────\n\n", logFile);
+  logOutput("      A C++ package enabling the bulk retrieval,\n", logFile);
+  logOutput("      assembly, and analysis of de novo transcriptomes\n", logFile);
+  logOutput("      from multiple individuals\n\n", logFile);
+  logOutput("      ───────────────────────────────────────────────\n\n", logFile);
 }
 
 
@@ -433,18 +433,27 @@ int main(int argc, char * argv[]) {
                         std::to_string(ram) + retain + verbose;
 
           logOutput("Performing entire assembly on: " + sraStr, logFilePath);
+          logOutput("\n ┌───────────────────────────────────────────────────────┐", logFilePath);
+          logOutput("\n │         Phase 1: Preprocessing of Short-reads         │", logFilePath);
+          logOutput("\n └───────────────────────────────────────────────────────┘", logFilePath);
           result = system(currPreCmd.c_str());
           if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
             std::cerr << "\nPreprocess exited" << std::endl;
             system("setterm -cursor on");
             exit(1);
           }
+          logOutput("\n ┌───────────────────────────────────────────────────────┐", logFilePath);
+          logOutput("\n │        Phase 2: De Novo Assembly of Short-reads       │", logFilePath);
+          logOutput("\n └───────────────────────────────────────────────────────┘", logFilePath);
           result = system(currAssCmd.c_str());
           if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
             std::cerr << "\nAssembly exited" << std::endl;
             system("setterm -cursor on");
             exit(1);
           }
+          logOutput("\n ┌────────────────────────────────────────────────────────┐", logFilePath);
+          logOutput("\n │    Phase 3: Postprocessing of Assembled Transcripts    │", logFilePath);
+          logOutput("\n └────────────────────────────────────────────────────────┘", logFilePath);
           result = system(currPostCmd.c_str());
           if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
            std::cerr << "\nPostprocess exited" << std::endl;
@@ -455,18 +464,27 @@ int main(int argc, char * argv[]) {
       }
       else {
         logOutput("Performing entire assembly\n", logFilePath);
+        logOutput("\n ┌───────────────────────────────────────────────────────┐", logFilePath);
+        logOutput("\n │         Phase 1: Preprocessing of Short-reads         │", logFilePath);
+        logOutput("\n └───────────────────────────────────────────────────────┘", logFilePath);
         result = system(preCmd.c_str());
         if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
           std::cerr << "\nPreprocess exited" << std::endl;
           system("setterm -cursor on");
           exit(1);
         }
+        logOutput("\n ┌───────────────────────────────────────────────────────┐", logFilePath);
+        logOutput("\n │        Phase 2: De Novo Assembly of Short-reads       │", logFilePath);
+        logOutput("\n └───────────────────────────────────────────────────────┘", logFilePath);
         result = system(assCmd.c_str());
         if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
           std::cerr << "\nAssembly exited" << std::endl;
           system("setterm -cursor on");
           exit(1);
         }
+        logOutput("\n ┌────────────────────────────────────────────────────────┐", logFilePath);
+        logOutput("\n │    Phase 3: Postprocessing of Assembled Transcripts    │", logFilePath);
+        logOutput("\n └────────────────────────────────────────────────────────┘", logFilePath);
         result = system(postCmd.c_str());
         if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
           std::cerr << "\nPostprocess exited" << std::endl;

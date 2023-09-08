@@ -255,18 +255,6 @@ void seqHash::dump(std::string filePath) {
     }
     else {
       int bpPerLine;
-      /*
-      for (auto seq : seqHashData[i]) {
-        currHeader = seq.get_header();
-        currSeq = seq.get_sequence();
-        currQual = seq.get_quality();
-        outFile << ">" << currHeader << '\n';
-        outFile << currSeq << std::endl;
-        if (!currQual.empty()) {
-          outFile << "+" << '\n';
-          outFile << currQual << std::endl;
-        }
-      }*/
       seqHashData[i].dump(outFile);
     }
   }
@@ -279,7 +267,7 @@ uintmax_t seqHash::getLength() {
 }
 
 // Return number of items in hash table
-uintmax_t seqHash::getSize() {
+uintmax_t seqHash::getNumItems() {
   return numItems;
 }
 

@@ -38,6 +38,7 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
   std::string fastaMap;
   transcript dummyTrans;
   std::ifstream bamMapFile;
+  std::stringstream percentStream;
 
   // Create string vector of user-defined FASTA files containing sequences to extract
   std::vector<std::string> seqsInterest;
@@ -109,6 +110,7 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
     uintmax_t numReads; 
     uintmax_t numMapped;
     int num1k;
+    float percentMapped;
     // Iterate through SRA runs, mapping each against the STAR index we just created
     for (auto sra : sras) {
       if (sra.checkpointExists(currSeqFilePrefix + ".iso")) {
@@ -218,10 +220,11 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
       seqHash readHashTable1(lenReadsHash1, fs::path(currSraIn.first.c_str()), ram_b);
       procRunning = false;
       constructHash.join();
+      numReads = readHashTable1.getNumItems();
       
       seqHash mappedHash1(lenReadsHash1);
 
-      logOutput("      Now splitting reads into mapped and unmapped\n", logFile);
+      logOutput("      Splitting reads into mapped and unmapped\n", logFile);
       bamMapFile.open(fastaMap + "/Aligned.out.sam");
 
       // Iterate through headers in unmapped reads file
@@ -233,9 +236,9 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
       numMapped = 0;
       num1k = 0; 
       while (std::getline(bamMapFile, currLine)) {
-        numMapped++;
         readName = currLine.substr(0, currLine.find("\t"));
         if (!mappedHash1.inHashTable(readName)) {
+          numMapped++;
           currSeq = readHashTable1.getSeq(readName);
           currHead = currSeq.get_header();
           currSeqData = currSeq.get_sequence();
@@ -250,7 +253,15 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
                        std::to_string(1000 * num1k) + " ..." << std::flush;
         }
       }
-      logOutput("\r        Mapped read count: " + std::to_string(numMapped) + "    \n", logFile);
+      percentMapped = (float(numMapped) * 100) / float(numReads);
+      percentStream << std::fixed << std::setprecision(2) << percentMapped;
+      logOutput("\r        Mapped read count:   " + std::to_string(numMapped) +
+                " (" + percentStream.str() + "%)", logFile);
+      percentStream.str("");
+      percentStream << std::fixed << std::setprecision(2) << 100.0 - percentMapped;
+      logOutput("\n        Unmapped read count: " + std::to_string(numReads - numMapped) +
+                " (" + percentStream.str() + "%)\n", logFile);
+      percentStream.str("");      
       // Dump filled sequence hash tables to new files, containing the mapped
       // and unmapped reads respectively
 
@@ -274,10 +285,11 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
         seqHash readHashTable2(lenReadsHash2, fs::path(currSraIn.second.c_str()), ram_b);
         procRunning = false;
         constructHash.join();
-     
+        numReads = readHashTable2.getNumItems();     
+
         seqHash mappedHash2(lenReadsHash2);
 
-        logOutput("      Now splitting reads into mapped and unmapped\n", logFile);
+        logOutput("      Splitting reads into mapped and unmapped\n", logFile);
         bamMapFile.open(fastaMap + "/Aligned.out.sam");
 
         // Iterate through headers in unmapped reads file
@@ -288,9 +300,9 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
         numMapped = 0;
         num1k = 0;
         while (std::getline(bamMapFile, currLine)) {
-          numMapped++;
           readName = currLine.substr(0, currLine.find("\t"));
           if (!mappedHash2.inHashTable(readName)) {
+            numMapped++;
             currSeq = readHashTable2.getSeq(readName);
             currHead = currSeq.get_header();
             currSeqData = currSeq.get_sequence();
@@ -307,7 +319,15 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
                          std::to_string(1000 * num1k) + " ..." << std::flush;
           }
         }
-        logOutput("\r        Mapped read count: " + std::to_string(numMapped) + "    \n", logFile);
+        percentMapped = (float(numMapped) * 100) / float(numReads);
+        percentStream << std::fixed << std::setprecision(2) << percentMapped;
+        logOutput("\r        Mapped read count:   " + std::to_string(numMapped) +
+                  " (" + percentStream.str() + "%)", logFile);
+        percentStream.str("");
+        percentStream << std::fixed << std::setprecision(2) << 100.0 - percentMapped;
+        logOutput("\n        Unmapped read count: " + std::to_string(numReads - numMapped) +
+                  " (" + percentStream.str() + "%)\n", logFile);
+        percentStream.str("");        
 
         // Dump filled sequence hash tables to new files, containing the mapped
         // and unmapped reads respectively

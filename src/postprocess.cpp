@@ -498,7 +498,6 @@ int main(int argc, char * argv[]) {
     if (logFilePath[0] == '~') {
       logFilePath = std::string(home) + logFilePath.substr(1, logFilePath.size() - 1);
     }
-    
     // Retrieve SRA objects, convert to transcripts
     std::vector<SRA> sras;
     std::vector<std::string> localDataFiles;

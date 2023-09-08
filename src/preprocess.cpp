@@ -42,7 +42,7 @@ void retrieveSraData(std::vector<SRA> & sras, std::string threads,
                      bool dispOutput, bool compressOutput,
                      bool retainInterFiles,
                      std::string logFilePath) {
-  logOutput("\nStarting retrieval of raw sequence data\n", logFilePath);
+  logOutput("\nStarting retrieval of raw sequence data", logFilePath);
   // Prefetch raw data
   for (auto sra : sras) {
     // Check for checkpoint file
@@ -137,7 +137,7 @@ void print_help() {
 // Given a vector of SRAs, perform a pre-assembly FastQC quality analysis on their sequence data
 void fastqcBulk1(std::vector<SRA> & sras, std::string threads, bool dispOutput,
                  std::string logFilePath) {
-  logOutput("\nStarting initial quality analysis\n", logFilePath);
+  logOutput("\n\nStarting initial quality analysis", logFilePath);
   std::pair<std::string, std::string> currFastqcIn1;
   std::string currFastqcOut1;
   for (auto sra : sras) {
@@ -180,7 +180,7 @@ void fastqcBulk1(std::vector<SRA> & sras, std::string threads, bool dispOutput,
 // Given a vector of SRAs, perform a FastQC quality analysis just prior to assembly
 void fastqcBulk2(std::vector<SRA> & sras, std::string threads, bool dispOutput,
                  std::string logFilePath, const INI_MAP & cfgIni) {
-  logOutput("\nStarting second quality analysis\n", logFilePath);
+  logOutput("\n\nStarting second quality analysis", logFilePath);
   INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
   std::pair<std::string, std::string> currFastqcIn;
   std::string currFastqcOut;
@@ -242,7 +242,7 @@ void fastqcBulk2(std::vector<SRA> & sras, std::string threads, bool dispOutput,
 void errorCorrBulk(std::vector<SRA> & sras, std::string threads,
                    bool dispOutput, bool retainInterFiles, bool compressFiles,
                    std::string logFilePath, const INI_MAP & cfgIni) {
-  logOutput("\nStarting error correction\n", logFilePath);
+  logOutput("\n\nStarting error correction", logFilePath);
   INI_MAP_ENTRY rcorrSettings = cfgIni.at("Rcorrector settings");
   std::string kmerLength = rcorrSettings.at("kmer_length");
   std::string maxCorrK = rcorrSettings.at("max_corrections_per_kmer_window");
@@ -268,7 +268,7 @@ void errorCorrBulk(std::vector<SRA> & sras, std::string threads,
       }
       continue;
     }
-    logOutput("\n  Now running error correction for:\n", logFilePath);
+    logOutput("\n  Now running error correction for:", logFilePath);
     summarize_sing_sra(sra, logFilePath, 4);
 
     if (!dispOutput) {
@@ -293,7 +293,7 @@ void errorCorrBulk(std::vector<SRA> & sras, std::string threads,
 bool remUnfixBulk(std::vector<SRA> & sras, std::string threads, std::string ram_gb,
                   bool dispOutput, bool retainInterFiles, bool compressFiles,
                   std::string logFilePath, const INI_MAP & cfgIni) {
-  logOutput("\nStarting post-correction removal of unfixable reads\n", logFilePath);
+  logOutput("\n\nStarting post-correction removal of unfixable reads", logFilePath);
   std::pair<std::string, std::string> currCorrFixIn;
   std::pair<std::string, std::string> currCorrFixOut;
   uintmax_t ram_b = (uintmax_t)stoi(ram_gb) * 1000000000;
@@ -370,7 +370,7 @@ bool remUnfixBulk(std::vector<SRA> & sras, std::string threads, std::string ram_
 void trimBulk(std::vector<SRA> & sras, std::string threads,
               bool dispOutput, bool retainInterFiles,
               std::string logFilePath, const INI_MAP & cfgIni) {
-  logOutput("\nStarting adapter sequence trimming\n", logFilePath);
+  logOutput("\n\nStarting adapter sequence trimming", logFilePath);
   INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
   INI_MAP_ENTRY trimmSettings = cfgIni.at("Trimmomatic settings");
   std::pair<std::string, std::string> currTrimIn;
@@ -517,7 +517,7 @@ void trimBulk(std::vector<SRA> & sras, std::string threads,
 void filtForeignBulk(std::vector<SRA> & sras, std::vector<std::string> krakenDbs,
                      std::string threads, bool dispOutput, bool compressFiles, bool retainInterFiles,
                      std::string logFilePath, const INI_MAP & cfgIni) {
-  logOutput("\nStarting foreign sequence filtering\n", logFilePath);
+  logOutput("\n\nStarting foreign sequence filtering", logFilePath);
   INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
   INI_MAP_ENTRY krakenSettings = cfgIni.at("Kraken2 settings");
   std::string confThreshold = krakenSettings.at("confidence_threshold");
@@ -678,7 +678,7 @@ bool remOverrepBulk(std::vector<SRA> & sras, std::string threads, std::string ra
                     bool dispOutput, bool retainInterFiles, bool compressFiles,
                     std::string logFilePath, const INI_MAP & cfgIni) {
   INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
-  logOutput("\nStarting removal of overrepresented reads\n", logFilePath);
+  logOutput("\n\nStarting removal of overrepresented reads", logFilePath);
   uintmax_t ram_b = (uintmax_t)stoi(ram_gb) * 1000000000;
   std::pair<std::vector<std::string>, std::vector<std::string>> currOrepSeqsPe;
   std::vector<std::string> currOrepSeqsSe;
@@ -941,7 +941,7 @@ int main(int argc, char * argv[]) {
       }
     }
 
-    logOutput("\nPreprocess finished successfully\n\n", logFilePath);
+    logOutput("\n\nPreprocess finished successfully\n", logFilePath);
   }
 
   system("setterm -cursor on");
