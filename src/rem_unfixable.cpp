@@ -25,11 +25,11 @@ long int rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
 
   long long int ram_b_per_file = ram_b / 2;
 
-  std::string inFile1Data;
-  std::string inFile2Data;
+  char * inFile1Data;
+  char * inFile2Data;
 
-  inFile1Data.reserve(ram_b_per_file);
-  inFile2Data.reserve(ram_b_per_file);
+  inFile1Data = new char[ram_b_per_file];
+  inFile2Data = new char[ram_b_per_file];
 
   std::streamsize s1;
   std::streamsize s2;
@@ -81,33 +81,33 @@ long int rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
           (inputStream1.good() && inputStream2.good() && inFile1.good() && inFile2.good())) {
 
     if (compressFiles) {
-      inputStream1.read(&inFile1Data[0], ram_b_per_file);
-      inputStream2.read(&inFile2Data[0], ram_b_per_file);
+      inputStream1.read(inFile1Data, ram_b_per_file);
+      inputStream2.read(inFile2Data, ram_b_per_file);
   
       s1 = inputStream1.gcount();
       s2 = inputStream2.gcount();
     }
     else {
-      inFile1.read(&inFile1Data[0], ram_b_per_file);
-      inFile2.read(&inFile2Data[0], ram_b_per_file);
+      inFile1.read(inFile1Data, ram_b_per_file);
+      inFile2.read(inFile2Data, ram_b_per_file);
     
       s1 = inFile1.gcount();
       s2 = inFile2.gcount();
     }
 
-    nlPos1 = &inFile1Data[0];
-    nlPos2 = &inFile2Data[0];
-    writeStart1 = &inFile1Data[0];
-    writeStart2 = &inFile2Data[0];
+    nlPos1 = inFile1Data;
+    nlPos2 = inFile2Data;
+    writeStart1 = inFile1Data;
+    writeStart2 = inFile2Data;
 
-    inFile1L = &inFile1Data[0] + s1;
-    inFile2L = &inFile2Data[0] + s2;
+    inFile1L = inFile1Data + s1;
+    inFile2L = inFile2Data + s2;
     
     if (compressFiles) {
-      align_file_buffer(inputStream1, inputStream2, &inFile1Data[0], &inFile2Data[0], s1, s2);
+      align_file_buffer(inputStream1, inputStream2, inFile1Data, inFile2Data, s1, s2);
     }
     else {
-      align_file_buffer(inFile1, inFile2, &inFile1Data[0], &inFile2Data[0], s1, s2);
+      align_file_buffer(inFile1, inFile2, inFile1Data, inFile2Data, s1, s2);
     }
 
     uintmax_t okReads = 0;
@@ -167,12 +167,12 @@ long int rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
       numReads++;
     }
     if (compressFiles) {
-      outputStream1.write(writeStart1, &inFile1Data[0] + s1 - writeStart1);
-      outputStream2.write(writeStart2, &inFile2Data[0] + s2 - writeStart2);
+      outputStream1.write(writeStart1, inFile1Data + s1 - writeStart1);
+      outputStream2.write(writeStart2, inFile2Data + s2 - writeStart2);
     }
     else {
-      outFile1.write(writeStart1, &inFile1Data[0] + s1 - writeStart1);
-      outFile2.write(writeStart2, &inFile2Data[0] + s2 - writeStart2);
+      outFile1.write(writeStart1, inFile1Data + s1 - writeStart1);
+      outFile2.write(writeStart2, inFile2Data + s2 - writeStart2);
     }
   }
   if (!outputStream1.good() || !outputStream2.good() || !outFile1.good() || !outFile2.good()) {
@@ -193,8 +193,8 @@ long int rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
     io::close(gzOutBuffer1);
     io::close(gzOutBuffer2);
   }
-  inFile1Data.clear();
-  inFile2Data.clear();
+  delete [] inFile1Data;
+  delete [] inFile2Data;
   outFile1.close();
   outFile2.close();
 
@@ -326,7 +326,9 @@ long int rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
       outFile.write(writeStart, inFileData + s - writeStart);
     }
   }
-  delete inFileData;
+
+  delete [] inFileData;
+
   if (!compressFiles) {
     inFile.close();
   }

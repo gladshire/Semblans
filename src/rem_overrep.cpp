@@ -112,11 +112,16 @@ bool rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
 
   uintmax_t ram_b_per_file = ram_b / 2;
 
-  std::string inFile1Data;
-  std::string inFile2Data;
+  //std::string inFile1Data;
+  //std::string inFile2Data;
 
-  inFile1Data.reserve(ram_b_per_file);
-  inFile2Data.reserve(ram_b_per_file);
+  //inFile1Data.reserve(ram_b_per_file);
+  //inFile2Data.reserve(ram_b_per_file);
+  char * inFile1Data;
+  char * inFile2Data;
+
+  inFile1Data = new char[ram_b_per_file];
+  inFile2Data = new char[ram_b_per_file];
 
   std::streamsize s1;
   std::streamsize s2;
@@ -169,33 +174,33 @@ bool rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
          (inputStream1.good() && inputStream2.good() && inFile1.good() && inFile2.good())) {
 
     if (compressFiles) {
-      inputStream1.read(&inFile1Data[0], ram_b_per_file);
-      inputStream2.read(&inFile2Data[0], ram_b_per_file);
+      inputStream1.read(inFile1Data, ram_b_per_file);
+      inputStream2.read(inFile2Data, ram_b_per_file);
   
       s1 = inputStream1.gcount();
       s2 = inputStream2.gcount();
     }
     else {
-      inFile1.read(&inFile1Data[0], ram_b_per_file);
-      inFile2.read(&inFile2Data[0], ram_b_per_file);
+      inFile1.read(inFile1Data, ram_b_per_file);
+      inFile2.read(inFile2Data, ram_b_per_file);
 
       s1 = inFile1.gcount();
       s2 = inFile2.gcount();
     }
 
-    nlPos1 = &inFile1Data[0];
-    nlPos2 = &inFile2Data[0];
-    writeStart1 = &inFile1Data[0];
-    writeStart2 = &inFile2Data[0];
+    nlPos1 = inFile1Data;
+    nlPos2 = inFile2Data;
+    writeStart1 = inFile1Data;
+    writeStart2 = inFile2Data;
     
-    inFile1L = &inFile1Data[0] + s1;
-    inFile2L = &inFile2Data[0] + s2;
+    inFile1L = inFile1Data + s1;
+    inFile2L = inFile2Data + s2;
 
     if (compressFiles) {
-      align_file_buffer(inputStream1, inputStream2, &inFile1Data[0], &inFile2Data[0], s1, s2);
+      align_file_buffer(inputStream1, inputStream2, inFile1Data, inFile2Data, s1, s2);
     }
     else {
-      align_file_buffer(inFile1, inFile2, &inFile1Data[0], &inFile2Data[0], s1, s2);
+      align_file_buffer(inFile1, inFile2, inFile1Data, inFile2Data, s1, s2);
     }
 
     uintmax_t okReads = 0;
@@ -278,12 +283,12 @@ bool rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
       }
     }
     if (compressFiles) {
-      outputStream1.write(writeStart1, &inFile1Data[0] + s1 - writeStart1);
-      outputStream2.write(writeStart2, &inFile2Data[0] + s2 - writeStart2);
+      outputStream1.write(writeStart1, inFile1Data + s1 - writeStart1);
+      outputStream2.write(writeStart2, inFile2Data + s2 - writeStart2);
     }
     else {
-      outFile1.write(writeStart1, &inFile1Data[0] + s1 - writeStart1);
-      outFile2.write(writeStart2, &inFile2Data[0] + s2 - writeStart2);
+      outFile1.write(writeStart1, inFile1Data + s1 - writeStart1);
+      outFile2.write(writeStart2, inFile2Data + s2 - writeStart2);
     }
   }
   if (!outputStream1.good() || !outputStream2.good() || !outFile1.good() || !outFile2.good()) {
@@ -301,6 +306,10 @@ bool rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
     io::close(gzOutBuffer1);
     io::close(gzOutBuffer2);
   }
+
+  delete [] inFile1Data;
+  delete [] inFile2Data;
+
   outFile1.close();
   outFile2.close();
 
@@ -337,9 +346,9 @@ bool rem_overrep_se(std::string sraRunIn, std::string sraRunOut,
 
   size_t lenOverrep = overrepSeqs.front().size();
 
-  std::string inFileData;
+  char * inFileData;
 
-  inFileData.reserve(ram_b);
+  inFileData = new char[ram_b];
 
   std::streamsize s;
 
@@ -369,18 +378,18 @@ bool rem_overrep_se(std::string sraRunIn, std::string sraRunOut,
   std::string readName;
   while ((!inputStream.eof() && !inFile.eof()) && (inputStream.good() && inFile.good())) {
     if (compressFiles) {
-      inputStream.read(&inFileData[0], ram_b);
+      inputStream.read(inFileData, ram_b);
       s = inputStream.gcount();
     }
     else {
-      inFile.read(&inFileData[0], ram_b);
+      inFile.read(inFileData, ram_b);
       s = inFile.gcount();
     }
 
-    nlPos = &inFileData[0];
-    writeStart = &inFileData[0];
+    nlPos = inFileData;
+    writeStart = inFileData;
 
-    inFileL = &inFileData[0] + s;
+    inFileL = inFileData + s;
 
     uintmax_t okReads = 0;
     while (nlPos != inFileL) {
@@ -439,7 +448,7 @@ bool rem_overrep_se(std::string sraRunIn, std::string sraRunOut,
       outputStream.write(writeStart, writeEnd - writeStart);
     }
     else {
-      outFile.write(writeStart, &inFileData[0] + s - writeStart);
+      outFile.write(writeStart, inFileData + s - writeStart);
     }
   }
   if (!outFile.good() || !outputStream.good()) {
@@ -452,6 +461,8 @@ bool rem_overrep_se(std::string sraRunIn, std::string sraRunOut,
     io::close(gzInBuffer);
     io::close(gzOutBuffer);
   }
+
+  delete [] inFileData;
   outFile.close();
 
   if (dispOutput) {

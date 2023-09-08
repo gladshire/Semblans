@@ -217,12 +217,12 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
       
       procRunning = true;
       std::thread constructHash(progressAnim, "      Creating hash table from forward-ended reads ", logFile);
-      seqHash readHashTable1(lenReadsHash1, fs::path(currSraIn.first.c_str()), ram_b);
+      seqHash readHashTable(lenReadsHash1, fs::path(currSraIn.first.c_str()), ram_b);
       procRunning = false;
       constructHash.join();
-      numReads = readHashTable1.getNumItems();
+      numReads = readHashTable.getNumItems();
       
-      seqHash mappedHash1(lenReadsHash1);
+      seqHash mappedHash(lenReadsHash1);
 
       logOutput("      Splitting reads into mapped and unmapped\n", logFile);
       bamMapFile.open(fastaMap + "/Aligned.out.sam");
@@ -237,15 +237,15 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
       num1k = 0; 
       while (std::getline(bamMapFile, currLine)) {
         readName = currLine.substr(0, currLine.find("\t"));
-        if (!mappedHash1.inHashTable(readName)) {
+        if (!mappedHash.inHashTable(readName)) {
           numMapped++;
-          currSeq = readHashTable1.getSeq(readName);
+          currSeq = readHashTable.getSeq(readName);
           currHead = currSeq.get_header();
           currSeqData = currSeq.get_sequence();
           currQual = currSeq.get_quality();
 
-          readHashTable1.deleteHash(readName);
-          mappedHash1.insertHash(currHead, currSeqData, currQual);
+          readHashTable.deleteHash(readName);
+          mappedHash.insertHash(currHead, currSeqData, currQual);
         }
         if (numMapped % 1000 == 0) {
           num1k++;
@@ -267,11 +267,13 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
 
       procRunning = true;
       std::thread dumpHash(progressAnim, "      Dumping split reads to mapped and unmapped files ", logFile);
-      mappedHash1.dump(outDir + "/" + filePrefix1 + "." + currSeqFilePrefix + ".mapped.fq");
-      readHashTable1.dump(outDir + "/" + filePrefix1 + ".unmapped.fq");
+      mappedHash.dump(outDir + "/" + filePrefix1 + "." + currSeqFilePrefix + ".mapped.fq");
+      readHashTable.dump(outDir + "/" + filePrefix1 + ".unmapped.fq");
       procRunning = false;
       dumpHash.join();
       
+      readHashTable.clear();
+      mappedHash.clear();
       bamMapFile.close();
 
       // If SRA run is paired, perform the same steps as above for the reverse-ended FASTQ file
@@ -282,12 +284,12 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
         
         procRunning = true;
         std::thread constructHash(progressAnim, "      Creating hash table from reverse-ended reads ", logFile);
-        seqHash readHashTable2(lenReadsHash2, fs::path(currSraIn.second.c_str()), ram_b);
+        seqHash readHashTable(lenReadsHash2, fs::path(currSraIn.second.c_str()), ram_b);
         procRunning = false;
         constructHash.join();
-        numReads = readHashTable2.getNumItems();     
+        numReads = readHashTable.getNumItems();     
 
-        seqHash mappedHash2(lenReadsHash2);
+        seqHash mappedHash(lenReadsHash2);
 
         logOutput("      Splitting reads into mapped and unmapped\n", logFile);
         bamMapFile.open(fastaMap + "/Aligned.out.sam");
@@ -301,15 +303,15 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
         num1k = 0;
         while (std::getline(bamMapFile, currLine)) {
           readName = currLine.substr(0, currLine.find("\t"));
-          if (!mappedHash2.inHashTable(readName)) {
+          if (!mappedHash.inHashTable(readName)) {
             numMapped++;
-            currSeq = readHashTable2.getSeq(readName);
+            currSeq = readHashTable.getSeq(readName);
             currHead = currSeq.get_header();
             currSeqData = currSeq.get_sequence();
             currQual = currSeq.get_quality();
 
-            readHashTable2.deleteHash(currHead);
-            mappedHash2.insertHash(currHead, currSeqData, currQual);
+            readHashTable.deleteHash(currHead);
+            mappedHash.insertHash(currHead, currSeqData, currQual);
           }
 
           // Print number of unmapped reads identified every half million
@@ -334,8 +336,8 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
 
         procRunning = true;
         std::thread dumpHash(progressAnim, "      Dumping split reads to mapped and unmapped files ", logFile);
-        mappedHash2.dump(outDir + "/" + filePrefix2 + "." + currSeqFilePrefix + ".mapped.fq");
-        readHashTable2.dump(outDir + "/" + filePrefix2 + ".unmapped.fq");
+        mappedHash.dump(outDir + "/" + filePrefix2 + "." + currSeqFilePrefix + ".mapped.fq");
+        readHashTable.dump(outDir + "/" + filePrefix2 + ".unmapped.fq");
         procRunning = false;
         dumpHash.join();
 
@@ -792,11 +794,11 @@ int main(int argc, char * argv[]) {
       currSraGroup.clear();
     }
 
-    logOutput("Semblans Assemble started with following parameters:\n", logFilePath);
-    logOutput("  Config file:     " + std::string(argv[1]) + "\n", logFilePath);;
-    logOutput("  Threads (Cores): " + threads + "\n", logFilePath);
-    logOutput("  Memory (GB):     " + ram_gb + "\n", logFilePath);
-    logOutput("  SRA Runs:\n\n", logFilePath);
+    logOutput("\nSemblans Assemble started with following parameters:", logFilePath);
+    logOutput("\n  Config file:     " + std::string(argv[1]), logFilePath);;
+    logOutput("\n  Threads (Cores): " + threads, logFilePath);
+    logOutput("\n  Memory (GB):     " + ram_gb, logFilePath);
+    logOutput("\n  SRA Runs:\n\n", logFilePath);
     summarize_all_sras(sras, logFilePath, 6);
     // Separate out reads of interest
     if (selectiveAssembly) {

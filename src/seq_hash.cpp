@@ -9,7 +9,6 @@ seqHash::seqHash() {
 
 // Constructor for seqHash object allowing definition of hash table size
 seqHash::seqHash(uintmax_t lenTable) {
-  //seqHashData = new std::vector<sequence>[lenTable];
   seqHashData = new linkedList[lenTable]; 
   lenHashTable = lenTable;
   numItems = 0;
@@ -23,16 +22,15 @@ seqHash::seqHash(uintmax_t lenTable, fs::path transFilePath, uintmax_t ram_b) {
     seqHashData = nullptr;
     return;
   }
-  //seqHashData = new std::vector<sequence>[lenTable];
   seqHashData = new linkedList[lenTable];
   lenHashTable = lenTable;
   numItems = 0;
 
   std::string inFileStr(transFilePath.c_str());
   std::ifstream inFile(inFileStr);
-  std::string inFileData;
 
-  inFileData.reserve(ram_b);
+  char * inFileData;
+  inFileData = new char[ram_b];
   std::streamsize s;
 
   char * headerStartPos;
@@ -45,11 +43,11 @@ seqHash::seqHash(uintmax_t lenTable, fs::path transFilePath, uintmax_t ram_b) {
   char headChar;
   while (!inFile.eof() && inFile.good()) {
     // Store file chunk into buffer
-    inFile.read(&inFileData[0], ram_b);
+    inFile.read(inFileData, ram_b);
     // Get number of bytes just read
     s = inFile.gcount();
     // Initialize header start position
-    headerStartPos = &inFileData[0];
+    headerStartPos = inFileData;
     if (*headerStartPos == '>') {
       headChar = '>';
     }
@@ -57,9 +55,9 @@ seqHash::seqHash(uintmax_t lenTable, fs::path transFilePath, uintmax_t ram_b) {
       headChar = '@';
     }
     // Initizlie address of last buffer position
-    inFileL = &inFileData[0] + s;
+    inFileL = inFileData + s;
     // Align end of buffer with end of last transcript
-    this->align_buffer_end(inFile, &inFileData[0], s);
+    this->align_buffer_end(inFile, inFileData, s);
     std::string currHeader;
     std::string currSequence;
     std::string currQuality;
@@ -75,7 +73,6 @@ seqHash::seqHash(uintmax_t lenTable, fs::path transFilePath, uintmax_t ram_b) {
       
       // Extract sequence
       seqEndPos = std::find(seqStartPos, inFileL, '\n');
-      //currSequence = std::string(seqStartPos, seqEndPos);
 
       // Extract quality if FASTQ, insert sequence object into hash table
       if (*(seqEndPos + 1) == '+') {
@@ -98,6 +95,7 @@ seqHash::seqHash(uintmax_t lenTable, fs::path transFilePath, uintmax_t ram_b) {
       }
     }
   }
+  delete [] inFileData;
   inFile.close();
 }
 
@@ -127,7 +125,6 @@ unsigned long seqHash::hashFunction(char * key) {
 void seqHash::insertHash(std::string header, std::string sequenceData, std::string quality) {
   std::string keyStr = header.substr(0, header.find(' '));
   unsigned long hashIndex = hashFunction(&keyStr[0]) % lenHashTable;
-  //seqHashData[hashIndex].push_back(sequence(header, sequenceData, quality));
   seqHashData[hashIndex].insert(sequence(header, sequenceData, quality));
   numItems++;
 }
@@ -135,7 +132,6 @@ void seqHash::insertHash(std::string header, std::string sequenceData, std::stri
 void seqHash::insertHash(std::string header, std::string sequenceData) {
   std::string keyStr = header.substr(0, header.find(' '));
   unsigned long hashIndex = hashFunction(&keyStr[0]) % lenHashTable;
-  //seqHashData[hashIndex].push_back(sequence(header, sequenceData));
   seqHashData[hashIndex].insert(sequence(header, sequenceData));
   numItems++;
 }
@@ -148,18 +144,6 @@ void seqHash::deleteHash(std::string header) {
     return;
   }
   std::string currKeyStrHash;
-  //auto dataIter = seqHashData[hashIndex].begin();
-  /*
-  while (dataIter != seqHashData[hashIndex].end()) {
-    currKeyStrHash = (dataIter->get_header()).substr(0, dataIter->get_header().find(' '));
-    if (keyStr == currKeyStrHash) {
-      dataIter = seqHashData[hashIndex].erase(dataIter);
-      numItems--;
-    }
-    else {
-      dataIter++;
-    }
-  }*/
   bool removed = seqHashData[hashIndex].remove(header);
   if (removed) {
     numItems--;
@@ -175,16 +159,6 @@ bool seqHash::inHashTable(std::string header) {
   }
   else {
     std::string currKeyStrHash;
-    //auto dataIter = seqHashData[hashIndex].begin();
-    /*while (dataIter != seqHashData[hashIndex].end()) {
-      currKeyStrHash = (dataIter->get_header()).substr(0, dataIter->get_header().find(' '));
-      if (dataIter->get_header() == header || currKeyStrHash == keyStr) {
-        return true;
-      }
-      dataIter++;
-    }
-    return false;
-    */
     return seqHashData[hashIndex].exists(header);
   }
 }
@@ -196,20 +170,6 @@ sequence seqHash::getSeq(std::string header) {
     return sequence();
   }
   else {
-    //std::string currKeyStrHash;
-    //auto dataIter = seqHashData[hashIndex].begin();
-    /*
-    while (dataIter != seqHashData[hashIndex].end()) {
-      currKeyStrHash = (dataIter->get_header()).substr(0, dataIter->get_header().find(' '));
-      if (dataIter->get_header() == header || currKeyStrHash == keyStr) {
-        return sequence(dataIter->get_header(), dataIter->get_sequence(),
-                        dataIter->get_quality());
-      }
-      dataIter++;
-    }
-    return sequence();
-    */
-    //sequence seq = seqHashData[hashIndex].getSeq(header);
     return seqHashData[hashIndex].getSeq(header);
   }
 }
@@ -224,22 +184,7 @@ void seqHash::setSeqHeader(std::string header, std::string newHeader) {
   }
   else {
     std::string currKeyStrHash;
-    //auto dataIter = seqHashData[hashIndex].begin();
-    // Check for sequence in chained hash table
-    /*
-    while (dataIter != seqHashData[hashIndex].end()) {
-      currKeyStrHash = (dataIter->get_header()).substr(0, dataIter->get_header().find(' '));
-      // If match found update its header and return
-      if (dataIter->get_header() == header || currKeyStrHash == keyStr) {
-        dataIter->set_header(newHeader);
-        return;
-      }
-      dataIter++;
-    }
-    */
     seqHashData[hashIndex].setSeqHead(header, newHeader);
-    //std::cout << "ERROR: Sequence not found" << std::endl;
-    //exit(2);
   }
 }
 
@@ -272,17 +217,19 @@ uintmax_t seqHash::getNumItems() {
 }
 
 // Get pointer to hash data
-//std::vector<sequence> * seqHash::getHashData() {
 linkedList * seqHash::getHashData() {
   return seqHashData;
 }
-/*
+
+// Clear function for hash table
 void seqHash::clear() {
   for (uintmax_t i = 0; i < lenHashTable; i++) {
     seqHashData[i].clear();
   }
   delete[] seqHashData;
-}*/
+  seqHashData = nullptr;
+}
+
 
 // Destructor for hash table
 seqHash::~seqHash() {
