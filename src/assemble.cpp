@@ -78,7 +78,7 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
         numReadsSeqInterest++;
       }
     }
-    logOutput("  Now running read extraction using: \"" + seqsInterest[i] + "\"\n", logFile);
+    logOutput("\n  Now running read extraction using: \"" + seqsInterest[i] + "\"\n", logFile);
     currSeqFilePrefix = std::string(fs::path(seqsInterest[i].c_str()).stem().c_str());
     // Create index of sequence file with STAR
     transcript dummyTrans(seqsInterest[i], cfgIni);
@@ -246,11 +246,11 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
 
           readHashTable.deleteHash(readName);
           mappedHash.insertHash(currHead, currSeqData, currQual);
-        }
-        if (numMapped % 1000 == 0) {
-          num1k++;
-          std::cout << "\r        Mapped read count: " +
-                       std::to_string(1000 * num1k) + " ..." << std::flush;
+          if (numMapped % 1000 == 0) {
+            num1k++;
+            std::cout << "\r        Mapped read count: " +
+                         std::to_string(1000 * num1k) + " ..." << std::flush;
+          }
         }
       }
       percentMapped = (float(numMapped) * 100) / float(numReads);
@@ -275,6 +275,7 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
       readHashTable.clear();
       mappedHash.clear();
       bamMapFile.close();
+      logOutput("      Reads were extracted successfully\n", logFile);
 
       // If SRA run is paired, perform the same steps as above for the reverse-ended FASTQ file
       if (sra.is_paired()) {
@@ -312,13 +313,11 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
 
             readHashTable.deleteHash(currHead);
             mappedHash.insertHash(currHead, currSeqData, currQual);
-          }
-
-          // Print number of unmapped reads identified every half million
-          if (numMapped % 1000 == 0) {
-            num1k++;
-            std::cout << "\r        Mapped read count: " +
-                         std::to_string(1000 * num1k) + " ..." << std::flush;
+            if (numMapped % 1000 == 0) {
+              num1k++;
+              std::cout << "\r        Mapped read count: " +
+                           std::to_string(1000 * num1k) + " ..." << std::flush;
+            }
           }
         }
         percentMapped = (float(numMapped) * 100) / float(numReads);
@@ -342,6 +341,7 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
         dumpHash.join();
 
         bamMapFile.close();
+        logOutput("      Reads were extracted successfully\n", logFile);
       }
       sraRunsIn.clear();
       sra.makeCheckpoint(currSeqFilePrefix + ".iso");
@@ -611,9 +611,8 @@ int main(int argc, char * argv[]) {
   INI_MAP_ENTRY cfgIniGen = cfgIni["General"];
 
   // Define log file
-  std::string logFilePath((fs::canonical((fs::path(cfgIniGen["output_directory"].c_str()))) /
-                           fs::path(cfgIniGen["project_name"].c_str()) /
-                           fs::path(cfgIniGen["log_file"].c_str())).c_str());
+  std::string logFilePath((fs::canonical(fs::path(cfgIniGen["log_file"].c_str()).parent_path()) /
+                          fs::path(cfgIniGen["log_file"].c_str()).filename()).c_str());
  
   if (argc > 1) {
     std::vector<SRA> sras;
@@ -682,12 +681,12 @@ int main(int argc, char * argv[]) {
     if (!dispOutput) {
       procRunning = true;
       std::thread sraRetrieve(progressAnim, "  Obtaining read information from NCBI ", logFilePath);
-      sras = get_sras(cfgIni, dispOutput, compressFiles);
+      sras = get_sras(cfgIni, dispOutput, compressFiles, logFilePath);
       procRunning = false;
       sraRetrieve.join();
     }
     else {
-      sras = get_sras(cfgIni, dispOutput, compressFiles);
+      sras = get_sras(cfgIni, dispOutput, compressFiles, logFilePath);
     }
     
     for (auto fqFileName : cfgIni.at("Local files")) {

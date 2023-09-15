@@ -492,16 +492,16 @@ int main(int argc, char * argv[]) {
     }
 
     // Obtain path to log file from config file
-    std::string logFilePath((fs::canonical((fs::path(cfgIniGen["output_directory"].c_str()))) /
-                             fs::path(cfgIniGen["project_name"].c_str()) /
-                             fs::path(cfgIniGen["log_file"].c_str())).c_str());
+    std::string logFilePath((fs::canonical(fs::path(cfgIniGen["log_file"].c_str()).parent_path()) /
+                            fs::path(cfgIniGen["log_file"].c_str()).filename()).c_str());
+    
     if (logFilePath[0] == '~') {
       logFilePath = std::string(home) + logFilePath.substr(1, logFilePath.size() - 1);
     }
     // Retrieve SRA objects, convert to transcripts
     std::vector<SRA> sras;
     std::vector<std::string> localDataFiles;
-    sras = get_sras(cfgIni, dispOutput, compressFiles);
+    sras = get_sras(cfgIni, dispOutput, compressFiles, logFilePath);
     for (auto fqFileName : cfgIni.at("Local files")) {
       localDataFiles.push_back(fqFileName.first);
     }

@@ -287,7 +287,7 @@ SRA::SRA(std::string fileName1, std::string fileName2, INI_MAP cfgIni, bool comp
 
   spots = numReads1;
 
-  sra_path_raw_1 = (localDataDir + fileBase1 + ".fastq" + compressExt).c_str();
+  sra_path_raw_1 = fileName1.c_str();
   fastqc_dir_1_1  = (projPath + stepDirs[1] + fileBase1 + "/" + fileBase1).c_str();
   sra_path_corr_1 = (projPath + stepDirs[2] + fileBase1 + ".cor.fq" + compressExt).c_str();
   sra_path_corr_fix_1 = (projPath + stepDirs[2] + fileBase1 + ".cor.fix.fq" + compressExt).c_str();
@@ -298,7 +298,7 @@ SRA::SRA(std::string fileName1, std::string fileName2, INI_MAP cfgIni, bool comp
   sra_path_orep_filt_1 = (projPath + stepDirs[6] + fileBase1 + ".orep.filt.fq" + compressExt).c_str();
 
   if (paired) {
-    sra_path_raw_2 = (localDataDir + fileBase2 + ".fastq" + compressExt).c_str();
+    sra_path_raw_2 = fileName2.c_str();
     fastqc_dir_2_1 = (projPath + stepDirs[1] + fileBase2 + "/" + fileBase2).c_str();
     sra_path_corr_2 = (projPath + stepDirs[2] + fileBase2 + ".cor.fq" + compressExt).c_str();
     sra_path_corr_fix_2 = (projPath + stepDirs[2] + fileBase2 + ".cor.fix.fq" + compressExt).c_str();

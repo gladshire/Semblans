@@ -7,6 +7,7 @@
 #include <iostream>
 #include <string>
 #include <map>
+#include <unordered_map>
 #include <cstdio>
 
 #include <libconfini/confini.h>
