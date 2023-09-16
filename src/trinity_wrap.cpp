@@ -97,6 +97,7 @@ void run_trinity(std::pair<std::string, std::string> sraRun, std::string outFile
   std::rename((outFile + ".Trinity.fasta").c_str(), outFile.c_str());
   std::rename((outFile + ".Trinity.fasta.gene_trans_map").c_str(),
               (outFile + ".gene_trans_map").c_str());
+  replaceChar(logFile, '\r', '\n');
 }
 
 // Perform a de novo assembly using multiple SRAs' sequence data with Trinity
@@ -163,4 +164,5 @@ void run_trinity_comb(std::vector<std::pair<std::string, std::string>> sraRuns,
   std::rename((outFile + ".Trinity.fasta").c_str(), outFile.c_str());
   std::rename((outFile + ".Trinity.fasta.gene_trans_map").c_str(),
               (outFile + ".gene_trans_map").c_str());
+  replaceChar(logFile, '\r', '\n');
 }
