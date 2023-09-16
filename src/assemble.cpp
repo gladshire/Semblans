@@ -429,6 +429,7 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
   std::string currTrinOutNon;
   fs::path cpDir;
   fs::path trinDir;
+  std::string trinOutDir;
   std::string transInfoFileStr;
   std::vector<std::string> seqsInterest;
   std::string currFilePrefix1;
@@ -453,7 +454,7 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
     // Define paths for checkpoint and trinity output directories
     cpDir = sraGroup.second[0].get_fastqc_dir_2().first.parent_path().parent_path().parent_path() / ".checkpoints";
     trinDir = transcript(sraGroup.second[0]).get_trans_path_trinity().parent_path();
-    outDir = std::string(trinDir.c_str());
+    trinOutDir = std::string(trinDir.c_str());
 
     currTrinOutNon = outDir + "/" + sraGroup.first + ".unmapped.Trinity.fasta";
     currTrinOutAll = outDir + "/" + sraGroup.first + ".Trinity.fasta";
@@ -463,7 +464,6 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
     for (auto sra : sraGroup.second) {
       currTrinIn.first = sra.get_sra_path_orep_filt().first.c_str();
       currTrinIn.second = sra.get_sra_path_orep_filt().second.c_str();
-      //if (assembAllSeqs) {
       if (!ini_get_bool(cfgPipeline.at("remove_overrepresented").c_str(), 0)) {
         if (!ini_get_bool(cfgPipeline.at("filter_foreign_reads").c_str(), 0)) {
           if (!ini_get_bool(cfgPipeline.at("trim_adapter_seqs").c_str(), 0)) {
@@ -490,7 +490,6 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
       currFilePrefix2 = fs::path(currTrinIn.second).filename().stem().stem().stem().c_str();
       sraRunsInTrin.push_back(currTrinIn);
       outDir = fs::path(currTrinIn.first).parent_path().c_str();
-      //}
       inDir = sra.get_sra_path_orep_filt().first.parent_path().c_str();
   
       // If user preferences specify assembly of unmapped reads, push paths of unmapped read files for current
@@ -507,7 +506,7 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
       // assembly with Trinity
       for (auto seqFilePath : seqsInterest) {
         currSeqFilePrefix = std::string(fs::path(seqFilePath.c_str()).stem().c_str());
-        currTrinOutInt = outDir + "/" + sraGroup.first + "." + currSeqFilePrefix + ".mapped.Trinity.fasta";
+        currTrinOutInt = trinOutDir + "/" + sraGroup.first + "." + currSeqFilePrefix + ".mapped.Trinity.fasta";
 
         // Check whether assembly group checkpoint exists
         if (groupCheckpointExists(std::string(cpDir.c_str()), sraGroup.first)) {
