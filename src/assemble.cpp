@@ -34,6 +34,7 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
   logOutput("\nStarting isolation of reads of interest\n", logFile);
   INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
   INI_MAP_ENTRY cfgSeqsInt = cfgIni.at("Sequences of interest");
+  std::string maxMapsPerRead = cfgIni.at("STAR settings").at("max_maps_per_read");
   std::string fastaIndex;
   std::string fastaMap;
   transcript dummyTrans;
@@ -191,13 +192,13 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
           procRunning = true;
           std::thread seqQuant(progressAnim, "      Mapping reads to sequences of interest ",
                                logFile);
-          star_map(fastaIndex, fastaMap, currSraIn, threads, dispOutput, logFile);
+          star_map(fastaIndex, fastaMap, currSraIn, maxMapsPerRead, threads, dispOutput, logFile);
           procRunning = false;
           seqQuant.join();
         }
         else {
           logOutput("\n      Mapping reads to sequences of interest\n", logFile);
-          star_map(fastaIndex, fastaMap, currSraIn, threads, dispOutput, logFile);
+          star_map(fastaIndex, fastaMap, currSraIn, maxMapsPerRead, threads, dispOutput, logFile);
         }
 
         // Create checkpoint for STAR mapping of SRA against seqs of interest
@@ -456,8 +457,8 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
     trinDir = transcript(sraGroup.second[0]).get_trans_path_trinity().parent_path();
     trinOutDir = std::string(trinDir.c_str());
 
-    currTrinOutNon = outDir + "/" + sraGroup.first + ".unmapped.Trinity.fasta";
-    currTrinOutAll = outDir + "/" + sraGroup.first + ".Trinity.fasta";
+    currTrinOutNon = trinOutDir + "/" + sraGroup.first + ".unmapped.Trinity.fasta";
+    currTrinOutAll = trinOutDir + "/" + sraGroup.first + ".Trinity.fasta";
 
     // Iterate over all SRA runs in current assembly group, preparing vectors containing input files for them,
     // as well as their mapped and unmapped read files generated during read isolation/extraction

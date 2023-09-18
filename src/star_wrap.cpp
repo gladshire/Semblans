@@ -28,7 +28,8 @@ void star_index(std::vector<std::string> fastaFiles, std::string outDir, std::st
 
 void star_map(std::string indexPath, std::string outMap,
               std::pair<std::string, std::string> sraReadsIn,
-              std::string threads, bool dispOutput, std::string logFile) {
+              std::string maxMapsPerRead, std::string threads,
+              bool dispOutput, std::string logFile) {
   std::string sraReadsString;
   std::string printOut;
   if (dispOutput) {
@@ -44,6 +45,7 @@ void star_map(std::string indexPath, std::string outMap,
   int result;
   std::string star_cmd = "( " + PATH_STAR + " --genomeDir " + indexPath +
                          " --readFilesIn " + sraReadsString +
+                         " --outFilterMultimapNmax " + maxMapsPerRead +
                          " --outFileNamePrefix " + outMap +
                          " --runThreadN " + threads + " )" + printOut;
   result = system(star_cmd.c_str());
