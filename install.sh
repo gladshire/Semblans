@@ -84,8 +84,8 @@ rm hmmer.tar.gz
 
 # Install PANTHER HMM Scoring components
 echo "Downloading PANTHER components ..."
-wget -q http://data.pantherdb.org/ftp/panther_library/current_release/PANTHER17.0_hmmscoring.tgz
-tar -xzf PANTHER17.0_hmmscoring.tgz
+wget -q http://data.pantherdb.org/ftp/hmm_scoring/current_release/PANTHER18.0_hmmscoring.tgz
+tar -xzf PANTHER*.tgz
 mv target panther_db/
 mv panther_db ./data/
 rm PANTHER17.0_hmmscoring.tgz
