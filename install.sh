@@ -89,8 +89,8 @@ tar -xzf PANTHER*.tgz
 mv target panther_db/
 mv panther_db ./data/
 rm PANTHER17.0_hmmscoring.tgz
-wget -r -q --no-parent http://data.pantherdb.org/ftp/hmm_scoring/current_release/pantherScore2.2/
-mv data.pantherdb.org/ftp/hmm_scoring/current_release/pantherScore2.2 ./external/pantherScore
+wget -r -q --no-parent http://data.pantherdb.org/ftp/hmm_scoring/17.0/pantherScore2.2/
+mv data.pantherdb.org/ftp/hmm_scoring/17.0/pantherScore2.2 ./external/pantherScore
 chmod +x ./external/pantherScore/pantherScore2.2.pl
 rm -rf data.pantherdb.org
 
