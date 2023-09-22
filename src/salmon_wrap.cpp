@@ -49,8 +49,6 @@ void prepareDecoys(std::vector<std::string> desiredFiles,
 // Index reads from sequence data using Salmon
 void salmon_index(std::string transIn, std::string transIndex, std::string decoys,
                   std::string threads, bool dispOutput, std::string logFile) {
-  std::cout << transIn << std::endl;
-  std::cout << decoys << std::endl;
 
   std::string printOut;
   if (dispOutput) {
@@ -62,8 +60,7 @@ void salmon_index(std::string transIn, std::string transIndex, std::string decoy
   int result;
 
   std::string salm_cmd = PATH_SALMON + " index" + " -t " + transIn +
-                         " -i " + transIndex + " --decoys " + decoys +
-                         " -p " + threads + printOut;
+                         " -i " + transIndex + " -p " + threads + printOut;
   result = system(salm_cmd.c_str());
   if (WIFSIGNALED(result)) {
     logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);

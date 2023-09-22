@@ -255,14 +255,10 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
         }
       }
       percentMapped = (float(numMapped) * 100) / float(numReads);
-      percentStream << std::fixed << std::setprecision(2) << percentMapped;
       logOutput("\r        Mapped read count:   " + std::to_string(numMapped) +
-                " (" + percentStream.str() + "%)", logFile);
-      percentStream.str("");
-      percentStream << std::fixed << std::setprecision(2) << 100.0 - percentMapped;
+                " (" + getPercent(percentMapped, 2) + "%)", logFile);
       logOutput("\n        Unmapped read count: " + std::to_string(numReads - numMapped) +
-                " (" + percentStream.str() + "%)\n", logFile);
-      percentStream.str("");      
+                " (" + getPercent(100.0 - percentMapped, 2) + "%)\n", logFile);
       // Dump filled sequence hash tables to new files, containing the mapped
       // and unmapped reads respectively
 
@@ -322,14 +318,10 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
           }
         }
         percentMapped = (float(numMapped) * 100) / float(numReads);
-        percentStream << std::fixed << std::setprecision(2) << percentMapped;
         logOutput("\r        Mapped read count:   " + std::to_string(numMapped) +
                   " (" + percentStream.str() + "%)", logFile);
-        percentStream.str("");
-        percentStream << std::fixed << std::setprecision(2) << 100.0 - percentMapped;
         logOutput("\n        Unmapped read count: " + std::to_string(numReads - numMapped) +
-                  " (" + percentStream.str() + "%)\n", logFile);
-        percentStream.str("");        
+                  " (" + getPercent(100.0 - percentMapped, 2) + "%)\n", logFile);
 
         // Dump filled sequence hash tables to new files, containing the mapped
         // and unmapped reads respectively
@@ -530,7 +522,7 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
       
         // Perform assembly for reads of interest (those that map to current user-defined FASTA)
         if (assembSeqsInterest) {
-          logOutput("  Now assembling reads that map to: \"" + seqFilePath + "\"\n", logFile);
+          logOutput("\n  Now assembling reads that map to: \"" + seqFilePath + "\"\n", logFile);
           if (!groupCheckpointExists(std::string(cpDir.c_str()), sraGroup.first + "." +
                                      currSeqFilePrefix + ".mapped")) {
             if (sraRunsInterest.size() > 1) {
@@ -549,7 +541,7 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
             updateHeaders(currTrinOutInt, sraGroup.first + "_" + currSeqFilePrefix + "_mapped", ram_b);
           }
           else {
-            logOutput("    Mapped assembly checkpoint found for: " + sraGroup.first + "\n\n", logFile);
+            logOutput("\n    Mapped assembly checkpoint found for: " + sraGroup.first + "\n\n", logFile);
           }
           sraRunsInterest.clear();
         }
@@ -558,7 +550,7 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
 
     // Perform assembly for reads of no interest (those that DO NOT map to current user-defined FASTA)
     if (assembSeqsNoInterest) {
-      logOutput("  Now assembling reads that do not map to sequences of interest\n", logFile);
+      logOutput("\n  Now assembling reads that do not map to sequences of interest\n", logFile);
       if (!groupCheckpointExists(std::string(cpDir.c_str()), sraGroup.first + ".unmapped")) {
         if (sraRunsNoInterest.size() > 1) {
           run_trinity_comb(sraRunsNoInterest, currTrinOutNon, threads, ram_gb, dispOutput, logFile);
@@ -574,13 +566,13 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
         updateHeaders(currTrinOutNon, sraGroup.first + "_" + currSeqFilePrefix + "_unmapped", ram_b);
       }
       else {
-        logOutput("    Unmapped assembly checkpoint found for:\n " + sraGroup.first, logFile);
+        logOutput("\n    Unmapped assembly checkpoint found for: " + sraGroup.first, logFile);
       }
       sraRunsNoInterest.clear();
     }
     // Perform assembly for all reads
     if (assembAllSeqs) {
-      logOutput("  Now assembling all reads", logFile);
+      logOutput("\n  Now assembling all reads", logFile);
       if (!groupCheckpointExists(std::string(cpDir.c_str()), sraGroup.first)) {
         if (sraRunsInTrin.size() > 1) {
           run_trinity_comb(sraRunsInTrin, currTrinOutAll, threads, ram_gb, dispOutput, logFile);
@@ -596,7 +588,7 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
         updateHeaders(currTrinOutAll, sraGroup.first, ram_b);
       }
       else {
-        logOutput("    Global assembly checkpoint found for:\n " + sraGroup.first, logFile);
+        logOutput("\n    Global assembly checkpoint found for:\n " + sraGroup.first, logFile);
       }
       sraRunsInTrin.clear();
     }
@@ -659,7 +651,7 @@ int main(int argc, char * argv[]) {
     }
     if (!selectiveAssembly) {
       if (seqsInterest.empty()) {
-        logOutput("User did not define sequences of interest. Skipping selective assembly.\n",
+        logOutput("\nUser did not define sequences of interest. Skipping selective assembly.\n",
                   logFilePath);
       }
       assembleInterest = false;

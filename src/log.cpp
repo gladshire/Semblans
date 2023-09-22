@@ -1,5 +1,6 @@
 #include "log.h"
 
+
 // Utility function to replace one character with another in a text file
 void replaceChar(std::string inFilePath, char oldChar, char newChar) {
   std::ifstream inLogFile(inFilePath);
@@ -31,4 +32,11 @@ void logOutput(std::string input, std::string logFile) {
   teeStream loggerStream(logger);
 
   loggerStream << input << std::flush;
+}
+
+// Return string of percentage to a given precision
+std::string getPercent(float valPercent, int precision) {
+  std::stringstream percentStream;
+  percentStream << std::fixed << std::setprecision(precision) << valPercent;
+  return percentStream.str();
 }
