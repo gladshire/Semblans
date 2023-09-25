@@ -67,8 +67,7 @@ std::map<std::string, std::string> getGeneMatches(std::string annotFile) {
       bestMatchId = matchId;
       bestMatchDesc = matchDesc;
       if (lastQry != "") {
-        newHeader = transPrefix + queryId.substr(queryId.find(" ")) + " " +
-                    matchId + " " + matchDesc;
+        newHeader = transPrefix + + " " + matchId + " " + matchDesc;
         geneMatches.emplace(queryId, newHeader);
       }
     }
@@ -109,7 +108,7 @@ void annotateTranscript(std::string transIn, std::string transPep, std::string t
   linkedList * hashData = fastaPepHashTable.getHashData();
 
   // Initiate PANTHER scoring
-  pantherScore(transPepFileStr, annotFile, threads, dispOutput, logFile);  
+  //pantherScore(transPepFileStr, annotFile, threads, dispOutput, logFile);  
 
   // Obtain PANTHER gene descriptions
   newSeqHeaders = getGeneMatches(annotFile);

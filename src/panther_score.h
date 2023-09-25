@@ -12,7 +12,7 @@ namespace dl = boost::dll;
 
 #define PATH_HMMER std::string((dl::program_location().parent_path() / fs::path(std::string("../external/hmmer/bin/").c_str())).c_str())
 
-#define PANTHER_LIB std::string((dl::program_location().parent_path() / fs::path(std::string("../data/panther_db/famlib/rel/PANTHER17.0_altVersion/hmmscoring/PANTHER17.0").c_str())).c_str())
+#define PANTHER_LIB std::string((dl::program_location().parent_path() / fs::path(std::string("../data/panther_db/famlib/rel/PANTHER18.0_altVersion/hmmscoring/PANTHER18.0").c_str())).c_str())
 
 void pantherScore(std::string transPepIn, std::string outFile, std::string threads,
                   bool dispOutput, std::string logFile);

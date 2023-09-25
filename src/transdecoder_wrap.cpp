@@ -73,14 +73,14 @@ void run_transdecoder(std::string transIn, std::string transCds, std::string tra
   }
   if (fasta_ok(std::string(cdsFilePath.c_str()), ram_b) &&
       fasta_ok(std::string(pepFilePath.c_str()), ram_b)) {
-    logOutput("Skipping TransDecoder", logFile);
+    // Skip TransDecoder
   }
   else {
     std::string transFileName = std::string(fs::path(transFilePath.c_str()).filename().c_str());
     fs::path allpep(std::string(outDir + "/" + transFileName +
                     ".transdecoder_dir/longest_orfs.pep").c_str());
     if (fs::exists(allpep)) {
-      logOutput("Skipping search for long orfs", logFile);
+      //logOutput("Skipping search for long orfs", logFile);
     }
     else {
       // Only operates on un-stranded. Implement stranded later
@@ -113,7 +113,7 @@ void run_transdecoder(std::string transIn, std::string transCds, std::string tra
     }
     if (fasta_ok(std::string(cdsFilePath.c_str()), ram_b) &&
         fasta_ok(std::string(pepFilePath.c_str()), ram_b)) {
-      logOutput("Skip finding final CDS and PEP", logFile);
+      //logOutput("Skip finding final CDS and PEP", logFile);
     }
     else {
       std::string tdPredict_cmd = PATH_TRANSD_PREDICT + " -t " + transFilePath +

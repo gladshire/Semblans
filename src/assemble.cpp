@@ -588,7 +588,7 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
         updateHeaders(currTrinOutAll, sraGroup.first, ram_b);
       }
       else {
-        logOutput("\n    Global assembly checkpoint found for:\n " + sraGroup.first, logFile);
+        logOutput("\n    Global assembly checkpoint found for: " + sraGroup.first, logFile);
       }
       sraRunsInTrin.clear();
     }

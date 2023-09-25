@@ -22,7 +22,7 @@ void pantherScore(std::string transPepIn, std::string outFile, std::string threa
   std::string panthCmd = "./pantherScore2.2.pl -V -l " + PANTHER_LIB + " -D A -H " +
                          PATH_HMMER + " -i " + transPepIn + " -o " + outFile + " -n -c " +
                          threads + printOut;
-  
+
   result = system(panthCmd.c_str());
   if (WIFSIGNALED(result)) {
     system("setterm -cursor on");

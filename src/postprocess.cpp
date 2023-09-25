@@ -119,11 +119,11 @@ void remChimeraBulk(const std::vector<transcript> & transVec, std::string ram_gb
   for (auto trans : transVec) {
     // Check if chimera removal checkpoint exists 
     if (trans.checkpointExists("chim.fix")) {
-      logOutput("  Chimera removal checkpoint found for: " +
-                trans.get_file_prefix() + "\n", logFilePath);
+      logOutput("\n  Chimera removal checkpoint found for: " +
+                trans.get_file_prefix(), logFilePath);
       continue;
     }
-    logOutput("  Now running chimera removal for:\n", logFilePath);
+    logOutput("\n  Now running chimera removal for:\n", logFilePath);
     summarize_sing_trans(trans, logFilePath, 4);
 
    
@@ -208,18 +208,16 @@ void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
       logOutput("  Now producing index for: ", logFilePath);
       summarize_sing_trans(trans, logFilePath, 4);
 
-      std::string decoy = "";
-
       // Create index of assembled transcripts
       if (!dispOutput) {
         procRunning = true;
         std::thread salmIdxThread(progressAnim, "  ", logFilePath);
-        salmon_index(currTransInSalm, currIndex, decoy, threads, dispOutput, logFilePath);
+        salmon_index(currTransInSalm, currIndex, threads, dispOutput, logFilePath);
         procRunning = false;
         salmIdxThread.join();
       }
       else {
-        salmon_index(currTransInSalm, currIndex, decoy, threads, dispOutput, logFilePath);
+        salmon_index(currTransInSalm, currIndex, threads, dispOutput, logFilePath);
       }
 
       // Create index checkpoint
@@ -318,12 +316,12 @@ void corsetBulk(const std::vector<transcript> & transVec, std::string ram_gb,
 
     // Check if corset filter checkpoint exists
     if (trans.checkpointExists("redund.fix")) {
-      logOutput("  Corset filtering checkpoint found for: " +
-                trans.get_file_prefix() + "\n", logFilePath);
+      logOutput("\n  Corset filtering checkpoint found for: " +
+                trans.get_file_prefix(), logFilePath);
       continue;
     }
     // Filter corset output
-    logOutput("  Now filtering redundant transcripts:\n", logFilePath);
+    logOutput("\n  Now filtering redundant transcripts:\n", logFilePath);
     summarize_sing_trans(trans, logFilePath, 4);
 
     if (!dispOutput) {
@@ -333,6 +331,10 @@ void corsetBulk(const std::vector<transcript> & transVec, std::string ram_gb,
                    ram_b, currOutDir, logFilePath);
       procRunning = false;
       clustFiltThread.join();
+    }
+    else {
+      filterCorset(currTransInCors, currTransClust, currTransLargestClust, currTransRedund,
+                   ram_b, currOutDir, logFilePath);
     }
 
     // Create corset filtering checkpoint
@@ -371,11 +373,11 @@ void transdecBulk(const std::vector<transcript> & transVec, std::string threads,
   for (auto trans : transVec) {
     // Check if coding region prediction checkpoint exists
     if (trans.checkpointExists("cdr.predict")) {
-      logOutput("  Coding region prediction checkpoint found for: " +
-                trans.get_file_prefix() + "\n", logFilePath);
+      logOutput("\n  Coding region prediction checkpoint found for: " +
+                trans.get_file_prefix(), logFilePath);
       continue;
     }
-    logOutput("  Now predicting coding regions for:\n", logFilePath);
+    logOutput("\n  Now predicting coding regions for:\n", logFilePath);
     summarize_sing_trans(trans, logFilePath, 4);
     currTransInTD = trans.get_trans_path_largest().c_str();
     if (!ini_get_bool(cfgPipeline.at("cluster_filtering").c_str(), 0)) {
@@ -399,8 +401,6 @@ void transdecBulk(const std::vector<transcript> & transVec, std::string threads,
       run_transdecoder(currTransInTD, currTransCds, currTransPep, useBlast, maxEvalue,
                        maxTargetSeqs, threads, ram_b, currDb, currOutDirTD, dispOutput,
                        logFilePath);
-      // Create coding region prediction checkpoint
-      trans.makeCheckpoint("cdr.predict");
       procRunning = false;
       transDecThread.join();
     }
@@ -409,6 +409,8 @@ void transdecBulk(const std::vector<transcript> & transVec, std::string threads,
                        maxTargetSeqs, threads, ram_b, currDb, currOutDirTD, dispOutput,
                        logFilePath);
     }
+    // Create coding region prediction checkpoint
+    trans.makeCheckpoint("cdr.predict");
   }
 }
 
@@ -423,11 +425,11 @@ void annotateBulk(const std::vector<transcript> & transVec, std::string threads,
   for (auto trans : transVec) {
     // Check if annotation checkpoint exists 
     if (trans.checkpointExists("annotate")) {
-      logOutput("  Annotation checkpoint found for: " +
-                trans.get_file_prefix() + "\n", logFilePath);
+      logOutput("\n  Annotation checkpoint found for: " +
+                trans.get_file_prefix(), logFilePath);
       continue;
     }
-    logOutput("  Now running annotation on:\n", logFilePath);
+    logOutput("\n  Now running annotation on:\n", logFilePath);
     summarize_sing_trans(trans, logFilePath, 4);
 
     currTransIn = trans.get_trans_path_cds().c_str();

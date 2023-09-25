@@ -1,4 +1,3 @@
-// TODO: Not compressing files properly. Missing last few lines
 
 #include "rem_unfixable.h"
 
@@ -198,17 +197,15 @@ long int rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
   outFile1.close();
   outFile2.close();
 
+  std::string percentStr;
   if (dispOutput) {
     percentUnfix = (float(numUnfix) * 100) / float(numReads);
-    percentStream << std::fixed << std::setprecision(2) << percentUnfix;
     logOutput("\nRemoval of unfixable reads finished\n", logFile);
     logOutput("\n  SUMMARY", logFile);
     logOutput("\n    Reads removed: " + std::to_string(numUnfix) +
-              "(" + percentStream.str() + "%)", logFile);
-    percentStream.str("");
-    percentStream << std::fixed << std::setprecision(2) << 100.0 - percentUnfix;
+              "(" + getPercent(percentUnfix, 2) + "%)", logFile);
     logOutput("\n    Reads retained: " + std::to_string(numReads - numUnfix) +
-              "(" + percentStream.str() + "%)", logFile);
+              "(" + getPercent(100.0 - percentUnfix, 2) + "%)", logFile);
   }
   return numUnfix;
 }
@@ -257,6 +254,7 @@ long int rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
   uintmax_t numUnfix = 0;
   uintmax_t numUnfix100k = 0;
   uintmax_t numReads = 0;
+  float percentUnfix;
   std::string readName;
   while ((!inputStream.eof() && !inFile.eof()) && (inputStream.good() && inFile.good())) {
     if (compressFiles) {
@@ -339,18 +337,13 @@ long int rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
   outFile.close();
 
   if (dispOutput) {
-    std::stringstream percentStream;
-    percentStream << std::fixed << std::setprecision(2)
-                  << (float(numUnfix) * 100) / float(numUnfix + numReads);
+    percentUnfix = (float(numUnfix) * 100) / float(numReads);
     logOutput("\nRemoval of unfixable reads finished", logFile);
     logOutput("\n  SUMMARY", logFile);
     logOutput("\n    " + std::to_string(numUnfix) + " reads removed (" +
-              percentStream.str() + "%)", logFile);
-    percentStream.str("");
-    percentStream << std::fixed << std::setprecision(2)
-                  << (float(numReads) * 100) / float(numUnfix + numReads);
+              getPercent(percentUnfix, 2) + "%)", logFile);
     logOutput("\n    " + std::to_string(numReads - numUnfix) + " reads retained (" +
-              percentStream.str() + "%)", logFile);
+              getPercent(100.0 - percentUnfix, 2) + "%)", logFile);
   }
   return numUnfix;
 }
