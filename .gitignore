@@ -14,6 +14,7 @@ tmp*
 *.p*
 *.tmp
 *.gz
+*.xz
 cassava.ini
 config.ini
 log.txt
@@ -23,6 +24,7 @@ bat_brain/*
 Delphinus_delphis/*
 miles_poster/*
 caryophyllales/*
+1kp_1/*
 lib/*
 include/*
 external/*

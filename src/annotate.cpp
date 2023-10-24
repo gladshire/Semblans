@@ -108,7 +108,7 @@ void annotateTranscript(std::string transIn, std::string transPep, std::string t
   linkedList * hashData = fastaPepHashTable.getHashData();
 
   // Initiate PANTHER scoring
-  //pantherScore(transPepFileStr, annotFile, threads, dispOutput, logFile);  
+  pantherScore(transPepFileStr, annotFile, threads, dispOutput, logFile);  
 
   // Obtain PANTHER gene descriptions
   newSeqHeaders = getGeneMatches(annotFile);

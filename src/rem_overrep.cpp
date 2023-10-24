@@ -112,11 +112,6 @@ bool rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
 
   uintmax_t ram_b_per_file = ram_b / 2;
 
-  //std::string inFile1Data;
-  //std::string inFile2Data;
-
-  //inFile1Data.reserve(ram_b_per_file);
-  //inFile2Data.reserve(ram_b_per_file);
   char * inFile1Data;
   char * inFile2Data;
 
