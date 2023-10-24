@@ -1,23 +1,30 @@
 #!/bin/bash
 
-# rcorrVersion   =
-# trimmVersion   =
-# fastqcVersion  = 
-# kraken2Version =
-# trinityVersion = 
-# dmndVersion    = 
-# blastVersion   =
-# corsetVersion  =
-# salmonVersion  = 
-# trnsDecVersion =
+# Determine whether to install PANTHER for annotation
+install_panther=false
+for flag in "$@"; do
+  if [ "$flag" == "--with-panther" ] || [ "$flag" == "-p" ]; then
+    install_panther=true
+  fi
+done
+
 
 echo "Initiating install of Semblans"
 
+if $install_panther
+then
+  echo "PANTHER will be installed. Please allow several extra minutes for its download."
+  echo "If user does not wish to perform annotations, they may omit the --with-panther / -p flag."
+else
+  echo "PANTHER will NOT be installed, and is required for transcript annotation."
+  echo "If user wishes to perform annotations, they should include the --with-panther / -p flag."
+fi
+
 # Prepare Semblans file structure
-mkdir include
-mkdir lib
-mkdir external
-mkdir data
+mkdir include &>/dev/null
+mkdir lib &>/dev/null
+mkdir external &>/dev/null
+mkdir data &>/dev/null
 
 #========================================================================
 #/////////////   INSTALLATION OF THIRD-PARTY LIBRARIES   \\\\\\\\\\\\\\\\
@@ -83,16 +90,18 @@ cd ../../
 rm hmmer.tar.gz
 
 # Install PANTHER HMM Scoring components
-echo "Downloading PANTHER components ..."
-wget -q http://data.pantherdb.org/ftp/hmm_scoring/current_release/PANTHER18.0_hmmscoring.tgz
-tar -xzf PANTHER*.tgz
-mv target panther_db/
-mv panther_db ./data/
-rm PANTHER17.0_hmmscoring.tgz
-wget -r -q --no-parent http://data.pantherdb.org/ftp/hmm_scoring/17.0/pantherScore2.2/
-mv data.pantherdb.org/ftp/hmm_scoring/17.0/pantherScore2.2 ./external/pantherScore
-chmod +x ./external/pantherScore/pantherScore2.2.pl
-rm -rf data.pantherdb.org
+if $install_panther ; then
+  echo "Downloading PANTHER components ..."
+  wget -q http://data.pantherdb.org/ftp/hmm_scoring/current_release/PANTHER18.0_hmmscoring.tgz
+  tar -xzf PANTHER*.tgz
+  mv target panther_db/
+  mv panther_db ./data/
+  rm PANTHER17.0_hmmscoring.tgz
+  wget -r -q --no-parent http://data.pantherdb.org/ftp/hmm_scoring/17.0/pantherScore2.2/
+  mv data.pantherdb.org/ftp/hmm_scoring/17.0/pantherScore2.2 ./external/pantherScore
+  chmod +x ./external/pantherScore/pantherScore2.2.pl
+  rm -rf data.pantherdb.org
+fi
 
 
 # Install NCBI sra-tools
