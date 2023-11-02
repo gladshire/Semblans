@@ -6,6 +6,10 @@ for flag in "$@"; do
   if [ "$flag" == "--with-panther" ] || [ "$flag" == "-p" ]; then
     install_panther=true
   fi
+  if [ "$flag" == "--help" ]; then
+    echo "  ./install.sh [--with-panther / -p]"
+    exit 0
+  fi
 done
 
 
