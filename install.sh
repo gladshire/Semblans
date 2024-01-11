@@ -37,6 +37,7 @@ mkdir data &>/dev/null
 echo "Now installing required libraries"
 
 # Install boost libraries
+
 echo "  Installing Boost libraries ..."
 wget -q https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.gz
 tar -xf boost_1_81_0.tar.gz
@@ -169,7 +170,7 @@ rm trinity.tar.gz
 
 # Install NCBI BLAST
 echo "Installing NCBI-BLAST+ ..."
-wget -q --output-document ncbi-blast.tar.gz https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/ncbi-blast-2.14.1+-x64-linux.tar.gz
+wget -q --output-document ncbi-blast.tar.gz https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.15.0/ncbi-blast-2.15.0+-x64-linux.tar.gz
 tar -xf ncbi-blast.tar.gz -C ./external/
 mv ./external/ncbi-blast* ./external/ncbi-blast+
 rm ncbi-blast.tar.gz
@@ -198,14 +199,14 @@ cd ../../
 rm corset.tar.gz
 
 # Install STAR
-echo "Installing STAR ..."
-wget -q --output-document star.tar.gz https://github.com/alexdobin/STAR/archive/refs/tags/2.7.11a.tar.gz
-tar -xf star.tar.gz -C ./external/
-mv ./external/STAR* ./external/STAR
-cd ./external/STAR/source/
-make STAR
-cd ../../../
-rm star.tar.gz
+# echo "Installing STAR ..."
+# wget -q --output-document star.tar.gz https://github.com/alexdobin/STAR/archive/refs/tags/2.7.11a.tar.gz
+# tar -xf star.tar.gz -C ./external/
+# mv ./external/STAR* ./external/STAR
+# cd ./external/STAR/source/
+# make STAR
+# cd ../../../
+# rm star.tar.gz
 
 # Install Salmon
 echo "Installing Salmon ..."
@@ -236,8 +237,10 @@ if [ ! -e "./external/hmmer/bin/hmmscan" ]; then
 fi
 
 # Check pantherScore installation
-if [ ! -e "./external/pantherScore/pantherScore2.2.pl" ]; then
-	packagesNotInstalled+=("pantherScore")
+if $install_panther ; then
+  if [ ! -e "./external/pantherScore/pantherScore2.2.pl" ]; then
+    packagesNotInstalled+=("pantherScore")
+  fi
 fi
 
 # Check SRA Toolkit installation
