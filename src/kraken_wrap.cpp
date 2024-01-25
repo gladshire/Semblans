@@ -7,6 +7,9 @@ std::vector<std::string> get_kraken2_dbs(const INI_MAP &iniFile) {
   std::string krakDbDir = iniFile.at("Kraken2 settings").at("db_directory");
   std::vector<std::string> kraken2Dbs;
   std::string dbPath;
+  if (iniFile.at("Kraken2 filter order").empty()) {
+    return kraken2Dbs;
+  }
   for (auto db : iniFile.at("Kraken2 filter order")) {
     dbPath = krakDbDir + db.first;
     kraken2Dbs.push_back(dbPath);

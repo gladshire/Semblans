@@ -928,8 +928,14 @@ int main(int argc, char * argv[]) {
     if (ini_get_bool(cfgPipeline.at("filter_foreign_reads").c_str(), 0)) {
       std::vector<std::string> krakenDbs = get_kraken2_dbs(cfgIni);
       std::string krakenConf = get_kraken2_conf(cfgIni);
-      filtForeignBulk(sras, krakenDbs, threads,
-                      dispOutput, compressFiles, retainInterFiles, logFilePath, cfgIni);
+      if (!krakenDbs.empty()) {
+        filtForeignBulk(sras, krakenDbs, threads,
+                        dispOutput, compressFiles, retainInterFiles, logFilePath, cfgIni);
+      }
+      else {
+        logOutput("No Kraken databases specified in config file. Skipping foreign filtering.",
+                  logFilePath);
+      }
     }
 
     // Run fastqc on all runs
