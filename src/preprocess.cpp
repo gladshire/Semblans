@@ -844,9 +844,9 @@ int main(int argc, char * argv[]) {
     }
     // Get single/paired filenames of local data
     for (auto fqFileName : cfgIni.at("Local files")) {
-      if (fqFileName.first[0] == '~') {
-        fqFileName.first = std::string(home) + fqFileName.first.substr(1, fqFileName.first.size() - 1);
-      }
+      //if (fqFileName.first[0] == '~') {
+      //  fqFileName.first = std::string(home) + fqFileName.first.substr(1, fqFileName.first.size() - 1);
+      //}
       localDataFiles.push_back(fqFileName.first);
     }
     std::pair<std::string, std::string> sraRunsLocal;
