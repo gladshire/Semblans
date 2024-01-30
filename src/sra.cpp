@@ -50,7 +50,7 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool dispOutput,
   while (true) {
     // After 5 unsuccessful retries, 
     if (numRetries == 5) {
-      logOutput("ERROR: Could not retrieve accession \"" + sra_accession + "\"\n", logFile);
+      logOutput("\n  ERROR: Could not retrieve accession \"" + sra_accession + "\"\n", logFile);
       this->sra_accession = "FAILURE";
       break;
     }
