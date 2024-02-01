@@ -133,7 +133,8 @@ bool rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
   char * writeEnd2;
   char * inFile1L;
   char * inFile2L;
-  int seqLength;
+  int seqLength1;
+  int seqLength2;
   bool overRep;
  
   // Instantiate input stream for compressed file
@@ -207,10 +208,11 @@ bool rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
       nlPos1 = std::find(nlPos1Head + 1, inFile1L, '\n');
       nlPos2 = std::find(nlPos2Head + 1, inFile2L, '\n');
 
-      seqLength = nlPos1 - nlPos1Head - 1;
+      seqLength1 = nlPos1 - nlPos1Head - 1;
+      seqLength2 = nlPos2 - nlPos2Head - 1;
       overRep = false;
       if (!overrepSeqs.first.empty()) {
-        for (int i = 0; i < seqLength - lenOverrep1; i++) {
+        for (int i = 0; i < seqLength1 - lenOverrep1; i++) {
           for (auto const & seq : overrepSeqs.first) {
             if (strncmp(nlPos1Head + 1 + i, seq.c_str(), lenOverrep1) == 0) {
               overRep = true;
@@ -220,7 +222,7 @@ bool rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
         }
       }
       if (!overrepSeqs.second.empty()) {
-        for (int i = 0; i < seqLength - lenOverrep2; i++) {
+        for (int i = 0; i < seqLength2 - lenOverrep2; i++) {
           for (auto const & seq : overrepSeqs.second) {
             if (strncmp(nlPos2Head + 1 + i, seq.c_str(), lenOverrep2) == 0) {
               overRep = true;
