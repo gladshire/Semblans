@@ -27,7 +27,9 @@ std::vector<transcript> get_transcript(std::vector<SRA> sras);
 bool stringToBool(std::string boolStr);
 
 void blastxBulk(const std::vector<transcript> & transVec, std::string threads,
-                bool dispOutput, std::string logFilePath, const INI_MAP & cfgIni);
+                bool dispOutput, std::string logFilePath,
+                std::string refProt, std::string outDir,
+                const INI_MAP & cfgIni);
 
 void remChimeraBulk(const std::vector<transcript> & transVec, std::string ram_gb,
                     bool retainInterFiles, bool dispOutput, std::string logFilePath,
@@ -35,12 +37,18 @@ void remChimeraBulk(const std::vector<transcript> & transVec, std::string ram_gb
 
 void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
                 bool retainInterFiles, bool dispOutput, std::string logFilePath,
+                std::vector<std::string> readFiles1,
+                std::vector<std::string> readFiles2,
+                std::string outDir,
                 const INI_MAP & cfgIni);
 
 void corsetBulk(const std::vector<transcript> & transVec, std::string ram_gb,
                 bool retainInterFiles, bool dispOutput, std::string logFilePath,
                 const INI_MAP & cfgIni);
 
-void transdecBulk(const std::vector<transcript> & transVec, std::string threads,
-                  std::string ram_gb, bool retainInterFiles, bool dispOutput,
-                  std::string logFilePath, const INI_MAP & cfgIni);
+void transdecBulk(const std::vector<transcript> & transVec,
+                  std::string threads, std::string ram_gb,
+                  bool retainInterFiles, bool dispOutput,
+                  std::string logFilePath,
+                  std::string refProt, std::string outDir,
+                  const INI_MAP & cfgIni);

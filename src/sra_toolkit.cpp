@@ -1,5 +1,10 @@
 #include "sra_toolkit.h"
 
+/*
+TODO: Segmentation fault occurs when insufficient RAM is given
+  - Likely due to '@' characters in quality being spuriously recognized as headers
+*/
+
 
 // Given a Semblans config INI file, construct and extract SRA objects
 // based on accession numbers
@@ -90,6 +95,7 @@ void align_file_buffer(std::istream & inStream1, std::istream & inStream2,
   std::string read;
   std::string readMatch;
   if (!inStream1.eof() && !inStream2.eof()) {
+    
     while ((inStream1.peek() != '@' && inStream1.peek() != '>') &&
            (inStream2.peek() != '@' && inStream2.peek() != '>')) {
       if (inStream1.peek() != '@' && inStream1.peek() != '>') {
@@ -103,6 +109,33 @@ void align_file_buffer(std::istream & inStream1, std::istream & inStream2,
         s2--;
       }
     }
+    /*
+    while (true) {
+      while (inStream1.peek() != '\n' && inStream2.peek() != '\n') {
+        if (inStream1.peek() != '\n') {
+          inStream1.unget();
+          inStream1Data[s1 - 1] = '\0';
+          s1--;
+        }
+        if (inStream2.peek() != '\n') {
+          inStream2.unget();
+          inStream2Data[s2 - 1] = '\0';
+          s2--;
+        }
+      }
+      if (inStream1.peek() == '\n') {
+        inStream1.get();
+        if (inStream1.peek() == '@' || inStream1.peek() == '>') {
+          
+        }
+      }
+      if (inStream2.peek() == '\n') {
+        inStream2.get();
+        if (inStream2.peek() == '@' || inStream2.peek() == '>') {
+
+        }
+      }
+    */
     if (inStream1.peek() == '@' || inStream1.peek() == '>') {
       inStream1.get();
       inStream1 >> readMatch;
@@ -132,6 +165,11 @@ void align_file_buffer(std::istream & inStream1, std::istream & inStream2,
           while (inStream2.peek() != '@' && inStream2.peek() != '>') {
             inStream2.unget();
           }
+          /*
+          for (int i = 0; i < read.size(); i++) {
+            inStream2.unget();
+          }
+          */
           inStream2.unget();
           inStream2Data[s2 - 1] = '\0';
           s2--;
@@ -151,6 +189,11 @@ void align_file_buffer(std::istream & inStream1, std::istream & inStream2,
           while (inStream1.peek() != '@' && inStream1.peek() != '>') {
             inStream1.unget();
           }
+          /*
+          for (int i = 0; i < readMatch.size(); i++) {
+            inStream1.unget();
+          }
+          */
           inStream1.unget();
           inStream1Data[s1 - 1] = '\0';
           s1--;

@@ -2,7 +2,7 @@
 
 std::atomic<bool> procRunning(false);
 
-// Print ASCII startup screen for Semblans
+
 void print_intro(std::string logFile) {
   winsize w;
   ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
@@ -19,8 +19,8 @@ void print_intro(std::string logFile) {
   logOutput("      ───────────────────────────────────────────────\n\n", logFile);
 }
 
-// Print base help message for Semblans in terminal
-void print_help_base() {
+
+void print_help() {
   std::cout << "USAGE:\n" << std::endl;
   std::cout << "  semblans [--help/-h] [COMMAND] [--config/-cfg]\n"
             << "           [--threads/-t] [--ram/-r] [--retain/-f]\n"
@@ -40,74 +40,24 @@ void print_help_base() {
 
 }
 
-/*
-void print_help_preprocess() {
-  std::cout << "USAGE:\n" << std::endl;
-  std::cout << "  semblans preprocess [--help/-h] [--config/-cfg]\n"
-            << "                      [--left/-l reads_1_left.fq,reads_2_left.fq,...]\n"
-            << "                      [--right/-r reads_1_right.fq,reads_2
-            << "                      [--threads/-t] [--ram/-r] [--retain/-f]\n"
-            << "                      [--verbose/-v]\n" << std::endl;
-  std::cout << "ARGUMENTS:\n" << std::endl;
-  std::cout << "  -cfg, --config     Specifies path to configuration file (REQUIRED)" << std::endl;
-  std::cout << "  -t,   --threads    Specifies number of threads/CPU cores to employ" << std::endl;
-  std::cout << "  -r,   --ram        Specifies ammount of memory/RAM (GB) to dedicate" << std::endl;
-  std::cout << "  -f,   --retain     Prevents deletion of intermediate files in pipeline" << std::endl;
-  std::cout << "  -v,   --verbose    Prints all output from Semblans and sub-programs" << std::endl;
-  std::cout << "  -h,   --help       Displays this help screen" << std::endl;
-}*/
-
-void print_help_postprocess() {
-  std::cout << "USAGE:\n" << std::endl;
-  std::cout << "  semblans postprocess [--help/-h] [--config/-cfg]\n"
-            << "                       [--assembly/-a reads_assembly.fa]\n"
-            << "                       [--left/-1 reads_1_left.fq,reads_2_left.fq,...]\n"
-            << "                       [--right/-2 reads_1_right.fq,reads_2_right.fq,...]\n"
-            << "                       [--threads/-t] [--ram/-r] [--retain/-f]\n"
-            << "                       [--verbose/-v]\n" << std::endl;
-  std::cout << "ARGUMENTS:\n" << std::endl;
-  std::cout << "  -cfg, --config     Specifies path to configuration file (REQUIRED)" << std::endl;
-  std::cout << "  -t,   --threads    Specifies number of threads/CPU cores to employ" << std::endl;
-  std::cout << "  -r,   --ram        Specifies ammount of memory/RAM (GB) to dedicate" << std::endl;
-  std::cout << "  -f,   --retain     Prevents deletion of intermediate files in pipeline" << std::endl;
-  std::cout << "  -v,   --verbose    Prints all output from Semblans and sub-programs" << std::endl;
-  std::cout << "  -h,   --help       Displays this help screen" << std::endl;
- 
-}
-
-
-
-
 int main(int argc, char * argv[]) {
   //print_intro();
-  INI_MAP cfgIni;
-  INI_MAP_ENTRY cfgIniGen;
-  std::vector<std::string> sraRuns;
-  std::string logFilePath;
   std::string threadStr;
   std::string ramStr;
   int numThreads;
   int ram;
   std::string pathConfig;
   std::string command;
-  std::string leftReads;
-  std::string rightReads;
-  std::string assembly;
-  std::string refProt;
-  std::string outDir;
-  bool useCfg = true;
-  bool serialProcess;
+  //bool multAssembly;
+  bool useLocalData;
   bool retainInterFiles;
   bool verboseOutput;
 
-  std::string preCmd;
-  std::string assCmd;
-  std::string postCmd;
   if (argc == 1 || 
       (argc == 2 && 
        (strcmp("--help", argv[1]) == 0 ||
         strcmp("-h", argv[1]) == 0))) {
-    print_help_base();
+    print_help();
     exit(0);
   }
   if (argc == 2 && (strcmp("--version", argv[1]) == 0 ||
@@ -122,11 +72,11 @@ int main(int argc, char * argv[]) {
     ram = 1;
     std::string pathConfig = "";
     std::string command = "";
+    //multAssembly = false;
     retainInterFiles = false;
     verboseOutput = false;
 
     for (int i = 0; i < argc; i++) {
-
       // Check for semblans command (preprocess/assemble/postprocess)
       // If none is given, will perform all
       if (strcmp("preprocess", argv[i]) == 0 ||
@@ -176,39 +126,9 @@ int main(int argc, char * argv[]) {
           }
         }
         else {
-          // ERROR: Config flag invoked, but no config file specified!
-          std::cout << "ERROR: If using '--config', you must specify config file (.INI)" << std::endl;
+          // ERROR: No config file specified!
+          std::cout << "ERROR: Must specify config file" << std::endl;
           std::cout << "  (example: --config path/to/config.ini)\n" << std::endl;
-          exit(1);
-        }
-      }
-
-      // Check for '--left' read sequence FASTQ file(s)
-      else if (strcmp("--left", argv[i]) == 0 ||
-               strcmp("-1", argv[i]) == 0) {
-        leftReads = argv[i + 1];
-      }
-      // Check for '--right' read sequence FASTQ file(s)
-      else if (strcmp("--right", argv[i]) == 0 ||
-               strcmp("-2", argv[i]) == 0) {
-        rightReads = argv[i + 1];
-      }
-      // Check for '--assembly' transcripts sequence FASTA file
-      else if (strcmp("--assembly", argv[i]) == 0 ||
-               strcmp("-a", argv[i]) == 0) {
-        assembly = argv[i + 1];
-      }
-      else if (strcmp("--reference-proteome", argv[i]) == 0 ||
-               strcmp("-rp", argv[i]) == 0) {
-        refProt = argv[i + 1];
-      }
-      // Check for '--output-directory', for specifying where outputs should
-      // go if no config file is used
-      else if (strcmp("--output-directory", argv[i]) == 0 ||
-               strcmp("-od", argv[i]) == 0) {
-        outDir = argv[i + 1];
-        if (!fs::exists(outDir.c_str())) {
-          std::cout << "ERROR: Output directory '" + outDir + "' does not exist\n" << std::endl;
           exit(1);
         }
       }
@@ -240,10 +160,8 @@ int main(int argc, char * argv[]) {
                strcmp("--Ram", argv[i]) == 0 ||
                strcmp("-r", argv[i]) == 0 ||
                strcmp("-R", argv[i]) == 0) {
-
         if (i != argc - 1) {
           ramStr = argv[i + 1];
-
           for (int j = 0; j < strlen(argv[i + 1]); j++) {
             if (!isdigit(ramStr[j])) {
               // ERROR: Bad memory argument
@@ -258,17 +176,12 @@ int main(int argc, char * argv[]) {
           // No RAM ammount given, using 1 GB
         }
       }
-      // Check for '--retain' flag, which tells Semblans not to delete outputs from
-      // intermediate steps in the pipeline
       else if (strcmp("--retain", argv[i]) == 0 ||
                strcmp("--Retain", argv[i]) == 0 ||
                strcmp("-f", argv[i]) == 0 ||
                strcmp("-F", argv[i]) == 0) {
         retainInterFiles = true;
       }
-      // Check for '--berbose' flag, which tells Semblans to print a detailed output
-      // to the terminal's standard output. This does not affect verbosity of log files.
-      // Regardless of terminal output, log files always receive maximum verbosity.
       else if (strcmp("--verbose", argv[i]) == 0 ||
                strcmp("--Verbose", argv[i]) == 0 ||
                strcmp("-v", argv[i]) == 0 ||
@@ -276,70 +189,39 @@ int main(int argc, char * argv[]) {
         verboseOutput = true;
       }
     }
-    // If no Semblans submodule specified, run all three (preprocess, assemble, postprocess)
+
     if (command == "") {
       command = "all";
     }
-    // If no config file specified, check for sequence files in Semblans call
     if (pathConfig == "") {
-      // TODO: Add support for preprocess w/o config file
-      // TODO: Add support for assemble w/o config file
-      useCfg = false;
-      if (command == "postprocess") {
-        if (assembly == "" || (leftReads == "" && rightReads == "")) {
-          std::cout << "ERROR: If not using '--config', user must specify assembly, ";
-          std::cout << "the left/right read files that were used in assembly" << std::endl;
-          std::cout << "  (example: --assembly transcripts.fa" << std::endl;
-          std::cout << "            --left reads_1_left.fq,reads_2_left.fq,..." << std::endl;
-          std::cout << "            --right reads_1_right.fq, reads_2_right.fq,..." << std::endl;
-          exit(1);
-        }
-        if (refProt == "") {
-          std::cout << "ERROR: If not using '--config', ";
-          std::cout << "user must specify a reference proteome FASTA" << std::endl;
-          std::cout << "  (example: --reference-proteome path/to/ref_prot.fa)\n" << std::endl;
-          exit(1);
-        }
-      }
-      else {
-        // ERROR: No config file specified
-        // std::cout << "ERROR: Must specify config file" << std::endl;
-        // std::cout << "  (example: --config path/to/config.ini)\n" << std::endl;
-        // exit(1);
-      }
+      // ERROR: No config file specified
+      std::cout << "ERROR: Must specify config file" << std::endl;
+      std::cout << "  (example: --config path/to/config.ini)\n" << std::endl;
+      exit(1);
     }
 
-    // If config file being used, set up workspace for project
-    if (useCfg) {
-      leftReads = "null";
-      rightReads = "null";
-      cfgIni = make_ini_map(pathConfig.c_str());
-      cfgIniGen = cfgIni["General"];
-      logFilePath = std::string((fs::canonical(fs::path(cfgIniGen["log_file"].c_str()).parent_path()) /
-                              fs::path(cfgIniGen["log_file"].c_str()).filename()).c_str());
+    INI_MAP cfgIni = make_ini_map(pathConfig.c_str());
+    INI_MAP_ENTRY cfgIniGen = cfgIni["General"];
+    std::string logFilePath((fs::canonical(fs::path(cfgIniGen["log_file"].c_str()).parent_path()) /
+                            fs::path(cfgIniGen["log_file"].c_str()).filename()).c_str());
     
-      fs::create_directory((fs::canonical(fs::path(cfgIniGen["output_directory"].c_str())) /
-                            fs::path(cfgIniGen["project_name"].c_str())));
-      std::ofstream logFile(logFilePath, std::ios_base::trunc);
+    fs::create_directory((fs::canonical(fs::path(cfgIniGen["output_directory"].c_str())) /
+                          fs::path(cfgIniGen["project_name"].c_str())));
+    std::ofstream logFile(logFilePath, std::ios_base::trunc);
 
-      serialProcess = ini_get_bool(cfgIniGen.at("serial_processing").c_str(), 0);
-      if (serialProcess) {
-        for (auto sraCode : cfgIni.at("SRA accessions")) {
-          sraRuns.push_back(sraCode.first);
-        }
-        for (auto sraFile : cfgIni.at("Local files")) {
-          sraRuns.push_back(sraFile.first);
-        }
+    bool serialProcess = ini_get_bool(cfgIniGen.at("serial_processing").c_str(), 0);
+    std::vector<std::string> sraRuns;
+    if (serialProcess) {
+      for (auto sraCode : cfgIni.at("SRA accessions")) {
+        sraRuns.push_back(sraCode.first);
       }
-    }
-    // If config file not being used
-    else {
-      pathConfig = "null";
+      for (auto sraFile : cfgIni.at("Local files")) {
+        sraRuns.push_back(sraFile.first);
+      }
     }
  
     std::string verbose;
     std::string retain;
-    std::string config;
     if (verboseOutput) {
       verbose = " true";
     }
@@ -352,28 +234,19 @@ int main(int argc, char * argv[]) {
     else {
       retain = " false";
     }
-    if (useCfg) {
-      config = " true";
-    }
-    else {
-      config = " false";
-    }
-
-    preCmd = SEMBLANS_DIR + "preprocess " + pathConfig + " " +
-             std::to_string(numThreads) + " " +
-             std::to_string(ram);
+    std::string preCmd = SEMBLANS_DIR + "preprocess " + pathConfig + " " +
+                         std::to_string(numThreads) + " " +
+                         std::to_string(ram);
     preCmd += retain;
     preCmd += verbose;
-    assCmd = SEMBLANS_DIR + "assemble " + pathConfig + " " +
-             std::to_string(numThreads) + " " +
-             std::to_string(ram);
+    std::string assCmd = SEMBLANS_DIR + "assemble " + pathConfig + " " +
+                         std::to_string(numThreads) + " " +
+                         std::to_string(ram);
     assCmd += retain;
     assCmd += verbose;
-    postCmd = SEMBLANS_DIR + "postprocess " + pathConfig + " " +
-              leftReads + " " + rightReads + " " + assembly + " " +
-              refProt + " " + outDir + " " +
-              std::to_string(numThreads) + " " +
-              std::to_string(ram);
+    std::string postCmd = SEMBLANS_DIR + "postprocess " + pathConfig + " " +
+                          std::to_string(numThreads) + " " +
+                          std::to_string(ram);
     postCmd += retain;
     postCmd += verbose;
     int result;
@@ -426,9 +299,6 @@ int main(int argc, char * argv[]) {
       }
       else {
         logOutput("Performing preprocessing only", logFilePath);
-        
-        std::cout << preCmd << std::endl;
-
         result = system(preCmd.c_str());
         if (WIFSIGNALED(result)) {
           system("setterm -cursor on");
@@ -553,7 +423,7 @@ int main(int argc, char * argv[]) {
           currPreCmd = SEMBLANS_DIR + "preprocess " + currCfgIniSub + " " +
                        std::to_string(numThreads) + " " +
                        std::to_string(ram) + retain + verbose;
-
+          
           currAssCmd = SEMBLANS_DIR + "assemble " + currCfgIniSub + " " +
                        std::to_string(numThreads) + " " +
                        std::to_string(ram) + retain + verbose;

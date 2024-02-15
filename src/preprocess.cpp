@@ -187,7 +187,8 @@ void fastqcBulk2(std::vector<SRA> & sras, std::string threads, bool dispOutput,
   for (auto sra : sras) {
     currFastqcIn.first = sra.get_sra_path_for_filt().first.c_str();
     currFastqcIn.second = sra.get_sra_path_for_filt().second.c_str();
-    if (!ini_get_bool(cfgPipeline.at("filter_foreign_reads").c_str(), 0)) {
+    if (!ini_get_bool(cfgPipeline.at("filter_foreign_reads").c_str(), 0) ||
+        cfgIni.at("Kraken2 filter order").empty()) {
       if (!ini_get_bool(cfgPipeline.at("trim_adapter_seqs").c_str(), 0)) {
         if (!ini_get_bool(cfgPipeline.at("error_correction").c_str(), 0)) {
           currFastqcIn.first = sra.get_sra_path_raw().first.c_str();
@@ -708,7 +709,8 @@ bool remOverrepBulk(std::vector<SRA> & sras, std::string threads, std::string ra
     currOrepIn.second = sra.get_sra_path_for_filt().second.c_str();
 
     fastqcDir = sra.get_fastqc_dir_2().first.parent_path();
-    if (!ini_get_bool(cfgPipeline.at("filter_foreign_reads").c_str(), 0)) {
+    if (!ini_get_bool(cfgPipeline.at("filter_foreign_reads").c_str(), 0) ||
+        cfgIni.at("Kraken2 filter order").empty()) {
       if (!ini_get_bool(cfgPipeline.at("trim_adapter_seqs").c_str(), 0)) {
         if (!ini_get_bool(cfgPipeline.at("error_correction").c_str(), 0)) {
           currOrepIn.first = sra.get_sra_path_raw().first.c_str();
@@ -933,7 +935,7 @@ int main(int argc, char * argv[]) {
                         dispOutput, compressFiles, retainInterFiles, logFilePath, cfgIni);
       }
       else {
-        logOutput("No Kraken databases specified in config file. Skipping foreign filtering.",
+        logOutput("\nNo Kraken databases specified in config file. Skipping foreign filtering.",
                   logFilePath);
       }
     }

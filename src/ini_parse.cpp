@@ -58,6 +58,29 @@ std::string getStepNum(int stepNum) {
   return currNum;
 }
 
+void make_proj_space(std::string outDir, std::string pipeStage) {
+  outDir += "/";
+  if (!fs::exists(fs::path(outDir.c_str()))) {
+    system(("mkdir " + outDir + " > /dev/null 2>&1").c_str());
+  }
+  if (!fs::exists(fs::path(outDir.c_str()) / ".checkpoints")) {
+    system(("mkdir " + outDir + "/.checkpoints/ > /dev/null 2>&1").c_str());
+  }
+  if (pipeStage == "postprocess") {
+    // Create directory for chimera-filtered transcripts
+    stepDirs.push_back(allSteps[8]);
+    system(("mkdir " + outDir + allSteps[8] + " > /dev/null 2>&1").c_str());
+
+    // Create directory for clustering step
+    stepDirs.push_back(allSteps[9]);
+    system(("mkdir " + outDir + allSteps[9] + " > /dev/null 2>&1").c_str());
+
+    // Create directory for coding sequences
+    stepDirs.push_back(allSteps[10]);
+    system(("mkdir " + outDir + allSteps[10] + " > /dev/null 2>&1").c_str());
+  }
+}
+
 // Create directory space for project
 void make_proj_space(const INI_MAP &iniFile, std::string pipeStage) {
   std::string projDir((fs::path(iniFile.at("General").at("output_directory").c_str()) /

@@ -103,6 +103,55 @@ transcript::transcript(std::string filename, INI_MAP cfgIni) {
   trans_path_annot = (projPath + stepDirs[11] + "/" + fileBase + ".annotated.fasta").c_str();
 }
 
+transcript::transcript(std::string filename, std::string outDir) {
+  outDir += "/";
+  org_name = "";
+  tax_id = "";
+  fs::path filePrefix(fs::path(filename.c_str()));
+  while (!filePrefix.extension().empty()) {
+    filePrefix = filePrefix.stem();
+  }
+  //while (fileBase.find(".") != std::string::npos) {
+  //  fileBase = std::string(fs::path(fileBase).stem().c_str());
+  //}
+  std::string fileBase = std::string(filePrefix.c_str());
+
+  file_prefix = fileBase;
+  
+  // Define trinity assembly path
+  //trans_path_trinity = (projPath + stepDirs[7] + "/" + fileBase + ".Trinity.fasta").c_str();
+  trans_path_trinity = filename;
+  // Define trinity gene map path
+  //trans_path_gene_map = (projPath + stepDirs[7] + "/" + fileBase + ".Trinity.fasta" + 
+  //                       ".gene_trans_map").c_str();
+  // Define chimera cut file path
+  trans_path_ccut = (outDir + stepDirs[8] + "/" + fileBase + ".cut").c_str();
+  // Define chimera info file path
+  trans_path_cinfo = (outDir + stepDirs[8] + "/" + fileBase + ".info").c_str();
+  // Define chimera-filtered transcript path
+  trans_path_chimera = (outDir + stepDirs[8] + "/" + fileBase + ".chim_filt.fasta").c_str();
+  // Define blastx output path
+  trans_path_blastx = (outDir + stepDirs[8] + "/" + fileBase + ".blastx").c_str();
+  // Define salmon index path
+  trans_path_index = (outDir + stepDirs[9] + "/" + fileBase + "_salmon_index").c_str();
+  // Define salmon quant path
+  trans_path_quant = (outDir + stepDirs[9] + "/" + fileBase + "_salmon_quant").c_str();
+  // Define corset cluster path
+  trans_path_clust = (outDir + stepDirs[9] + "/" + fileBase + "_salmon-clusters.txt").c_str();
+  // Define largest cluster transcripts path
+  trans_path_largest = (outDir + stepDirs[9] + "/" + fileBase + ".lc.fasta").c_str();
+  // Define redundant transcripts path
+  trans_path_redund = (outDir + stepDirs[9] + "/" + fileBase + ".rd.fasta").c_str();
+  // Define corset counts path
+  trans_path_counts = (outDir + stepDirs[9] + "/" + fileBase + "_salmon-counts.txt").c_str();
+  // Define transdecoder cds path
+  trans_path_cds = (outDir + stepDirs[10] + "/" + fileBase + ".transdecoder.cds.fasta").c_str();
+  // Define transdecoder prot path 
+  trans_path_prot = (outDir + stepDirs[10] + "/" + fileBase + ".transdecoder.pep.fasta").c_str();
+  // Define annotated transcripts path
+  trans_path_annot = (outDir + stepDirs[11] + "/" + fileBase + ".annotated.fasta").c_str();
+}
+
 // Return the organism name
 std::string transcript::get_org_name() {
   return org_name;

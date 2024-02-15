@@ -20,4 +20,6 @@ namespace dl = boost::dll;
 
 void print_intro(std::string logFile);
 
-void print_help();
+void print_help_base();
+
+void print_help_postprocess();
