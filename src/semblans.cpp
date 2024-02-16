@@ -205,6 +205,7 @@ int main(int argc, char * argv[]) {
       // Check for '--output-directory', for specifying where outputs should
       // go if no config file is used
       else if (strcmp("--output-directory", argv[i]) == 0 ||
+               strcmp("--output", argv[i]) == 0 ||
                strcmp("-od", argv[i]) == 0) {
         outDir = argv[i + 1];
         if (!fs::exists(outDir.c_str())) {
@@ -287,17 +288,17 @@ int main(int argc, char * argv[]) {
       useCfg = false;
       if (command == "postprocess") {
         if (assembly == "" || (leftReads == "" && rightReads == "")) {
-          std::cout << "ERROR: If not using '--config', user must specify assembly, ";
-          std::cout << "the left/right read files that were used in assembly" << std::endl;
-          std::cout << "  (example: --assembly transcripts.fa" << std::endl;
-          std::cout << "            --left reads_1_left.fq,reads_2_left.fq,..." << std::endl;
-          std::cout << "            --right reads_1_right.fq, reads_2_right.fq,..." << std::endl;
+          std::cerr << "ERROR: If not using '--config', user must specify assembly, ";
+          std::cerr << "the left/right read files that were used in assembly" << std::endl;
+          std::cerr << "  (example: --assembly transcripts.fa" << std::endl;
+          std::cerr << "            --left reads_1_left.fq,reads_2_left.fq,..." << std::endl;
+          std::cerr << "            --right reads_1_right.fq, reads_2_right.fq,..." << std::endl;
           exit(1);
         }
         if (refProt == "") {
-          std::cout << "ERROR: If not using '--config', ";
-          std::cout << "user must specify a reference proteome FASTA" << std::endl;
-          std::cout << "  (example: --reference-proteome path/to/ref_prot.fa)\n" << std::endl;
+          std::cerr << "ERROR: If not using '--config', ";
+          std::cerr << "user must specify a reference proteome FASTA" << std::endl;
+          std::cerr << "  (example: --reference-proteome path/to/ref_prot.fa)\n" << std::endl;
           exit(1);
         }
       }
@@ -320,7 +321,7 @@ int main(int argc, char * argv[]) {
     
       fs::create_directory((fs::canonical(fs::path(cfgIniGen["output_directory"].c_str())) /
                             fs::path(cfgIniGen["project_name"].c_str())));
-      std::ofstream logFile(logFilePath, std::ios_base::trunc);
+      //std::ofstream logFile(logFilePath, std::ios_base::trunc);
 
       serialProcess = ini_get_bool(cfgIniGen.at("serial_processing").c_str(), 0);
       if (serialProcess) {
@@ -335,7 +336,11 @@ int main(int argc, char * argv[]) {
     // If config file not being used
     else {
       pathConfig = "null";
+      logFilePath = std::string((fs::canonical(fs::path(outDir.c_str()).parent_path()) /
+                                "log.txt").c_str());
     }
+
+    std::ofstream logFile(logFilePath, std::ios_base::trunc);
  
     std::string verbose;
     std::string retain;
@@ -391,6 +396,10 @@ int main(int argc, char * argv[]) {
 
     // Case 1: preprocess
     if (command == "preprocess") {
+      if (assembly != "") {
+        std::cerr << "ERROR: '--assembly' flag can only be invoked for postprocess" << std::endl;
+        exit(1);
+      }
       if (serialProcess) {
         for (auto sraStr : sraRuns) {
           currCfgIniSub = pathConfig.substr(0, pathConfig.rfind(".ini")).insert(pathConfig.rfind("/") + 1, ".") +
@@ -439,6 +448,10 @@ int main(int argc, char * argv[]) {
     }
     // Case 2: assemble
     if (command == "assemble") {
+      if (assembly != "") {
+        std::cerr << "ERROR: '--assembly' flag can only be invoked for postprocess" << std::endl;
+        exit(1);
+      }
       if (serialProcess) {
         for (auto sraStr : sraRuns) {
           currCfgIniSub = pathConfig.substr(0, pathConfig.rfind(".ini")).insert(pathConfig.rfind("/") + 1, ".") +
@@ -505,12 +518,19 @@ int main(int argc, char * argv[]) {
           cfgIniFile.close();
           cfgIniSub.close();
         }
-
-        currPostCmd = SEMBLANS_DIR + "postprocess " + currCfgIniSub + " " +
+        currPostCmd = SEMBLANS_DIR + "postprocess " + pathConfig + " " +
+                      leftReads + " " + rightReads + " " + assembly + " " +
+                      refProt + " " + outDir + " " +
                       std::to_string(numThreads) + " " +
                       std::to_string(ram) + retain + verbose;
 
-        logOutput("Performing postprocess only", logFilePath);
+        //currPostCmd = SEMBLANS_DIR + "postprocess " + currCfgIniSub + " " +
+        //              std::to_string(numThreads) + " " +
+        //              std::to_string(ram) + retain + verbose;
+
+        //logOutput("Performing postprocess only", logFilePath);
+
+
         result = system(postCmd.c_str());
         if (WIFSIGNALED(result)) {
           system("setterm -cursor on");
@@ -519,6 +539,9 @@ int main(int argc, char * argv[]) {
       }
       else {
         logOutput("Performing postprocess only", logFilePath);
+
+        std::cout << postCmd << std::endl;
+
         result = system(postCmd.c_str());
         if (WIFSIGNALED(result)) {
           system("setterm -cursor on");

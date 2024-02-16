@@ -71,7 +71,7 @@ void blastxBulk(const std::vector<transcript> & transVec, std::string threads,
       logOutput("ERROR: Reference proteome: " + refProteome + " not found\n", logFilePath);
       exit(1);
     }
-    blastDbDir = outDir + stepDirs[8] + "/";
+    blastDbDir = outDir + stepDirs[0] + "/";
     blastDbName = std::string(fs::path(refProteome.c_str()).stem().c_str());
   }
 
@@ -478,7 +478,7 @@ void transdecBulk(const std::vector<transcript> & transVec,
       logOutput("ERROR: Reference proteome " + refProteome + " not found\n", logFilePath);
       exit(1);
     }
-    blastDbDir = outDir + stepDirs[8] + "/";
+    blastDbDir = outDir + stepDirs[0] + "/";
     blastDbName = std::string(fs::path(refProteome.c_str()).stem().c_str());
   }
   /*
