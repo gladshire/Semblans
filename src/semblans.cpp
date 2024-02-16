@@ -540,8 +540,6 @@ int main(int argc, char * argv[]) {
       else {
         logOutput("Performing postprocess only", logFilePath);
 
-        std::cout << postCmd << std::endl;
-
         result = system(postCmd.c_str());
         if (WIFSIGNALED(result)) {
           system("setterm -cursor on");

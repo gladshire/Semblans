@@ -83,14 +83,13 @@ void salmon_quant(std::string transIn, std::string transIndex, std::string trans
   if (morePaired) {
     std::string salm_cmd = PATH_SALMON + " quant" + " -i " + indexFilePath + " --dumpEq" +
                            " --writeUnmappedNames " + " --libType" + " A" + " -p " + threads +
-                           " -1 " + sras1 + " -2 " + sras2 +
-                           " --validateMappings" + " -o " + quantFilePath + printOut;
+                           " -1 " + sras1 + " -2 " + sras2 + " -o " + quantFilePath + printOut;
     result = system(salm_cmd.c_str());
   }
   else {
     std::string salm_cmd = PATH_SALMON + " quant" + " -i " + indexFilePath + " --dumpEq" +
                            " --writeUnmappedNames " + " --libType" + " A" + " -p " + threads +
-                           " -r " + sras1 + " --validateMappings" + " -o " + quantFilePath +
+                           " -r " + sras1 + " -o " + quantFilePath +
                            printOut;
     result = system(salm_cmd.c_str());
   }

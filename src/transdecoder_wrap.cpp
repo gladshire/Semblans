@@ -88,8 +88,6 @@ void run_transdecoder(std::string transIn, std::string transCds, std::string tra
                                    std::string(allpep.parent_path().c_str()) + printOut;
       int resultLO;
 
-      std::cout << tdLongOrfs_cmd << std::endl;
-
       resultLO = system(tdLongOrfs_cmd.c_str());
       if (WIFSIGNALED(resultLO)) {
         system("setterm -cursor on");

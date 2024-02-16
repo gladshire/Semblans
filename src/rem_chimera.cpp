@@ -155,8 +155,6 @@ void detect_chimera(std::string blastxFile, std::string outDir) {
   fs::path blastxFilePath(blastxFile.c_str());
   std::string blastxFileStr(blastxFilePath.stem().c_str());
 
-  std::cout << blastxFile << std::endl;
-
   std::string cutFile = blastxFileStr + ".cut";
   std::string infoFile = blastxFileStr + ".info";
 

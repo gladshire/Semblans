@@ -258,6 +258,7 @@ void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
     }
     else {
       for (int i = 0; i < readFiles1.size(); i++) {
+
         currSraRun.first = readFiles1[i];
         if (!readFiles2.empty()) {
           currSraRun.second = readFiles2[i];
@@ -526,9 +527,6 @@ void transdecBulk(const std::vector<transcript> & transVec,
         }
       }
     }
-    else {
-      currTransInTD = trans.get_trans_path_chimera().c_str();
-    }
     currTransCds = trans.get_trans_path_cds().c_str();
     currTransPep = trans.get_trans_path_prot().c_str();
     
@@ -599,13 +597,14 @@ void annotateBulk(const std::vector<transcript> & transVec, std::string threads,
 
 std::vector<std::string> getCommaSepStrings(std::string commaSepStrings) {
   std::vector<std::string> stringVec;
-  size_t commaInd = commaSepStrings.find(',');
+  size_t commaInd;
   size_t currPos = 0;
   std::string currStr;
   do {
-    currStr = commaSepStrings.substr(currPos, commaInd + 1);
-    std::cout << currStr << std::endl;
+    commaInd = commaSepStrings.find(',', currPos);
+    currStr = commaSepStrings.substr(currPos, commaInd - currPos);
     stringVec.push_back(currStr);
+    currPos = commaInd + 1;
   } while (commaInd != std::string::npos);
   return stringVec;
 }
@@ -664,8 +663,10 @@ int main(int argc, char * argv[]) {
       make_proj_space(outDir, "postprocess");
       transcript transFile(assembly, outDir);
       transVec.push_back(transFile);
-      // DO POSTPROCESS STEPS
-      
+     
+      outDir = std::string((fs::canonical(fs::path(outDir.c_str())).parent_path()).c_str()) + "/";
+
+      std::cout << outDir << std::endl;
     }
     // Set up postprocess parameters based on user-specified config file
     else {
