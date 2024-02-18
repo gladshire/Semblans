@@ -264,9 +264,9 @@ void errorCorrBulk(std::vector<SRA> & sras, std::string threads,
     weakProportion = rcorrSettings.at("weak_kmer_proportion_threshold");
   }
   else {
-    kmerLength = 23;
-    maxCorrK = 4;
-    weakProportion = 0.95;
+    kmerLength = "23";
+    maxCorrK = "4";
+    weakProportion = "0.95";
   }
 
   for (auto sra : sras) {
@@ -288,7 +288,7 @@ void errorCorrBulk(std::vector<SRA> & sras, std::string threads,
       }
       continue;
     }
-    logOutput("\n  Now running error correction for:", logFilePath);
+    logOutput("\n  Now running error correction for:\n", logFilePath);
     summarize_sing_sra(sra, logFilePath, 4);
 
     if (!dispOutput) {
@@ -457,9 +457,11 @@ void trimBulk(std::vector<SRA> & sras, std::string threads,
     currTrimIn.first = sra.get_sra_path_corr_fix().first.c_str();
     currTrimIn.second = sra.get_sra_path_corr_fix().second.c_str();   
 
-    if (!ini_get_bool(cfgPipeline.at("error_correction").c_str(), 0)) {
-      currTrimIn.first = sra.get_sra_path_raw().first.c_str();
-      currTrimIn.second = sra.get_sra_path_raw().second.c_str();
+    if (!cfgIni.empty()) {
+      if (!ini_get_bool(cfgPipeline.at("error_correction").c_str(), 0)) {
+        currTrimIn.first = sra.get_sra_path_raw().first.c_str();
+        currTrimIn.second = sra.get_sra_path_raw().second.c_str();
+      }
     }
 
     // Check SRA FastQC output to discern whether trimming is necessary
@@ -567,12 +569,12 @@ void filtForeignBulk(std::vector<SRA> & sras, std::vector<std::string> krakenDbs
                      std::string logFilePath, std::string outDir,
                      const INI_MAP & cfgIni = {}) {
   logOutput("\n\nStarting foreign sequence filtering", logFilePath);
-  INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
-  INI_MAP_ENTRY krakenSettings = cfgIni.at("Kraken2 settings");
-  std::string confThreshold = krakenSettings.at("confidence_threshold");
-  std::string minBaseQuality = krakenSettings.at("min_base_quality");
-  std::string minHitGroups = krakenSettings.at("min_hit_groups");
-  bool keepForeign = ini_get_bool(krakenSettings.at("save_foreign_reads").c_str(), 0);
+  INI_MAP_ENTRY cfgIniPipeline;
+  INI_MAP_ENTRY krakenSettings;
+  std::string confThreshold;
+  std::string minBaseQuality;
+  std::string minHitGroups;
+  bool keepForeign;
   std::pair<std::string, std::string> firstKrakIn;
   std::pair<std::string, std::string> currKrakIn;
   std::string krakOutDir;
@@ -581,6 +583,20 @@ void filtForeignBulk(std::vector<SRA> & sras, std::vector<std::string> krakenDbs
   std::string currRepStem;
   std::string currRepFile;
 
+  if (!cfgIni.empty()) {
+    cfgIniPipeline = cfgIni.at("Pipeline");
+    krakenSettings = cfgIni.at("Kraken2 settings");
+    keepForeign = ini_get_bool(krakenSettings.at("save_foreign_reads").c_str(), 0); 
+    confThreshold = krakenSettings.at("confidence_threshold");
+    minBaseQuality = krakenSettings.at("min_base_quality");
+    minHitGroups = krakenSettings.at("min_hit_groups");
+  }
+  else {
+    keepForeign = false;
+    confThreshold = "0.2";
+    minBaseQuality = "0";
+    minHitGroups = "2";
+  }
   
   for (int i = 0; i < krakenDbs.size(); i++) {
     logOutput("\n  Now filtering with database: " +
@@ -601,7 +617,7 @@ void filtForeignBulk(std::vector<SRA> & sras, std::vector<std::string> krakenDbs
         }
         continue;
       }
-      logOutput("    Running filter of:\n", logFilePath);
+      logOutput("\n    Running filter of:\n", logFilePath);
       summarize_sing_sra(sra, logFilePath, 4);
       krakOutDir = sra.get_sra_path_for_filt().first.parent_path().c_str();
       if (sra.get_accession() == "") {
@@ -615,18 +631,20 @@ void filtForeignBulk(std::vector<SRA> & sras, std::vector<std::string> krakenDbs
       if (i == 0) {
         currKrakIn.first = sra.get_sra_path_trim_p().first.c_str();
         currKrakIn.second = sra.get_sra_path_trim_p().second.c_str();
-        if (!ini_get_bool(cfgPipeline.at("trim_adapter_seqs").c_str(), 0)) {
-          if (!ini_get_bool(cfgPipeline.at("error_correction").c_str(), 0)) {
-            currKrakIn.first = sra.get_sra_path_raw().first.c_str();
-            currKrakIn.second = sra.get_sra_path_raw().second.c_str();
+        if (!cfgIni.empty()) {
+          if (!ini_get_bool(cfgIniPipeline.at("trim_adapter_seqs").c_str(), 0)) {
+            if (!ini_get_bool(cfgIniPipeline.at("error_correction").c_str(), 0)) {
+              currKrakIn.first = sra.get_sra_path_raw().first.c_str();
+              currKrakIn.second = sra.get_sra_path_raw().second.c_str();
+            }
+            else {
+              currKrakIn.first = sra.get_sra_path_corr_fix().first.c_str();
+              currKrakIn.second = sra.get_sra_path_corr_fix().second.c_str();
+            }
           }
-          else {
-            currKrakIn.first = sra.get_sra_path_corr_fix().first.c_str();
-            currKrakIn.second = sra.get_sra_path_corr_fix().second.c_str();
-          }
+          firstKrakIn.first = currKrakIn.first;
+          firstKrakIn.second = currKrakIn.second;
         }
-        firstKrakIn.first = currKrakIn.first;
-        firstKrakIn.second = currKrakIn.second;
       }
       else {
         currKrakIn.first = sra.get_sra_path_for_filt().first.c_str();
@@ -727,14 +745,19 @@ bool remOverrepBulk(std::vector<SRA> & sras, std::string threads, std::string ra
                     bool dispOutput, bool retainInterFiles, bool compressFiles,
                     std::string logFilePath, std::string outDir,
                     const INI_MAP & cfgIni = {}) {
-  INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
   logOutput("\n\nStarting removal of overrepresented reads", logFilePath);
+
+  INI_MAP_ENTRY cfgIniPipeline;
   uintmax_t ram_b = (uintmax_t)stoi(ram_gb) * 1000000000;
   std::pair<std::vector<std::string>, std::vector<std::string>> currOrepSeqsPe;
   std::vector<std::string> currOrepSeqsSe;
   std::pair<std::string, std::string> currOrepIn;
   std::pair<std::string, std::string> currOrepOut;
   fs::path fastqcDir;
+
+  if (!cfgIni.empty()) {
+    cfgIniPipeline = cfgIni.at("Pipeline");
+  }
 
   bool writeSuccess;
   for (auto sra : sras) {
@@ -758,24 +781,25 @@ bool remOverrepBulk(std::vector<SRA> & sras, std::string threads, std::string ra
     currOrepIn.second = sra.get_sra_path_for_filt().second.c_str();
 
     fastqcDir = sra.get_fastqc_dir_2().first.parent_path();
-    if (!ini_get_bool(cfgPipeline.at("filter_foreign_reads").c_str(), 0) ||
-        cfgIni.at("Kraken2 filter order").empty()) {
-      if (!ini_get_bool(cfgPipeline.at("trim_adapter_seqs").c_str(), 0)) {
-        if (!ini_get_bool(cfgPipeline.at("error_correction").c_str(), 0)) {
-          currOrepIn.first = sra.get_sra_path_raw().first.c_str();
-          currOrepIn.second = sra.get_sra_path_raw().second.c_str();
+    if (!cfgIni.empty()) {
+      if (!ini_get_bool(cfgIniPipeline.at("filter_foreign_reads").c_str(), 0) ||
+          cfgIni.at("Kraken2 filter order").empty()) {
+        if (!ini_get_bool(cfgIniPipeline.at("trim_adapter_seqs").c_str(), 0)) {
+          if (!ini_get_bool(cfgIniPipeline.at("error_correction").c_str(), 0)) {
+            currOrepIn.first = sra.get_sra_path_raw().first.c_str();
+            currOrepIn.second = sra.get_sra_path_raw().second.c_str();
+          }
+          else {
+            currOrepIn.first = sra.get_sra_path_corr_fix().first.c_str();
+            currOrepIn.second = sra.get_sra_path_corr_fix().second.c_str();
+          }
         }
         else {
-          currOrepIn.first = sra.get_sra_path_corr_fix().first.c_str();
-          currOrepIn.second = sra.get_sra_path_corr_fix().second.c_str();
+          currOrepIn.first = sra.get_sra_path_trim_p().first.c_str();
+          currOrepIn.second = sra.get_sra_path_trim_p().second.c_str();
         }
       }
-      else {
-        currOrepIn.first = sra.get_sra_path_trim_p().first.c_str();
-        currOrepIn.second = sra.get_sra_path_trim_p().second.c_str();
-      }
     }
-
     currOrepOut.first = sra.get_sra_path_orep_filt().first.c_str();
     currOrepOut.second = sra.get_sra_path_orep_filt().second.c_str();
 
@@ -1005,41 +1029,67 @@ int main(int argc, char * argv[]) {
       }
     }
     else {
-      //stepSuccess = remUnfixBulk(sras, threads, ram_gb
+      errorCorrBulk(sras, threads, dispOutput, retainInterFiles, compressFiles, logFilePath, outDir);
+      stepSuccess = remUnfixBulk(sras, threads, ram_gb, dispOutput, retainInterFiles, compressFiles,
+                                 logFilePath, outDir);
     }
     if (!stepSuccess) {
       exit(1);
     }
 
     // Adapter sequence trimming stage
-    if (ini_get_bool(cfgIniPipeline.at("trim_adapter_seqs").c_str(), 0)) {
-      trimBulk(sras, threads, dispOutput, retainInterFiles, logFilePath, "", cfgIni);
+    if (configPath != "null") {
+      if (ini_get_bool(cfgIniPipeline.at("trim_adapter_seqs").c_str(), 0)) {
+        trimBulk(sras, threads, dispOutput, retainInterFiles, logFilePath, "", cfgIni);
+      }
+    }
+    else {
+      trimBulk(sras, threads, dispOutput, retainInterFiles, logFilePath, outDir);
     }
 
     // Run kraken2 to remove foreign reads
-    if (ini_get_bool(cfgIniPipeline.at("filter_foreign_reads").c_str(), 0)) {
-      std::vector<std::string> krakenDbs = get_kraken2_dbs(cfgIni);
-      std::string krakenConf = get_kraken2_conf(cfgIni);
-      if (!krakenDbs.empty()) {
-        filtForeignBulk(sras, krakenDbs, threads,
-                        dispOutput, compressFiles, retainInterFiles, logFilePath, "", cfgIni);
+    if (configPath != "null") {
+      if (ini_get_bool(cfgIniPipeline.at("filter_foreign_reads").c_str(), 0)) {
+        std::vector<std::string> krakenDbs = get_kraken2_dbs(cfgIni);
+        std::string krakenConf = get_kraken2_conf(cfgIni);
+        if (!krakenDbs.empty()) {
+          filtForeignBulk(sras, krakenDbs, threads, dispOutput, compressFiles, retainInterFiles,
+                          logFilePath, "", cfgIni);
+        }
+        else {
+          logOutput("\nNo Kraken databases specified in config file. Skipping foreign filtering.",
+                    logFilePath);
+        }
       }
-      else {
-        logOutput("\nNo Kraken databases specified in config file. Skipping foreign filtering.",
-                  logFilePath);
-      }
+    }
+    else {
+      if (!kraken2DbFiles.empty()) {
+        filtForeignBulk(sras, kraken2DbFiles, threads, dispOutput, compressFiles, retainInterFiles,
+                        logFilePath, outDir);
+      } 
     }
 
     // Run fastqc on all runs
-    fastqcBulk2(sras, threads, dispOutput, logFilePath, "", cfgIni);
+    if (configPath != "null") {
+      fastqcBulk2(sras, threads, dispOutput, logFilePath, "", cfgIni);
+    }
+    else {
+      fastqcBulk2(sras, threads, dispOutput, logFilePath, outDir);
+    }
 
     // Remove reads with over-represented sequences
-    if (ini_get_bool(cfgIniPipeline.at("remove_overrepresented").c_str(), 0)) {
-      stepSuccess = remOverrepBulk(sras, threads, ram_gb, dispOutput, retainInterFiles, compressFiles,
-                                   logFilePath, outDir, cfgIni);
-      if (!stepSuccess) {
-        exit(1);
+    if (configPath != "null") {
+      if (ini_get_bool(cfgIniPipeline.at("remove_overrepresented").c_str(), 0)) {
+        stepSuccess = remOverrepBulk(sras, threads, ram_gb, dispOutput, retainInterFiles, compressFiles,
+                                     logFilePath, "", cfgIni);
       }
+    }
+    else {
+      stepSuccess = remOverrepBulk(sras, threads, ram_gb, dispOutput, retainInterFiles, compressFiles,
+                                   logFilePath, outDir);
+    }
+    if (!stepSuccess) {
+      exit(1);
     }
 
     logOutput("\n\nPreprocess finished successfully\n", logFilePath);
