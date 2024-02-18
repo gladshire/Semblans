@@ -914,9 +914,20 @@ int main(int argc, char * argv[]) {
       kraken2DbFiles = splitStrings(kraken2Dbs, ',');
       logFilePath = "log.txt";
       if (readFilesLeft.size() != readFilesRight.size()) {
-        logOutput("ERROR: Number of lerft/right read files do not match", logFilePath);
+        logOutput("\nERROR: Number of left/right read files do not match\n", logFilePath);
         exit(1);
       }
+      for (int i = 0; i < readFilesLeft.size(); i++) {
+        if (!fs::exists(readFilesLeft[i].c_str())) {
+          logOutput("\nERROR: --left read file '" + readFilesLeft[i] + "' not found\n", logFilePath);
+          exit(1);
+        }
+        if (!fs::exists(readFilesRight[i].c_str())) {
+          logOutput("\nERROR: --right read file '" + readFilesRight[i] + "' not found\n", logFilePath);
+          exit(1);
+        }
+      }
+      
       make_proj_space(outDir, "preprocess");
       outDir = std::string((fs::canonical(fs::path(outDir.c_str())).parent_path()).c_str()) + "/";
 
