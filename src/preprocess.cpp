@@ -877,7 +877,6 @@ int main(int argc, char * argv[]) {
   std::string rightReads;
   std::string kraken2Dbs;
   std::string outDir;
-  std::string projDir;
   std::string configPath = argv[1];
   std::string threads;
   std::string ram_gb;

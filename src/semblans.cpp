@@ -319,6 +319,8 @@ int main(int argc, char * argv[]) {
     if (useCfg) {
       leftReads = "null";
       rightReads = "null";
+      kraken2Dbs = "null";
+      outDir = "null";
       cfgIni = make_ini_map(pathConfig.c_str());
       cfgIniGen = cfgIni["General"];
       logFilePath = std::string((fs::canonical(fs::path(cfgIniGen["log_file"].c_str()).parent_path()) /
@@ -436,6 +438,7 @@ int main(int argc, char * argv[]) {
                      std::to_string(ram) + retain + verbose;
 
         logOutput("Performing preprocessing only", logFilePath);
+
         result = system(preCmd.c_str());
         if (WIFSIGNALED(result)) {
           system("setterm -cursor on");
@@ -444,7 +447,7 @@ int main(int argc, char * argv[]) {
       }
       else {
         logOutput("Performing preprocessing only", logFilePath);
-        
+       
         result = system(preCmd.c_str());
         if (WIFSIGNALED(result)) {
           system("setterm -cursor on");
