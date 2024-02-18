@@ -370,7 +370,7 @@ int main(int argc, char * argv[]) {
     }
 
     preCmd = SEMBLANS_DIR + "preprocess " + pathConfig + " " +
-             leftReads + " " + rightReads + " " + kraken2Dbs +
+             leftReads + " " + rightReads + " " + kraken2Dbs + " " +
              outDir + " " +
              std::to_string(numThreads) + " " +
              std::to_string(ram);
@@ -430,7 +430,7 @@ int main(int argc, char * argv[]) {
         }
 
         currPreCmd = SEMBLANS_DIR + "preprocess " + currCfgIniSub + " " +
-                     leftReads + " " + rightReads + " " + kraken2Dbs +
+                     leftReads + " " + rightReads + " " + kraken2Dbs + " " +
                      outDir +
                      std::to_string(numThreads) + " " +
                      std::to_string(ram) + retain + verbose;
@@ -445,8 +445,6 @@ int main(int argc, char * argv[]) {
       else {
         logOutput("Performing preprocessing only", logFilePath);
         
-        std::cout << preCmd << std::endl;
-
         result = system(preCmd.c_str());
         if (WIFSIGNALED(result)) {
           system("setterm -cursor on");

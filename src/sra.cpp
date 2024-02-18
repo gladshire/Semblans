@@ -174,7 +174,7 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool dispOutput,
       else {
 	extIndMod = 0;
       }
-      sra_path_raw_1 = (sra_path_raw_1_str.insert(sra_path_raw_1_str.length() - 6 - extIndMod, "_1")).c_str();
+      sra_path_raw_1 = (projPath + stepDirs[0] + fileBase + "_1.fastq" + compressExt).c_str();
       fastqc_dir_1_1 = (fastqc_dir_1_1_str.insert(fastqc_dir_1_1_str.length(), "_1")).c_str();
       sra_path_corr_1 = (sra_path_corr_1_str.insert(sra_path_corr_1_str.length() - 7 - extIndMod, "_1")).c_str();
       sra_path_corr_fix_1 = (sra_path_corr_fix_1_str.insert(sra_path_corr_fix_1_str.length() - 11 - extIndMod, "_1")).c_str();
@@ -201,6 +201,8 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool dispOutput,
 // Constructor for if local paired-end data used
 SRA::SRA(std::string fileName1, std::string fileName2, INI_MAP cfgIni, bool compressedFiles,
          std::string logFile) {
+
+  
   std::string outDir(fs::canonical(fs::path(cfgIni["General"]["output_directory"].c_str())).c_str());
   std::string projName(cfgIni["General"]["project_name"]);
   std::string projPath((fs::path(outDir.c_str()) / fs::path(projName.c_str())).c_str());
@@ -315,6 +317,8 @@ SRA::SRA(std::string fileName1, std::string fileName2, INI_MAP cfgIni, bool comp
 SRA::SRA(std::string fileName1, std::string fileName2, std::string outDir, bool compressedFiles) {
 
   outDir = std::string(fs::canonical(outDir.c_str()).parent_path().c_str()) + "/";
+  fileName1 = std::string(fs::canonical(fileName1.c_str()).c_str());
+  fileName2 = std::string(fs::canonical(fileName2.c_str()).c_str());
 
   //std::string localDataDir(cfgIni["General"]["local_data_directory"]);
   std::string compressExt;

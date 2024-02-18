@@ -4,12 +4,12 @@ std::atomic<bool> procRunning(false);
 
 
 // Summarize the initialized preprocessing job's parameters
-void preSummary(const std::vector<SRA> sras, 
+void preSummary(const std::vector<SRA> sras, std::string configPath,
                 std::string logFilePath, std::string threads, std::string ram_gb,
                 bool retainInterFiles, bool compressFiles) {
   logOutput("\nSemblans Preprocess started with following parameters:\n", logFilePath);
   logOutput("  Config file:     " +
-            std::string(fs::path(logFilePath.c_str()).filename().c_str()) + "\n",
+            std::string(fs::path(configPath.c_str()).filename().c_str()) + "\n",
             logFilePath);
   logOutput("  Threads (Cores): " + threads + "\n", logFilePath);
   logOutput("  Memory (GB):     " + ram_gb + "\n", logFilePath);
@@ -182,22 +182,27 @@ void fastqcBulk2(std::vector<SRA> & sras, std::string threads, bool dispOutput,
                  std::string logFilePath, std::string outDir,
                  const INI_MAP & cfgIni = {}) {
   logOutput("\n\nStarting second quality analysis", logFilePath);
-  INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
+  INI_MAP_ENTRY cfgIniPipeline;
   std::pair<std::string, std::string> currFastqcIn;
   std::string currFastqcOut;
+  if (!cfgIni.empty()) {
+    cfgIniPipeline = cfgIni.at("Pipeline");
+  }
   for (auto sra : sras) {
     currFastqcIn.first = sra.get_sra_path_for_filt().first.c_str();
     currFastqcIn.second = sra.get_sra_path_for_filt().second.c_str();
-    if (!ini_get_bool(cfgPipeline.at("filter_foreign_reads").c_str(), 0) ||
-        cfgIni.at("Kraken2 filter order").empty()) {
-      if (!ini_get_bool(cfgPipeline.at("trim_adapter_seqs").c_str(), 0)) {
-        if (!ini_get_bool(cfgPipeline.at("error_correction").c_str(), 0)) {
-          currFastqcIn.first = sra.get_sra_path_raw().first.c_str();
-          currFastqcIn.second = sra.get_sra_path_raw().second.c_str();
-        }
-        else {
-          currFastqcIn.first = sra.get_sra_path_corr_fix().first.c_str();
-          currFastqcIn.second = sra.get_sra_path_corr_fix().second.c_str();
+    if (!cfgIni.empty()) {
+      if (!ini_get_bool(cfgIniPipeline.at("filter_foreign_reads").c_str(), 0) ||
+          cfgIni.at("Kraken2 filter order").empty()) {
+        if (!ini_get_bool(cfgIniPipeline.at("trim_adapter_seqs").c_str(), 0)) {
+          if (!ini_get_bool(cfgIniPipeline.at("error_correction").c_str(), 0)) {
+            currFastqcIn.first = sra.get_sra_path_raw().first.c_str();
+            currFastqcIn.second = sra.get_sra_path_raw().second.c_str();
+          }
+          else {
+            currFastqcIn.first = sra.get_sra_path_corr_fix().first.c_str();
+            currFastqcIn.second = sra.get_sra_path_corr_fix().second.c_str();
+          }
         }
       }
       else {
@@ -246,12 +251,24 @@ void errorCorrBulk(std::vector<SRA> & sras, std::string threads,
                    std::string logFilePath, std::string outDir,
                    const INI_MAP & cfgIni = {}) {
   logOutput("\n\nStarting error correction", logFilePath);
-  INI_MAP_ENTRY rcorrSettings = cfgIni.at("Rcorrector settings");
-  std::string kmerLength = rcorrSettings.at("kmer_length");
-  std::string maxCorrK = rcorrSettings.at("max_corrections_per_kmer_window");
-  std::string weakProportion = rcorrSettings.at("weak_kmer_proportion_threshold");
+  INI_MAP_ENTRY rcorrSettings;
+  std::string kmerLength;
+  std::string maxCorrK;
+  std::string weakProportion;
   std::pair<std::string, std::string> currRcorrIn;
   std::string rcorrOutDir;
+  if (!cfgIni.empty()) {
+    rcorrSettings = cfgIni.at("Rcorrector settings");
+    kmerLength = rcorrSettings.at("kmer_length");
+    maxCorrK = rcorrSettings.at("max_corrections_per_kmer_window");
+    weakProportion = rcorrSettings.at("weak_kmer_proportion_threshold");
+  }
+  else {
+    kmerLength = 23;
+    maxCorrK = 4;
+    weakProportion = 0.95;
+  }
+
   for (auto sra : sras) {
     rcorrOutDir = sra.get_sra_path_corr().first.parent_path().c_str();
     currRcorrIn.first = sra.get_sra_path_raw().first.c_str();
@@ -376,8 +393,8 @@ void trimBulk(std::vector<SRA> & sras, std::string threads,
               std::string logFilePath, std::string outDir,
               const INI_MAP & cfgIni = {}) {
   logOutput("\n\nStarting adapter sequence trimming", logFilePath);
-  INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
-  INI_MAP_ENTRY trimmSettings = cfgIni.at("Trimmomatic settings");
+  INI_MAP_ENTRY cfgPipeline;
+  INI_MAP_ENTRY trimmSettings;
   std::pair<std::string, std::string> currTrimIn;
   std::pair<std::string, std::string> currTrimOutP;
   std::pair<std::string, std::string> currTrimOutU;
@@ -387,15 +404,41 @@ void trimBulk(std::vector<SRA> & sras, std::string threads,
   std::string currLine;
   std::string::const_iterator sStart, sEnd;
   bool inFilesGood;
-  std::string maxSeedMismatch = trimmSettings.at("max_allowed_seed_mismatch");
-  std::string minScorePaired = trimmSettings.at("min_score_paired");
-  std::string minScoreSingle = trimmSettings.at("min_score_single");
-  std::string windowSize = trimmSettings.at("sliding_window_size");
-  std::string windowMinQuality = trimmSettings.at("sliding_window_min_quality");
-  std::string minQualityLead = trimmSettings.at("min_quality_leading");
-  std::string minQualityTrail = trimmSettings.at("min_quality_trailing");
-  std::string minReadLength = trimmSettings.at("min_read_length");
-  std::string numBpCutFront = trimmSettings.at("cut_number_bp_from_front");
+  
+  std::string maxSeedMismatch;
+  std::string minScorePaired;
+  std::string minScoreSingle;
+  std::string windowSize;
+  std::string windowMinQuality;
+  std::string minQualityLead;
+  std::string minQualityTrail;
+  std::string minReadLength;
+  std::string numBpCutFront;
+
+  if (!cfgIni.empty()) {
+    cfgPipeline = cfgIni.at("Pipeline");
+    trimmSettings = cfgIni.at("Trimmomatic settings");
+    maxSeedMismatch = trimmSettings.at("max_allowed_seed_mismatch");
+    minScorePaired = trimmSettings.at("min_score_paired");
+    minScoreSingle = trimmSettings.at("min_score_single");
+    windowSize = trimmSettings.at("sliding_window_size");
+    windowMinQuality = trimmSettings.at("sliding_window_min_quality");
+    minQualityLead = trimmSettings.at("min_quality_leading");
+    minQualityTrail = trimmSettings.at("min_quality_trailing");
+    minReadLength = trimmSettings.at("min_read_length");
+    numBpCutFront = trimmSettings.at("cut_number_bp_from_front");
+  }
+  else {
+    maxSeedMismatch = "2";
+    minScorePaired = "30";
+    minScoreSingle = "10";
+    windowSize = "4";
+    windowMinQuality = "5";
+    minQualityLead = "5";
+    minQualityTrail = "5";
+    minReadLength = "25";
+    numBpCutFront = "0";
+  }
   for (auto sra : sras) {
     // Check for checkpoint file
     if (sra.checkpointExists("trim")) {
@@ -840,6 +883,8 @@ int main(int argc, char * argv[]) {
       outDir = argv[5];
       threads = argv[6];
       ram_gb = argv[7];
+      retainInterFiles = stringToBool(argv[8]);
+      dispOutput = stringToBool(argv[9]);
       readFilesLeft = splitStrings(leftReads, ',');
       readFilesRight = splitStrings(rightReads, ',');
       kraken2DbFiles = splitStrings(kraken2Dbs, ',');
@@ -945,7 +990,7 @@ int main(int argc, char * argv[]) {
     //INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
 
     // Show summary of preprocess task
-    preSummary(sras, logFilePath, threads, ram_gb, retainInterFiles, compressFiles);
+    preSummary(sras, configPath, logFilePath, threads, ram_gb, retainInterFiles, compressFiles);
 
     // Run initial fastqc on reads
     fastqcBulk1(sras, threads, dispOutput, logFilePath);
