@@ -8,7 +8,6 @@
 #include "sra.h"
 #include "transcript.h"
 #include "seq.h"
-#include "ips_job_man.h"
 #include "panther_score.h"
 #include "seq_hash.h"
 #include "print_info.h"

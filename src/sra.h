@@ -49,6 +49,7 @@ class SRA {
     SRA();
     SRA(std::string sra_accession, INI_MAP cfgIni, bool dispOutput,
         bool compressedFiles, std::string logFile, int num);
+    SRA(std::string fileName1, std::string fileName2, std::string outDir, bool compressedFiles);
     SRA(std::string fileName1, std::string fileName2, INI_MAP cfgIni, bool compressedFiles,
         std::string logFile);
     SRA(const SRA & sra);

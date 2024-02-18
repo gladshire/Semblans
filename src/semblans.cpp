@@ -94,6 +94,7 @@ int main(int argc, char * argv[]) {
   std::string rightReads;
   std::string assembly;
   std::string refProt;
+  std::string kraken2Dbs;
   std::string outDir;
   bool useCfg = true;
   bool serialProcess;
@@ -201,6 +202,10 @@ int main(int argc, char * argv[]) {
       else if (strcmp("--reference-proteome", argv[i]) == 0 ||
                strcmp("-rp", argv[i]) == 0) {
         refProt = argv[i + 1];
+      }
+      else if (strcmp("--kraken-db", argv[i]) == 0 ||
+               strcmp("-kdb", argv[i]) == 0) {
+        kraken2Dbs = argv[i + 1];
       }
       // Check for '--output-directory', for specifying where outputs should
       // go if no config file is used
@@ -365,6 +370,8 @@ int main(int argc, char * argv[]) {
     }
 
     preCmd = SEMBLANS_DIR + "preprocess " + pathConfig + " " +
+             leftReads + " " + rightReads + " " + kraken2Dbs +
+             outDir + " " +
              std::to_string(numThreads) + " " +
              std::to_string(ram);
     preCmd += retain;
@@ -423,6 +430,8 @@ int main(int argc, char * argv[]) {
         }
 
         currPreCmd = SEMBLANS_DIR + "preprocess " + currCfgIniSub + " " +
+                     leftReads + " " + rightReads + " " + kraken2Dbs +
+                     outDir +
                      std::to_string(numThreads) + " " +
                      std::to_string(ram) + retain + verbose;
 

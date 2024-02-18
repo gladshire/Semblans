@@ -8,4 +8,3 @@ all:
 	$(MAKE) postprocess.mk
 	#$(MAKE) postprocess.mk clean
 	$(MAKE) semblans.mk
-	#$(MAKE) semblans.mk clean

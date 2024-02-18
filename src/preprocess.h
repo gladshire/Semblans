@@ -38,24 +38,27 @@ void fastqcBulk1(std::vector<SRA> & sras, std::string threads, bool dispOutput,
                  std::string logFilePath);
 
 void fastqcBulk2(std::vector<SRA> & sras, std::string threads, bool dispOutput,
-                 std::string logFilePath, const INI_MAP & cfgIni);
+                 std::string logFilePath, std::string outDir, const INI_MAP & cfgIni);
 
 void errorCorrBulk(std::vector<SRA> & sras, std::string threads,
                    bool dispOutput, bool retainInterFiles, bool compressFiles,
-                   std::string logFilePath, const INI_MAP & cfgIni);
+                   std::string logFilePath, std::string outDir,
+                   const INI_MAP & cfgIni);
 
 bool remUnfixBulk(std::vector<SRA> & sras, std::string threads, std::string ram_gb,
                   bool dispOutput, bool retainInterFiles, bool compressFiles,
-                  std::string logFilePath, const INI_MAP & cfgIni);
+                  std::string logFilePath, std::string outDir,
+                  const INI_MAP & cfgIni);
 
 void trimBulk(std::vector<SRA> & sras, std::string threads,
               bool dispOutput, bool retainInterFiles,
-              std::string logFilePath, const INI_MAP & cfgIni);
+              std::string logFilePath, std::string outDir,
+              const INI_MAP & cfgIni);
 
 void filtForeignBulk(std::vector<SRA> & sras, std::vector<std::string> krakenDbs,
                      std::string threads, bool dispOutput, bool compressFiles, bool retainInterFiles,
-                     std::string logFilePath, const INI_MAP & cfgIni);
+                     std::string logFilePath, std::string outDir, const INI_MAP & cfgIni);
 
 bool remOverrepBulk(std::vector<SRA> & sras, std::string threads, std::string ram_gb,
                     bool dispOutput, bool retainInterFiles, bool compressFiles,
-                    std::string logFilePath, const INI_MAP & cfgIni);
+                    std::string logFilePath, std::string outDir, const INI_MAP & cfgIni);

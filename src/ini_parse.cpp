@@ -66,18 +66,23 @@ void make_proj_space(std::string outDir, std::string pipeStage) {
   if (!fs::exists(fs::path(outDir.c_str()) / ".checkpoints")) {
     system(("mkdir " + outDir + "/.checkpoints/ > /dev/null 2>&1").c_str());
   }
+
+  int stepNum = 0;
+  int startDirInd;
+  int endDirInd;
+  std::string currNum;
+  if (pipeStage == "preprocess") {
+    startDirInd = 1;
+    endDirInd = 7;
+  }
   if (pipeStage == "postprocess") {
-    // Create directory for chimera-filtered transcripts
-    stepDirs.push_back(allSteps[8]);
-    system(("mkdir " + outDir + allSteps[8] + " > /dev/null 2>&1").c_str());
-
-    // Create directory for clustering step
-    stepDirs.push_back(allSteps[9]);
-    system(("mkdir " + outDir + allSteps[9] + " > /dev/null 2>&1").c_str());
-
-    // Create directory for coding sequences
-    stepDirs.push_back(allSteps[10]);
-    system(("mkdir " + outDir + allSteps[10] + " > /dev/null 2>&1").c_str());
+    startDirInd = 8;
+    endDirInd = 11;
+  }
+  for (int i = startDirInd; i < endDirInd; i++) {
+    currNum = getStepNum(stepNum);
+    stepDirs.push_back(currNum + "-" + allSteps[i]);
+    system(("mkdir " + outDir + currNum + "-" + allSteps[i] + " > /dev/null 2>&1").c_str());
   }
 }
 
