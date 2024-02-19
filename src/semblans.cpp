@@ -7,16 +7,16 @@ void print_intro(std::string logFile) {
   winsize w;
   ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
   logOutput("\n", logFile);
+  logOutput("\n", logFile);
   logOutput("                            |     |                     \n", logFile);
   logOutput("      __|   _ \\  __ `__ \\   __ \\  |   _` |  __ \\    __| \n", logFile);
   logOutput("    \\__ \\   __/  |   |   |  |   | |  (   |  |   | \\__ \\ \n", logFile);
   logOutput("    ____/ \\___| _|  _|  _| _.__/ _| \\__,_| _|  _| ____/ \n", logFile); 
-  logOutput("\n", logFile);
-  logOutput("      ───────────────────────────────────────────────\n\n", logFile);
-  logOutput("      A C++ package enabling the bulk retrieval,\n", logFile);
-  logOutput("      assembly, and analysis of de novo transcriptomes\n", logFile);
-  logOutput("      from multiple individuals\n\n", logFile);
-  logOutput("      ───────────────────────────────────────────────\n\n", logFile);
+  logOutput("\n\n\n", logFile);
+  //printVertEllipse(logFile, 3);
+  //logOutput("      ───────────────────────────────────────────────\n", logFile);
+  printBreakLine(logFile, 6, 47);
+  //logOutput("      ───────────────────────────────────────────────\n\n", logFile);
 }
 
 // Print base help message for Semblans in terminal

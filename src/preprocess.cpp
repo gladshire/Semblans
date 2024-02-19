@@ -23,7 +23,7 @@ void preSummary(const std::vector<SRA> sras, std::string configPath,
   else {
     retainStr = "NO";
   }
-  logOutput("  Retain intermediate files: " + retainStr + "\n", logFilePath);
+  logOutput("  Retain intermediate files: " + retainStr + "\n\n", logFilePath);
 
   std::string compressStr;
   if (compressFiles) {
@@ -42,7 +42,7 @@ void retrieveSraData(std::vector<SRA> & sras, std::string threads,
                      bool dispOutput, bool compressOutput,
                      bool retainInterFiles,
                      std::string logFilePath) {
-  logOutput("\n\nStarting retrieval of raw sequence data from NCBI", logFilePath);
+  logOutput("\nStarting retrieval of raw sequence data from NCBI", logFilePath);
   // Prefetch raw data
   for (auto sra : sras) {
     // Check for checkpoint file
@@ -154,7 +154,7 @@ void fastqcBulk1(std::vector<SRA> & sras, std::string threads, bool dispOutput,
       else {
         logOutput(std::string("\n  Quality analysis checkpoint found for: ") +
                   "\n    " + sra.get_file_prefix().first +
-                  "\n    " + sra.get_file_prefix().second,
+                  "\n    " + sra.get_file_prefix().second + "\n",
                   logFilePath);
       }
       continue;
@@ -222,7 +222,7 @@ void fastqcBulk2(std::vector<SRA> & sras, std::string threads, bool dispOutput,
       else {
         logOutput(std::string("\n  Quality analysis checkpoint found for: ") +
                   "\n    " + sra.get_file_prefix().first +
-                  "\n    " + sra.get_file_prefix().second,
+                  "\n    " + sra.get_file_prefix().second + "\n",
                   logFilePath);
       }
       continue;
@@ -1031,9 +1031,14 @@ int main(int argc, char * argv[]) {
 
     // Show summary of preprocess task
     preSummary(sras, configPath, logFilePath, threads, ram_gb, retainInterFiles, compressFiles);
+    //printVertEllipse(logFilePath, 3);
+    printBreakLine(logFilePath, 6, 47);
 
     // Run initial fastqc on reads
     fastqcBulk1(sras, threads, dispOutput, logFilePath);
+    //printVertEllipse(logFilePath, 3);
+    logOutput("\n", logFilePath);
+    printBreakLine(logFilePath, 6, 47);
 
     // Error-correction stage
     if (configPath != "null") {
@@ -1052,6 +1057,9 @@ int main(int argc, char * argv[]) {
     if (!stepSuccess) {
       exit(1);
     }
+    //printVertEllipse(logFilePath, 3);
+    printBreakLine(logFilePath, 6, 47);
+    logOutput("\n", logFilePath);
 
     // Adapter sequence trimming stage
     if (configPath != "null") {
@@ -1062,6 +1070,9 @@ int main(int argc, char * argv[]) {
     else {
       trimBulk(sras, threads, dispOutput, retainInterFiles, logFilePath, outDir);
     }
+    //printVertEllipse(logFilePath, 3);
+    printBreakLine(logFilePath, 6, 47);
+    logOutput("\n", logFilePath);
 
     // Run kraken2 to remove foreign reads
     if (configPath != "null") {
@@ -1084,6 +1095,9 @@ int main(int argc, char * argv[]) {
                         logFilePath, outDir);
       } 
     }
+    //printVertEllipse(logFilePath, 3);
+    printBreakLine(logFilePath, 6, 47);
+    logOutput("\n", logFilePath);
 
     // Run fastqc on all runs
     if (configPath != "null") {
@@ -1092,6 +1106,9 @@ int main(int argc, char * argv[]) {
     else {
       fastqcBulk2(sras, threads, dispOutput, logFilePath, outDir);
     }
+    //printVertEllipse(logFilePath, 3);
+    printBreakLine(logFilePath, 6, 47);
+    logOutput("\n", logFilePath);
 
     // Remove reads with over-represented sequences
     if (configPath != "null") {
@@ -1107,7 +1124,8 @@ int main(int argc, char * argv[]) {
     if (!stepSuccess) {
       exit(1);
     }
-
+    //printVertEllipse(logFilePath, 3);
+    printBreakLine(logFilePath, 6, 47);
     logOutput("\n\nPreprocess finished successfully\n", logFilePath);
   }
 

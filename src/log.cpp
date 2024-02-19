@@ -36,6 +36,22 @@ void logOutput(std::string input, std::string logFile) {
   loggerStream << input << std::flush;
 }
 
+void printVertEllipse(std::string logFile, int numLines) {
+  for (int i = 0; i < numLines; i++) {
+    logOutput("                            .                           \n", logFile);
+  }
+}
+
+void printBreakLine(std::string logFile, int leadingSpace, int length) {
+  for (int i = 0; i < leadingSpace; i++) {
+    logOutput(" ", logFile);
+  }
+  for (int i = 0; i < length; i++) {
+    logOutput("─", logFile);
+  }
+  logOutput("\n", logFile);
+}
+
 // Return string of percentage to a given precision
 std::string getPercent(float valPercent, int precision) {
   std::stringstream percentStream;
