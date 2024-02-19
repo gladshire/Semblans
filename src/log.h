@@ -16,3 +16,5 @@ void replaceChar(std::string inFilePath, char oldChar, char newChar);
 void logOutput(std::string input, std::string logFile);
 
 std::string getPercent(float valPercent, int precision);
+
+void reportError(int commandResult, std::string logFile);

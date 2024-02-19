@@ -178,8 +178,8 @@ int main(int argc, char * argv[]) {
         }
         else {
           // ERROR: Config flag invoked, but no config file specified!
-          std::cout << "ERROR: If using '--config', you must specify config file (.INI)" << std::endl;
-          std::cout << "  (example: --config path/to/config.ini)\n" << std::endl;
+          std::cerr << "ERROR: If using '--config', you must specify config file (.INI)" << std::endl;
+          std::cerr << "  (example: --config path/to/config.ini)\n" << std::endl;
           exit(1);
         }
       }
@@ -214,7 +214,7 @@ int main(int argc, char * argv[]) {
                strcmp("-od", argv[i]) == 0) {
         outDir = argv[i + 1];
         if (!fs::exists(outDir.c_str())) {
-          std::cout << "ERROR: Output directory '" + outDir + "' does not exist\n" << std::endl;
+          std::cerr << "ERROR: Output directory '" + outDir + "' does not exist\n" << std::endl;
           exit(1);
         }
       }
@@ -229,8 +229,8 @@ int main(int argc, char * argv[]) {
           for (int j = 0; j < strlen(argv[i + 1]); j++) {
             if (!isdigit(threadStr[j])) {
               // ERROR: Bad thread argument
-              std::cout << "ERROR: Invalid argument given for --threads/-t" << std::endl;
-              std::cout << "  (example: --threads 8)\n" << std::endl;
+              std::cerr << "ERROR: Invalid argument given for --threads/-t" << std::endl;
+              std::cerr << "  (example: --threads 8)\n" << std::endl;
               exit(1);
             }
           }
@@ -253,8 +253,8 @@ int main(int argc, char * argv[]) {
           for (int j = 0; j < strlen(argv[i + 1]); j++) {
             if (!isdigit(ramStr[j])) {
               // ERROR: Bad memory argument
-              std::cout << "ERROR: Invalid argument given for --ram/-r" << std::endl;
-              std::cout << "  (example: --ram 10)\n" << std::endl;
+              std::cerr << "ERROR: Invalid argument given for --ram/-r" << std::endl;
+              std::cerr << "  (example: --ram 10)\n" << std::endl;
               exit(1);
             }
           }
@@ -291,6 +291,15 @@ int main(int argc, char * argv[]) {
       // TODO: Add support for preprocess w/o config file
       // TODO: Add support for assemble w/o config file
       useCfg = false;
+      if (command == "preprocess") {
+        if (leftReads == "" && rightReads == "") {
+          std::cerr << "ERROR: If not using '--config', user must specify ";
+          std::cerr << "the left/right read files for preprocessing" << std::endl;
+          std::cerr << "  (example: --left reads_1_left.fq,reads_2_left.fq,..." << std::endl;
+          std::cerr << "            --right reads_1_right.fq,reads2_right.fq,..." << std::endl;
+          exit(1);
+        }
+      }
       if (command == "postprocess") {
         if (assembly == "" || (leftReads == "" && rightReads == "")) {
           std::cerr << "ERROR: If not using '--config', user must specify assembly, ";
@@ -379,6 +388,7 @@ int main(int argc, char * argv[]) {
     preCmd += retain;
     preCmd += verbose;
     assCmd = SEMBLANS_DIR + "assemble " + pathConfig + " " +
+             leftReads + " " + rightReads + " " + outDir + " " +
              std::to_string(numThreads) + " " +
              std::to_string(ram);
     assCmd += retain;
@@ -437,7 +447,7 @@ int main(int argc, char * argv[]) {
                      std::to_string(numThreads) + " " +
                      std::to_string(ram) + retain + verbose;
 
-        logOutput("Performing preprocessing only", logFilePath);
+        logOutput("\nPerforming preprocessing only\n\n", logFilePath);
 
         result = system(preCmd.c_str());
         if (WIFSIGNALED(result)) {
@@ -446,7 +456,7 @@ int main(int argc, char * argv[]) {
         }
       }
       else {
-        logOutput("Performing preprocessing only", logFilePath);
+        logOutput("\nPerforming preprocessing only\n\n", logFilePath);
        
         result = system(preCmd.c_str());
         if (WIFSIGNALED(result)) {
@@ -485,10 +495,11 @@ int main(int argc, char * argv[]) {
         }
 
         currAssCmd = SEMBLANS_DIR + "assemble " + currCfgIniSub + " " +
+                     leftReads + " " + rightReads + " " + outDir + " " +
                      std::to_string(numThreads) + " " +
                      std::to_string(ram) + retain + verbose;
 
-        logOutput("Performing assembly only", logFilePath);
+        logOutput("\nPerforming assembly only\n\n", logFilePath);
         result = system(assCmd.c_str());
         if (WIFSIGNALED(result)) {
           system("setterm -cursor on");
@@ -496,7 +507,10 @@ int main(int argc, char * argv[]) {
         }
       }
       else {
-        logOutput("Performing assembly only", logFilePath);
+        logOutput("\nPerforming assembly only\n\n", logFilePath);
+  
+        std::cout << assCmd << std::endl;
+
         result = system(assCmd.c_str());
         if (WIFSIGNALED(result)) {
           system("setterm -cursor on");
@@ -538,7 +552,7 @@ int main(int argc, char * argv[]) {
         //              std::to_string(numThreads) + " " +
         //              std::to_string(ram) + retain + verbose;
 
-        //logOutput("Performing postprocess only", logFilePath);
+        logOutput("\nPerforming postprocess only\n\n", logFilePath);
 
 
         result = system(postCmd.c_str());
@@ -548,7 +562,7 @@ int main(int argc, char * argv[]) {
         }
       }
       else {
-        logOutput("Performing postprocess only", logFilePath);
+        logOutput("\nPerforming postprocess only\n\n", logFilePath);
 
         result = system(postCmd.c_str());
         if (WIFSIGNALED(result)) {
@@ -560,6 +574,10 @@ int main(int argc, char * argv[]) {
     }
     // Case 4: all three
     if (command == "all") {
+      if (assembly != "") {
+        std::cerr << "\nERROR: --assembly flag should not be invoked when calling entire pipeline\n" << std::endl;
+        exit(1);
+      }
       if (serialProcess) {
         for (auto sraStr : sraRuns) {
           currCfgIniSub = pathConfig.substr(0, pathConfig.rfind(".ini")).insert(pathConfig.rfind("/") + 1, ".") +
@@ -596,7 +614,7 @@ int main(int argc, char * argv[]) {
           logOutput("Performing entire assembly on: " + sraStr, logFilePath);
           logOutput("\n ┌───────────────────────────────────────────────────────┐", logFilePath);
           logOutput("\n │         Phase 1: Preprocessing of Short-reads         │", logFilePath);
-          logOutput("\n └───────────────────────────────────────────────────────┘", logFilePath);
+          logOutput("\n └───────────────────────────────────────────────────────┘\n", logFilePath);
           result = system(currPreCmd.c_str());
           if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
             std::cerr << "\nPreprocess exited" << std::endl;
@@ -605,7 +623,7 @@ int main(int argc, char * argv[]) {
           }
           logOutput("\n ┌───────────────────────────────────────────────────────┐", logFilePath);
           logOutput("\n │        Phase 2: De Novo Assembly of Short-reads       │", logFilePath);
-          logOutput("\n └───────────────────────────────────────────────────────┘", logFilePath);
+          logOutput("\n └───────────────────────────────────────────────────────┘\n", logFilePath);
           result = system(currAssCmd.c_str());
           if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
             std::cerr << "\nAssembly exited" << std::endl;
@@ -614,7 +632,7 @@ int main(int argc, char * argv[]) {
           }
           logOutput("\n ┌────────────────────────────────────────────────────────┐", logFilePath);
           logOutput("\n │    Phase 3: Postprocessing of Assembled Transcripts    │", logFilePath);
-          logOutput("\n └────────────────────────────────────────────────────────┘", logFilePath);
+          logOutput("\n └────────────────────────────────────────────────────────┘\n", logFilePath);
           result = system(currPostCmd.c_str());
           if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
            std::cerr << "\nPostprocess exited" << std::endl;
@@ -627,7 +645,7 @@ int main(int argc, char * argv[]) {
         logOutput("Performing entire assembly\n", logFilePath);
         logOutput("\n ┌───────────────────────────────────────────────────────┐", logFilePath);
         logOutput("\n │         Phase 1: Preprocessing of Short-reads         │", logFilePath);
-        logOutput("\n └───────────────────────────────────────────────────────┘", logFilePath);
+        logOutput("\n └───────────────────────────────────────────────────────┘\n", logFilePath);
         result = system(preCmd.c_str());
         if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
           std::cerr << "\nPreprocess exited" << std::endl;
@@ -636,7 +654,7 @@ int main(int argc, char * argv[]) {
         }
         logOutput("\n ┌───────────────────────────────────────────────────────┐", logFilePath);
         logOutput("\n │        Phase 2: De Novo Assembly of Short-reads       │", logFilePath);
-        logOutput("\n └───────────────────────────────────────────────────────┘", logFilePath);
+        logOutput("\n └───────────────────────────────────────────────────────┘\n", logFilePath);
         result = system(assCmd.c_str());
         if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
           std::cerr << "\nAssembly exited" << std::endl;
@@ -645,7 +663,7 @@ int main(int argc, char * argv[]) {
         }
         logOutput("\n ┌────────────────────────────────────────────────────────┐", logFilePath);
         logOutput("\n │    Phase 3: Postprocessing of Assembled Transcripts    │", logFilePath);
-        logOutput("\n └────────────────────────────────────────────────────────┘", logFilePath);
+        logOutput("\n └────────────────────────────────────────────────────────┘\n", logFilePath);
         result = system(postCmd.c_str());
         if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
           std::cerr << "\nPostprocess exited" << std::endl;

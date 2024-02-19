@@ -314,7 +314,8 @@ SRA::SRA(std::string fileName1, std::string fileName2, INI_MAP cfgIni, bool comp
   }
 }
 
-SRA::SRA(std::string fileName1, std::string fileName2, std::string outDir, bool compressedFiles) {
+SRA::SRA(std::string fileName1, std::string fileName2, std::string outDir, bool compressedFiles,
+         bool dummy) {
 
   outDir = std::string(fs::canonical(outDir.c_str()).parent_path().c_str()) + "/";
   fileName1 = std::string(fs::canonical(fileName1.c_str()).c_str());
@@ -402,27 +403,30 @@ SRA::SRA(std::string fileName1, std::string fileName2, std::string outDir, bool 
   spots = numReads1;
 
   sra_path_raw_1 = fileName1.c_str();
-  fastqc_dir_1_1  = (outDir + stepDirs[1] + fileBase1 + "/" + fileBase1).c_str();
-  sra_path_corr_1 = (outDir + stepDirs[2] + fileBase1 + ".cor.fq" + compressExt).c_str();
-  sra_path_corr_fix_1 = (outDir + stepDirs[2] + fileBase1 + ".cor.fix.fq" + compressExt).c_str();
-  sra_path_trim_u1 = (outDir + stepDirs[3] + fileBase1 + ".trim.fq" + compressExt).c_str();
-  sra_path_trim_p1 = (outDir + stepDirs[3] + fileBase1 + ".trim.fq" + compressExt).c_str();
-  sra_path_for_filt_1 = (outDir + stepDirs[4] + fileBase1 + ".filt.fq" + compressExt).c_str();
-  fastqc_dir_1_2 = (outDir + stepDirs[5] + fileBase1 + "/" + fileBase1).c_str();
-  sra_path_orep_filt_1 = (outDir + stepDirs[6] + fileBase1 + ".orep.filt.fq" + compressExt).c_str();
-
+  if (!dummy) {
+    fastqc_dir_1_1  = (outDir + stepDirs[1] + fileBase1 + "/" + fileBase1).c_str();
+    sra_path_corr_1 = (outDir + stepDirs[2] + fileBase1 + ".cor.fq" + compressExt).c_str();
+    sra_path_corr_fix_1 = (outDir + stepDirs[2] + fileBase1 + ".cor.fix.fq" + compressExt).c_str();
+    sra_path_trim_u1 = (outDir + stepDirs[3] + fileBase1 + ".trim.fq" + compressExt).c_str();
+    sra_path_trim_p1 = (outDir + stepDirs[3] + fileBase1 + ".trim.fq" + compressExt).c_str();
+    sra_path_for_filt_1 = (outDir + stepDirs[4] + fileBase1 + ".filt.fq" + compressExt).c_str();
+    fastqc_dir_1_2 = (outDir + stepDirs[5] + fileBase1 + "/" + fileBase1).c_str();
+    sra_path_orep_filt_1 = (outDir + stepDirs[6] + fileBase1 + ".orep.filt.fq" + compressExt).c_str();
+  }
   if (paired) {
     sra_path_raw_2 = fileName2.c_str();
-    fastqc_dir_2_1 = (outDir + stepDirs[1] + fileBase2 + "/" + fileBase2).c_str();
-    sra_path_corr_2 = (outDir + stepDirs[2] + fileBase2 + ".cor.fq" + compressExt).c_str();
-    sra_path_corr_fix_2 = (outDir + stepDirs[2] + fileBase2 + ".cor.fix.fq" + compressExt).c_str();
-    sra_path_trim_u1 = (outDir + stepDirs[3] + fileBase1 + ".unpaired.trim.fq" + compressExt).c_str();
-    sra_path_trim_p1 = (outDir + stepDirs[3] + fileBase1 + ".paired.trim.fq" + compressExt).c_str();
-    sra_path_trim_u2 = (outDir + stepDirs[3] + fileBase2 + ".unpaired.trim.fq" + compressExt).c_str();
-    sra_path_trim_p2 = (outDir + stepDirs[3] + fileBase2 + ".paired.trim.fq" + compressExt).c_str();
-    sra_path_for_filt_2 = (outDir + stepDirs[4] + fileBase2 + ".filt.fq" + compressExt).c_str();
-    fastqc_dir_2_2 = (outDir + stepDirs[5] + fileBase2 + "/" + fileBase2).c_str();
-    sra_path_orep_filt_2 = (outDir + stepDirs[6] + fileBase2 + ".orep.filt.fq" + compressExt).c_str();
+    if (!dummy) {
+      fastqc_dir_2_1 = (outDir + stepDirs[1] + fileBase2 + "/" + fileBase2).c_str();
+      sra_path_corr_2 = (outDir + stepDirs[2] + fileBase2 + ".cor.fq" + compressExt).c_str();
+      sra_path_corr_fix_2 = (outDir + stepDirs[2] + fileBase2 + ".cor.fix.fq" + compressExt).c_str();
+      sra_path_trim_u1 = (outDir + stepDirs[3] + fileBase1 + ".unpaired.trim.fq" + compressExt).c_str();
+      sra_path_trim_p1 = (outDir + stepDirs[3] + fileBase1 + ".paired.trim.fq" + compressExt).c_str();
+      sra_path_trim_u2 = (outDir + stepDirs[3] + fileBase2 + ".unpaired.trim.fq" + compressExt).c_str();
+      sra_path_trim_p2 = (outDir + stepDirs[3] + fileBase2 + ".paired.trim.fq" + compressExt).c_str();
+      sra_path_for_filt_2 = (outDir + stepDirs[4] + fileBase2 + ".filt.fq" + compressExt).c_str();
+      fastqc_dir_2_2 = (outDir + stepDirs[5] + fileBase2 + "/" + fileBase2).c_str();
+      sra_path_orep_filt_2 = (outDir + stepDirs[6] + fileBase2 + ".orep.filt.fq" + compressExt).c_str();
+    }
   } 
 }
 

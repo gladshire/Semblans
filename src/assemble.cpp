@@ -404,14 +404,14 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
                       bool assembSeqsInterest, bool assembSeqsNoInterest,
                       bool assembAllSeqs,
                       bool dispOutput, bool retainInterFiles,
-                      std::string logFile, const INI_MAP & cfgIni) {
+                      std::string logFile, std::string outDir,
+                      const INI_MAP & cfgIni = {}) {
   logOutput("\nStarting de-novo assembly\n", logFile);
 
   // Obtain sections from the config file as map objects
-  INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
-  INI_MAP_ENTRY cfgSeqsInt = cfgIni.at("Sequences of interest");
-  INI_MAP_ENTRY assembGroups = cfgIni.at("Assembly groups");
-  std::string outDir;
+  INI_MAP_ENTRY cfgIniPipeline;
+  INI_MAP_ENTRY cfgIniSeqsInt;
+  INI_MAP_ENTRY cfgIniAssembGroups;
   std::string inDir;
   std::vector<std::pair<std::string, std::string>> sraRunsInTrin;
   std::vector<std::pair<std::string, std::string>> sraRunsInterest;
@@ -427,11 +427,16 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
   std::vector<std::string> seqsInterest;
   std::string currFilePrefix1;
   std::string currFilePrefix2;
- 
+  if (!cfgIni.empty()) {
+    cfgIniPipeline = cfgIni.at("Pipeline");
+    cfgIniSeqsInt = cfgIni.at("Sequences of interest");
+    cfgIniAssembGroups = cfgIni.at("Assembly groups");
+  }
+
   // Obtain a string vector containing paths to user-defined FASTA sequences for read extraction
   const char * home = std::getenv("HOME");
   std::string currSeqFilePath;
-  for (auto seqFilePath : cfgSeqsInt) {
+  for (auto seqFilePath : cfgIniSeqsInt) {
     currSeqFilePath = seqFilePath.first;
     if (currSeqFilePath[0] == '~') {
       currSeqFilePath = std::string(home) + currSeqFilePath.substr(1, currSeqFilePath.size() - 1);
@@ -445,9 +450,16 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
   // the SRA runs which should be assembled together, and pass their FASTQ read files into Trinity
   for (auto sraGroup : sraGroups) {
     // Define paths for checkpoint and trinity output directories
-    cpDir = sraGroup.second[0].get_fastqc_dir_2().first.parent_path().parent_path().parent_path() / ".checkpoints";
-    trinDir = transcript(sraGroup.second[0]).get_trans_path_trinity().parent_path();
-    trinOutDir = std::string(trinDir.c_str());
+    if (!cfgIni.empty()) {
+      cpDir = sraGroup.second[0].get_fastqc_dir_2().first.parent_path().parent_path().parent_path() / ".checkpoints";
+      trinDir = transcript(sraGroup.second[0]).get_trans_path_trinity().parent_path();
+      trinOutDir = std::string(trinDir.c_str());
+    }
+    else {
+      cpDir = outDir + "/.checkpoints/";
+      //trinDir = outDir + "/00-Transcript_assembly/";
+      trinOutDir = outDir + "/00-Transcript_assembly/";
+    }
 
     currTrinOutNon = trinOutDir + "/" + sraGroup.first + ".unmapped.Trinity.fasta";
     currTrinOutAll = trinOutDir + "/" + sraGroup.first + ".Trinity.fasta";
@@ -455,29 +467,35 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
     // Iterate over all SRA runs in current assembly group, preparing vectors containing input files for them,
     // as well as their mapped and unmapped read files generated during read isolation/extraction
     for (auto sra : sraGroup.second) {
-      currTrinIn.first = sra.get_sra_path_orep_filt().first.c_str();
-      currTrinIn.second = sra.get_sra_path_orep_filt().second.c_str();
-      if (!ini_get_bool(cfgPipeline.at("remove_overrepresented").c_str(), 0)) {
-        if (!ini_get_bool(cfgPipeline.at("filter_foreign_reads").c_str(), 0)) {
-          if (!ini_get_bool(cfgPipeline.at("trim_adapter_seqs").c_str(), 0)) {
-            if (!ini_get_bool(cfgPipeline.at("error_correction").c_str(), 0)) {
-              currTrinIn.first = sra.get_sra_path_raw().first.c_str();
-              currTrinIn.second = sra.get_sra_path_raw().second.c_str();
+      if (!cfgIni.empty()) {
+        currTrinIn.first = sra.get_sra_path_orep_filt().first.c_str();
+        currTrinIn.second = sra.get_sra_path_orep_filt().second.c_str();
+        if (!ini_get_bool(cfgIniPipeline.at("remove_overrepresented").c_str(), 0)) {
+          if (!ini_get_bool(cfgIniPipeline.at("filter_foreign_reads").c_str(), 0)) {
+            if (!ini_get_bool(cfgIniPipeline.at("trim_adapter_seqs").c_str(), 0)) {
+              if (!ini_get_bool(cfgIniPipeline.at("error_correction").c_str(), 0)) {
+                currTrinIn.first = sra.get_sra_path_raw().first.c_str();
+                currTrinIn.second = sra.get_sra_path_raw().second.c_str();
+              }
+              else {
+                currTrinIn.first = sra.get_sra_path_corr_fix().first.c_str();
+                currTrinIn.second = sra.get_sra_path_corr_fix().second.c_str();
+              }  
             }
             else {
-              currTrinIn.first = sra.get_sra_path_corr_fix().first.c_str();
-              currTrinIn.second = sra.get_sra_path_corr_fix().second.c_str();
-            }  
+              currTrinIn.first = sra.get_sra_path_trim_p().first.c_str();
+              currTrinIn.second = sra.get_sra_path_trim_p().second.c_str();
+            }
           }
           else {
-            currTrinIn.first = sra.get_sra_path_trim_p().first.c_str();
-            currTrinIn.second = sra.get_sra_path_trim_p().second.c_str();
+            currTrinIn.first = sra.get_sra_path_for_filt().first.c_str();
+            currTrinIn.second = sra.get_sra_path_for_filt().second.c_str();
           }
-        }
-        else {
-          currTrinIn.first = sra.get_sra_path_for_filt().first.c_str();
-          currTrinIn.second = sra.get_sra_path_for_filt().second.c_str();
-        }
+        } 
+      }
+      else {
+        currTrinIn.first = sra.get_sra_path_raw().first.c_str();
+        currTrinIn.second = sra.get_sra_path_raw().second.c_str();
       }
       currFilePrefix1 = fs::path(currTrinIn.first).filename().stem().stem().stem().c_str();
       currFilePrefix2 = fs::path(currTrinIn.second).filename().stem().stem().stem().c_str();
@@ -595,140 +613,198 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
   }
 }
 
+std::vector<std::string> getCommaSepStrings(std::string commaSepStrings) {
+  std::vector<std::string> stringVec;
+  size_t commaInd;
+  size_t currPos = 0;
+  std::string currStr;
+  do {
+    commaInd = commaSepStrings.find(',', currPos);
+    currStr = commaSepStrings.substr(currPos, commaInd - currPos);
+    stringVec.push_back(currStr);
+    currPos = commaInd + 1;
+  } while (commaInd != std::string::npos);
+  return stringVec;
+}
+
 
 int main(int argc, char * argv[]) {
   system("setterm -cursor off");
-  // Get INI config file
-  INI_MAP cfgIni = make_ini_map(argv[1]);
-  INI_MAP_ENTRY cfgIniGen = cfgIni["General"];
 
-  // Define log file
-  std::string logFilePath((fs::canonical(fs::path(cfgIniGen["log_file"].c_str()).parent_path()) /
-                          fs::path(cfgIniGen["log_file"].c_str()).filename()).c_str());
+  INI_MAP cfgIni;
+  INI_MAP_ENTRY cfgIniGen;
+  INI_MAP_ENTRY cfgIniSeqsInt;
+  INI_MAP_ENTRY cfgIniAssemblyGroups;
+  std::string configPath;
+  std::string leftReads;
+  std::string rightReads;
+  std::string outDir;
+  std::string logFilePath;
+  std::vector<std::string> readFilesLeft;
+  std::vector<std::string> readFilesRight;
+
+  std::vector<SRA> sras;
+  std::vector<std::string> localDataFiles;
+  std::vector<std::string> seqsInterest;
+  std::string threads;
+  std::string ram_gb;
+  bool retainInterFiles;
+  bool dispOutput;
+  bool selectiveAssembly;
+  bool assembleInterest;
+  bool assembleOthers;
+  bool assembleAllSeqs;
+  bool compressFiles= false;
  
   if (argc > 1) {
-    std::vector<SRA> sras;
-    std::vector<std::string> localDataFiles;
+    threads = argv[5];
+    ram_gb = argv[6];
+    retainInterFiles = stringToBool(argv[7]);
+    dispOutput = stringToBool(argv[8]);
+    configPath = argv[1];
+    selectiveAssembly = false;
+    assembleInterest = false;
+    assembleOthers = false;
+    assembleAllSeqs = true;
 
-    // Get sequences of interest from config file
-    INI_MAP_ENTRY cfgSeqsInt = cfgIni.at("Sequences of interest");
-    std::vector<std::string> seqsInterest;
-    for (auto seqFilePath : cfgSeqsInt) {
-      seqsInterest.push_back(seqFilePath.first);
-    }
+    if (configPath == "null") {
+      leftReads = argv[2];
+      rightReads = argv[3];
+      outDir = argv[4];
+      readFilesLeft = getCommaSepStrings(leftReads);
+      readFilesRight = getCommaSepStrings(rightReads);
+      logFilePath = "log.txt";
+      outDir = std::string((fs::canonical(fs::path(outDir.c_str())).parent_path()).c_str()) + "/";
+      make_proj_space(outDir, "assemble");
 
-
-    // Get number of threads
-    std::string threads = argv[2];
-
-    // Get RAM in GB
-    std::string ram_gb = argv[3];
-
-    // Get boolean for intermediate file fate
-    bool retainInterFiles = stringToBool(argv[4]);
-    
-    // Get boolean for verbose printing
-    bool dispOutput = stringToBool(argv[5]);
-  
-    // Get sequences of interest from config
-    bool selectiveAssembly = true;
-    bool assembleInterest = ini_get_bool(cfgIniGen["assemble_seqs_of_interest"].c_str(), 0);
-    bool assembleOthers = ini_get_bool(cfgIniGen["assemble_other_seqs"].c_str(), 0);
-    bool assembleAllSeqs = ini_get_bool(cfgIniGen["assemble_all_seqs"].c_str(), 0);
-
-        
-    if (!seqsInterest.empty()) {
-      for (auto seqFilePath : seqsInterest) {
-        if (!fs::exists(fs::path(seqFilePath.c_str()))) {
-          logOutput("ERROR:\n  file \"" + seqFilePath + "\" not found.\n  Exiting.\n",
-                    logFilePath);
+      if (readFilesLeft.size() != readFilesRight.size()) {
+        logOutput("ERROR: Number of left/right read files do not match", logFilePath);
+        exit(1);
+      }
+      for (int i = 0; i < readFilesLeft.size(); i++) {
+        if (!fs::exists(readFilesLeft[i].c_str())) {
+          logOutput("\nERROR: --left read file '" + readFilesLeft[i] + "' not found\n", logFilePath);
           exit(1);
         }
+        if (!fs::exists(readFilesRight[i].c_str())) {
+          logOutput("\nERROR: --right read file '" + readFilesRight[i] + "' not found\n", logFilePath);
+          exit(1);
+        }
+        sras.push_back(SRA(readFilesLeft[i], readFilesRight[i], outDir, compressFiles, true));
       }
+            
     }
     else {
-      selectiveAssembly = false;
-    }
-    if (!selectiveAssembly) {
-      if (seqsInterest.empty()) {
-        logOutput("\nUser did not define sequences of interest. Skipping selective assembly.\n",
-                  logFilePath);
+      cfgIni = make_ini_map(argv[1]);
+      cfgIniGen = cfgIni["General"];
+      logFilePath = std::string((fs::canonical(cfgIniGen["log_file"].c_str()).parent_path() /
+                                fs::path(cfgIniGen["log_file"].c_str()).filename()).c_str());
+      // Get sequences of interest from config file
+      cfgIniSeqsInt = cfgIni.at("Sequences of interest");
+      for (auto seqFilePath : cfgIniSeqsInt) {
+        seqsInterest.push_back(seqFilePath.first);
       }
-      assembleInterest = false;
-      assembleOthers = false;
-    }
-    
-    // If all assembly options are disabled, exit
-    if (!assembleInterest && !assembleOthers && !assembleAllSeqs) {
-      logOutput("No assembly option specified. Have a nice day!\n", logFilePath);
-      exit(1);
-    }
-    
-    bool compressFiles = false;
-    
-    // Create file space
-    make_proj_space(cfgIni, "assemble");
-
-    // Obtain SRAs
-    if (!dispOutput) {
-      procRunning = true;
-      std::thread sraRetrieve(progressAnim, "  Obtaining read information from NCBI ", logFilePath);
-      sras = get_sras(cfgIni, dispOutput, compressFiles, logFilePath);
-      procRunning = false;
-      sraRetrieve.join();
-    }
-    else {
-      sras = get_sras(cfgIni, dispOutput, compressFiles, logFilePath);
-    }
-    
-    for (auto fqFileName : cfgIni.at("Local files")) {
-      localDataFiles.push_back(fqFileName.first);
-    }
-    std::pair<std::string, std::string> sraRunsLocal;
-    size_t pos;
-    for (auto sraRun : localDataFiles) {
-      sraRunsLocal.first = "";
-      sraRunsLocal.second = "";
-      pos = sraRun.find(" ");
-      sraRunsLocal.first = sraRun.substr(0, pos);
-      if (pos != std::string::npos) {
-        sraRun.erase(0, pos + 1);
-        pos = sraRun.find(" ");
-        sraRunsLocal.second = sraRun.substr(0, pos);
-      }
-      if (fs::exists(sraRunsLocal.first) &&
-          fs::exists(sraRunsLocal.second)) {
-        sras.push_back(SRA(sraRunsLocal.first, sraRunsLocal.second, cfgIni, compressFiles,
-                           logFilePath));
+  
+      // Get sequences of interest from config
+      selectiveAssembly = true;
+      assembleInterest = ini_get_bool(cfgIniGen["assemble_seqs_of_interest"].c_str(), 0);
+      assembleOthers = ini_get_bool(cfgIniGen["assemble_other_seqs"].c_str(), 0);
+      assembleAllSeqs = ini_get_bool(cfgIniGen["assemble_all_seqs"].c_str(), 0);
+        
+      if (!seqsInterest.empty()) {
+        for (auto seqFilePath : seqsInterest) {
+          if (!fs::exists(fs::path(seqFilePath.c_str()))) {
+            logOutput("ERROR:\n  file \"" + seqFilePath + "\" not found.\n  Exiting.\n",
+                      logFilePath);
+            exit(1);
+          }
+        }
       }
       else {
-        if (sraRunsLocal.first != "" &&
-            !fs::exists(sraRunsLocal.first)) {
-          logOutput("ERROR: Local run not found: \"" + sraRunsLocal.first + "\"", logFilePath);
+        selectiveAssembly = false;
+      }
+      if (!selectiveAssembly) {
+        if (seqsInterest.empty()) {
+          logOutput("\nUser did not define sequences of interest. Skipping selective assembly.\n",
+                    logFilePath);
         }
-        if (sraRunsLocal.second != "" &&
-            !fs::exists(sraRunsLocal.second)) {
-          logOutput("ERROR: Local run not found: \"" + sraRunsLocal.second + "\"", logFilePath);
+        assembleInterest = false;
+        assembleOthers = false;
+      }
+    
+      // If all assembly options are disabled, exit
+      if (!assembleInterest && !assembleOthers && !assembleAllSeqs) {
+        logOutput("No assembly option specified. Have a nice day!\n", logFilePath);
+        exit(1);
+      }
+    
+      bool compressFiles = false;
+    
+      // Create file space
+      make_proj_space(cfgIni, "assemble");
+
+      // Obtain SRAs
+      if (!dispOutput) {
+        procRunning = true;
+        std::thread sraRetrieve(progressAnim, "  Obtaining read information from NCBI ", logFilePath);
+        sras = get_sras(cfgIni, dispOutput, compressFiles, logFilePath);
+        procRunning = false;
+        sraRetrieve.join();
+      }
+      else {
+        sras = get_sras(cfgIni, dispOutput, compressFiles, logFilePath);
+      }
+    
+      for (auto fqFileName : cfgIni.at("Local files")) {
+        localDataFiles.push_back(fqFileName.first);
+      }
+      std::pair<std::string, std::string> sraRunsLocal;
+      size_t pos;
+      for (auto sraRun : localDataFiles) {
+        sraRunsLocal.first = "";
+        sraRunsLocal.second = "";
+        pos = sraRun.find(" ");
+        sraRunsLocal.first = sraRun.substr(0, pos);
+        if (pos != std::string::npos) {
+          sraRun.erase(0, pos + 1);
+          pos = sraRun.find(" ");
+          sraRunsLocal.second = sraRun.substr(0, pos);
+        }
+        if (fs::exists(sraRunsLocal.first) &&
+            fs::exists(sraRunsLocal.second)) {
+          sras.push_back(SRA(sraRunsLocal.first, sraRunsLocal.second, cfgIni, compressFiles,
+                             logFilePath));
+        }
+        else {
+          if (sraRunsLocal.first != "" &&
+              !fs::exists(sraRunsLocal.first)) {
+            logOutput("ERROR: Local run not found: \"" + sraRunsLocal.first + "\"", logFilePath);
+          }
+          if (sraRunsLocal.second != "" &&
+              !fs::exists(sraRunsLocal.second)) {
+            logOutput("ERROR: Local run not found: \"" + sraRunsLocal.second + "\"", logFilePath);
+          }
         }
       }
-    }
 
-    // Check if no SRAs specified
-    if (sras.empty()) {
-      logOutput("ERROR: No valid SRA data.\nPlease check the configuration file.\n",
-                logFilePath);
-      exit(1);
+      // Check if no SRAs specified
+      if (sras.empty()) {
+        logOutput("ERROR: No valid SRA data.\nPlease check the configuration file.\n",
+                  logFilePath);
+        exit(1);
+      }
     }
-
     // Get group specifications for SRAs
     std::map<std::string, std::vector<SRA>> sraGroups;
-    INI_MAP_ENTRY assemblyGroups = cfgIni["Assembly groups"];
+    if (configPath != "null") {
+      cfgIniAssemblyGroups = cfgIni["Assembly groups"];
+    }
     std::string currGroupName;
     std::string currIniArrStr;
     std::vector<std::string> iniStrArray;
     std::vector<SRA> currSraGroup;
     // Iterate through user-defined assembly groups in config file
-    if (assemblyGroups.empty()) {
+    if (cfgIniAssemblyGroups.empty()) {
       for (auto sra : sras) {
         currSraGroup.push_back(sra);
         sraGroups.emplace(sra.get_file_prefix().first.substr(0, 
@@ -736,7 +812,7 @@ int main(int argc, char * argv[]) {
         currSraGroup.clear();
       }
     }
-    for (auto assemblyGroup : assemblyGroups) {
+    for (auto assemblyGroup : cfgIniAssemblyGroups) {
       // Get group name and group array string 
       currGroupName = assemblyGroup.first;
       currIniArrStr = assemblyGroup.second;
@@ -757,9 +833,9 @@ int main(int argc, char * argv[]) {
           // If SRA specified in group, push to group vector
           if (iniStrArray[i] == sra.get_accession() ||
               iniStrArray[i] == sra.get_file_prefix().first ||
-              iniStrArray[i] == sra.get_file_prefix().second ||
-              iniStrArray[i] == sra.get_file_prefix().first + ".fastq" ||
-              iniStrArray[i] == sra.get_file_prefix().second + ".fastq") {
+            iniStrArray[i] == sra.get_file_prefix().second ||
+            iniStrArray[i] == sra.get_file_prefix().first + ".fastq" ||
+            iniStrArray[i] == sra.get_file_prefix().second + ".fastq") {
             iniEntryFound[i] = true;
             if (!sraChosen) {
               currSraGroup.push_back(sra);
@@ -780,7 +856,7 @@ int main(int argc, char * argv[]) {
         }
       }
       
-      // Emplace current SRA group into map
+        // Emplace current SRA group into map
       sraGroups.emplace(currGroupName, currSraGroup);
       currSraGroup.clear();
     }
@@ -797,9 +873,16 @@ int main(int argc, char * argv[]) {
                    cfgIni, logFilePath);
     }
     // Perform assembly with Trinity
-    run_trinity_bulk(sraGroups, threads, ram_gb, assembleInterest, 
-                     assembleOthers, assembleAllSeqs, dispOutput,
-                     retainInterFiles, logFilePath, cfgIni);
+    if (configPath != "null") {
+      run_trinity_bulk(sraGroups, threads, ram_gb, assembleInterest, 
+                       assembleOthers, assembleAllSeqs, dispOutput,
+                       retainInterFiles, logFilePath, "", cfgIni);
+    }
+    else {
+      run_trinity_bulk(sraGroups, threads, ram_gb, assembleInterest,
+                       assembleOthers, assembleAllSeqs, dispOutput,
+                       retainInterFiles, logFilePath, outDir);
+    }
 
     logOutput("\nAssemble finished successfully\n\n", logFilePath);
   }

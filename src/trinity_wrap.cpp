@@ -49,8 +49,8 @@ void run_trinity(std::pair<std::string, std::string> sraRun, std::string outFile
   std::string inFile2 = sraRun.second;
   std::string trin_cmd;
   std::string printOut;
-  logOutput("    Single assembly chosen", logFile);
-  logOutput("\n    Now assembling de-novo transcriptome for:\n", logFile);
+  logOutput("\n    Single assembly chosen", logFile);
+  logOutput("\n    Now assembling de-novo transcriptome for:", logFile);
   logOutput("\n      SRA Run:", logFile);
   logOutput("\n      " + std::string(fs::path(sraRun.first).stem().c_str()), logFile);
   if (sraRun.second != "") {

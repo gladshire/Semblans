@@ -32,7 +32,7 @@ void prefetch_sra(SRA sra, bool dispOutput, std::string logFile) {
   std::string prefetchFlag = " --max-size u -O ";
   std::string sraAccession = sra.get_accession();
   int result;
-  std::string prefetchCmd = PATH_PREFETCH + " " + sraAccession + prefetchFlag + outDir;
+  std::string prefetchCmd = PATH_PREFETCH + " --progress " + sraAccession + prefetchFlag + outDir;
   if (dispOutput) {
     prefetchCmd += (" 2>&1 | tee -a " + logFile);
   }
@@ -40,11 +40,8 @@ void prefetch_sra(SRA sra, bool dispOutput, std::string logFile) {
     prefetchCmd += (" >>" + logFile + " 2>&1");
   }
   result = system(prefetchCmd.c_str());
-  if (WIFSIGNALED(result)) {
-    system("setterm -cursor on");
-    logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
-    exit(1);
-  }
+  replaceChar(logFile, '\b', ' ');
+  reportError(result, logFile);
 }
 
 // Given an SRA run object, dump prefetched data to a FASTQ file 

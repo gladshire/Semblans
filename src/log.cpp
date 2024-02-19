@@ -1,6 +1,8 @@
 #include "log.h"
 
 
+
+
 // Utility function to replace one character with another in a text file
 void replaceChar(std::string inFilePath, char oldChar, char newChar) {
   std::ifstream inLogFile(inFilePath);
@@ -39,4 +41,13 @@ std::string getPercent(float valPercent, int precision) {
   std::stringstream percentStream;
   percentStream << std::fixed << std::setprecision(precision) << valPercent;
   return percentStream.str();
+}
+
+// Print error code of a program call and then exit
+void reportError(int commandResult, std::string logFile) {
+  if (WIFSIGNALED(commandResult)) {
+    system("setterm -cursor on");
+    logOutput("\nExisted with signal " + std::to_string(WTERMSIG(commandResult)) + "\n", logFile);
+    exit(1);
+  }
 }
