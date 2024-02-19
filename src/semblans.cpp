@@ -286,6 +286,10 @@ int main(int argc, char * argv[]) {
     if (command == "") {
       command = "all";
     }
+
+    if (kraken2Dbs == "") {
+      kraken2Dbs = "null";
+    }
     // If no config file specified, check for sequence files in Semblans call
     if (pathConfig == "") {
       // TODO: Add support for preprocess w/o config file
@@ -457,7 +461,7 @@ int main(int argc, char * argv[]) {
       }
       else {
         logOutput("\nPerforming preprocessing only\n\n", logFilePath);
-       
+      
         result = system(preCmd.c_str());
         if (WIFSIGNALED(result)) {
           system("setterm -cursor on");

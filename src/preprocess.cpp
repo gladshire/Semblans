@@ -1079,7 +1079,7 @@ int main(int argc, char * argv[]) {
       }
     }
     else {
-      if (!kraken2DbFiles.empty()) {
+      if (kraken2DbFiles[0] != "null") {
         filtForeignBulk(sras, kraken2DbFiles, threads, dispOutput, compressFiles, retainInterFiles,
                         logFilePath, outDir);
       } 
