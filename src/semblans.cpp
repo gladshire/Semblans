@@ -310,7 +310,7 @@ int main(int argc, char * argv[]) {
       if (outDir == "") {
         outDir = ".";
       }
-      if (command == "preprocess") {
+      if (command == "preprocess" || command == "all") {
         if (leftReads == "" && rightReads == "") {
           std::cerr << "ERROR: If not using '--config', user must specify ";
           std::cerr << "the left/right read files for preprocessing" << std::endl;
@@ -319,11 +319,13 @@ int main(int argc, char * argv[]) {
           exit(1);
         }
       }
-      if (command == "postprocess") {
+      if (command == "postprocess" || command == "all") {
         if (assembly == "" || (leftReads == "" && rightReads == "")) {
-          std::cerr << "ERROR: If not using '--config', user must specify assembly, ";
-          std::cerr << "the left/right read files that were used in assembly" << std::endl;
+          std::cerr << "ERROR: If not using '--config', user must specify assembly, " << std::endl;
+          std::cerr << "the left/right read files that were used in assembly, and" << std::endl;
+          std::cerr << "a reference proteome." << std::endl;
           std::cerr << "  (example: --assembly transcripts.fa" << std::endl;
+          std::cerr << "            --ref-proteome refProt.fa" << std::endl;
           std::cerr << "            --left reads_1_left.fq,reads_2_left.fq,..." << std::endl;
           std::cerr << "            --right reads_1_right.fq, reads_2_right.fq,..." << std::endl;
           exit(1);
