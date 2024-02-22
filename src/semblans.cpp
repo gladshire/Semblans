@@ -37,6 +37,9 @@ void print_help_base() {
   std::cout << "  -kdb, --kraken-db      Specifies which Kraken databases to use during removal of foreign reads." << std::endl;
   std::cout << "                         To specify multiple databases, separate their paths with commas." << std::endl;
   std::cout << "                         If omitted, Semblans will skip foreign read filtration" << std::endl;
+  std::cout << "  -rp, --ref-proteome    Specifies the reference proteome Semblans will use for" << std::endl;
+  std::cout << "                         chimera detection and coding region prediction." << std::endl;
+  std::cout << "                         Only used during postprocessing." << std::endl;
   std::cout << std::endl;
   std::cout << "  -cfg, --config         Specifies config file mode." << std::endl;
   std::cout << "                         Path to config file should follow this argument" << std::endl;
@@ -210,6 +213,7 @@ int main(int argc, char * argv[]) {
         assembly = argv[i + 1];
       }
       else if (strcmp("--reference-proteome", argv[i]) == 0 ||
+               strcmp("--ref-proteome", argv[i]) == 0 ||
                strcmp("-rp", argv[i]) == 0) {
         refProt = argv[i + 1];
       }
@@ -217,7 +221,7 @@ int main(int argc, char * argv[]) {
                strcmp("-kdb", argv[i]) == 0) {
         kraken2Dbs = argv[i + 1];
       }
-      // Check for '--output-directory', for specifying where outputs should
+      // Check for '--output', for specifying where outputs should
       // go if no config file is used
       else if (strcmp("--output-directory", argv[i]) == 0 ||
                strcmp("--output", argv[i]) == 0 ||
@@ -303,6 +307,9 @@ int main(int argc, char * argv[]) {
     // If no config file specified, check for sequence files in Semblans call
     if (pathConfig == "") {
       useCfg = false;
+      if (outDir == "") {
+        outDir = ".";
+      }
       if (command == "preprocess") {
         if (leftReads == "" && rightReads == "") {
           std::cerr << "ERROR: If not using '--config', user must specify ";

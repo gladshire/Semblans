@@ -663,10 +663,9 @@ int main(int argc, char * argv[]) {
       make_proj_space(outDir, "postprocess");
       transcript transFile(assembly, outDir);
       transVec.push_back(transFile);
-     
-      outDir = std::string((fs::canonical(fs::path(outDir.c_str())).parent_path()).c_str()) + "/";
 
-      std::cout << outDir << std::endl;
+      outDir = std::string((fs::canonical(fs::path(outDir.c_str())).parent_path()).c_str()) + "/" +
+               std::string((fs::canonical(fs::path(outDir.c_str())).filename()).c_str()) + "/";
     }
     // Set up postprocess parameters based on user-specified config file
     else {

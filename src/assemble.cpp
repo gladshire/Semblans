@@ -674,7 +674,9 @@ int main(int argc, char * argv[]) {
       readFilesLeft = getCommaSepStrings(leftReads);
       readFilesRight = getCommaSepStrings(rightReads);
       logFilePath = "log.txt";
-      outDir = std::string((fs::canonical(fs::path(outDir.c_str())).parent_path()).c_str()) + "/";
+      outDir = std::string((fs::canonical(fs::path(outDir.c_str())).parent_path()).c_str()) + "/" +
+               std::string((fs::canonical(fs::path(outDir.c_str())).filename()).c_str()) + "/";      
+
       make_proj_space(outDir, "assemble");
 
       if (readFilesLeft.size() != readFilesRight.size()) {
