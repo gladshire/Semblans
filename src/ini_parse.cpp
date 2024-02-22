@@ -87,6 +87,7 @@ void make_proj_space(std::string outDir, std::string pipeStage) {
     currNum = getStepNum(stepNum);
     stepDirs.push_back(currNum + "-" + allSteps[i]);
     system(("mkdir " + outDir + currNum + "-" + allSteps[i] + " > /dev/null 2>&1").c_str());
+    stepNum++;
   }
 }
 
