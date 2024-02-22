@@ -926,8 +926,6 @@ int main(int argc, char * argv[]) {
       outDir = std::string((fs::canonical(fs::path(outDir.c_str())).parent_path()).c_str()) + "/" +
                std::string((fs::canonical(fs::path(outDir.c_str())).filename()).c_str()) + "/";
 
-      std::cout << outDir << std::endl;
-
       if (readFilesLeft.size() != readFilesRight.size()) {
         logOutput("\nERROR: Number of left/right read files do not match\n", logFilePath);
         exit(1);

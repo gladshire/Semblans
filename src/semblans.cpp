@@ -319,7 +319,7 @@ int main(int argc, char * argv[]) {
           exit(1);
         }
       }
-      if (command == "postprocess" || command == "all") {
+      if (command == "postprocess") {
         if (assembly == "" || (leftReads == "" && rightReads == "")) {
           std::cerr << "ERROR: If not using '--config', user must specify assembly, " << std::endl;
           std::cerr << "the left/right read files that were used in assembly, and" << std::endl;
@@ -530,8 +530,6 @@ int main(int argc, char * argv[]) {
       else {
         logOutput("\nPerforming assembly only\n\n", logFilePath);
   
-        std::cout << assCmd << std::endl;
-
         result = system(assCmd.c_str());
         if (WIFSIGNALED(result)) {
           system("setterm -cursor on");
