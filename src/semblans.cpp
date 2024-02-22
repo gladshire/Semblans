@@ -13,10 +13,7 @@ void print_intro(std::string logFile) {
   logOutput("    \\__ \\   __/  |   |   |  |   | |  (   |  |   | \\__ \\ \n", logFile);
   logOutput("    ____/ \\___| _|  _|  _| _.__/ _| \\__,_| _|  _| ____/ \n", logFile); 
   logOutput("\n\n\n", logFile);
-  //printVertEllipse(logFile, 3);
-  //logOutput("      ───────────────────────────────────────────────\n", logFile);
   printBreakLine(logFile, 6, 47);
-  //logOutput("      ───────────────────────────────────────────────\n\n", logFile);
 }
 
 // Print base help message for Semblans in terminal
@@ -27,16 +24,29 @@ void print_help_base() {
             << "           [--verbose/-v]\n" << std::endl;
   std::cout << "ARGUMENTS:\n" << std::endl;
   std::cout << "  [COMMAND]" << std::endl;
-  std::cout << "    preprocess       Performs pre-assembly steps only" << std::endl;
-  std::cout << "    assemble         Performs de novo assembly step only" << std::endl;
-  std::cout << "    postprocess      Performs post-assembly steps only" << std::endl;
-  std::cout << "    all (default)    Performs all steps in pipeline\n" << std::endl;
-  std::cout << "  -cfg, --config     Specifies path to configuration file (REQUIRED)" << std::endl;
-  std::cout << "  -t,   --threads    Specifies number of threads/CPU cores to employ" << std::endl;
-  std::cout << "  -r,   --ram        Specifies ammount of memory/RAM (GB) to dedicate" << std::endl;
-  std::cout << "  -f,   --retain     Prevents deletion of intermediate files in pipeline" << std::endl;
-  std::cout << "  -v,   --verbose    Prints all output from Semblans and sub-programs" << std::endl;
-  std::cout << "  -h,   --help       Displays this help screen" << std::endl;
+  std::cout << "    preprocess           Performs pre-assembly steps only" << std::endl;
+  std::cout << "    assemble             Performs de novo assembly step only" << std::endl;
+  std::cout << "    postprocess          Performs post-assembly steps only" << std::endl;
+  std::cout << "    all (default)        Performs all steps in pipeline\n" << std::endl;
+  std::cout << "  [MODE]" << std::endl;
+  std::cout << "  -1/-2, --left/--right  Specifies simple mode." << std::endl;
+  std::cout << "                         Path to left/right read FASTQ(s) should follow the corresponding flags." << std::endl;
+  std::cout << "                         To specify multiple pairs of files, separate file paths with commas" << std::endl;
+  std::cout << "  -od, --output          Specifies path to where Semblans should place output files." << std::endl;
+  std::cout << "                         Directory must already exist" << std::endl;
+  std::cout << "  -kdb, --kraken-db      Specifies which Kraken databases to use during removal of foreign reads." << std::endl;
+  std::cout << "                         To specify multiple databases, separate their paths with commas." << std::endl;
+  std::cout << "                         If omitted, Semblans will skip foreign read filtration" << std::endl;
+  std::cout << std::endl;
+  std::cout << "  -cfg, --config         Specifies config file mode." << std::endl;
+  std::cout << "                         Path to config file should follow this argument" << std::endl;
+  std::cout << std::endl;
+  std::cout << "  [FLAGS]" << std::endl;
+  std::cout << "  -t,   --threads        Specifies number of threads/CPU cores to employ" << std::endl;
+  std::cout << "  -r,   --ram            Specifies ammount of memory/RAM (GB) to dedicate" << std::endl;
+  std::cout << "  -f,   --retain         Prevents deletion of intermediate files in pipeline" << std::endl;
+  std::cout << "  -v,   --verbose        Prints all output from Semblans and sub-programs" << std::endl;
+  std::cout << "  -h,   --help           Displays this help screen" << std::endl;
 
 }
 
@@ -292,8 +302,6 @@ int main(int argc, char * argv[]) {
     }
     // If no config file specified, check for sequence files in Semblans call
     if (pathConfig == "") {
-      // TODO: Add support for preprocess w/o config file
-      // TODO: Add support for assemble w/o config file
       useCfg = false;
       if (command == "preprocess") {
         if (leftReads == "" && rightReads == "") {
@@ -552,9 +560,6 @@ int main(int argc, char * argv[]) {
                       std::to_string(numThreads) + " " +
                       std::to_string(ram) + retain + verbose;
 
-        //currPostCmd = SEMBLANS_DIR + "postprocess " + currCfgIniSub + " " +
-        //              std::to_string(numThreads) + " " +
-        //              std::to_string(ram) + retain + verbose;
 
         logOutput("\nPerforming postprocess only\n\n", logFilePath);
 
