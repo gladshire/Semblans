@@ -655,17 +655,18 @@ int main(int argc, char * argv[]) {
       outDir = argv[6];
       readFilesLeft = getCommaSepStrings(leftReads);
       readFilesRight = getCommaSepStrings(rightReads);
-      logFilePath = "log.txt";
       if (readFilesLeft.size() != readFilesRight.size()) {
         logOutput("ERROR: Number of left/right read files do not match", logFilePath);
         exit(1);
       }
+      
+      outDir = std::string((fs::canonical(fs::path(outDir.c_str())).parent_path()).c_str()) + "/" +
+               std::string((fs::canonical(fs::path(outDir.c_str())).filename()).c_str()) + "/";
       make_proj_space(outDir, "postprocess");
+      logFilePath = outDir + "log.txt";
       transcript transFile(assembly, outDir);
       transVec.push_back(transFile);
 
-      outDir = std::string((fs::canonical(fs::path(outDir.c_str())).parent_path()).c_str()) + "/" +
-               std::string((fs::canonical(fs::path(outDir.c_str())).filename()).c_str()) + "/";
     }
     // Set up postprocess parameters based on user-specified config file
     else {
@@ -745,78 +746,6 @@ int main(int argc, char * argv[]) {
       }
     }
 
-    // Determine whether to compress files
-    //bool compressFiles = ini_get_bool(cfgIni["General"]["compress_files"].c_str(), 0);
-    
-    // Retrieve SRA objects defined by , convert to transcripts
-    /*
-    std::vector<SRA> sras;
-    std::vector<std::string> localDataFiles;
-    sras = get_sras(cfgIni, dispOutput, compressFiles, logFilePath);
-    for (auto fqFileName : cfgIni.at("Local files")) {
-      localDataFiles.push_back(fqFileName.first);
-    }
-    size_t pos;
-    for (auto sraRun : localDataFiles) {
-      sraRunsLocal.first = "";
-      sraRunsLocal.second = "";
-      pos = sraRun.find(" ");
-      sraRunsLocal.first = sraRun.substr(0, pos);
-      if (pos != std::string::npos) {
-        sraRun.erase(0, pos + 1);
-        pos = sraRun.find(" ");
-        sraRunsLocal.second = sraRun.substr(0, pos);
-      }
-      if (fs::exists(sraRunsLocal.first) &&
-          fs::exists(sraRunsLocal.second)) {
-        sras.push_back(SRA(sraRunsLocal.first, sraRunsLocal.second, cfgIni, compressFiles,
-                           logFilePath));
-      }
-      else {
-        if (sraRunsLocal.first != "" &&
-            !fs::exists(sraRunsLocal.first)) {
-          logOutput("ERROR: Local run not found: \"" + sraRunsLocal.first + "\"\n",
-                    logFilePath);
-        }
-        if (sraRunsLocal.second != "" &&
-            !fs::exists(sraRunsLocal.second)) {
-          logOutput("ERROR: Local run not found: \"" + sraRunsLocal.second + "\"\n",
-                    logFilePath);
-        }
-      }
-    }
-    
-    if (sras.empty()) {
-      logOutput("ERROR: No valid SRA data. Please check the configuration file.\n",
-                logFilePath);
-      exit(1);
-    }
-    
-    std::vector<transcript> transVec;
-    fs::path currFile = transcript(sras[0]).get_trans_path_trinity().parent_path();
-    fs::path currPrefix;
-    fs::directory_iterator fileIter{currFile};
-    while (fileIter != fs::directory_iterator{}) {
-      // Iterate through files in transcript directory
-      // Push transcript to transcript vector
-      if (fileIter->path().extension() == ".fasta") {
-        currFile = fileIter->path();
-        currPrefix = currFile;
-        while (!currPrefix.extension().empty()) {
-          currPrefix = currPrefix.stem();
-        }
-        fs::rename(currFile, currFile.parent_path() /
-                             fs::path((std::string(currPrefix.c_str()) + ".Trinity.fasta").c_str()));
-        transcript currTrans(fileIter->path().c_str(), cfgIni);
-        transVec.push_back(currTrans);
-      }
-      fileIter++;
-    }
- 
-    for (auto trans : transVec) {
-      std::cout << trans.get_trans_path_trinity().c_str() << std::endl;
-    }*/
-  
     // Summarize program execution parameters
     logOutput("Semblans Postprocess started with following parameters:\n", logFilePath);
     logOutput("  Config file:     " + std::string(argv[1]) + "\n", logFilePath);

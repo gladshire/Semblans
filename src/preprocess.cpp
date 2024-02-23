@@ -922,11 +922,11 @@ int main(int argc, char * argv[]) {
       readFilesLeft = splitStrings(leftReads, ',');
       readFilesRight = splitStrings(rightReads, ',');
       kraken2DbFiles = splitStrings(kraken2Dbs, ',');
-      logFilePath = "log.txt";
       make_proj_space(outDir, "preprocess");
       outDir = std::string((fs::canonical(fs::path(outDir.c_str())).parent_path()).c_str()) + "/" +
                std::string((fs::canonical(fs::path(outDir.c_str())).filename()).c_str()) + "/";
-
+      logFilePath = outDir + "log.txt";
+      
       if (readFilesLeft.size() != readFilesRight.size()) {
         logOutput("\nERROR: Number of left/right read files do not match\n", logFilePath);
         exit(1);

@@ -15,7 +15,7 @@ void run_fastqc(std::pair<std::string, std::string> sraRunFiles,
   }
   std::string fastqcFlags = " --extract -t " + threads + " -o ";
   int result;
-  system(("mkdir " + outFile).c_str());
+  system(("mkdir " + outFile + " > /dev/null 2>&1").c_str());
   std::string fastqcCmd;
   std::string printOut;
   if (dispOutput) {
