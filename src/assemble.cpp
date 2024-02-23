@@ -867,7 +867,7 @@ int main(int argc, char * argv[]) {
     logOutput("\n  Config file:     " + std::string(argv[1]), logFilePath);;
     logOutput("\n  Threads (Cores): " + threads, logFilePath);
     logOutput("\n  Memory (GB):     " + ram_gb, logFilePath);
-    logOutput("\n  SRA Runs:\n\n", logFilePath);
+    logOutput("\n  SRA Runs:\n", logFilePath);
     summarize_all_sras(sras, logFilePath, 6);
     // Separate out reads of interest
     if (selectiveAssembly) {

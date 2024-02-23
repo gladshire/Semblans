@@ -49,12 +49,12 @@ void retrieveSraData(std::vector<SRA> & sras, std::string threads,
     if (sra.checkpointExists("sra")) {
       if (!sra.get_accession().empty()) {
         logOutput("\n  Prefetch checkpoint found for: " +
-                  sra.get_accession(), logFilePath);
+                  sra.get_accession() + "\n", logFilePath);
       }
       else {
         logOutput(std::string("\n  Prefetch checkpoint found for:") +
                   "\n    " + sra.get_file_prefix().first +
-                  "\n    " + sra.get_file_prefix().second,
+                  "\n    " + sra.get_file_prefix().second + "\n",
                   logFilePath);
       }
       continue;
@@ -83,12 +83,12 @@ void retrieveSraData(std::vector<SRA> & sras, std::string threads,
     if (sra.checkpointExists("dump")) {
       if (!sra.get_accession().empty()) {
         logOutput("\n  Raw dump checkpoint found for: " +
-                  sra.get_accession(), logFilePath);
+                  sra.get_accession() + "\n", logFilePath);
       }
       else {
         logOutput(std::string("\n  Raw dump checkpoint found for: ") +
                   "\n    " + sra.get_file_prefix().first +
-                  "\n    " + sra.get_file_prefix().second,
+                  "\n    " + sra.get_file_prefix().second + "\n",
                   logFilePath);
       }
       continue;
@@ -138,7 +138,7 @@ void print_help() {
 // Given a vector of SRAs, perform a pre-assembly FastQC quality analysis on their sequence data
 void fastqcBulk1(std::vector<SRA> & sras, std::string threads, bool dispOutput,
                  std::string logFilePath) {
-  logOutput("\n\nStarting initial quality analysis of reads", logFilePath);
+  logOutput("\nStarting initial quality analysis of reads", logFilePath);
   std::pair<std::string, std::string> currFastqcIn1;
   std::string currFastqcOut1;
   for (auto sra : sras) {
@@ -149,7 +149,7 @@ void fastqcBulk1(std::vector<SRA> & sras, std::string threads, bool dispOutput,
     if (sra.checkpointExists("fastqc1")) {
       if (!sra.get_accession().empty()) {
         logOutput("\n  Quality analysis checkpoint found for: " +
-                  sra.get_accession(), logFilePath);
+                  sra.get_accession() + "\n", logFilePath);
       }
       else {
         logOutput(std::string("\n  Quality analysis checkpoint found for: ") +
@@ -183,7 +183,7 @@ void fastqcBulk1(std::vector<SRA> & sras, std::string threads, bool dispOutput,
 void fastqcBulk2(std::vector<SRA> & sras, std::string threads, bool dispOutput,
                  std::string logFilePath, std::string outDir,
                  const INI_MAP & cfgIni = {}) {
-  logOutput("\n\nStarting second quality analysis of reads", logFilePath);
+  logOutput("\nStarting second quality analysis of reads", logFilePath);
   INI_MAP_ENTRY cfgIniPipeline;
   std::pair<std::string, std::string> currFastqcIn;
   std::string currFastqcOut;
@@ -217,7 +217,7 @@ void fastqcBulk2(std::vector<SRA> & sras, std::string threads, bool dispOutput,
     if (sra.checkpointExists("fastqc2")) {
       if (!sra.get_accession().empty()) {
         logOutput("\n  Quality analysis checkpoint found for: " +
-                  sra.get_accession(), logFilePath);
+                  sra.get_accession() + "\n", logFilePath);
       }
       else {
         logOutput(std::string("\n  Quality analysis checkpoint found for: ") +
@@ -254,7 +254,7 @@ void errorCorrBulk(std::vector<SRA> & sras, std::string threads,
                    bool dispOutput, bool retainInterFiles, bool compressFiles,
                    std::string logFilePath, std::string outDir,
                    const INI_MAP & cfgIni = {}) {
-  logOutput("\n\nStarting error correction of reads", logFilePath);
+  logOutput("\nStarting error correction of reads", logFilePath);
   INI_MAP_ENTRY rcorrSettings;
   std::string kmerLength;
   std::string maxCorrK;
@@ -282,12 +282,12 @@ void errorCorrBulk(std::vector<SRA> & sras, std::string threads,
     if (sra.checkpointExists("corr")) {
       if (!sra.get_accession().empty()) {
         logOutput("\n  Error-correction checkpoint found for: " +
-                  sra.get_accession(), logFilePath);
+                  sra.get_accession() + "\n", logFilePath);
       }
       else {
         logOutput(std::string("\n  Error-correction checkpoint found for: ") +
                   "\n    " + sra.get_file_prefix().first +
-                  "\n    " + sra.get_file_prefix().second,
+                  "\n    " + sra.get_file_prefix().second + "\n",
                   logFilePath);
       }
       continue;
@@ -340,7 +340,7 @@ bool remUnfixBulk(std::vector<SRA> & sras, std::string threads, std::string ram_
       else {
         logOutput(std::string("\n  Unfixable error fix checkpoint found for: ") +
                   "\n    " + sra.get_file_prefix().first +
-                  "\n    " + sra.get_file_prefix().second,
+                  "\n    " + sra.get_file_prefix().second + "\n\n",
                   logFilePath);
       }
       continue;
@@ -399,7 +399,7 @@ void trimBulk(std::vector<SRA> & sras, std::string threads,
               bool dispOutput, bool retainInterFiles,
               std::string logFilePath, std::string outDir,
               const INI_MAP & cfgIni = {}) {
-  logOutput("\n\nStarting the trimming of adapter sequences on reads", logFilePath);
+  logOutput("\nStarting the trimming of adapter sequences on reads", logFilePath);
   INI_MAP_ENTRY cfgPipeline;
   INI_MAP_ENTRY trimmSettings;
   std::pair<std::string, std::string> currTrimIn;
@@ -456,7 +456,7 @@ void trimBulk(std::vector<SRA> & sras, std::string threads,
       else {
         logOutput(std::string("\n  Adapter trimming checkpoint found for: ") +
                   "\n    " + sra.get_file_prefix().first + 
-                  "\n    " + sra.get_file_prefix().second,
+                  "\n    " + sra.get_file_prefix().second + "\n",
                   logFilePath);
       }
       continue;
@@ -576,7 +576,7 @@ void filtForeignBulk(std::vector<SRA> & sras, std::vector<std::string> krakenDbs
                      std::string threads, bool dispOutput, bool compressFiles, bool retainInterFiles,
                      std::string logFilePath, std::string outDir,
                      const INI_MAP & cfgIni = {}) {
-  logOutput("\n\nStarting the removal of foreign sequence contamination", logFilePath);
+  logOutput("\nStarting the removal of foreign sequence contamination", logFilePath);
   INI_MAP_ENTRY cfgIniPipeline;
   INI_MAP_ENTRY krakenSettings;
   std::string confThreshold;
@@ -608,19 +608,19 @@ void filtForeignBulk(std::vector<SRA> & sras, std::vector<std::string> krakenDbs
   
   for (int i = 0; i < krakenDbs.size(); i++) {
     logOutput("\n  Now filtering reads with database: " +
-              std::string(fs::path(krakenDbs[i].c_str()).filename().c_str()),
+              std::string(fs::path(krakenDbs[i].c_str()).parent_path().c_str()),
               logFilePath);
     for (auto sra : sras) {
       // Check for checkpoint file
       if (sra.checkpointExists(std::string(fs::path(krakenDbs[i]).stem().c_str()) + ".filt")) {
         if (!sra.get_accession().empty()) {
           logOutput("\n    Filter checkpoint found for: " +
-                    sra.get_accession(), logFilePath);
+                    sra.get_accession() + "\n", logFilePath);
         }
         else {
           logOutput(std::string("\n    Filter checkpoint found for: ") +
                     "\n      " + sra.get_file_prefix().first +
-                    "\n      " + sra.get_file_prefix().second,
+                    "\n      " + sra.get_file_prefix().second + "\n",
                     logFilePath);
         }
         continue;
@@ -754,7 +754,7 @@ bool remOverrepBulk(std::vector<SRA> & sras, std::string threads, std::string ra
                     bool dispOutput, bool retainInterFiles, bool compressFiles,
                     std::string logFilePath, std::string outDir,
                     const INI_MAP & cfgIni = {}) {
-  logOutput("\n\nStarting removal of overrepresented sequences from reads", logFilePath);
+  logOutput("\nStarting removal of overrepresented sequences from reads", logFilePath);
 
   INI_MAP_ENTRY cfgIniPipeline;
   uintmax_t ram_b = (uintmax_t)stoi(ram_gb) * 1000000000;
@@ -774,12 +774,12 @@ bool remOverrepBulk(std::vector<SRA> & sras, std::string threads, std::string ra
     if (sra.checkpointExists("orep.fix")) {
       if (!sra.get_accession().empty()) {
         logOutput("\n  Overrepresented-removed checkpoint found for: " +
-                  sra.get_accession(), logFilePath);
+                  sra.get_accession() + "\n", logFilePath);
       }
       else {
         logOutput(std::string("\n  Overrepresented-removed checkpoint found for: ") +
                   "\n    " + sra.get_file_prefix().first +
-                  "\n    " + sra.get_file_prefix().second,
+                  "\n    " + sra.get_file_prefix().second + "\n",
                   logFilePath);
       }
       continue;
@@ -825,6 +825,7 @@ bool remOverrepBulk(std::vector<SRA> & sras, std::string threads, std::string ra
         writeSuccess = rem_overrep_se(currOrepIn.first, currOrepOut.first, ram_b, dispOutput,
                                       compressFiles, currOrepSeqsSe, logFilePath);
       }
+      procRunning = false;
       orepThread.join();
     }
     else {
@@ -1061,7 +1062,6 @@ int main(int argc, char * argv[]) {
     }
     //printVertEllipse(logFilePath, 3);
     printBreakLine(logFilePath, 6, 47);
-    logOutput("\n", logFilePath);
 
     // Adapter sequence trimming stage
     if (configPath != "null") {
@@ -1073,9 +1073,9 @@ int main(int argc, char * argv[]) {
       trimBulk(sras, threads, dispOutput, retainInterFiles, logFilePath, outDir);
     }
     //printVertEllipse(logFilePath, 3);
-    printBreakLine(logFilePath, 6, 47);
     logOutput("\n", logFilePath);
-
+    printBreakLine(logFilePath, 6, 47);
+    
     // Run kraken2 to remove foreign reads
     if (configPath != "null") {
       if (ini_get_bool(cfgIniPipeline.at("filter_foreign_reads").c_str(), 0)) {
@@ -1098,8 +1098,8 @@ int main(int argc, char * argv[]) {
       } 
     }
     //printVertEllipse(logFilePath, 3);
-    printBreakLine(logFilePath, 6, 47);
     logOutput("\n", logFilePath);
+    printBreakLine(logFilePath, 6, 47);
 
     // Run fastqc on all runs
     if (configPath != "null") {
@@ -1109,8 +1109,8 @@ int main(int argc, char * argv[]) {
       fastqcBulk2(sras, threads, dispOutput, logFilePath, outDir);
     }
     //printVertEllipse(logFilePath, 3);
-    printBreakLine(logFilePath, 6, 47);
     logOutput("\n", logFilePath);
+    printBreakLine(logFilePath, 6, 47);
 
     // Remove reads with over-represented sequences
     if (configPath != "null") {
@@ -1127,6 +1127,7 @@ int main(int argc, char * argv[]) {
       exit(1);
     }
     //printVertEllipse(logFilePath, 3);
+    logOutput("\n", logFilePath);
     printBreakLine(logFilePath, 6, 47);
     logOutput("\n\nPreprocess finished successfully\n", logFilePath);
   }

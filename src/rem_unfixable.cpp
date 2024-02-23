@@ -343,7 +343,7 @@ long int rem_unfix_se(std::string sraRunIn, std::string sraRunOut,
     logOutput("\n    " + std::to_string(numUnfix) + " reads removed (" +
               getPercent(percentUnfix, 2) + "%)", logFile);
     logOutput("\n    " + std::to_string(numReads - numUnfix) + " reads retained (" +
-              getPercent(100.0 - percentUnfix, 2) + "%)", logFile);
+              getPercent(100.0 - percentUnfix, 2) + "%)\n", logFile);
   }
   return numUnfix;
 }
