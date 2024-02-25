@@ -181,7 +181,7 @@ void fastqcBulk1(std::vector<SRA> & sras, std::string threads, bool dispOutput,
 
 // Given a vector of SRAs, perform a FastQC quality analysis just prior to assembly
 void fastqcBulk2(std::vector<SRA> & sras, std::string threads, bool dispOutput,
-                 std::string logFilePath, std::string outDir,
+                 std::string logFilePath, std::string outDir, bool noKrakenDbs,
                  const INI_MAP & cfgIni = {}) {
   logOutput("\nStarting second quality analysis of reads", logFilePath);
   INI_MAP_ENTRY cfgIniPipeline;
@@ -210,6 +210,12 @@ void fastqcBulk2(std::vector<SRA> & sras, std::string threads, bool dispOutput,
           currFastqcIn.first = sra.get_sra_path_trim_p().first.c_str();
           currFastqcIn.second = sra.get_sra_path_trim_p().second.c_str();
         }
+      }
+    }
+    else {
+      if (noKrakenDbs) {
+        currFastqcIn.first = sra.get_sra_path_trim_p().first.c_str();
+        currFastqcIn.second = sra.get_sra_path_trim_p().second.c_str();
       }
     }
     currFastqcOut = sra.get_fastqc_dir_2().first.parent_path().c_str();
@@ -752,7 +758,7 @@ void filtForeignBulk(std::vector<SRA> & sras, std::vector<std::string> krakenDbs
 // sequences from each's sequence data, as identified by FastQC
 bool remOverrepBulk(std::vector<SRA> & sras, std::string threads, std::string ram_gb,
                     bool dispOutput, bool retainInterFiles, bool compressFiles,
-                    std::string logFilePath, std::string outDir,
+                    std::string logFilePath, std::string outDir, bool noKrakenDbs,
                     const INI_MAP & cfgIni = {}) {
   logOutput("\nStarting removal of overrepresented sequences from reads", logFilePath);
 
@@ -807,6 +813,12 @@ bool remOverrepBulk(std::vector<SRA> & sras, std::string threads, std::string ra
           currOrepIn.first = sra.get_sra_path_trim_p().first.c_str();
           currOrepIn.second = sra.get_sra_path_trim_p().second.c_str();
         }
+      }
+    }
+    else {
+      if (noKrakenDbs) {
+        currOrepIn.first = sra.get_sra_path_trim_p().first.c_str();
+        currOrepIn.second = sra.get_sra_path_trim_p().second.c_str();
       }
     }
     currOrepOut.first = sra.get_sra_path_orep_filt().first.c_str();
@@ -895,6 +907,7 @@ int main(int argc, char * argv[]) {
   bool dispOutput;
   bool compressFiles = false;
   bool stepSuccess;
+  bool noKrakenDb = false;
   std::string logFilePath;
   const char * home = std::getenv("HOME");
 
@@ -1096,6 +1109,11 @@ int main(int argc, char * argv[]) {
         filtForeignBulk(sras, kraken2DbFiles, threads, dispOutput, compressFiles, retainInterFiles,
                         logFilePath, outDir);
       } 
+      else {
+        logOutput("\nNo Kraken database specified. Skipping removal of foreign reads.\n",
+                  logFilePath);
+        noKrakenDb = true;
+      }
     }
     //printVertEllipse(logFilePath, 3);
     logOutput("\n", logFilePath);
@@ -1103,10 +1121,10 @@ int main(int argc, char * argv[]) {
 
     // Run fastqc on all runs
     if (configPath != "null") {
-      fastqcBulk2(sras, threads, dispOutput, logFilePath, "", cfgIni);
+      fastqcBulk2(sras, threads, dispOutput, logFilePath, "", false, cfgIni);
     }
     else {
-      fastqcBulk2(sras, threads, dispOutput, logFilePath, outDir);
+      fastqcBulk2(sras, threads, dispOutput, logFilePath, outDir, noKrakenDb);
     }
     //printVertEllipse(logFilePath, 3);
     logOutput("\n", logFilePath);
@@ -1116,12 +1134,12 @@ int main(int argc, char * argv[]) {
     if (configPath != "null") {
       if (ini_get_bool(cfgIniPipeline.at("remove_overrepresented").c_str(), 0)) {
         stepSuccess = remOverrepBulk(sras, threads, ram_gb, dispOutput, retainInterFiles, compressFiles,
-                                     logFilePath, "", cfgIni);
+                                     logFilePath, "", false, cfgIni);
       }
     }
     else {
       stepSuccess = remOverrepBulk(sras, threads, ram_gb, dispOutput, retainInterFiles, compressFiles,
-                                   logFilePath, outDir);
+                                   logFilePath, outDir, noKrakenDb);
     }
     if (!stepSuccess) {
       exit(1);

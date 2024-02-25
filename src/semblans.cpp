@@ -37,6 +37,8 @@ void print_help_base() {
   std::cout << "  -kdb, --kraken-db      Specifies which Kraken databases to use during removal of foreign reads." << std::endl;
   std::cout << "                         To specify multiple databases, separate their paths with commas." << std::endl;
   std::cout << "                         If omitted, Semblans will skip foreign read filtration" << std::endl;
+  std::cout << "  -a, --assembly         Specifies an assembly for Semblans to process." << std::endl;
+  std::cout << "                         Only used during postprocessing." << std::endl;
   std::cout << "  -rp, --ref-proteome    Specifies the reference proteome Semblans will use for" << std::endl;
   std::cout << "                         chimera detection and coding region prediction." << std::endl;
   std::cout << "                         Only used during postprocessing." << std::endl;

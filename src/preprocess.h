@@ -61,4 +61,5 @@ void filtForeignBulk(std::vector<SRA> & sras, std::vector<std::string> krakenDbs
 
 bool remOverrepBulk(std::vector<SRA> & sras, std::string threads, std::string ram_gb,
                     bool dispOutput, bool retainInterFiles, bool compressFiles,
-                    std::string logFilePath, std::string outDir, const INI_MAP & cfgIni);
+                    std::string logFilePath, std::string outDir, bool noKrakenDbs,
+                    const INI_MAP & cfgIni);

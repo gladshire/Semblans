@@ -29,9 +29,16 @@ void replaceChar(std::string inFilePath, char oldChar, char newChar) {
 // Given a string, it prints it to std::out and writes it to a log file
 void logOutput(std::string input, std::string logFile) {
   std::ofstream logStream;
+  char timeBuffer[100];
+  time_t currTime;
   logStream.open(logFile, std::ios_base::app);
   teedev logger(logStream, std::cout);
   teeStream loggerStream(logger);
+
+  time(&currTime);
+  strftime(timeBuffer, 100, "[%R:%S %F]  ", localtime(&currTime));
+
+  //loggerStream << timeBuffer << std::flush;
 
   loggerStream << input << std::flush;
 }
