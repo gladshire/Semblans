@@ -20,7 +20,7 @@ void makeBlastDbDiam(std::string pathProtRef, std::string outDir,
   result = system(makeDbCmd.c_str());
   if (WIFSIGNALED(result)) {
     system("setterm -cursor on");
-    logOutput("Existed with signal " + std::to_string(WTERMSIG(result)), logFile);
+    logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
     exit(1);
   } 
 }

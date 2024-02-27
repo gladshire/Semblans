@@ -120,14 +120,14 @@ void blastxBulk(const std::vector<transcript> & transVec, std::string threads,
       procRunning = true;
       std::thread blastxThread(progressAnim, "  ", logFilePath);
       if (useBlast) {
-        blastxDiam(currTransIn, blastDbDir + currBlastDbName,
-                   maxEvalue, maxTargetSeqs, threads,
-                   blastDbDir, dispOutput, logFilePath);
-      }
-      else {
         blastx(currTransIn, blastDbDir + currBlastDbName,
                maxEvalue, maxTargetSeqs, threads,
                blastDbDir, dispOutput, logFilePath);
+      }
+      else {
+        blastxDiam(currTransIn, blastDbDir + currBlastDbName,
+                   maxEvalue, maxTargetSeqs, threads,
+                   blastDbDir, dispOutput, logFilePath);
       }
       procRunning = false;
       blastxThread.join();
@@ -221,19 +221,6 @@ void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
     cfgIniPipeline = cfgIni.at("Pipeline");
   }
 
-  /*
-  INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
-  std::string currTransInSalm;
-  std::string currIndex;
-  std::string currQuant;
-  std::string currTransInfoFileStr;
-  std::ifstream currTransInfoFile;
-  std::string currLineInfo;
-  size_t spacePos;
-  size_t nlPos;
-  std::vector<std::pair<std::string, std::string>> currSraRunsIn;
-  std::pair<std::string, std::string> currSraRun;
-  */
   for (auto trans : transVec) {
     currTransInSalm = trans.get_trans_path_chimera().c_str();
     if (!cfgIni.empty()) {

@@ -5,6 +5,7 @@ std::atomic<bool> procRunning(false);
 
 // Summarize the initialized preprocessing job's parameters
 void preSummary(const std::vector<SRA> sras, std::string configPath,
+                std::vector<std::string> krakenDbs,
                 std::string logFilePath, std::string threads, std::string ram_gb,
                 bool retainInterFiles, bool compressFiles) {
   logOutput("\nSemblans Preprocess started with following parameters:\n", logFilePath);
@@ -15,7 +16,12 @@ void preSummary(const std::vector<SRA> sras, std::string configPath,
   logOutput("  Memory (GB):     " + ram_gb + "\n", logFilePath);
   logOutput("  SRA runs:\n", logFilePath); 
   summarize_all_sras(sras, logFilePath, 6);
-    
+  if (configPath == "null") {
+    logOutput("  Kraken2 Database(s):\n", logFilePath);
+    for (auto krakenDb : krakenDbs) {
+      logOutput("    " + krakenDb + "\n", logFilePath);
+    }
+  }  
   std::string retainStr;
   if (retainInterFiles) {
     retainStr = "YES";
