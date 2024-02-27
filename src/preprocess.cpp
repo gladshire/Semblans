@@ -1052,7 +1052,7 @@ int main(int argc, char * argv[]) {
     //INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
 
     // Show summary of preprocess task
-    preSummary(sras, configPath, logFilePath, threads, ram_gb, retainInterFiles, compressFiles);
+    preSummary(sras, configPath, kraken2DbFiles, logFilePath, threads, ram_gb, retainInterFiles, compressFiles);
     //printVertEllipse(logFilePath, 3);
     printBreakLine(logFilePath, 6, 47);
 

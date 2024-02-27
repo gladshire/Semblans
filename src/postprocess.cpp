@@ -75,28 +75,6 @@ void blastxBulk(const std::vector<transcript> & transVec, std::string threads,
     blastDbName = std::string(fs::path(refProteome.c_str()).stem().c_str());
   }
 
-  /*
-  std::string currTransIn;
-  std::string currBlastDbName;
-  INI_MAP_ENTRY cfgGen = cfgIni.at("General");
-  INI_MAP_ENTRY cfgAlign = cfgIni.at("Alignment settings");
-  bool useBlast = ini_get_bool(cfgAlign.at("use_blast_instead_of_diamond").c_str(), 0);
-  std::string maxEvalue = cfgAlign.at("blastx_max_evalue");
-  std::string maxTargetSeqs = cfgAlign.at("blastx_max_target_seqs");
-  std::string refProt = cfgGen.at("reference_proteome_path");
-  if (!fs::exists(fs::path(refProt.c_str()))) {
-    logOutput("ERROR: Reference proteome: " + refProt + " not found\n", logFilePath);
-    logOutput("  Please ensure its path is correctly specified in your config INI file\n",
-              logFilePath);
-    exit(1);
-  }
-  std::string blastDbDir;
-  blastDbDir = cfgGen.at("output_directory") + "/" +
-               cfgGen.at("project_name") + "/" +
-               stepDirs[8] + "/";
-  std::string blastDbName;
-  blastDbName = std::string(fs::path(refProt.c_str()).stem().c_str());
-  */
   for (auto trans : transVec) {
     // Check if BlastX checkpoint exists
     if (trans.checkpointExists("blastx")) {
@@ -107,12 +85,6 @@ void blastxBulk(const std::vector<transcript> & transVec, std::string threads,
     logOutput("  Now running BLASTX alignment for:\n", logFilePath);
     summarize_sing_trans(trans, logFilePath, 4);
     currTransIn = trans.get_trans_path_trinity().c_str();
-    if (useBlast) {
-      makeBlastDb(refProt, blastDbDir, dispOutput, logFilePath);
-    }
-    else {
-      makeBlastDbDiam(refProt, blastDbDir, dispOutput, logFilePath);
-    }
     // Run BlastX
     currBlastDbName = std::string(fs::path(refProt.c_str()).stem().c_str());
 
@@ -120,11 +92,13 @@ void blastxBulk(const std::vector<transcript> & transVec, std::string threads,
       procRunning = true;
       std::thread blastxThread(progressAnim, "  ", logFilePath);
       if (useBlast) {
+        makeBlastDb(refProt, blastDbDir, dispOutput, logFilePath);
         blastx(currTransIn, blastDbDir + currBlastDbName,
                maxEvalue, maxTargetSeqs, threads,
                blastDbDir, dispOutput, logFilePath);
       }
       else {
+        makeBlastDbDiam(refProt, blastDbDir, dispOutput, logFilePath);
         blastxDiam(currTransIn, blastDbDir + currBlastDbName,
                    maxEvalue, maxTargetSeqs, threads,
                    blastDbDir, dispOutput, logFilePath);
@@ -134,11 +108,13 @@ void blastxBulk(const std::vector<transcript> & transVec, std::string threads,
     }
     else {
        if (useBlast) {
+         makeBlastDb(refProt, blastDbDir, dispOutput, logFilePath);
          blastx(currTransIn, blastDbDir + currBlastDbName,
                 maxEvalue, maxTargetSeqs, threads,
                 blastDbDir, dispOutput, logFilePath);
        }
        else {
+         makeBlastDbDiam(refProt, blastDbDir, dispOutput, logFilePath);
          blastxDiam(currTransIn, blastDbDir + currBlastDbName,
                     maxEvalue, maxTargetSeqs, threads,
                     blastDbDir, dispOutput, logFilePath);
@@ -651,6 +627,10 @@ int main(int argc, char * argv[]) {
                std::string((fs::canonical(fs::path(outDir.c_str())).filename()).c_str()) + "/";
       make_proj_space(outDir, "postprocess");
       logFilePath = outDir + "log.txt";
+      for (int i = 0; i < readFilesLeft.size(); i++) {
+        sras.push_back(SRA(readFilesLeft[i], readFilesRight[i], outDir,
+                       compressFiles, true));
+      }
       transcript transFile(assembly, outDir);
       transVec.push_back(transFile);
 
