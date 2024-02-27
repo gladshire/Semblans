@@ -17,3 +17,5 @@ Reference peptide sets for **postprocess**
 [**Ensembl animal reference**](https://uofi.app.box.com/s/0rlp6q0u5uvc161mzbdr3c0xoiti63sk)
 
 [**Ensembl plant reference**](https://uofi.app.box.com/s/lvg7x2qrxvg8hfcmue9xv4y9t1rgfb48)
+
+[**Ensembl fungi reference**](https://uofi.box.com/s/qc4nmun4apb0pik5fqxukn4qvn3wm943)
