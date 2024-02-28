@@ -3,6 +3,7 @@
 /*
 TODO: Segmentation fault occurs when insufficient RAM is given
   - Likely due to '@' characters in quality being spuriously recognized as headers
+  - Occurs in 'align_buffer_end()'
 */
 
 
@@ -35,6 +36,7 @@ void prefetch_sra(SRA sra, bool dispOutput, std::string logFile) {
   std::string prefetchCmd = PATH_PREFETCH + " --progress " + sraAccession + prefetchFlag + outDir;
   if (dispOutput) {
     prefetchCmd += (" 2>&1 | tee -a " + logFile);
+    logOutput("  Running command: " + prefetchCmd + "\n\n", logFile);
   }
   else {
     prefetchCmd += (" >>" + logFile + " 2>&1");
@@ -71,6 +73,7 @@ void fasterq_sra(SRA sra, std::string threads, bool dispOutput,
   }
   if (dispOutput) {
     fasterqCmd += (" 2>&1 | tee -a " + logFile);
+    logOutput("  Running command: " + fasterqCmd + "\n\n", logFile);
   }
   else {
     fasterqCmd += (" >>" + logFile + " 2>&1");

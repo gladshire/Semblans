@@ -6,6 +6,32 @@ std::atomic<bool> procRunning(false);
 extern std::vector<std::string> stepDirs;
 
 
+// Suimmarize the initialized postprocessing job's parameters
+void postSummary(const std::vector<transcript> transVec, std::string configPath,
+                 std::string logFilePath, std::string refProt, 
+                 std::string threads, std::string ram_gb,
+                 bool retainInterFiles, bool compressFiles) {
+ 
+  logOutput("\nSemblans Postprocess started with following parameters:\n", logFilePath);
+  logOutput("  Config file:     " +
+            std::string(fs::path(configPath.c_str()).filename().c_str()) + "\n",
+            logFilePath);
+  logOutput("  Threads (Cores): " + threads + "\n", logFilePath);
+  logOutput("  Memory (GB):     " + ram_gb + "\n", logFilePath);
+  logOutput("  Ref. Proteome:  " + refProt + "\n", logFilePath);
+  logOutput("  Transcripts:\n", logFilePath);
+  summarize_all_trans(transVec, logFilePath, 6);
+
+  std::string retainStr;
+  if (retainInterFiles) {
+    retainStr = "YES";
+  }
+  else {
+    retainStr = "NO";
+  }
+  logOutput("  Retain intermediate files: " + retainStr + "\n\n", logFilePath);
+}
+
 // Given a vector of SRAs, instantiate transcript objects constructed
 // off of them
 std::vector<transcript> get_transcript(std::vector<SRA> sras) {
@@ -140,11 +166,11 @@ void remChimeraBulk(const std::vector<transcript> & transVec, std::string ram_gb
   for (auto trans : transVec) {
     // Check if chimera removal checkpoint exists 
     if (trans.checkpointExists("chim.fix")) {
-      logOutput("\n  Chimera removal checkpoint found for: " +
+      logOutput("  Chimera removal checkpoint found for: " +
                 trans.get_file_prefix(), logFilePath);
       continue;
     }
-    logOutput("\n  Now running chimera removal for:\n", logFilePath);
+    logOutput("  Now running chimera removal for:\n", logFilePath);
     summarize_sing_trans(trans, logFilePath, 4);
 
    
@@ -239,7 +265,7 @@ void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
     }
     else {
       // Summarize indexing job
-      logOutput("  Now producing index for: ", logFilePath);
+      logOutput("  Now producing index for:\n", logFilePath);
       summarize_sing_trans(trans, logFilePath, 4);
 
       // Create index of assembled transcripts
@@ -445,31 +471,6 @@ void transdecBulk(const std::vector<transcript> & transVec,
     blastDbDir = outDir + stepDirs[0] + "/";
     blastDbName = std::string(fs::path(refProteome.c_str()).stem().c_str());
   }
-  /*
-  INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
-  std::string currTransInTD;
-  std::string currTransCds;
-  std::string currTransPep;
-  std::string currDb;
-  std::string currOutDirTD;
-  INI_MAP_ENTRY cfgGen = cfgIni.at("General");
-  INI_MAP_ENTRY cfgAlign = cfgIni.at("Alignment settings");
-  bool useBlast = ini_get_bool(cfgAlign.at("use_blast_instead_of_diamond").c_str(), 0);
-  std::string maxEvalue = cfgAlign.at("blastp_max_evalue");
-  std::string maxTargetSeqs = cfgAlign.at("blastp_max_target_seqs");
-  std::string refProt = cfgGen.at("reference_proteome_path");
-  if (!fs::exists(fs::path(refProt.c_str()))) {
-    logOutput("ERROR: Reference proteome: " + refProt + " not found\n", logFilePath);
-    logOutput("  Please ensure its path is correctly specified in your config INI file\n",
-              logFilePath);
-    exit(1);
-  }
-  std::string blastDbDir = cfgIni.at("General").at("output_directory") + "/" +
-                           cfgIni.at("General").at("project_name") + "/" +
-                           stepDirs[8] + "/";
-  std::string blastDbName(fs::path(refProt.c_str()).stem().c_str());
-  uintmax_t ram_b = (uintmax_t)stoi(ram_gb) * 1000000000;
-  */
   for (auto trans : transVec) {
     // Check if coding region prediction checkpoint exists
     if (trans.checkpointExists("cdr.predict")) {
@@ -477,7 +478,7 @@ void transdecBulk(const std::vector<transcript> & transVec,
                 trans.get_file_prefix(), logFilePath);
       continue;
     }
-    logOutput("\n  Now predicting coding regions for:\n", logFilePath);
+    logOutput("  Now predicting coding regions for:\n", logFilePath);
     summarize_sing_trans(trans, logFilePath, 4);
     currTransInTD = trans.get_trans_path_largest().c_str();
     if (!cfgIni.empty()) {
@@ -714,34 +715,44 @@ int main(int argc, char * argv[]) {
     }
 
     // Summarize program execution parameters
+    postSummary(transVec, configPath, logFilePath, refProt,
+                threads, ram_gb, retainInterFiles, compressFiles);
+    /*
     logOutput("Semblans Postprocess started with following parameters:\n", logFilePath);
     logOutput("  Config file:     " + std::string(argv[1]) + "\n", logFilePath);
     logOutput("  Threads (Cores): " + threads + "\n", logFilePath);
     logOutput("  Memory (GB):     " + ram_gb + "\n", logFilePath);
-    logOutput("  Reference Prot:  " + refProt + "\n", logFilePath);
+    logOutput("  Ref. Proteome:  " + refProt + "\n", logFilePath);
     logOutput("  SRA runs:\n", logFilePath);
     summarize_all_sras(sras, logFilePath, 6);
+    */
 
     if (configPath != "null") {
       if (ini_get_bool(cfgIniPipeline.at("remove_chimera_reads").c_str(), 0)) {
         // BlastX alignment of transcript to reference proteome
-        blastxBulk(transVec, threads, dispOutput, logFilePath, "", "", cfgIni);
-
+        blastxBulk(transVec, threads, dispOutput,
+                   logFilePath, "", "", cfgIni);
+        printBreakLine(logFilePath, 6, 47);
         // Detect and remove chimeric transcripts
-        remChimeraBulk(transVec, ram_gb, retainInterFiles, dispOutput, logFilePath, cfgIni);
+        remChimeraBulk(transVec, ram_gb, retainInterFiles,
+                       dispOutput, logFilePath, cfgIni);
       }
     }
     else {
-      blastxBulk(transVec, threads, dispOutput, logFilePath, refProt, outDir);
-      remChimeraBulk(transVec, ram_gb, retainInterFiles, dispOutput, logFilePath);
+      blastxBulk(transVec, threads, dispOutput,
+                 logFilePath, refProt, outDir);
+      printBreakLine(logFilePath, 6, 47);
+      remChimeraBulk(transVec, ram_gb, retainInterFiles,
+                     dispOutput, logFilePath);
     }
-
+    logOutput("\n", logFilePath);
+    printBreakLine(logFilePath, 6, 47);
     if (configPath != "null") {
       if (ini_get_bool(cfgIniPipeline.at("cluster_filtering").c_str(), 0)) {
         // Perform salmon index of transcripts
         salmonBulk(transVec, threads, retainInterFiles, dispOutput, logFilePath,
                    {}, {}, "", cfgIni);
-   
+        printBreakLine(logFilePath, 6, 47);
         // Perform corset run to cluster transcripts
         corsetBulk(transVec, ram_gb, retainInterFiles, dispOutput, logFilePath, cfgIni);
       }
@@ -749,9 +760,11 @@ int main(int argc, char * argv[]) {
     else {
       salmonBulk(transVec, threads, retainInterFiles, dispOutput, logFilePath,
                  readFilesLeft, readFilesRight, outDir);
+      printBreakLine(logFilePath, 6, 47);
       corsetBulk(transVec, ram_gb, retainInterFiles, dispOutput, logFilePath, cfgIni);
     }
-    
+    logOutput("\n", logFilePath);
+    printBreakLine(logFilePath, 6, 47);    
     // Run transdecoder
     if (configPath != "null") {
       transdecBulk(transVec, threads, ram_gb, retainInterFiles, dispOutput, logFilePath, "", "", cfgIni);
@@ -760,6 +773,7 @@ int main(int argc, char * argv[]) {
       transdecBulk(transVec, threads, ram_gb, retainInterFiles, dispOutput, logFilePath, refProt, outDir);
     }
 
+    printBreakLine(logFilePath, 6, 47);
     if (configPath != "null") {
       if (ini_get_bool(cfgIniPipeline.at("annotate_transcripts").c_str(), 0)) {
         // Annotate transcriptome

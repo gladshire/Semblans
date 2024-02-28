@@ -3,15 +3,15 @@
 
 void progressAnim(std::string precedeString, std::string logFile) {
 
-  const std::string anim[] = {".  ", ".. ", "..."};
+  const std::string anim[] = {"   ", ".  ", ".. ", "..."};
   int animIndex = 0;
 
   logOutput(precedeString, logFile);
   while (procRunning) {
     std::cout << "\r" << precedeString;
     std::cout << anim[animIndex] << std::flush;
-    animIndex = (animIndex + 1) % 3;
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    animIndex = (animIndex + 1) % 4;
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
   }
   std::cout << "\r" << precedeString;
   std::cout << "    " << std::endl;

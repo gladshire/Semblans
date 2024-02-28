@@ -16,16 +16,9 @@ void run_trimmomatic(std::pair<std::string, std::string> sraRunIn,
   std::string outFileP2 = sraRunOutP.second;
   std::string outFileU1 = sraRunOutU.first;
   std::string outFileU2 = sraRunOutU.second;
-
-  std::string printOut;
-  if (dispOutput) {
-    printOut = " 2>&1 | tee -a " + logFile;
-  }
-  else {
-    printOut = " >>" + logFile + " 2>&1";
-  }
   int result;
   bool isPaired;
+  
   if (sraRunIn.second != "") {
     isPaired = true;
   }
@@ -42,14 +35,20 @@ void run_trimmomatic(std::pair<std::string, std::string> sraRunIn,
   if (isPaired) {
     trimmCmd = trimmCmd + " PE " + " -phred33 " + inFile1 + " " + inFile2 + " " +
                outFileP1 + " " + outFileU1 + " " + outFileP2 + " " + outFileU2 + " " +
-               trimmFlags + printOut;
-    result = system(trimmCmd.c_str());
+               trimmFlags;
   }
   else {
     trimmCmd = trimmCmd + " SE " + " -phred33 " + inFile1 + " " +
-               outFileU1 + " " + trimmFlags + printOut;
-    result = system(trimmCmd.c_str());
+               outFileU1 + " " + trimmFlags;
   }
+  if (dispOutput) {
+    trimmCmd += " 2>&1 | tee -a " + logFile;
+    logOutput("  Running command: " + trimmCmd + "\n\n", logFile);
+  }
+  else {
+    trimmCmd += " >>" + logFile + " 2>&1";
+  }
+  result = system(trimmCmd.c_str());
   if (WIFSIGNALED(result)) {
     system("setterm -cursor on");
     logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);

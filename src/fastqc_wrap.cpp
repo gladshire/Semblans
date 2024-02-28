@@ -18,20 +18,20 @@ void run_fastqc(std::pair<std::string, std::string> sraRunFiles,
   system(("mkdir " + outFile + " > /dev/null 2>&1").c_str());
   std::string fastqcCmd;
   std::string printOut;
-  if (dispOutput) {
-    printOut = " 2>&1 | tee -a " + logFile;
-  }
-  else {
-    printOut = " >>" + logFile + " 2>&1";
-  }
   if (isPaired) {
-    fastqcCmd = PATH_FASTQC + fastqcFlags + outFile + " " + inFile1 + " " + inFile2 + printOut;
-    result = system(fastqcCmd.c_str());
+    fastqcCmd = PATH_FASTQC + fastqcFlags + outFile + " " + inFile1 + " " + inFile2;
   }
   else {
-    fastqcCmd = PATH_FASTQC + fastqcFlags + outFile + " " + inFile1 + printOut;
-    result = system(fastqcCmd.c_str());
+    fastqcCmd = PATH_FASTQC + fastqcFlags + outFile + " " + inFile1;
   }
+  if (dispOutput) {
+    fastqcCmd += " 2>&1 | tee -a " + logFile;
+    logOutput("  Running command: " + fastqcCmd + "\n\n", logFile);
+  }
+  else {
+    fastqcCmd += " >>" + logFile + " 2>&1";
+  }
+  result = system(fastqcCmd.c_str());
   if (WIFSIGNALED(result)) {
     system("setterm -cursor on");
     std::cout << "Exited with signal " << WTERMSIG(result) << std::endl;

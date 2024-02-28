@@ -14,13 +14,14 @@ void preSummary(const std::vector<SRA> sras, std::string configPath,
             logFilePath);
   logOutput("  Threads (Cores): " + threads + "\n", logFilePath);
   logOutput("  Memory (GB):     " + ram_gb + "\n", logFilePath);
-  logOutput("  SRA runs:\n", logFilePath); 
+  logOutput("  SRA run(s):\n", logFilePath); 
   summarize_all_sras(sras, logFilePath, 6);
   if (configPath == "null") {
     logOutput("  Kraken2 Database(s):\n", logFilePath);
     for (auto krakenDb : krakenDbs) {
-      logOutput("    " + krakenDb + "\n", logFilePath);
+      logOutput("      " + krakenDb + "\n", logFilePath);
     }
+    logOutput("\n", logFilePath);
   }  
   std::string retainStr;
   if (retainInterFiles) {

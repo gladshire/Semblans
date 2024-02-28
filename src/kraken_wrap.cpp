@@ -44,7 +44,6 @@ void run_kraken2(std::pair<std::string, std::string> sraRunIn,
                         " --minimum-base-quality " + minBaseQuality +
                         " --minimum-hit-groups " + minHitGroups);
   std::string krakOutput;
-  std::string printOut;
   std::string sraRunOutDir = fs::path(sraRunOut.c_str()).parent_path().c_str();
   fs::path sraRunOutFile(sraRunIn.first.c_str());
   while (!sraRunOutFile.extension().empty()) {
@@ -69,12 +68,7 @@ void run_kraken2(std::pair<std::string, std::string> sraRunIn,
       krakOutput += " --classified-out " + sraRunOutClass;
     }
   }
-  if (dispOutput) {
-    printOut = " 2>&1 | tee -a " + logFile;
-  }
-  else {
-    printOut = " >>" + logFile + " 2>&1";
-  }
+
   int result;
   bool isPaired;
   if (sraRunIn.second != "") {
@@ -84,14 +78,21 @@ void run_kraken2(std::pair<std::string, std::string> sraRunIn,
     isPaired = false;
   }
   if (isPaired) {
-    krakCmd = krakCmd + " " + krakFlags + " --paired " + krakOutput + " " + inFile1 + " " + inFile2 + " --report " +
-              repFile + printOut;
-    result = system(krakCmd.c_str());
+    krakCmd = krakCmd + " " + krakFlags + " --paired " + krakOutput + " " + inFile1 + " " + inFile2 +
+              " --report " + repFile;
   }
   else {
-    krakCmd = krakCmd + " " + krakFlags + " " + krakOutput + " " + inFile1 + " " + " --report " + repFile + " " + printOut;
-    result = system(krakCmd.c_str());
+    krakCmd = krakCmd + " " + krakFlags + " " + krakOutput + " " + inFile1 + " " +
+              " --report " + repFile + " ";
   }
+  if (dispOutput) {
+    krakCmd += " 2>&1 | tee -a " + logFile;
+    logOutput("  Running command: " + krakCmd + "\n", logFile);
+  }
+  else {
+    krakCmd += " >>" + logFile + " 2>&1";
+  } 
+  result = system(krakCmd.c_str());
   if (WIFSIGNALED(result)) {
     system("setterm -cursor on");
     logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);

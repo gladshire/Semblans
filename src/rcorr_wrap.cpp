@@ -14,13 +14,6 @@ void run_rcorr(std::pair<std::string, std::string> sraRun, std::string outDir,
 
   std::string printOut;
   
-  if (dispOutput) {
-    printOut = " 2>&1 | tee -a " + logFile;
-  }
-  else {
-    printOut = " >>" + logFile + " 2>&1";
-  }
-
   bool isPaired;
   int result;
   if (sraRun.second != "") {
@@ -48,7 +41,13 @@ void run_rcorr(std::pair<std::string, std::string> sraRun, std::string outDir,
   else {
     rcorrCmd += std::string(" -od " + outDir + ")");
   }
-  rcorrCmd += printOut;
+  if (dispOutput) {
+    rcorrCmd += " 2>&1 | tee -a " + logFile;
+    logOutput("  Running command: " + rcorrCmd + "\n\n", logFile);
+  }
+  else {
+    rcorrCmd += " >>" + logFile + " 2>&1";
+  }
   result = system(rcorrCmd.c_str());
   if (WIFSIGNALED(result)) {
     system("setterm -cursor on");
