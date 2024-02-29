@@ -471,20 +471,19 @@ int main(int argc, char * argv[]) {
           }
           cfgIniFile.close();
           cfgIniSub.close();
-        }
+          currPreCmd = SEMBLANS_DIR + "preprocess " + currCfgIniSub + " " +
+                       leftReads + " " + rightReads + " " + kraken2Dbs + " " +
+                       outDir + " " +
+                       std::to_string(numThreads) + " " +
+                       std::to_string(ram) + retain + verbose;
 
-        currPreCmd = SEMBLANS_DIR + "preprocess " + currCfgIniSub + " " +
-                     leftReads + " " + rightReads + " " + kraken2Dbs + " " +
-                     outDir + " " +
-                     std::to_string(numThreads) + " " +
-                     std::to_string(ram) + retain + verbose;
+          logOutput("\nPerforming preprocessing only\n\n", logFilePath);
 
-        logOutput("\nPerforming preprocessing only\n\n", logFilePath);
-
-        result = system(preCmd.c_str());
-        if (WIFSIGNALED(result)) {
-          system("setterm -cursor on");
-          exit(1);
+          result = system(currPreCmd.c_str());
+          if (WIFSIGNALED(result)) {
+            system("setterm -cursor on");
+            exit(1);
+          }
         }
       }
       else {
@@ -525,18 +524,18 @@ int main(int argc, char * argv[]) {
           }
           cfgIniFile.close();
           cfgIniSub.close();
-        }
 
-        currAssCmd = SEMBLANS_DIR + "assemble " + currCfgIniSub + " " +
-                     leftReads + " " + rightReads + " " + outDir + " " +
-                     std::to_string(numThreads) + " " +
-                     std::to_string(ram) + retain + verbose;
+          currAssCmd = SEMBLANS_DIR + "assemble " + currCfgIniSub + " " +
+                       leftReads + " " + rightReads + " " + outDir + " " +
+                       std::to_string(numThreads) + " " +
+                       std::to_string(ram) + retain + verbose;
 
-        logOutput("\nPerforming assembly only\n\n", logFilePath);
-        result = system(assCmd.c_str());
-        if (WIFSIGNALED(result)) {
-          system("setterm -cursor on");
-          exit(1);
+          logOutput("\nPerforming assembly only\n\n", logFilePath);
+          result = system(currAssCmd.c_str());
+          if (WIFSIGNALED(result)) {
+            system("setterm -cursor on");
+            exit(1);
+          }
         }
       }
       else {
@@ -573,21 +572,20 @@ int main(int argc, char * argv[]) {
           }
           cfgIniFile.close();
           cfgIniSub.close();
-        }
-        currPostCmd = SEMBLANS_DIR + "postprocess " + pathConfig + " " +
-                      leftReads + " " + rightReads + " " + assembly + " " +
-                      refProt + " " + outDir + " " +
-                      std::to_string(numThreads) + " " +
-                      std::to_string(ram) + retain + verbose;
 
+          currPostCmd = SEMBLANS_DIR + "postprocess " + pathConfig + " " +
+                        leftReads + " " + rightReads + " " + assembly + " " +
+                        refProt + " " + outDir + " " +
+                        std::to_string(numThreads) + " " +
+                        std::to_string(ram) + retain + verbose;
 
-        logOutput("\nPerforming postprocess only\n\n", logFilePath);
+          logOutput("\nPerforming postprocess only\n\n", logFilePath);
 
-
-        result = system(postCmd.c_str());
-        if (WIFSIGNALED(result)) {
-          system("setterm -cursor on");
-          exit(1);
+          result = system(currPostCmd.c_str());
+          if (WIFSIGNALED(result)) {
+            system("setterm -cursor on");
+            exit(1);
+          }
         }
       }
       else {
@@ -630,6 +628,8 @@ int main(int argc, char * argv[]) {
           cfgIniFile.close();
           cfgIniSub.close();
 
+          std::replace(sraStr.begin(), sraStr.end(), ' ', '\n');
+
           currPreCmd = SEMBLANS_DIR + "preprocess " + currCfgIniSub + " " +
                        leftReads + " " + rightReads + " " + kraken2Dbs + " " +
                        outDir + " " +
@@ -649,7 +649,7 @@ int main(int argc, char * argv[]) {
 
 
 
-          logOutput("Performing entire assembly on: " + sraStr, logFilePath);
+          logOutput("Performing entire assembly on:\n" + sraStr, logFilePath);
           logOutput("\n ┌───────────────────────────────────────────────────────┐", logFilePath);
           logOutput("\n │         Phase 1: Preprocessing of Short-reads         │", logFilePath);
           logOutput("\n └───────────────────────────────────────────────────────┘\n", logFilePath);
