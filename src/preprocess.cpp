@@ -16,13 +16,11 @@ void preSummary(const std::vector<SRA> sras, std::string configPath,
   logOutput("  Memory (GB):     " + ram_gb + "\n", logFilePath);
   logOutput("  SRA run(s):\n", logFilePath); 
   summarize_all_sras(sras, logFilePath, 6);
-  if (configPath == "null") {
-    logOutput("  Kraken2 Database(s):\n", logFilePath);
-    for (auto krakenDb : krakenDbs) {
-      logOutput("      " + krakenDb + "\n", logFilePath);
-    }
-    logOutput("\n", logFilePath);
-  }  
+  logOutput("  Kraken2 Database(s):\n", logFilePath);
+  for (auto krakenDb : krakenDbs) {
+    logOutput("      " + krakenDb + "\n", logFilePath);
+  }
+  logOutput("\n", logFilePath);
   std::string retainStr;
   if (retainInterFiles) {
     retainStr = "YES";
@@ -78,6 +76,7 @@ void retrieveSraData(std::vector<SRA> & sras, std::string threads,
         prefProgThread.join();
       }
       else {
+        logOutput("\n", logFilePath);
         prefetch_sra(sra, dispOutput, logFilePath);
       }
     }
@@ -951,6 +950,12 @@ int main(int argc, char * argv[]) {
         logOutput("\nERROR: Number of left/right read files do not match\n", logFilePath);
         exit(1);
       }
+      for (int i = 0; i < kraken2DbFiles.size(); i++) {
+        if (!fs::exists(kraken2DbFiles[i].c_str())) {
+          logOutput("\nERROR: Kraken database '" + kraken2DbFiles[i] + "' not found\n", logFilePath);
+          exit(1);
+        }
+      }
       for (int i = 0; i < readFilesLeft.size(); i++) {
         if (!fs::exists(readFilesLeft[i].c_str())) {
           logOutput("\nERROR: --left read file '" + readFilesLeft[i] + "' not found\n", logFilePath);
@@ -972,6 +977,7 @@ int main(int argc, char * argv[]) {
       ram_gb = argv[7];
       retainInterFiles = stringToBool(argv[8]);
       dispOutput = stringToBool(argv[9]);
+      kraken2DbFiles = get_kraken2_dbs(cfgIni);
       //bool compressFiles = ini_get_bool(cfgIni["General"]["compress_files"].c_str(), 0);
       logFilePath = std::string((fs::canonical(fs::path(cfgIniGen["log_file"].c_str()).parent_path()) /
                             fs::path(cfgIniGen["log_file"].c_str()).filename()).c_str());
@@ -1099,10 +1105,9 @@ int main(int argc, char * argv[]) {
     // Run kraken2 to remove foreign reads
     if (configPath != "null") {
       if (ini_get_bool(cfgIniPipeline.at("filter_foreign_reads").c_str(), 0)) {
-        std::vector<std::string> krakenDbs = get_kraken2_dbs(cfgIni);
         std::string krakenConf = get_kraken2_conf(cfgIni);
-        if (!krakenDbs.empty()) {
-          filtForeignBulk(sras, krakenDbs, threads, dispOutput, compressFiles, retainInterFiles,
+        if (!kraken2DbFiles.empty()) {
+          filtForeignBulk(sras, kraken2DbFiles, threads, dispOutput, compressFiles, retainInterFiles,
                           logFilePath, "", cfgIni);
         }
         else {

@@ -213,11 +213,19 @@ int main(int argc, char * argv[]) {
       else if (strcmp("--assembly", argv[i]) == 0 ||
                strcmp("-a", argv[i]) == 0) {
         assembly = argv[i + 1];
+        if (!fs::exists(fs::path(assembly.c_str()))) {
+          std::cerr << "ERROR: Assemble '" + assembly + "' does not exist\n" << std::endl;
+          exit(1);
+        }
       }
       else if (strcmp("--reference-proteome", argv[i]) == 0 ||
                strcmp("--ref-proteome", argv[i]) == 0 ||
                strcmp("-rp", argv[i]) == 0) {
         refProt = argv[i + 1];
+        if (!fs::exists(fs::path(refProt.c_str()))) {
+          std::cerr << "ERROR: Reference proteome '" + refProt + "' does not exist\n" << std::endl;
+          exit(1);
+        }
       }
       else if (strcmp("--kraken-db", argv[i]) == 0 ||
                strcmp("-kdb", argv[i]) == 0) {
