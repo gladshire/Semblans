@@ -3,6 +3,7 @@
 #include <cstring>
 #include <string>
 #include <vector>
+#include <algorithm>
 #include <sys/ioctl.h>
 #include <signal.h>
 #include <boost/filesystem.hpp>

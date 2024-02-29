@@ -454,6 +454,7 @@ int main(int argc, char * argv[]) {
         for (auto sraStr : sraRuns) {
           currCfgIniSub = pathConfig.substr(0, pathConfig.rfind(".ini")).insert(pathConfig.rfind("/") + 1, ".") +
                           "." + std::string(fs::path(sraStr.c_str()).stem().c_str()) + ".ini";
+          std::replace(currCfgIniSub.begin(), currCfgIniSub.end(), ' ', '_');
           cfgIniFile.open(pathConfig);
           cfgIniSub.open(currCfgIniSub);
           while (std::getline(cfgIniFile, currLine)) {
@@ -474,7 +475,7 @@ int main(int argc, char * argv[]) {
 
         currPreCmd = SEMBLANS_DIR + "preprocess " + currCfgIniSub + " " +
                      leftReads + " " + rightReads + " " + kraken2Dbs + " " +
-                     outDir +
+                     outDir + " " +
                      std::to_string(numThreads) + " " +
                      std::to_string(ram) + retain + verbose;
 
@@ -507,6 +508,7 @@ int main(int argc, char * argv[]) {
         for (auto sraStr : sraRuns) {
           currCfgIniSub = pathConfig.substr(0, pathConfig.rfind(".ini")).insert(pathConfig.rfind("/") + 1, ".") +
                           "." + std::string(fs::path(sraStr.c_str()).stem().c_str()) + ".ini";
+          std::replace(currCfgIniSub.begin(), currCfgIniSub.end(), ' ', '_');
           cfgIniFile.open(pathConfig);
           cfgIniSub.open(currCfgIniSub);
           while (std::getline(cfgIniFile, currLine)) {
@@ -554,6 +556,7 @@ int main(int argc, char * argv[]) {
         for (auto sraStr : sraRuns) {
           currCfgIniSub = pathConfig.substr(0, pathConfig.rfind(".ini")).insert(pathConfig.rfind("/") + 1, ".") +
                           "." + std::string(fs::path(sraStr.c_str()).stem().c_str()) + ".ini";
+          std::replace(currCfgIniSub.begin(), currCfgIniSub.end(), ' ', '_');
           cfgIniFile.open(pathConfig);
           cfgIniSub.open(currCfgIniSub);
           while (std::getline(cfgIniFile, currLine)) {
@@ -608,6 +611,8 @@ int main(int argc, char * argv[]) {
         for (auto sraStr : sraRuns) {
           currCfgIniSub = pathConfig.substr(0, pathConfig.rfind(".ini")).insert(pathConfig.rfind("/") + 1, ".") +
                           "." + std::string(fs::path(sraStr.c_str()).stem().c_str()) + ".ini";
+          
+          std::replace(currCfgIniSub.begin(), currCfgIniSub.end(), ' ', '_');
           cfgIniFile.open(pathConfig);
           cfgIniSub.open(currCfgIniSub);
           while (std::getline(cfgIniFile, currLine)) {
@@ -626,21 +631,29 @@ int main(int argc, char * argv[]) {
           cfgIniSub.close();
 
           currPreCmd = SEMBLANS_DIR + "preprocess " + currCfgIniSub + " " +
+                       leftReads + " " + rightReads + " " + kraken2Dbs + " " +
+                       outDir + " " +
                        std::to_string(numThreads) + " " +
                        std::to_string(ram) + retain + verbose;
 
           currAssCmd = SEMBLANS_DIR + "assemble " + currCfgIniSub + " " +
+                       leftReads + " " + rightReads + " " + outDir + " " +
                        std::to_string(numThreads) + " " +
                        std::to_string(ram) + retain + verbose;
 
-          currPostCmd = SEMBLANS_DIR + "postprocess " + currCfgIniSub + " " +
+          currPostCmd = SEMBLANS_DIR + "postprocess " + pathConfig + " " +
+                        leftReads + " " + rightReads + " " + assembly + " " +
+                        refProt + " " + outDir + " " +
                         std::to_string(numThreads) + " " +
                         std::to_string(ram) + retain + verbose;
+
+
 
           logOutput("Performing entire assembly on: " + sraStr, logFilePath);
           logOutput("\n ┌───────────────────────────────────────────────────────┐", logFilePath);
           logOutput("\n │         Phase 1: Preprocessing of Short-reads         │", logFilePath);
           logOutput("\n └───────────────────────────────────────────────────────┘\n", logFilePath);
+
           result = system(currPreCmd.c_str());
           if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
             std::cerr << "\nPreprocess exited" << std::endl;
