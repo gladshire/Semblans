@@ -717,15 +717,6 @@ int main(int argc, char * argv[]) {
     // Summarize program execution parameters
     postSummary(transVec, configPath, logFilePath, refProt,
                 threads, ram_gb, retainInterFiles, compressFiles);
-    /*
-    logOutput("Semblans Postprocess started with following parameters:\n", logFilePath);
-    logOutput("  Config file:     " + std::string(argv[1]) + "\n", logFilePath);
-    logOutput("  Threads (Cores): " + threads + "\n", logFilePath);
-    logOutput("  Memory (GB):     " + ram_gb + "\n", logFilePath);
-    logOutput("  Ref. Proteome:  " + refProt + "\n", logFilePath);
-    logOutput("  SRA runs:\n", logFilePath);
-    summarize_all_sras(sras, logFilePath, 6);
-    */
 
     if (configPath != "null") {
       if (ini_get_bool(cfgIniPipeline.at("remove_chimera_reads").c_str(), 0)) {

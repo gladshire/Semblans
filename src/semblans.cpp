@@ -128,7 +128,7 @@ int main(int argc, char * argv[]) {
   }
   if (argc == 2 && (strcmp("--version", argv[1]) == 0 ||
                     strcmp("-v", argv[1]) == 0)) {
-    std::cout << "Semblans version: v1.0.2" << std::endl;
+    std::cout << "Semblans version: v1.0.4" << std::endl;
   }
   else {
     // Parse through flags in commands
@@ -345,6 +345,26 @@ int main(int argc, char * argv[]) {
           std::cerr << "user must specify a reference proteome FASTA" << std::endl;
           std::cerr << "  (example: --reference-proteome path/to/ref_prot.fa)\n" << std::endl;
           exit(1);
+        }
+      }
+      if (command == "all") {
+        // Placeholder: create assemblies vector
+        size_t commaInd;
+        size_t currPos = 0;
+        std::string currLeft;
+        std::vector<std::string> assemblies;
+        do {
+          commaInd = leftReads.find(',', currPos);
+          currLeft = leftReads.substr(currPos, commaInd - currPos);
+          assemblies.push_back(currLeft.substr(0, currLeft.find_last_of("_")) +
+                               ".fasta");
+          currPos = commaInd + 1;
+        } while (commaInd != std::string::npos);
+        for (auto ass : assemblies) {
+          assembly += ass;
+          if (ass != *assemblies.end()) {
+            assembly += ",";
+          }
         }
       }
       else {
@@ -601,10 +621,16 @@ int main(int argc, char * argv[]) {
     }
     // Case 4: all three
     if (command == "all") {
+      /*
       if (assembly != "") {
         std::cerr << "\nERROR: --assembly flag should not be invoked when calling entire pipeline\n" << std::endl;
         exit(1);
       }
+      */
+
+      std::string currLeft;
+      std::string currRight;
+      std::vector<std::string> assemblies;
       if (serialProcess) {
         for (auto sraStr : sraRuns) {
           currCfgIniSub = pathConfig.substr(0, pathConfig.rfind(".ini")).insert(pathConfig.rfind("/") + 1, ".") +
@@ -653,7 +679,6 @@ int main(int argc, char * argv[]) {
           logOutput("\n ┌───────────────────────────────────────────────────────┐", logFilePath);
           logOutput("\n │         Phase 1: Preprocessing of Short-reads         │", logFilePath);
           logOutput("\n └───────────────────────────────────────────────────────┘\n", logFilePath);
-
           result = system(currPreCmd.c_str());
           if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
             std::cerr << "\nPreprocess exited" << std::endl;
@@ -703,6 +728,7 @@ int main(int argc, char * argv[]) {
         logOutput("\n ┌────────────────────────────────────────────────────────┐", logFilePath);
         logOutput("\n │    Phase 3: Postprocessing of Assembled Transcripts    │", logFilePath);
         logOutput("\n └────────────────────────────────────────────────────────┘\n", logFilePath);
+
         result = system(postCmd.c_str());
         if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
           std::cerr << "\nPostprocess exited" << std::endl;
