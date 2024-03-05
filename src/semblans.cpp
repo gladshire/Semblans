@@ -356,7 +356,7 @@ int main(int argc, char * argv[]) {
         do {
           commaInd = leftReads.find(',', currPos);
           currLeft = leftReads.substr(currPos, commaInd - currPos);
-          assemblies.push_back(currLeft.substr(0, currLeft.find_last_of("_")) +
+          assemblies.push_back(outDir + "/00-Transcript_assembly/" + currLeft.substr(0, currLeft.find_last_of("_")) +
                                ".Trinity.fasta");
           currPos = commaInd + 1;
         } while (commaInd != std::string::npos);

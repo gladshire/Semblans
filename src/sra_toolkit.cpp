@@ -42,7 +42,7 @@ void prefetch_sra(SRA sra, bool dispOutput, std::string logFile) {
     prefetchCmd += (" >>" + logFile + " 2>&1");
   }
   result = system(prefetchCmd.c_str());
-  replaceChar(logFile, '\b', ' ');
+  replaceChar(logFile, '\b', '\n');
   reportError(result, logFile);
 }
 

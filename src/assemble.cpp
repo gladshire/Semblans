@@ -869,6 +869,8 @@ int main(int argc, char * argv[]) {
     logOutput("\n  Memory (GB):     " + ram_gb, logFilePath);
     logOutput("\n  SRA Runs:\n", logFilePath);
     summarize_all_sras(sras, logFilePath, 6);
+    logOutput("\n", logFilePath);
+    printBreakLine(logFilePath, 6, 47);
     // Separate out reads of interest
     if (selectiveAssembly) {
       isolateReads(sras, threads, ram_gb, dispOutput,
