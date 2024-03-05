@@ -108,7 +108,6 @@ void print_help_postprocess() {
 
 
 
-
 int main(int argc, char * argv[]) {
   //print_intro();
   INI_MAP cfgIni;
@@ -336,6 +335,8 @@ int main(int argc, char * argv[]) {
       if (outDir == "") {
         outDir = ".";
       }
+      // Catch case of user running preprocess or entire pipeline without config file, and not
+      // defining forward or reverse ended reads in their command
       if (command == "preprocess" || command == "all") {
         if (leftReads == "" && rightReads == "") {
           std::cerr << "ERROR: If not using '--config', user must specify ";
@@ -345,6 +346,8 @@ int main(int argc, char * argv[]) {
           exit(1);
         }
       }
+      // Catch case of user running postprocess without config file, and not defining forward or
+      // reverse ended reads, assembly in their command
       if (command == "postprocess") {
         if (assembly == "" || (leftReads == "" && rightReads == "")) {
           std::cerr << "ERROR: If not using '--config', user must specify assembly, " << std::endl;
@@ -363,6 +366,7 @@ int main(int argc, char * argv[]) {
           exit(1);
         }
       }
+      // If running entire assembly without config file, define names of resulting assemblies
       if (command == "all") {
         // Placeholder: create assemblies vector
         size_t commaInd;
@@ -378,16 +382,10 @@ int main(int argc, char * argv[]) {
         } while (commaInd != std::string::npos);
         for (auto ass : assemblies) {
           assembly += ass;
-          if (ass != *assemblies.end()) {
+          if (ass != assemblies.back()) {
             assembly += ",";
           }
         }
-      }
-      else {
-        // ERROR: No config file specified
-        // std::cout << "ERROR: Must specify config file" << std::endl;
-        // std::cout << "  (example: --config path/to/config.ini)\n" << std::endl;
-        // exit(1);
       }
     }
 
