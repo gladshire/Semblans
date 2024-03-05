@@ -55,22 +55,30 @@ void print_help_base() {
 
 }
 
-/*
+
 void print_help_preprocess() {
   std::cout << "USAGE:\n" << std::endl;
   std::cout << "  semblans preprocess [--help/-h] [--config/-cfg]\n"
             << "                      [--left/-l reads_1_left.fq,reads_2_left.fq,...]\n"
-            << "                      [--right/-r reads_1_right.fq,reads_2
+            << "                      [--right/-r reads_1_right.fq,reads_2_right.fq,...]\n"
             << "                      [--threads/-t] [--ram/-r] [--retain/-f]\n"
             << "                      [--verbose/-v]\n" << std::endl;
   std::cout << "ARGUMENTS:\n" << std::endl;
-  std::cout << "  -cfg, --config     Specifies path to configuration file (REQUIRED)" << std::endl;
-  std::cout << "  -t,   --threads    Specifies number of threads/CPU cores to employ" << std::endl;
-  std::cout << "  -r,   --ram        Specifies ammount of memory/RAM (GB) to dedicate" << std::endl;
-  std::cout << "  -f,   --retain     Prevents deletion of intermediate files in pipeline" << std::endl;
-  std::cout << "  -v,   --verbose    Prints all output from Semblans and sub-programs" << std::endl;
-  std::cout << "  -h,   --help       Displays this help screen" << std::endl;
-}*/
+  std::cout << "  -1/-2, --left/--right  Specifies simple mode." << std::endl;
+  std::cout << "                         Path to left/right read FASTQ(s) should follow the corresponding flags." << std::endl;
+  std::cout << "                         To specify multiple pairs of files, separate file paths with commas" << std::endl;
+  std::cout << "  -od,  --output         Specifies path to where Semblans should place output files." << std::endl;
+  std::cout << "                         Directory must already exist" << std::endl;
+  std::cout << "  -kdb, --kraken-db      Specifies which Kraken databases to use during removal of foreign reads." << std::endl;
+  std::cout << "                         To specify multiple databases, separate their paths with commas." << std::endl;
+  std::cout << "  -cfg, --config         Specifies config file mode." << std::endl;
+  std::cout << "                         Path to config file should follow this argument" << std::endl;
+  std::cout << "  -t,   --threads        Specifies number of threads/CPU cores to employ" << std::endl;
+  std::cout << "  -r,   --ram            Specifies ammount of memory/RAM (GB) to dedicate" << std::endl;
+  std::cout << "  -f,   --retain         Prevents deletion of intermediate files in pipeline" << std::endl;
+  std::cout << "  -v,   --verbose        Prints all output from Semblans and sub-programs" << std::endl;
+  std::cout << "  -h,   --help           Displays this help screen" << std::endl;
+}
 
 void print_help_postprocess() {
   std::cout << "USAGE:\n" << std::endl;
@@ -81,12 +89,20 @@ void print_help_postprocess() {
             << "                       [--threads/-t] [--ram/-r] [--retain/-f]\n"
             << "                       [--verbose/-v]\n" << std::endl;
   std::cout << "ARGUMENTS:\n" << std::endl;
-  std::cout << "  -cfg, --config     Specifies path to configuration file (REQUIRED)" << std::endl;
-  std::cout << "  -t,   --threads    Specifies number of threads/CPU cores to employ" << std::endl;
-  std::cout << "  -r,   --ram        Specifies ammount of memory/RAM (GB) to dedicate" << std::endl;
-  std::cout << "  -f,   --retain     Prevents deletion of intermediate files in pipeline" << std::endl;
-  std::cout << "  -v,   --verbose    Prints all output from Semblans and sub-programs" << std::endl;
-  std::cout << "  -h,   --help       Displays this help screen" << std::endl;
+  std::cout << "  -1/-2, --left/--right  Specifies simple mode." << std::endl;
+  std::cout << "                         Path to left/right read FASTQ(s) should follow the corresponding flags." << std::endl;
+  std::cout << "                         To specify multiple pairs of files, separate file paths with commas" << std::endl;
+  std::cout << "  -a,   --assembly       Specifies an assembly for Semblans to operate on." << std::endl;
+  std::cout << "                         Only used during postprocessing." << std::endl;
+  std::cout << "  -od,  --output         Specifies path to where Semblans should place output files." << std::endl;
+  std::cout << "                         Directory must already exist" << std::endl;
+  std::cout << "  -cfg, --config         Specifies config file mode." << std::endl;
+  std::cout << "                         Path to config file should follow this argument" << std::endl;
+  std::cout << "  -t,   --threads        Specifies number of threads/CPU cores to employ" << std::endl;
+  std::cout << "  -r,   --ram            Specifies ammount of memory/RAM (GB) to dedicate" << std::endl;
+  std::cout << "  -f,   --retain         Prevents deletion of intermediate files in pipeline" << std::endl;
+  std::cout << "  -v,   --verbose        Prints all output from Semblans and sub-programs" << std::endl;
+  std::cout << "  -h,   --help           Displays this help screen" << std::endl;
  
 }
 
@@ -355,7 +371,7 @@ int main(int argc, char * argv[]) {
         std::vector<std::string> assemblies;
         do {
           commaInd = leftReads.find(',', currPos);
-          currLeft = leftReads.substr(currPos, commaInd - currPos);
+          currLeft = leftReads.substr(currPos, commaInd - currPos - 1);
           assemblies.push_back(outDir + "/00-Transcript_assembly/" + currLeft.substr(0, currLeft.find_last_of("_")) +
                                ".Trinity.fasta");
           currPos = commaInd + 1;
