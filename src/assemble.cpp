@@ -803,14 +803,33 @@ int main(int argc, char * argv[]) {
     }
     std::string currGroupName;
     std::string currIniArrStr;
+    std::string currSraPrefix1;
+    std::string currSraPrefix2;
+    size_t numIndex1;
+    size_t numIndex2;
     std::vector<std::string> iniStrArray;
     std::vector<SRA> currSraGroup;
     // Iterate through user-defined assembly groups in config file
     if (cfgIniAssemblyGroups.empty()) {
       for (auto sra : sras) {
         currSraGroup.push_back(sra);
-        sraGroups.emplace(sra.get_file_prefix().first.substr(0, 
-                          sra.get_file_prefix().first.find_last_of("_")), currSraGroup);
+        currSraPrefix1 = sra.get_file_prefix().first;
+        currSraPrefix2 = sra.get_file_prefix().second;
+        //sraGroups.emplace(sra.get_file_prefix().first.substr(0, 
+        //                  sra.get_file_prefix().first.find_last_of("_")), currSraGroup);
+        numIndex1 = std::string(fs::path(currSraPrefix1.c_str()).stem().c_str()).find("_1");
+        numIndex2 = std::string(fs::path(currSraPrefix2.c_str()).stem().c_str()).find("_2");
+        if (numIndex1 == numIndex2) {
+          currSraPrefix1.erase(numIndex1, 2);
+          currSraPrefix2.erase(numIndex2, 2);
+        }
+        sraGroups.emplace(currSraPrefix1, currSraGroup);
+        /*
+        else {
+          sraGroups.emplace(currSraPrefix1, currSraGroup);
+        }
+        sraGroups.emplace(currSraPrefix.substr(0, currSraPrefix.find("_1", currSraGroup
+        */
         currSraGroup.clear();
       }
     }

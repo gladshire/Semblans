@@ -951,7 +951,7 @@ int main(int argc, char * argv[]) {
         exit(1);
       }
       for (int i = 0; i < kraken2DbFiles.size(); i++) {
-        if (!fs::exists(kraken2DbFiles[i].c_str())) {
+        if (kraken2DbFiles[i] != "null" && !fs::exists(kraken2DbFiles[i].c_str())) {
           logOutput("\nERROR: Kraken database '" + kraken2DbFiles[i] + "' not found\n", logFilePath);
           exit(1);
         }
