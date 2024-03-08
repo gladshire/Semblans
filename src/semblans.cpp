@@ -297,11 +297,12 @@ int main(int argc, char * argv[]) {
               exit(1);
             }
           }
-          ram = atoi(ramStr.c_str());
         }
         else {
           // No RAM ammount given, using 1 GB
+          ramStr = "1";
         }
+        ram = atoi(ramStr.c_str());
       }
       // Check for '--retain' flag, which tells Semblans not to delete outputs from
       // intermediate steps in the pipeline
@@ -371,13 +372,19 @@ int main(int argc, char * argv[]) {
         // Placeholder: create assemblies vector
         size_t commaInd;
         size_t currPos = 0;
-        std::string currLeft;
+        size_t numIndex;
+        std::string currForward;
+        std::string currForwardPrefix;
+        fs::path currForwardPath;
         std::vector<std::string> assemblies;
         do {
           commaInd = leftReads.find(',', currPos);
-          currLeft = leftReads.substr(currPos, commaInd - currPos - 1);
-          assemblies.push_back(outDir + "/00-Transcript_assembly/" + currLeft.substr(0, currLeft.find_last_of("_")) +
-                               ".Trinity.fasta");
+          currForward = leftReads.substr(currPos, commaInd - currPos - 1);
+          currForwardPath = fs::canonical(fs::path(currForward.c_str()));
+          currForwardPrefix = std::string(currForwardPath.stem().c_str());
+          
+          assemblies.push_back(outDir + "/00-Transcript_assembly/" +
+                               currForwardPrefix + ".Trinity.fasta");
           currPos = commaInd + 1;
         } while (commaInd != std::string::npos);
         for (auto ass : assemblies) {
@@ -512,6 +519,9 @@ int main(int argc, char * argv[]) {
                        std::to_string(ram) + retain + verbose;
 
           logOutput("\nPerforming preprocessing only\n\n", logFilePath);
+          if (verbose == " true") {
+            logOutput("  Running command: " + currPreCmd + "\n", logFilePath);
+          }
 
           result = system(currPreCmd.c_str());
           if (WIFSIGNALED(result)) {
@@ -522,7 +532,9 @@ int main(int argc, char * argv[]) {
       }
       else {
         logOutput("\nPerforming preprocessing only\n\n", logFilePath);
-      
+        if (verbose == " true") {
+          logOutput("  Running command: " + preCmd + "\n", logFilePath);
+        }
         result = system(preCmd.c_str());
         if (WIFSIGNALED(result)) {
           system("setterm -cursor on");
@@ -565,6 +577,9 @@ int main(int argc, char * argv[]) {
                        std::to_string(ram) + retain + verbose;
 
           logOutput("\nPerforming assembly only\n\n", logFilePath);
+          if (verbose == " true") {
+            logOutput("  Running command: " + currAssCmd + "\n", logFilePath);
+          }
           result = system(currAssCmd.c_str());
           if (WIFSIGNALED(result)) {
             system("setterm -cursor on");
@@ -574,7 +589,9 @@ int main(int argc, char * argv[]) {
       }
       else {
         logOutput("\nPerforming assembly only\n\n", logFilePath);
-  
+        if (verbose == " true") {
+          logOutput("  Running command: " + assCmd + "\n", logFilePath);
+        }
         result = system(assCmd.c_str());
         if (WIFSIGNALED(result)) {
           system("setterm -cursor on");
@@ -614,7 +631,9 @@ int main(int argc, char * argv[]) {
                         std::to_string(ram) + retain + verbose;
 
           logOutput("\nPerforming postprocess only\n\n", logFilePath);
-
+          if (verbose == " true") {
+            logOutput("  Running command: " + currPostCmd + "\n", logFilePath);
+          }
           result = system(currPostCmd.c_str());
           if (WIFSIGNALED(result)) {
             system("setterm -cursor on");
@@ -624,7 +643,9 @@ int main(int argc, char * argv[]) {
       }
       else {
         logOutput("\nPerforming postprocess only\n\n", logFilePath);
-
+        if (verbose == " true") {
+          logOutput("  Running command: " + postCmd + "\n", logFilePath);
+        }
         result = system(postCmd.c_str());
         if (WIFSIGNALED(result)) {
           system("setterm -cursor on");
@@ -693,6 +714,9 @@ int main(int argc, char * argv[]) {
           logOutput("\n ┌───────────────────────────────────────────────────────┐", logFilePath);
           logOutput("\n │         Phase 1: Preprocessing of Short-reads         │", logFilePath);
           logOutput("\n └───────────────────────────────────────────────────────┘\n", logFilePath);
+          if (verbose == " true") {
+            logOutput("  Running command: " + currPreCmd + "\n", logFilePath);
+          }
           result = system(currPreCmd.c_str());
           if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
             std::cerr << "\nPreprocess exited" << std::endl;
@@ -702,6 +726,9 @@ int main(int argc, char * argv[]) {
           logOutput("\n ┌───────────────────────────────────────────────────────┐", logFilePath);
           logOutput("\n │        Phase 2: De Novo Assembly of Short-reads       │", logFilePath);
           logOutput("\n └───────────────────────────────────────────────────────┘\n", logFilePath);
+          if (verbose == " true") {
+            logOutput("  Running command: " + currAssCmd + "\n", logFilePath);
+          }
           result = system(currAssCmd.c_str());
           if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
             std::cerr << "\nAssembly exited" << std::endl;
@@ -711,6 +738,9 @@ int main(int argc, char * argv[]) {
           logOutput("\n ┌────────────────────────────────────────────────────────┐", logFilePath);
           logOutput("\n │    Phase 3: Postprocessing of Assembled Transcripts    │", logFilePath);
           logOutput("\n └────────────────────────────────────────────────────────┘\n", logFilePath);
+          if (verbose == " true") {
+            logOutput("  Running command: " + currPostCmd + "\n", logFilePath);
+          }
           result = system(currPostCmd.c_str());
           if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
            std::cerr << "\nPostprocess exited" << std::endl;
@@ -724,6 +754,9 @@ int main(int argc, char * argv[]) {
         logOutput("\n ┌───────────────────────────────────────────────────────┐", logFilePath);
         logOutput("\n │         Phase 1: Preprocessing of Short-reads         │", logFilePath);
         logOutput("\n └───────────────────────────────────────────────────────┘\n", logFilePath);
+        if (verbose == " true") {
+          logOutput("  Running command: " + preCmd + "\n", logFilePath);
+        }
         result = system(preCmd.c_str());
         if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
           std::cerr << "\nPreprocess exited" << std::endl;
@@ -733,6 +766,9 @@ int main(int argc, char * argv[]) {
         logOutput("\n ┌───────────────────────────────────────────────────────┐", logFilePath);
         logOutput("\n │        Phase 2: De Novo Assembly of Short-reads       │", logFilePath);
         logOutput("\n └───────────────────────────────────────────────────────┘\n", logFilePath);
+        if (verbose == " true") {
+          logOutput("  Running command: " + assCmd + "\n", logFilePath);
+        }
         result = system(assCmd.c_str());
         if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
           std::cerr << "\nAssembly exited" << std::endl;
@@ -742,7 +778,9 @@ int main(int argc, char * argv[]) {
         logOutput("\n ┌────────────────────────────────────────────────────────┐", logFilePath);
         logOutput("\n │    Phase 3: Postprocessing of Assembled Transcripts    │", logFilePath);
         logOutput("\n └────────────────────────────────────────────────────────┘\n", logFilePath);
-
+        if (verbose == " true") {
+          logOutput("  Running command: " + assCmd + "\n", logFilePath);
+        }
         result = system(postCmd.c_str());
         if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
           std::cerr << "\nPostprocess exited" << std::endl;

@@ -16,9 +16,11 @@ void preSummary(const std::vector<SRA> sras, std::string configPath,
   logOutput("  Memory (GB):     " + ram_gb + "\n", logFilePath);
   logOutput("  SRA run(s):\n", logFilePath); 
   summarize_all_sras(sras, logFilePath, 6);
-  logOutput("  Kraken2 Database(s):\n", logFilePath);
-  for (auto krakenDb : krakenDbs) {
-    logOutput("      " + krakenDb + "\n", logFilePath);
+  if (krakenDbs[0] != "null") {
+    logOutput("  Kraken2 Database(s):\n", logFilePath);
+    for (auto krakenDb : krakenDbs) {
+      logOutput("      " + krakenDb + "\n", logFilePath);
+    }
   }
   logOutput("\n", logFilePath);
   std::string retainStr;
@@ -347,7 +349,7 @@ bool remUnfixBulk(std::vector<SRA> & sras, std::string threads, std::string ram_
     if (sra.checkpointExists("corr.fix")) {
       if (!sra.get_accession().empty()) {
         logOutput("\n  Unfixable error fix checkpoint found for: " +
-                  sra.get_accession(), logFilePath);
+                  sra.get_accession() + "\n\n", logFilePath);
       }
       else {
         logOutput(std::string("\n  Unfixable error fix checkpoint found for: ") +
@@ -463,7 +465,7 @@ void trimBulk(std::vector<SRA> & sras, std::string threads,
     if (sra.checkpointExists("trim")) {
       if (!sra.get_accession().empty()) {
         logOutput("\n  Adapter trimming checkpoint found for: " +
-                  sra.get_accession(), logFilePath);
+                  sra.get_accession() + "\n", logFilePath);
       }
       else {
         logOutput(std::string("\n  Adapter trimming checkpoint found for: ") +
