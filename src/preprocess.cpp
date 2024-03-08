@@ -424,7 +424,7 @@ void trimBulk(std::vector<SRA> & sras, std::string threads,
   std::ifstream inFile2;
   std::string currLine;
   std::string::const_iterator sStart, sEnd;
-  bool inFilesGood;
+  bool inFilesGood = false;
   
   std::string maxSeedMismatch;
   std::string minScorePaired;
@@ -493,16 +493,13 @@ void trimBulk(std::vector<SRA> & sras, std::string threads,
 
     boost::regex rgx("(?<=\\[)(.*?)(Adapter Content)");
     boost::smatch res;
-
     while (getline(inFile1, currLine));
     sStart = currLine.begin();
     sEnd = currLine.end();
-    boost::regex_search(sStart, sEnd, res, rgx);
-    if (res.str().substr(0, 2) == "OK") {
-      inFilesGood = true;
-    }
-    else {
-      inFilesGood = false;
+    if (boost::regex_search(sStart, sEnd, res, rgx)) {
+      if (res.str().substr(0, 2) == "OK") {
+        inFilesGood = true;
+      }
     }
 
     if (sra.is_paired()) {
