@@ -25,11 +25,13 @@ void run_rcorr(std::pair<std::string, std::string> sraRun, std::string outDir,
   std::string rcorrCmd;
   if (isPaired) {
     rcorrCmd = "( perl " + PATH_RCORR + " -t " + threads + " -1 " + inFile1 + " -2 " + inFile2 +
-               " -k " + kmerLength + " -maxcorK " + maxCorrK + " -wk " + weakProportion;
+               " -k " + kmerLength + " -maxcorK " + maxCorrK + " -wk " + weakProportion +
+               " -tmpd " + outDir;
   }
   else {
     rcorrCmd = "( perl " + PATH_RCORR + " -t " + threads + " -s " + inFile1 +
-               " -k " + kmerLength + " -maxcorK " + maxCorrK + " -wk " + weakProportion;
+               " -k " + kmerLength + " -maxcorK " + maxCorrK + " -wk " + weakProportion +
+               " -tmpd " + outDir;
   }
   if (compressFiles) {
     std::string sraPathL = outDir + "/" + std::string(fs::path(sraRun.first.c_str()).stem().stem().c_str()) + ".cor.fq.gz";
