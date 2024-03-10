@@ -37,13 +37,14 @@ mkdir data &>/dev/null
 echo "Now installing required libraries"
 
 # Install boost libraries
-
 echo "  Installing Boost libraries ..."
 wget -q https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.gz
 tar -xf boost_1_81_0.tar.gz
 cd boost_1_81_0
 ./bootstrap.sh --prefix=../
-./b2 install
+./b2 install cxxflags="-std=c++11" link=static
+make
+make install
 mv LICENSE_1_0.txt ../include/boost/
 cd ..
 rm -rf boost_1_81_0*
@@ -246,14 +247,18 @@ else
 fi
 
 # Install STAR
-# echo "Installing STAR ..."
-# wget -q --output-document star.tar.gz https://github.com/alexdobin/STAR/archive/refs/tags/2.7.11a.tar.gz
-# tar -xf star.tar.gz -C ./external/
-# mv ./external/STAR* ./external/STAR
-# cd ./external/STAR/source/
-# make STAR
-# cd ../../../
-# rm star.tar.gz
+#if ( [ ! -e "./external/STAR/bin" ] ); then
+#	echo "Installing STAR ..."
+#	wget -q --output-document star.tar.gz https://github.com/alexdobin/STAR/archive/refs/tags/2.7.11a.tar.gz
+#	tar -xf star.tar.gz -C ./external/
+#	mv ./external/STAR* ./external/STAR
+#	cd ./external/STAR/source/
+#	make STAR
+#	cd ../../../
+#	rm star.tar.gz
+#else
+#	echo "STAR alread installed. Skipping ..."
+#fi
 
 # Install Salmon
 if ( [ ! -e "./external/salmon/bin/salmon" ] ); then

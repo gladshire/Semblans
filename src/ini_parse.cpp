@@ -166,14 +166,14 @@ void make_proj_space(const INI_MAP &iniFile, std::string pipeStage) {
     }
 
   }
-  else if (pipeStage == "assemble" || pipeStage == "all") {
+  if (pipeStage == "assemble" || pipeStage == "all") {
     // Create directory for transcriptome assembly
     currNum = getStepNum(stepNum);
     stepDirs.push_back(currNum + "-" + allSteps[7]);
     system(("mkdir " + projDir + currNum + "-" + allSteps[7] + " > /dev/null 2>&1").c_str());
     stepNum++;
   }
-  else if (pipeStage == "postprocess" || pipeStage == "all") {
+  if (pipeStage == "postprocess" || pipeStage == "all") {
     // If pipeline running removal of chimeras, create its directory
     currNum = getStepNum(stepNum);
     if (ini_get_bool(pipeSteps.at("remove_chimera_reads").c_str(), -1)) {

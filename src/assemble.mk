@@ -1,11 +1,12 @@
 CC = g++ -std=c++11
 CFLAGS = '-Wl,-rpath,$$ORIGIN/../lib/' -pthread -g
-LIBS = -L../lib/ -lboost_system -lboost_filesystem -lboost_iostreams -ldl -lconfini
+#LIBS = -L../lib/ -lboost_system -lboost_filesystem -lboost_iostreams -ldl -lconfini
+LIBS = -L../lib -Wl,-Bstatic -lboost_atomic -lboost_system -lboost_filesystem -lboost_iostreams -Wl,-Bdynamic -ldl -lconfini
 INCLUDE_PATH = -I../lib -I../include
 OBJ_LINK = assemble.o log.o sra.o sra_toolkit.o transcript.o ini_parse.o trinity_wrap.o star_wrap.o print_info.o seq.o llist.o seq_hash.o
 
 ../bin/assemble: $(OBJ_LINK)
-	$(CC) $(CFLAGS) -o ../bin/assemble $(OBJ_LINK) $(LIBS)
+	$(CC) $(CFLAGS) -o ../bin/assemble $(OBJ_LINK) $(LIBS) -lz
 assemble.o: assemble.cpp assemble.h
 	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c assemble.cpp $(LIBS)
 log.o: log.cpp log.h

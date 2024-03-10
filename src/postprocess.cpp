@@ -642,7 +642,7 @@ int main(int argc, char * argv[]) {
       cfgIni = make_ini_map(argv[1]);
       cfgIniGen = cfgIni["General"];
       cfgIniPipeline = cfgIni["Pipeline"];
-      make_proj_space(cfgIni, "postprocess");
+      make_proj_space(cfgIni, "all");
       outDir = cfgIniGen["output_directory"];
       if (outDir[0] == '~') {
         outDir = std::string(home) + outDir.substr(1, outDir.size() - 1);

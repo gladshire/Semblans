@@ -984,7 +984,7 @@ int main(int argc, char * argv[]) {
         logFilePath = std::string(home) + logFilePath.substr(1, logFilePath.size() - 1);
       }
       // Make project file structure
-      make_proj_space(cfgIni, "preprocess");
+      make_proj_space(cfgIni, "all");
 
       // Create vector of SRA objects from SRA accessions, using NCBI web API
       if (!dispOutput) {

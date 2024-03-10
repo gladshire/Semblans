@@ -743,7 +743,7 @@ int main(int argc, char * argv[]) {
       bool compressFiles = false;
     
       // Create file space
-      make_proj_space(cfgIni, "assemble");
+      make_proj_space(cfgIni, "all");
 
       // Obtain SRAs
       if (!dispOutput) {
