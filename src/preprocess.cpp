@@ -506,12 +506,10 @@ void trimBulk(std::vector<SRA> & sras, std::string threads,
       while (getline(inFile2, currLine));
       sStart = currLine.begin();
       sEnd = currLine.end();
-      boost::regex_search(sStart, sEnd, res, rgx);
-      if (res.str().substr(0, 2) == "OK") {
-        inFilesGood = true;
-      }
-      else {
-        inFilesGood = false;
+      if (boost::regex_search(sStart, sEnd, res, rgx)) {
+        if (res.str().substr(0, 2) == "OK") {
+          inFilesGood = true;
+        }
       }
     }
 
