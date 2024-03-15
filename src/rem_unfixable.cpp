@@ -205,7 +205,7 @@ long int rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
     logOutput("\n    Reads removed: " + std::to_string(numUnfix) +
               "(" + getPercent(percentUnfix, 2) + "%)", logFile);
     logOutput("\n    Reads retained: " + std::to_string(numReads - numUnfix) +
-              "(" + getPercent(100.0 - percentUnfix, 2) + "%)", logFile);
+              "(" + getPercent(100.0 - percentUnfix, 2) + "%)\n", logFile);
   }
   return numUnfix;
 }

@@ -23,4 +23,4 @@ void printBreakLine(std::string logFile, int leadingSpace, int length);
 
 std::string getPercent(float valPercent, int precision);
 
-void reportError(int commandResult, std::string logFile);
+void checkExitSignal(int commandResult, std::string logFile);

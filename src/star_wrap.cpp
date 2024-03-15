@@ -19,10 +19,7 @@ void star_index(std::vector<std::string> fastaFiles, std::string outDir, std::st
                          " --genomeDir " + outDir +
                          " --runThreadN " + threads + " )" + printOut;
   result = system(star_cmd.c_str());
-  if (WIFSIGNALED(result)) {
-    logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
-    exit(1);
-  }
+  checkExitSignal(result, logFile);
 }
 
 
@@ -49,8 +46,5 @@ void star_map(std::string indexPath, std::string outMap,
                          " --outFileNamePrefix " + outMap +
                          " --runThreadN " + threads + " )" + printOut;
   result = system(star_cmd.c_str());
-  if (WIFSIGNALED(result)) {
-    logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
-    exit(1);
-  }
+  checkExitSignal(result, logFile);
 }

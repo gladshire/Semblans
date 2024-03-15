@@ -32,11 +32,7 @@ void run_fastqc(std::pair<std::string, std::string> sraRunFiles,
     fastqcCmd += " >>" + logFile + " 2>&1";
   }
   result = system(fastqcCmd.c_str());
-  if (WIFSIGNALED(result)) {
-    system("setterm -cursor on");
-    std::cout << "Exited with signal " << WTERMSIG(result) << std::endl;
-    exit(1);
-  }
+  checkExitSignal(result, logFile);
 }
 
 void run_fastqc_bulk(std::vector<std::pair<std::string, std::string>> sraRunsInput,

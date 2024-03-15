@@ -127,7 +127,7 @@ int main(int argc, char * argv[]) {
   std::string kraken2Dbs;
   std::string outDir;
   bool useCfg = true;
-  bool serialProcess;
+  bool serialProcess = false;
   bool retainInterFiles;
   bool verboseOutput;
 
@@ -401,7 +401,9 @@ int main(int argc, char * argv[]) {
       leftReads = "null";
       rightReads = "null";
       kraken2Dbs = "null";
+      refProt = "null";
       outDir = "null";
+      assembly = "null";
       cfgIni = make_ini_map(pathConfig.c_str());
       cfgIniGen = cfgIni["General"];
       logFilePath = std::string((fs::canonical(fs::path(cfgIniGen["log_file"].c_str()).parent_path()) /
@@ -432,7 +434,7 @@ int main(int argc, char * argv[]) {
  
     std::string verbose;
     std::string retain;
-    std::string config;
+    std::string entirePipeline;
     if (verboseOutput) {
       verbose = " true";
     }
@@ -445,11 +447,11 @@ int main(int argc, char * argv[]) {
     else {
       retain = " false";
     }
-    if (useCfg) {
-      config = " true";
+    if (command == "all") {
+      entirePipeline = " true";
     }
     else {
-      config = " false";
+      entirePipeline = " false";
     }
 
     preCmd = SEMBLANS_DIR + "preprocess " + pathConfig + " " +
@@ -459,12 +461,14 @@ int main(int argc, char * argv[]) {
              std::to_string(ram);
     preCmd += retain;
     preCmd += verbose;
+    preCmd += entirePipeline;
     assCmd = SEMBLANS_DIR + "assemble " + pathConfig + " " +
              leftReads + " " + rightReads + " " + outDir + " " +
              std::to_string(numThreads) + " " +
              std::to_string(ram);
     assCmd += retain;
     assCmd += verbose;
+    assCmd += entirePipeline;
     postCmd = SEMBLANS_DIR + "postprocess " + pathConfig + " " +
               leftReads + " " + rightReads + " " + assembly + " " +
               refProt + " " + outDir + " " +
@@ -472,6 +476,7 @@ int main(int argc, char * argv[]) {
               std::to_string(ram);
     postCmd += retain;
     postCmd += verbose;
+    postCmd += entirePipeline;
     int result;
 
     print_intro(logFilePath);
@@ -516,7 +521,7 @@ int main(int argc, char * argv[]) {
                        leftReads + " " + rightReads + " " + kraken2Dbs + " " +
                        outDir + " " +
                        std::to_string(numThreads) + " " +
-                       std::to_string(ram) + retain + verbose;
+                       std::to_string(ram) + retain + verbose + entirePipeline;
 
           logOutput("\nPerforming preprocessing only\n\n", logFilePath);
           if (verbose == " true") {
@@ -524,10 +529,7 @@ int main(int argc, char * argv[]) {
           }
 
           result = system(currPreCmd.c_str());
-          if (WIFSIGNALED(result)) {
-            system("setterm -cursor on");
-            exit(1);
-          }
+          checkExitSignal(result, logFilePath);
         }
       }
       else {
@@ -536,10 +538,7 @@ int main(int argc, char * argv[]) {
           logOutput("  Running command: " + preCmd + "\n", logFilePath);
         }
         result = system(preCmd.c_str());
-        if (WIFSIGNALED(result)) {
-          system("setterm -cursor on");
-          exit(1);
-        }
+        checkExitSignal(result, logFilePath);
       }
       exit(0);
     }
@@ -574,17 +573,14 @@ int main(int argc, char * argv[]) {
           currAssCmd = SEMBLANS_DIR + "assemble " + currCfgIniSub + " " +
                        leftReads + " " + rightReads + " " + outDir + " " +
                        std::to_string(numThreads) + " " +
-                       std::to_string(ram) + retain + verbose;
+                       std::to_string(ram) + retain + verbose + entirePipeline;
 
           logOutput("\nPerforming assembly only\n\n", logFilePath);
           if (verbose == " true") {
             logOutput("  Running command: " + currAssCmd + "\n", logFilePath);
           }
           result = system(currAssCmd.c_str());
-          if (WIFSIGNALED(result)) {
-            system("setterm -cursor on");
-            exit(1);
-          }
+          checkExitSignal(result, logFilePath);
         }
       }
       else {
@@ -593,10 +589,7 @@ int main(int argc, char * argv[]) {
           logOutput("  Running command: " + assCmd + "\n", logFilePath);
         }
         result = system(assCmd.c_str());
-        if (WIFSIGNALED(result)) {
-          system("setterm -cursor on");
-          exit(1);
-        }
+        checkExitSignal(result, logFilePath);
       }
       exit(0);
     }
@@ -628,17 +621,14 @@ int main(int argc, char * argv[]) {
                         leftReads + " " + rightReads + " " + assembly + " " +
                         refProt + " " + outDir + " " +
                         std::to_string(numThreads) + " " +
-                        std::to_string(ram) + retain + verbose;
+                        std::to_string(ram) + retain + verbose + entirePipeline;
 
           logOutput("\nPerforming postprocess only\n\n", logFilePath);
           if (verbose == " true") {
             logOutput("  Running command: " + currPostCmd + "\n", logFilePath);
           }
           result = system(currPostCmd.c_str());
-          if (WIFSIGNALED(result)) {
-            system("setterm -cursor on");
-            exit(1);
-          }
+          checkExitSignal(result, logFilePath);
         }
       }
       else {
@@ -647,22 +637,12 @@ int main(int argc, char * argv[]) {
           logOutput("  Running command: " + postCmd + "\n", logFilePath);
         }
         result = system(postCmd.c_str());
-        if (WIFSIGNALED(result)) {
-          system("setterm -cursor on");
-          exit(1);
-        }
+        checkExitSignal(result, logFilePath);
       }
       exit(0);
     }
     // Case 4: all three
     if (command == "all") {
-      /*
-      if (assembly != "") {
-        std::cerr << "\nERROR: --assembly flag should not be invoked when calling entire pipeline\n" << std::endl;
-        exit(1);
-      }
-      */
-
       std::string currLeft;
       std::string currRight;
       std::vector<std::string> assemblies;
@@ -695,18 +675,18 @@ int main(int argc, char * argv[]) {
                        leftReads + " " + rightReads + " " + kraken2Dbs + " " +
                        outDir + " " +
                        std::to_string(numThreads) + " " +
-                       std::to_string(ram) + retain + verbose;
+                       std::to_string(ram) + retain + verbose + entirePipeline;
 
           currAssCmd = SEMBLANS_DIR + "assemble " + currCfgIniSub + " " +
                        leftReads + " " + rightReads + " " + outDir + " " +
                        std::to_string(numThreads) + " " +
-                       std::to_string(ram) + retain + verbose;
+                       std::to_string(ram) + retain + verbose + entirePipeline;
 
           currPostCmd = SEMBLANS_DIR + "postprocess " + pathConfig + " " +
                         leftReads + " " + rightReads + " " + assembly + " " +
                         refProt + " " + outDir + " " +
                         std::to_string(numThreads) + " " +
-                        std::to_string(ram) + retain + verbose;
+                        std::to_string(ram) + retain + verbose + entirePipeline;
 
 
 
@@ -779,7 +759,7 @@ int main(int argc, char * argv[]) {
         logOutput("\n │    Phase 3: Postprocessing of Assembled Transcripts    │", logFilePath);
         logOutput("\n └────────────────────────────────────────────────────────┘\n", logFilePath);
         if (verbose == " true") {
-          logOutput("  Running command: " + assCmd + "\n", logFilePath);
+          logOutput("  Running command: " + postCmd + "\n", logFilePath);
         }
         result = system(postCmd.c_str());
         if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {

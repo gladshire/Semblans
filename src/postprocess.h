@@ -31,9 +31,9 @@ void blastxBulk(const std::vector<transcript> & transVec, std::string threads,
                 std::string refProt, std::string outDir,
                 const INI_MAP & cfgIni);
 
-void remChimeraBulk(const std::vector<transcript> & transVec, std::string ram_gb,
-                    bool retainInterFiles, bool dispOutput, std::string logFilePath,
-                    const INI_MAP & cfgIni);
+std::vector<std::string> remChimeraBulk(const std::vector<transcript> & transVec, std::string ram_gb,
+                                        bool retainInterFiles, bool dispOutput, std::string logFilePath,
+                                        const INI_MAP & cfgIni);
 
 void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
                 bool retainInterFiles, bool dispOutput, std::string logFilePath,
@@ -42,13 +42,13 @@ void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
                 std::string outDir,
                 const INI_MAP & cfgIni);
 
-void corsetBulk(const std::vector<transcript> & transVec, std::string ram_gb,
-                bool retainInterFiles, bool dispOutput, std::string logFilePath,
-                const INI_MAP & cfgIni);
+std::vector<std::string> corsetBulk(const std::vector<transcript> & transVec, std::string ram_gb,
+                                    bool retainInterFiles, bool dispOutput, std::string logFilePath,
+                                    const INI_MAP & cfgIni);
 
-void transdecBulk(const std::vector<transcript> & transVec,
-                  std::string threads, std::string ram_gb,
-                  bool retainInterFiles, bool dispOutput,
-                  std::string logFilePath,
-                  std::string refProt, std::string outDir,
-                  const INI_MAP & cfgIni);
+std::vector<std::pair<std::string, std::string>> transdecBulk(const std::vector<transcript> & transVec,
+                                                              std::string threads, std::string ram_gb,
+                                                              bool retainInterFiles, bool dispOutput,
+                                                              std::string logFilePath,
+                                                              std::string refProt, std::string outDir,
+                                                              const INI_MAP & cfgIni);

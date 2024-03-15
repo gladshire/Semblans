@@ -77,7 +77,7 @@ void blastxBulk(const std::vector<transcript> & transVec, std::string threads,
     maxEvalue = cfgIniAlign.at("blastx_max_evalue");
     maxTargetSeqs = cfgIniAlign.at("blastx_max_target_seqs");
     refProteome = cfgIniGen.at("reference_proteome_path");
-    if (!fs::exists(fs::path(refProt.c_str()))) {
+    if (!fs::exists(fs::path(refProteome.c_str()))) {
       logOutput("ERROR: Reference proteome: " + refProteome + " not found\n", logFilePath);
       logOutput("  Please ensure its path is correctly specified in your config file\n",
                 logFilePath);
@@ -112,19 +112,19 @@ void blastxBulk(const std::vector<transcript> & transVec, std::string threads,
     summarize_sing_trans(trans, logFilePath, 4);
     currTransIn = trans.get_trans_path_trinity().c_str();
     // Run BlastX
-    currBlastDbName = std::string(fs::path(refProt.c_str()).stem().c_str());
+    currBlastDbName = std::string(fs::path(refProteome.c_str()).stem().c_str());
 
     if (!dispOutput) {
       procRunning = true;
       std::thread blastxThread(progressAnim, "  ", logFilePath);
       if (useBlast) {
-        makeBlastDb(refProt, blastDbDir, dispOutput, logFilePath);
+        makeBlastDb(refProteome, blastDbDir, dispOutput, logFilePath);
         blastx(currTransIn, blastDbDir + currBlastDbName,
                maxEvalue, maxTargetSeqs, threads,
                blastDbDir, dispOutput, logFilePath);
       }
       else {
-        makeBlastDbDiam(refProt, blastDbDir, dispOutput, logFilePath);
+        makeBlastDbDiam(refProteome, blastDbDir, dispOutput, logFilePath);
         blastxDiam(currTransIn, blastDbDir + currBlastDbName,
                    maxEvalue, maxTargetSeqs, threads,
                    blastDbDir, dispOutput, logFilePath);
@@ -134,13 +134,13 @@ void blastxBulk(const std::vector<transcript> & transVec, std::string threads,
     }
     else {
        if (useBlast) {
-         makeBlastDb(refProt, blastDbDir, dispOutput, logFilePath);
+         makeBlastDb(refProteome, blastDbDir, dispOutput, logFilePath);
          blastx(currTransIn, blastDbDir + currBlastDbName,
                 maxEvalue, maxTargetSeqs, threads,
                 blastDbDir, dispOutput, logFilePath);
        }
        else {
-         makeBlastDbDiam(refProt, blastDbDir, dispOutput, logFilePath);
+         makeBlastDbDiam(refProteome, blastDbDir, dispOutput, logFilePath);
          blastxDiam(currTransIn, blastDbDir + currBlastDbName,
                     maxEvalue, maxTargetSeqs, threads,
                     blastDbDir, dispOutput, logFilePath);
@@ -153,10 +153,11 @@ void blastxBulk(const std::vector<transcript> & transVec, std::string threads,
 }
 
 // Given a vector of transcript objects, detect and remove chimera transcripts from each's data
-void remChimeraBulk(const std::vector<transcript> & transVec, std::string ram_gb,
-                    bool retainInterFiles, bool dispOutput, std::string logFilePath,
-                    const INI_MAP & cfgIni = {}) {
+std::vector<std::string> remChimeraBulk(const std::vector<transcript> & transVec, std::string ram_gb,
+                                        bool retainInterFiles, bool dispOutput, std::string logFilePath,
+                                        const INI_MAP & cfgIni = {}) {
   logOutput("\nStarting chimera removal\n", logFilePath);
+  std::vector<std::string> outFiles;
   std::string currTransInChim;
   std::string currTransOutChim;
   std::string currBlastx;
@@ -195,10 +196,11 @@ void remChimeraBulk(const std::vector<transcript> & transVec, std::string ram_gb
       removeChimera(currTransInChim, currTransOutChim, currTransInfo, currTransCut, ram_gb,
                     logFilePath);
     }
-  
+    outFiles.push_back(currTransOutChim);
     // Create chimera removal checkpoint
     trans.makeCheckpoint("chim.fix");
   }
+  return outFiles;
 }
 
 // Given a vector of transcript objects, create a salmon index for each and then
@@ -317,10 +319,11 @@ void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
 
 // Given a vector of transcript objects, determine each's largest cluster / redundant
 // transcripts using Corset, and then generate output files for both
-void corsetBulk(const std::vector<transcript> & transVec, std::string ram_gb,
-                bool retainInterFiles, bool dispOutput, std::string logFilePath,
-                const INI_MAP & cfgIni = {}) {
+std::vector<std::string> corsetBulk(const std::vector<transcript> & transVec, std::string ram_gb,
+                                    bool retainInterFiles, bool dispOutput, std::string logFilePath,
+                                    const INI_MAP & cfgIni = {}) {
   logOutput("\nRemoving redundant transcripts\n", logFilePath);
+  std::vector<std::string> outFiles;
   std::string currTransInCors;
   std::string currTransPrefix;
   std::string currEqClassFile;
@@ -413,19 +416,22 @@ void corsetBulk(const std::vector<transcript> & transVec, std::string ram_gb,
                    ram_b, currOutDir, logFilePath);
     }
 
+    outFiles.push_back(currTransLargestClust);
     // Create corset filtering checkpoint
     trans.makeCheckpoint("redund.fix");
   }
+  return outFiles;
 }
 
 // Given a vector of transcript objects, predict each's coding regions using TransDecoder
-void transdecBulk(const std::vector<transcript> & transVec,
-                  std::string threads, std::string ram_gb,
-                  bool retainInterFiles, bool dispOutput,
-                  std::string logFilePath,
-                  std::string refProt, std::string outDir,
-                  const INI_MAP & cfgIni = {}) {
+std::vector<std::pair<std::string, std::string>> transdecBulk(const std::vector<transcript> & transVec,
+                                                              std::string threads, std::string ram_gb,
+                                                              bool retainInterFiles, bool dispOutput,
+                                                              std::string logFilePath,
+                                                              std::string refProt, std::string outDir,
+                                                              const INI_MAP & cfgIni = {}) {
   logOutput("\nStarting prediction of coding regions\n", logFilePath);
+  std::vector<std::pair<std::string, std::string>> outFiles;
   std::string currTransInTD;
   std::string currTransCds;
   std::string currTransPep;
@@ -441,6 +447,7 @@ void transdecBulk(const std::vector<transcript> & transVec,
   std::string blastDbDir;
   std::string blastDbName;
   uintmax_t ram_b = (uintmax_t)stoi(ram_gb) * 1000000000;
+  std::pair<std::string, std::string> currOutFilePair;
   if (!cfgIni.empty()) {
     cfgIniGen = cfgIni.at("General");
     cfgIniAlign = cfgIni.at("Alignment settings");
@@ -512,9 +519,13 @@ void transdecBulk(const std::vector<transcript> & transVec,
                        maxTargetSeqs, threads, ram_b, currDb, currOutDirTD, dispOutput,
                        logFilePath);
     }
+    currOutFilePair.first = currTransCds;
+    currOutFilePair.second = currTransPep;
+    outFiles.push_back(currOutFilePair);
     // Create coding region prediction checkpoint
     trans.makeCheckpoint("cdr.predict");
   }
+  return outFiles;
 }
 
 // Given a vector of transcript objects, run a HMMER/PANTHER-based annotation for each
@@ -595,6 +606,7 @@ int main(int argc, char * argv[]) {
   std::string ram_gb;
   bool retainInterFiles;
   bool dispOutput;
+  bool entirePipeline;
   bool compressFiles = false;
 
   std::vector<SRA> sras;
@@ -603,11 +615,14 @@ int main(int argc, char * argv[]) {
   size_t posLocalFiles;
 
   std::vector<transcript> transVec;
+  std::vector<std::string> outFiles;
+  std::vector<std::pair<std::string, std::string>> outFilesFinal;
   if (argc > 1) {
     threads = argv[7];
     ram_gb = argv[8];
     retainInterFiles = stringToBool(argv[9]);
     dispOutput = stringToBool(argv[10]);
+    entirePipeline = stringToBool(argv[11]);
     // Determine whether sequence files are specified in config file or postprocess call
     configPath = argv[1];
     // Set up postprocess parameters based on command line input
@@ -626,7 +641,12 @@ int main(int argc, char * argv[]) {
       
       outDir = std::string((fs::canonical(fs::path(outDir.c_str())).parent_path()).c_str()) + "/" +
                std::string((fs::canonical(fs::path(outDir.c_str())).filename()).c_str()) + "/";
-      make_proj_space(outDir, "postprocess");
+      if (entirePipeline) {
+        make_proj_space(outDir, "all");
+      }
+      else {
+        make_proj_space(outDir, "postprocess");
+      }
       logFilePath = outDir + "log.txt";
       for (int i = 0; i < readFilesLeft.size(); i++) {
         sras.push_back(SRA(readFilesLeft[i], readFilesRight[i], outDir,
@@ -642,7 +662,12 @@ int main(int argc, char * argv[]) {
       cfgIni = make_ini_map(argv[1]);
       cfgIniGen = cfgIni["General"];
       cfgIniPipeline = cfgIni["Pipeline"];
-      make_proj_space(cfgIni, "all");
+      if (entirePipeline) {
+        make_proj_space(cfgIni, "all");
+      }
+      else {
+        make_proj_space(cfgIni, "postprocess");
+      }
       outDir = cfgIniGen["output_directory"];
       if (outDir[0] == '~') {
         outDir = std::string(home) + outDir.substr(1, outDir.size() - 1);
@@ -725,16 +750,16 @@ int main(int argc, char * argv[]) {
                    logFilePath, "", "", cfgIni);
         printBreakLine(logFilePath, 6, 47);
         // Detect and remove chimeric transcripts
-        remChimeraBulk(transVec, ram_gb, retainInterFiles,
-                       dispOutput, logFilePath, cfgIni);
+        outFiles = remChimeraBulk(transVec, ram_gb, retainInterFiles,
+                                  dispOutput, logFilePath, cfgIni);
       }
     }
     else {
       blastxBulk(transVec, threads, dispOutput,
                  logFilePath, refProt, outDir);
       printBreakLine(logFilePath, 6, 47);
-      remChimeraBulk(transVec, ram_gb, retainInterFiles,
-                     dispOutput, logFilePath);
+      outFiles = remChimeraBulk(transVec, ram_gb, retainInterFiles,
+                                dispOutput, logFilePath);
     }
     logOutput("\n", logFilePath);
     printBreakLine(logFilePath, 6, 47);
@@ -745,23 +770,23 @@ int main(int argc, char * argv[]) {
                    {}, {}, "", cfgIni);
         printBreakLine(logFilePath, 6, 47);
         // Perform corset run to cluster transcripts
-        corsetBulk(transVec, ram_gb, retainInterFiles, dispOutput, logFilePath, cfgIni);
+        outFiles = corsetBulk(transVec, ram_gb, retainInterFiles, dispOutput, logFilePath, cfgIni);
       }
     }
     else {
       salmonBulk(transVec, threads, retainInterFiles, dispOutput, logFilePath,
                  readFilesLeft, readFilesRight, outDir);
       printBreakLine(logFilePath, 6, 47);
-      corsetBulk(transVec, ram_gb, retainInterFiles, dispOutput, logFilePath, cfgIni);
+      outFiles = corsetBulk(transVec, ram_gb, retainInterFiles, dispOutput, logFilePath, cfgIni);
     }
     logOutput("\n", logFilePath);
     printBreakLine(logFilePath, 6, 47);    
     // Run transdecoder
     if (configPath != "null") {
-      transdecBulk(transVec, threads, ram_gb, retainInterFiles, dispOutput, logFilePath, "", "", cfgIni);
+      outFilesFinal = transdecBulk(transVec, threads, ram_gb, retainInterFiles, dispOutput, logFilePath, "", "", cfgIni);
     }
     else {
-      transdecBulk(transVec, threads, ram_gb, retainInterFiles, dispOutput, logFilePath, refProt, outDir);
+      outFilesFinal = transdecBulk(transVec, threads, ram_gb, retainInterFiles, dispOutput, logFilePath, refProt, outDir);
     }
 
     printBreakLine(logFilePath, 6, 47);
@@ -774,7 +799,6 @@ int main(int argc, char * argv[]) {
     logOutput("\nPostprocess finished successfully\n\n", logFilePath);
   }
   else {
-  
   }
   system("setterm -cursor on");
 }

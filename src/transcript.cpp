@@ -11,7 +11,7 @@ transcript::transcript() {
 // Constructor for transcript object, taking an SRA run object as input
 transcript::transcript(SRA sra) {
   //std::string projPath(sra.get_sra_path_trim_u().first.parent_path().parent_path().c_str());
-  std::string projPath(sra.get_fastqc_dir_2().first.parent_path().parent_path().parent_path().c_str());
+  std::string projPath(sra.get_fastqc_dir_2().first.parent_path().parent_path().parent_path().parent_path().c_str());
   projPath += "/";
   org_name = sra.get_org_name();
   tax_id = sra.get_tax_id();

@@ -64,13 +64,6 @@ void run_transdecoder(std::string transIn, std::string transCds, std::string tra
   std::string transPrefix = fs::path(transIn.c_str()).filename().stem().stem().c_str();
 
   std::string blastpout = transPrefix + ".blastp.outfmt6";
-  std::string printOut;
-  if (dispOutput) {
-    printOut = " 2>&1 | tee -a " + logFile;
-  }
-  else {
-    printOut = " >>" + logFile + " 2>&1";
-  }
   if (fasta_ok(std::string(cdsFilePath.c_str()), ram_b) &&
       fasta_ok(std::string(pepFilePath.c_str()), ram_b)) {
     // Skip TransDecoder
@@ -85,16 +78,17 @@ void run_transdecoder(std::string transIn, std::string transCds, std::string tra
     else {
       // Only operates on un-stranded. Implement stranded later
       std::string tdLongOrfs_cmd = PATH_TRANSD_LONGORFS + " -t " + transFilePath + " -O " +
-                                   std::string(allpep.parent_path().c_str()) + printOut;
+                                   std::string(allpep.parent_path().c_str());
       int resultLO;
-
-      resultLO = system(tdLongOrfs_cmd.c_str());
-      if (WIFSIGNALED(resultLO)) {
-        system("setterm -cursor on");
-        logOutput("Exited with signal " + std::to_string(WTERMSIG(resultLO)), logFile);
-        exit(1);
+      if (dispOutput) {
+        tdLongOrfs_cmd += " 2>&1 | tee -a " + logFile;
+        logOutput("  Running command: " + tdLongOrfs_cmd + "\n\n", logFile);
       }
-      
+      else {
+        tdLongOrfs_cmd += " >>" + logFile + " 2>&1";
+      }
+      resultLO = system(tdLongOrfs_cmd.c_str());
+      checkExitSignal(resultLO, logFile);
     }
     if (blastpout_ok(outDir + "/" +  blastpout)) {
       logOutput("Skipping blastp", logFile);
@@ -116,18 +110,21 @@ void run_transdecoder(std::string transIn, std::string transCds, std::string tra
     else {
       std::string tdPredict_cmd = PATH_TRANSD_PREDICT + " -t " + transFilePath +
                                   " --retain_blastp_hits " + outDir + "/" + blastpout +
-                                  " --cpu " + threads + printOut;
+                                  " --cpu " + threads;
       fs::path currDir = fs::current_path();
       fs::current_path(fs::path(outDir.c_str()));
       int resultPD;
 
-      resultPD = system(tdPredict_cmd.c_str());
-      if (WIFSIGNALED(resultPD)) {
-        system("setterm -cursor on");
-        logOutput("Exited with signal " + std::to_string(WTERMSIG(resultPD)), logFile);
-        exit(1);
+      if (dispOutput) {
+        tdPredict_cmd += " 2>&1 | tee -a " + logFile;
+        logOutput("  Running command: " + tdPredict_cmd + "\n\n", logFile);
       }
+      else {
+        tdPredict_cmd += " >>" + logFile + " 2>&1";
+      }
+      resultPD = system(tdPredict_cmd.c_str());
       fs::current_path(currDir);
+      checkExitSignal(resultPD, logFile);
       std::rename((outDir + "/" + transFileName + ".transdecoder.gff3").c_str(),
                   (outDir + "/" + transPrefix + ".transdecoder.gff3").c_str());
       std::rename((outDir + "/" + transFileName + ".transdecoder.bed").c_str(),

@@ -20,11 +20,7 @@ void makeBlastDb(std::string pathProtRef, std::string outDir,
   std::string makeblastdbCmd = MAKEBLASTDB + " -in " + pathProtRef + " -dbtype prot -out " +
                                outDbFile.c_str() + printOut;
   result = system(makeblastdbCmd.c_str());
-  if (WIFSIGNALED(result)) {
-    system("setterm -cursor on");
-    logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
-    exit(1);
-  }
+  checkExitSignal(result, logFile);
 }
 
 
@@ -57,11 +53,7 @@ void blastx(std::string transIn, std::string blastDb,
                           " -num_threads " + threads +
                           " -max_target_seqs 100" + printOut;
   result = system(blastxCmd.c_str());
-  if (WIFSIGNALED(result)) {
-    system("setterm -cursor on");
-    logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
-    exit(1);
-  }
+  checkExitSignal(result, logFile);
 }
 
 
@@ -86,9 +78,5 @@ void blastp(std::string pepFilePath, std::string blastDb,
                           " -evalue " + maxEvalue + " -max_target_seqs " + maxTargetSeqs + 
                           " -outfmt 6 " + "-num_threads " + threads + " > " + outFile + printOut;
   result = system(blastpCmd.c_str());
-  if (WIFSIGNALED(result)) {
-    system("setterm -cursor on");
-    logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
-    exit(1);
-  }
+  checkExitSignal(result, logFile);
 }

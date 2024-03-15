@@ -43,7 +43,7 @@ void prefetch_sra(SRA sra, bool dispOutput, std::string logFile) {
   }
   result = system(prefetchCmd.c_str());
   replaceChar(logFile, '\b', ' ');
-  reportError(result, logFile);
+  checkExitSignal(result, logFile);
 }
 
 // Given an SRA run object, dump prefetched data to a FASTQ file 
@@ -68,7 +68,7 @@ void fasterq_sra(SRA sra, std::string threads, bool dispOutput,
                  "else {print | \"" + PATH_PIGZ + " --fast -p " + threads + " > " + outFile + "_2.fastq.gz\"} }\' )";
   }
   else {
-    fasterqCmd = "(" + PATH_FASTERQ + " " + sraAccession + fasterqFlag +
+    fasterqCmd = "(" + PATH_FASTERQ + " " + " --progress " + sraAccession + fasterqFlag +
                  " -o ./" + outFile + " )";
   }
   if (dispOutput) {
@@ -80,11 +80,8 @@ void fasterq_sra(SRA sra, std::string threads, bool dispOutput,
   }
   result = system(fasterqCmd.c_str());
   fs::current_path(currDir);
-  if (WIFSIGNALED(result)) {
-    system("setterm -cursor on");
-    logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
-    exit(1);
-  }
+  replaceChar(logFile, '\b', ' ');
+  checkExitSignal(result, logFile);
 }
 
 // Align in file streams of paired-end sequence data to ensure both data buffers

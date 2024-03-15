@@ -49,9 +49,5 @@ void run_trimmomatic(std::pair<std::string, std::string> sraRunIn,
     trimmCmd += " >>" + logFile + " 2>&1";
   }
   result = system(trimmCmd.c_str());
-  if (WIFSIGNALED(result)) {
-    system("setterm -cursor on");
-    logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
-    exit(1);
-  }
+  checkExitSignal(result, logFile);
 }

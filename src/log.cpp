@@ -9,13 +9,17 @@ void replaceChar(std::string inFilePath, char oldChar, char newChar) {
   std::ofstream outLogFile(inFilePath + ".tmp");
    
   char currChar;
+  char lastChar;
   while (inLogFile.get(currChar)) {
-    if (currChar != oldChar) {
-      outLogFile.put(currChar);
+    if (currChar == oldChar) {
+      if (currChar != lastChar) {
+        outLogFile.put(newChar);
+      }
     }
     else {
-      outLogFile.put(newChar);
+      outLogFile.put(currChar);
     }
+    lastChar = currChar;
   }
 
   inLogFile.close();
@@ -67,7 +71,7 @@ std::string getPercent(float valPercent, int precision) {
 }
 
 // Print error code of a program call and then exit
-void reportError(int commandResult, std::string logFile) {
+void checkExitSignal(int commandResult, std::string logFile) {
   if (WIFSIGNALED(commandResult)) {
     system("setterm -cursor on");
     logOutput("\nExisted with signal " + std::to_string(WTERMSIG(commandResult)) + "\n", logFile);

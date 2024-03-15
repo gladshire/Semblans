@@ -3,23 +3,19 @@
 // Index reads from sequence data using Salmon
 void salmon_index(std::string transIn, std::string transIndex, std::string threads,
                   bool dispOutput, std::string logFile) {
-
-  std::string printOut;
-  if (dispOutput) {
-    printOut = " 2>&1 | tee -a " + logFile;
-  }
-  else {
-    printOut = " >>" + logFile + " 2>&1";
-  }
   int result;
 
-  std::string salm_cmd = PATH_SALMON + " index" + " -t " + transIn +
-                         " -i " + transIndex + " -p " + threads + printOut;
-  result = system(salm_cmd.c_str());
-  if (WIFSIGNALED(result)) {
-    logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
-    exit(1);
+  std::string salmCmd = PATH_SALMON + " index" + " -t " + transIn +
+                        " -i " + transIndex + " -p " + threads;
+  if (dispOutput) {
+    salmCmd += " 2>&1 | tee -a " + logFile;
+    logOutput("  Running command: " + salmCmd + "\n\n", logFile);
   }
+  else {
+    salmCmd += " >>" + logFile + " 2>&1";
+  }
+  result = system(salmCmd.c_str());
+  checkExitSignal(result, logFile);
 }
 
 bool runPaired(std::vector<std::pair<std::string, std::string>> sraRunsIn) {
@@ -71,32 +67,33 @@ void salmon_quant(std::string transIn, std::string transIndex, std::string trans
     }
   }
 
-  std::string printOut;
-  if (dispOutput) {
-    printOut = " 2>&1 | tee -a " + logFile;
-  }
-  else {
-    printOut = " >>" + logFile + " 2>&1";
-  }
   int result;
-  
   if (morePaired) {
-    std::string salm_cmd = PATH_SALMON + " quant" + " -i " + indexFilePath + " --dumpEq" +
-                           " --writeUnmappedNames " + " --libType" + " A" + " -p " + threads +
-                           " -1 " + sras1 + " -2 " + sras2 + " -o " + quantFilePath + printOut;
-    result = system(salm_cmd.c_str());
+    std::string salmCmd = PATH_SALMON + " quant" + " -i " + indexFilePath + " --dumpEq" +
+                          " --writeUnmappedNames " + " --libType" + " A" + " -p " + threads +
+                          " -1 " + sras1 + " -2 " + sras2 + " -o " + quantFilePath;
+    if (dispOutput) {
+      salmCmd += " 2>&1 | tee -a " + logFile;
+      logOutput("  Running command: " + salmCmd + "\n\n", logFile);
+    }
+    else {
+      salmCmd += " >>" + logFile + " 2>&1";
+    }
+    result = system(salmCmd.c_str());
   }
   else {
-    std::string salm_cmd = PATH_SALMON + " quant" + " -i " + indexFilePath + " --dumpEq" +
-                           " --writeUnmappedNames " + " --libType" + " A" + " -p " + threads +
-                           " -r " + sras1 + " -o " + quantFilePath +
-                           printOut;
-    result = system(salm_cmd.c_str());
-  }
-  if (WIFSIGNALED(result)) {
-    system("setterm -cursor on");
-    logOutput("Exited with signal " + std::to_string(WTERMSIG(result)), logFile);
-    exit(1);
+    std::string salmCmd = PATH_SALMON + " quant" + " -i " + indexFilePath + " --dumpEq" +
+                          " --writeUnmappedNames " + " --libType" + " A" + " -p " + threads +
+                          " -r " + sras1 + " -o " + quantFilePath;
+    if (dispOutput) {
+      salmCmd += " 2>&1 | tee -a " + logFile;
+      logOutput("  Running command: " + salmCmd + "\n\n", logFile);
+    }
+    else {
+      salmCmd += " >>" + logFile + " 2>&1";
+    }
+    result = system(salmCmd.c_str());
   }
   replaceChar(logFile, '\r', '\n');
+  checkExitSignal(result, logFile);
 }

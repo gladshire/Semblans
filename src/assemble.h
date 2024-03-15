@@ -34,9 +34,9 @@ bool groupCheckpointExists(std::string cpDir, std::string prefix);
 
 void makeTransInfoFile(const std::vector<std::pair<std::string, std::string>> & sraRuns, std::string transInfoFileStr);
 
-void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
-                      std::string threads, std::string ram_gb,
-                      bool assembSeqsInterest, bool assembSeqsNoInterest,
-                      bool assembAllSeqs,
-                      bool dispOutput, bool retainInterFiles,
-                      std::string logFile, const INI_MAP & cfgIni);
+std::vector<std::string> run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
+                                          std::string threads, std::string ram_gb,
+                                          bool assembSeqsInterest, bool assembSeqsNoInterest,
+                                          bool assembAllSeqs,
+                                          bool dispOutput, bool retainInterFiles,
+                                          std::string logFile, const INI_MAP & cfgIni);

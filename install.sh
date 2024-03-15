@@ -28,7 +28,9 @@ fi
 mkdir include &>/dev/null
 mkdir lib &>/dev/null
 mkdir external &>/dev/null
-mkdir data &>/dev/null
+if $install_panther; then
+	mkdir data &>/dev/null
+fi
 
 #========================================================================
 #/////////////   INSTALLATION OF THIRD-PARTY LIBRARIES   \\\\\\\\\\\\\\\\
@@ -147,7 +149,6 @@ fi
 # Install Rcorrector
 if [ ! -e "./external/Rcorrector/rcorrector" ]; then
 	echo "Installing Rcorrector ..."
-	#wget -q --output-document rcorrector.tar.gz https://github.com/mourisl/Rcorrector/archive/refs/tags/v1.0.5.tar.gz
 	wget -q --output-document rcorrector.tar.gz https://github.com/mourisl/Rcorrector/archive/refs/tags/v1.0.7.tar.gz
 	tar -xf rcorrector.tar.gz -C ./external/
 	mv ./external/Rcorrector* ./external/Rcorrector
@@ -162,9 +163,9 @@ fi
 # Install Trimmomatic
 if [ ! -e "./external/Trimmomatic/trimmomatic-0.39.jar" ]; then
 	echo "Installing Trimmomatic ..."
-	wget -q --output-document trimmomatic.zip https://github.com/usadellab/Trimmomatic/files/5854859/Trimmomatic-0.39.zip
+	wget -q --output-document trimmomatic.zip http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/Trimmomatic-0.39.zip
 	unzip trimmomatic.zip -d ./external/
-	mv ./external/Trimmomatic-0.39 ./external/Trimmomatic
+        mv ./external/Trimmomatic* ./external/Trimmomatic
 	cd ./external/Trimmomatic/adapters/
 	echo -e "$(cat NexteraPE-PE.fa)\n$(cat TruSeq2-PE.fa TruSeq2-SE.fa TruSeq3-PE-2.fa)\n$(cat TruSeq3-PE.fa)\n$(cat TruSeq3-SE.fa)" > TruSeq_all.fa
 	cd ../../../

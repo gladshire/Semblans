@@ -399,14 +399,15 @@ void makeTransInfoFile(const std::vector<std::pair<std::string, std::string>> & 
 }
 
 // Perform a bulk assembly for SRAs and groups of SRAs
-void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
-                      std::string threads, std::string ram_gb,
-                      bool assembSeqsInterest, bool assembSeqsNoInterest,
-                      bool assembAllSeqs,
-                      bool dispOutput, bool retainInterFiles,
-                      std::string logFile, std::string outDir,
-                      const INI_MAP & cfgIni = {}) {
+std::vector<std::string> run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
+                                          std::string threads, std::string ram_gb,
+                                          bool assembSeqsInterest, bool assembSeqsNoInterest,
+                                          bool assembAllSeqs,
+                                          bool dispOutput, bool retainInterFiles,
+                                          std::string logFile, std::string outDir,
+                                          const INI_MAP & cfgIni = {}) {
   logOutput("\nStarting de-novo assembly\n", logFile);
+  std::vector<std::string> outFiles;
 
   // Obtain sections from the config file as map objects
   INI_MAP_ENTRY cfgIniPipeline;
@@ -429,7 +430,6 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
   std::string currFilePrefix2;
   if (!cfgIni.empty()) {
     cfgIniPipeline = cfgIni.at("Pipeline");
-    cfgIniSeqsInt = cfgIni.at("Sequences of interest");
     cfgIniAssembGroups = cfgIni.at("Assembly groups");
   }
 
@@ -457,7 +457,6 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
     }
     else {
       cpDir = outDir + "/.checkpoints/";
-      //trinDir = outDir + "/00-Transcript_assembly/";
       trinOutDir = outDir + "/00-Transcript_assembly/";
     }
 
@@ -502,92 +501,8 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
       sraRunsInTrin.push_back(currTrinIn);
       outDir = fs::path(currTrinIn.first).parent_path().c_str();
       inDir = sra.get_sra_path_orep_filt().first.parent_path().c_str();
-  
-      // If user preferences specify assembly of unmapped reads, push paths of unmapped read files for current
-      // SRA to vector containing the inputs for assembly with Trinity    
-      if (assembSeqsNoInterest) {
-        currTrinIn.first = outDir + "/" + currFilePrefix1 + ".unmapped.fq";
-        if (sra.is_paired()) {
-          currTrinIn.second = outDir + "/" + currFilePrefix2 + ".unmapped.fq";
-        }
-        sraRunsNoInterest.push_back(currTrinIn);
-      }
-
-      // Iterate through all user-defined FASTA sequence files, filling vector with paths to mapped input files for
-      // assembly with Trinity
-      for (auto seqFilePath : seqsInterest) {
-        currSeqFilePrefix = std::string(fs::path(seqFilePath.c_str()).stem().c_str());
-        currTrinOutInt = trinOutDir + "/" + sraGroup.first + "." + currSeqFilePrefix + ".mapped.Trinity.fasta";
-
-        // Check whether assembly group checkpoint exists
-        if (groupCheckpointExists(std::string(cpDir.c_str()), sraGroup.first)) {
-          logOutput("Assembly found for: " + sraGroup.first, logFile);
-          logOutput("  Containing:", logFile);
-          summarize_all_sras(sraGroup.second, logFile, 4);
-          continue;
-        }
-
-        // If user preferences specify assembly of mapped reads, push paths of mapped read files for current
-        // SRA to vector containing the inputs for assembly with Trinity
-        if (assembSeqsInterest) {
-          currTrinIn.first = outDir + "/" + currFilePrefix1 + "." + currSeqFilePrefix + ".mapped.fq";
-          if (sra.is_paired()) {
-            currTrinIn.second = outDir + "/" + currFilePrefix2 + "." + currSeqFilePrefix + ".mapped.fq";
-          }
-          sraRunsInterest.push_back(currTrinIn);
-        }
-
-      
-        // Perform assembly for reads of interest (those that map to current user-defined FASTA)
-        if (assembSeqsInterest) {
-          logOutput("\n  Now assembling reads that map to: \"" + seqFilePath + "\"\n", logFile);
-          if (!groupCheckpointExists(std::string(cpDir.c_str()), sraGroup.first + "." +
-                                     currSeqFilePrefix + ".mapped")) {
-            if (sraRunsInterest.size() > 1) {
-              run_trinity_comb(sraRunsInterest, currTrinOutInt, threads, ram_gb, dispOutput, logFile);
-            }
-            else {
-              run_trinity(sraRunsInterest.at(0), currTrinOutInt, threads, ram_gb, dispOutput, logFile);
-            }
-            // Make file for mapped assembly containing associated SRAs
-            transInfoFileStr = std::string(fs::path(currTrinOutInt.c_str()).replace_extension(".ti").c_str());
-            makeTransInfoFile(sraRunsInterest, transInfoFileStr);
-  
-            makeGroupCheckpoint(std::string(cpDir.c_str()), sraGroup.first + "." +
-                                currSeqFilePrefix + ".mapped");
-
-            updateHeaders(currTrinOutInt, sraGroup.first + "_" + currSeqFilePrefix + "_mapped", ram_b);
-          }
-          else {
-            logOutput("\n    Mapped assembly checkpoint found for: " + sraGroup.first + "\n\n", logFile);
-          }
-          sraRunsInterest.clear();
-        }
-      }
     }
-
-    // Perform assembly for reads of no interest (those that DO NOT map to current user-defined FASTA)
-    if (assembSeqsNoInterest) {
-      logOutput("\n  Now assembling reads that do not map to sequences of interest\n", logFile);
-      if (!groupCheckpointExists(std::string(cpDir.c_str()), sraGroup.first + ".unmapped")) {
-        if (sraRunsNoInterest.size() > 1) {
-          run_trinity_comb(sraRunsNoInterest, currTrinOutNon, threads, ram_gb, dispOutput, logFile);
-        }
-        else {
-          run_trinity(sraRunsNoInterest.at(0), currTrinOutNon, threads, ram_gb, dispOutput, logFile);
-        }
-        // Make file for unmapped assembly containing associated SRAs
-        transInfoFileStr = std::string(fs::path(currTrinOutNon.c_str()).replace_extension(".ti").c_str());
-        makeTransInfoFile(sraRunsNoInterest, transInfoFileStr);
-
-        makeGroupCheckpoint(std::string(cpDir.c_str()), sraGroup.first + ".unmapped");
-        updateHeaders(currTrinOutNon, sraGroup.first + "_" + currSeqFilePrefix + "_unmapped", ram_b);
-      }
-      else {
-        logOutput("\n    Unmapped assembly checkpoint found for: " + sraGroup.first, logFile);
-      }
-      sraRunsNoInterest.clear();
-    }
+  
     // Perform assembly for all reads
     if (assembAllSeqs) {
       logOutput("\n  Now assembling all reads", logFile);
@@ -602,6 +517,7 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
         transInfoFileStr = std::string(fs::path(currTrinOutAll.c_str()).replace_extension(".ti").c_str());
         makeTransInfoFile(sraRunsInTrin, transInfoFileStr);
 
+        outFiles.push_back(currTrinOutAll);
         makeGroupCheckpoint(std::string(cpDir.c_str()), sraGroup.first);
         updateHeaders(currTrinOutAll, sraGroup.first, ram_b);
       }
@@ -611,6 +527,7 @@ void run_trinity_bulk(std::map<std::string, std::vector<SRA>> sraGroups,
       sraRunsInTrin.clear();
     }
   }
+  return outFiles;
 }
 
 std::vector<std::string> getCommaSepStrings(std::string commaSepStrings) {
@@ -646,10 +563,12 @@ int main(int argc, char * argv[]) {
   std::vector<SRA> sras;
   std::vector<std::string> localDataFiles;
   std::vector<std::string> seqsInterest;
+  std::vector<std::string> outFiles;
   std::string threads;
   std::string ram_gb;
   bool retainInterFiles;
   bool dispOutput;
+  bool entirePipeline;
   bool selectiveAssembly;
   bool assembleInterest;
   bool assembleOthers;
@@ -661,6 +580,7 @@ int main(int argc, char * argv[]) {
     ram_gb = argv[6];
     retainInterFiles = stringToBool(argv[7]);
     dispOutput = stringToBool(argv[8]);
+    entirePipeline = stringToBool(argv[9]);
     configPath = argv[1];
     selectiveAssembly = false;
     assembleInterest = false;
@@ -677,7 +597,12 @@ int main(int argc, char * argv[]) {
                std::string((fs::canonical(fs::path(outDir.c_str())).filename()).c_str()) + "/";      
       logFilePath = outDir + "log.txt";
 
-      make_proj_space(outDir, "assemble");
+      if (entirePipeline) {
+        make_proj_space(outDir, "all");
+      }
+      else {
+        make_proj_space(outDir, "assembly");
+      }
 
       if (readFilesLeft.size() != readFilesRight.size()) {
         logOutput("ERROR: Number of left/right read files do not match", logFilePath);
@@ -701,17 +626,6 @@ int main(int argc, char * argv[]) {
       cfgIniGen = cfgIni["General"];
       logFilePath = std::string((fs::canonical(cfgIniGen["log_file"].c_str()).parent_path() /
                                 fs::path(cfgIniGen["log_file"].c_str()).filename()).c_str());
-      // Get sequences of interest from config file
-      cfgIniSeqsInt = cfgIni.at("Sequences of interest");
-      for (auto seqFilePath : cfgIniSeqsInt) {
-        seqsInterest.push_back(seqFilePath.first);
-      }
-  
-      // Get sequences of interest from config
-      selectiveAssembly = true;
-      assembleInterest = ini_get_bool(cfgIniGen["assemble_seqs_of_interest"].c_str(), 0);
-      assembleOthers = ini_get_bool(cfgIniGen["assemble_other_seqs"].c_str(), 0);
-      assembleAllSeqs = ini_get_bool(cfgIniGen["assemble_all_seqs"].c_str(), 0);
         
       if (!seqsInterest.empty()) {
         for (auto seqFilePath : seqsInterest) {
@@ -727,8 +641,8 @@ int main(int argc, char * argv[]) {
       }
       if (!selectiveAssembly) {
         if (seqsInterest.empty()) {
-          logOutput("\nUser did not define sequences of interest. Skipping selective assembly.\n",
-                    logFilePath);
+          //logOutput("\nUser did not define sequences of interest. Skipping selective assembly.\n",
+          //          logFilePath);
         }
         assembleInterest = false;
         assembleOthers = false;
@@ -743,7 +657,14 @@ int main(int argc, char * argv[]) {
       bool compressFiles = false;
     
       // Create file space
-      make_proj_space(cfgIni, "all");
+      if (entirePipeline) {
+        make_proj_space(cfgIni, "all");
+      }
+      else {
+        make_proj_space(cfgIni, "assembly");
+      }
+      outDir = std::string(fs::canonical(fs::path(cfgIniGen.at("output_directory").c_str()) /
+                                         fs::path(cfgIniGen.at("project_name").c_str())).c_str());
 
       // Obtain SRAs
       if (!dispOutput) {
@@ -897,14 +818,14 @@ int main(int argc, char * argv[]) {
     }
     // Perform assembly with Trinity
     if (configPath != "null") {
-      run_trinity_bulk(sraGroups, threads, ram_gb, assembleInterest, 
-                       assembleOthers, assembleAllSeqs, dispOutput,
-                       retainInterFiles, logFilePath, "", cfgIni);
+      outFiles = run_trinity_bulk(sraGroups, threads, ram_gb, assembleInterest, 
+                                  assembleOthers, assembleAllSeqs, dispOutput,
+                                  retainInterFiles, logFilePath, "", cfgIni);
     }
     else {
-      run_trinity_bulk(sraGroups, threads, ram_gb, assembleInterest,
-                       assembleOthers, assembleAllSeqs, dispOutput,
-                       retainInterFiles, logFilePath, outDir);
+      outFiles = run_trinity_bulk(sraGroups, threads, ram_gb, assembleInterest,
+                                  assembleOthers, assembleAllSeqs, dispOutput,
+                                  retainInterFiles, logFilePath, outDir);
     }
 
     logOutput("\nAssemble finished successfully\n\n", logFilePath);
@@ -913,6 +834,11 @@ int main(int argc, char * argv[]) {
     logOutput("ERROR: Assemble invoked improperly.\n", logFilePath);
   }
 
+  if (!entirePipeline) {
+    for (auto outFile : outFiles) {
+      system(("mv " + outFile + " " + outDir).c_str());
+    }
+  }
   system("setterm -cursor on");
   return 0;
 }
