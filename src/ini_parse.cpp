@@ -75,14 +75,15 @@ void make_proj_space(std::string outDir, std::string pipeStage) {
     startDirInd = 1;
     endDirInd = 7;
   }
-  if (pipeStage == "assembly") {
+  else if (pipeStage == "assembly") {
     startDirInd = 7;
     endDirInd = 8;
   }
-  if (pipeStage == "postprocess") {
+  else if (pipeStage == "postprocess") {
     startDirInd = 8;
     endDirInd = 11;
   }
+
   for (int i = startDirInd; i < endDirInd; i++) {
     currNum = getStepNum(stepNum);
     stepDirs[i] = pipeStage + "/" + currNum + "-" + stepDirs[i];

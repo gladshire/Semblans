@@ -97,7 +97,7 @@ void blastxBulk(const std::vector<transcript> & transVec, std::string threads,
       logOutput("ERROR: Reference proteome: " + refProteome + " not found\n", logFilePath);
       exit(1);
     }
-    blastDbDir = outDir + stepDirs[0] + "/";
+    blastDbDir = outDir + stepDirs[8] + "/";
     blastDbName = std::string(fs::path(refProteome.c_str()).stem().c_str());
   }
 
@@ -641,12 +641,12 @@ int main(int argc, char * argv[]) {
       
       outDir = std::string((fs::canonical(fs::path(outDir.c_str())).parent_path()).c_str()) + "/" +
                std::string((fs::canonical(fs::path(outDir.c_str())).filename()).c_str()) + "/";
-      if (entirePipeline) {
-        make_proj_space(outDir, "all");
-      }
-      else {
-        make_proj_space(outDir, "postprocess");
-      }
+      // if (entirePipeline) {
+      //   make_proj_space(outDir, "all");
+      // }
+      // else {
+      make_proj_space(outDir, "postprocess");
+      // }
       logFilePath = outDir + "log.txt";
       for (int i = 0; i < readFilesLeft.size(); i++) {
         sras.push_back(SRA(readFilesLeft[i], readFilesRight[i], outDir,

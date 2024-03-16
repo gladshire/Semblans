@@ -597,12 +597,12 @@ int main(int argc, char * argv[]) {
                std::string((fs::canonical(fs::path(outDir.c_str())).filename()).c_str()) + "/";      
       logFilePath = outDir + "log.txt";
 
-      if (entirePipeline) {
-        make_proj_space(outDir, "all");
-      }
-      else {
-        make_proj_space(outDir, "assembly");
-      }
+      // if (entirePipeline) {
+      //   make_proj_space(outDir, "all");
+      // }
+      // else {
+      make_proj_space(outDir, "assembly");
+      // }
 
       if (readFilesLeft.size() != readFilesRight.size()) {
         logOutput("ERROR: Number of left/right read files do not match", logFilePath);
