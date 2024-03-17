@@ -451,7 +451,7 @@ std::vector<std::string> run_trinity_bulk(std::map<std::string, std::vector<SRA>
   for (auto sraGroup : sraGroups) {
     // Define paths for checkpoint and trinity output directories
     if (!cfgIni.empty()) {
-      cpDir = sraGroup.second[0].get_fastqc_dir_2().first.parent_path().parent_path().parent_path() / ".checkpoints";
+      cpDir = sraGroup.second[0].get_fastqc_dir_2().first.parent_path().parent_path().parent_path().parent_path() / ".checkpoints";
       trinDir = transcript(sraGroup.second[0]).get_trans_path_trinity().parent_path();
       trinOutDir = std::string(trinDir.c_str());
     }

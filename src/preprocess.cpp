@@ -1033,6 +1033,9 @@ int main(int argc, char * argv[]) {
       cfgIniGen = cfgIni["General"];
       cfgIniPipeline = cfgIni["Pipeline"];
       kraken2DbFiles = get_kraken2_dbs(cfgIni);
+      if (kraken2DbFiles.empty()) {
+        kraken2DbFiles.push_back("null");
+      }
       //bool compressFiles = ini_get_bool(cfgIni["General"]["compress_files"].c_str(), 0);
       logFilePath = std::string((fs::canonical(fs::path(cfgIniGen["log_file"].c_str()).parent_path()) /
                                 fs::path(cfgIniGen["log_file"].c_str()).filename()).c_str());
@@ -1161,7 +1164,7 @@ int main(int argc, char * argv[]) {
     if (configPath != "null") {
       if (ini_get_bool(cfgIniPipeline.at("filter_foreign_reads").c_str(), 0)) {
         std::string krakenConf = get_kraken2_conf(cfgIni);
-        if (!kraken2DbFiles.empty()) {
+        if (kraken2DbFiles[0] != "null") {
           outFiles = filtForeignBulk(sras, kraken2DbFiles, threads, dispOutput, compressFiles, retainInterFiles,
                                      logFilePath, "", cfgIni);
         }
