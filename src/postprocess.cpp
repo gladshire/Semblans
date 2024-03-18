@@ -690,13 +690,14 @@ int main(int argc, char * argv[]) {
         sraRunsLocal.first = "";
         sraRunsLocal.second = "";
         posLocalFiles = sraRun.find(' ');
+        sraRunsLocal.first = sraRun.substr(0, posLocalFiles);
         if (posLocalFiles != std::string::npos) {
           sraRun.erase(0, posLocalFiles + 1);
           posLocalFiles = sraRun.find(' ');
           sraRunsLocal.second = sraRun.substr(0, posLocalFiles);
         }
-        if (fs::exists(sraRunsLocal.first) &&
-            fs::exists(sraRunsLocal.second)) {
+        if (fs::exists(sraRunsLocal.first.c_str()) &&
+            fs::exists(sraRunsLocal.second.c_str())) {
           sras.push_back(SRA(sraRunsLocal.first, sraRunsLocal.second, cfgIni, compressFiles,
                              logFilePath));
         }
