@@ -143,7 +143,7 @@ int main(int argc, char * argv[]) {
   }
   if (argc == 2 && (strcmp("--version", argv[1]) == 0 ||
                     strcmp("-v", argv[1]) == 0)) {
-    std::cout << "Semblans version: v1.0.4" << std::endl;
+    std::cout << "Semblans version: v1.0.6" << std::endl;
   }
   else {
     // Parse through flags in commands

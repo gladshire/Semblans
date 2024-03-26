@@ -109,7 +109,7 @@ if $install_panther ; then
 		tar -xzf PANTHER*.tgz
 		mv target panther_db/
 		mv panther_db ./data/
-		rm PANTHER17.0_hmmscoring.tgz
+		rm PANTHER*.tgz
 		wget -r -q --no-parent http://data.pantherdb.org/ftp/hmm_scoring/17.0/pantherScore2.2/
 		mv data.pantherdb.org/ftp/hmm_scoring/17.0/pantherScore2.2 ./external/pantherScore
 		chmod +x ./external/pantherScore/pantherScore2.2.pl
