@@ -39,24 +39,35 @@ fi
 echo "Now installing required libraries"
 
 # Install boost libraries
-echo "  Installing Boost libraries ..."
-wget -q https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.gz
-tar -xf boost_1_81_0.tar.gz
-cd boost_1_81_0
-./bootstrap.sh --prefix=../
-./b2 install cxxflags="-std=c++11" link=static
-make
-make install
-mv LICENSE_1_0.txt ../include/boost/
-cd ..
-rm -rf boost_1_81_0*
+if ( [ ! -f ./lib/libboost_filesystem.a ] ||
+     [ ! -f ./lib/libboost_regex.a ] ||
+     [ ! -f ./lib/libboost_system.a ] ||
+     [ ! -f ./lib/libboost_locale.a ] ); then
+	echo "  Installing Boost libraries ..."
+	wget -q https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.gz
+	tar -xf boost_1_81_0.tar.gz
+	cd boost_1_81_0
+	./bootstrap.sh --prefix=../
+	./b2 install cxxflags="-std=c++11" link=static
+	make
+	make install
+	mv LICENSE_1_0.txt ../include/boost/
+	cd ..
+	rm -rf boost_1_81_0*
+else
+	echo "Boost already installed. Skipping ..."
+fi
 
 # Install rapidXML
-echo "  Installing rapidXML library ..."
-wget -q https://sourceforge.net/projects/rapidxml/files/rapidxml/rapidxml%201.13/rapidxml-1.13.zip
-unzip rapidxml-1.13.zip -d ./include/
-mv ./include/rapidxml-1.13 ./include/rapidxml
-rm rapidxml-1.13.zip
+if [ ! -f ./include/rapidxml/rapidxml.hpp ]; then
+	echo "  Installing rapidXML library ..."
+	wget -q https://sourceforge.net/projects/rapidxml/files/rapidxml/rapidxml%201.13/rapidxml-1.13.zip
+	unzip rapidxml-1.13.zip -d ./include/
+	mv ./include/rapidxml-1.13 ./include/rapidxml
+	rm rapidxml-1.13.zip
+else
+	echo "RapidXML already installed. Skipping ..."
+fi
 
 # Install libconfini
 echo "  Installing libconfini library ..."
@@ -388,6 +399,9 @@ if ( [ ! -e "./bin/preprocess" ] ||
      [ ! -e "./bin/assemble" ] ||
      [ ! -e "./bin/postprocess" ] ||
      [ ! -e "./bin/semblans" ] ); then
-	echo ERROR: Semblans failed to build from source
+	echo "ERROR: Semblans failed to build from source"
 	exit 1
+else
+	echo "Semblans built successfully"
+fi
 fi
