@@ -74,7 +74,7 @@ std::string getPercent(float valPercent, int precision) {
 void checkExitSignal(int commandResult, std::string logFile) {
   if (WIFSIGNALED(commandResult)) {
     system("setterm -cursor on");
-    logOutput("\nExisted with signal " + std::to_string(WTERMSIG(commandResult)) + "\n", logFile);
+    logOutput("\nExited with signal " + std::to_string(WTERMSIG(commandResult)) + "\n", logFile);
     exit(1);
   }
 }

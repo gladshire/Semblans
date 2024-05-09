@@ -107,6 +107,402 @@ void print_help_postprocess() {
 }
 
 
+void parseArgv(int argc, char * argv[], std::string & command,
+               std::string & leftReads, std::string & rightReads,
+               std::string & assembly, std::string & refProt,
+               std::string & outDir, std::string & threadStr,
+               std::string & ramStr, std::string & pathConfig,
+               std::string & kraken2Dbs, bool & retainInterFiles,
+               bool & verboseOutput) {
+
+  for (int i = 0; i < argc; i++) {
+
+    // Check for semblans command (preprocess/assemble/postprocess)
+    // If none is given, will perform all
+    if (strcmp("preprocess", argv[i]) == 0 ||
+        strcmp("Preprocess", argv[i]) == 0 ||
+        strcmp("pre", argv[i]) == 0 ||
+        strcmp("Pre", argv[i]) == 0 ||
+        strcmp("pr", argv[i]) == 0 ||
+        strcmp("Pr", argv[i]) == 0) {
+      command = "preprocess";
+    }
+    else if (strcmp("assemble", argv[i]) == 0 ||
+             strcmp("Assemble", argv[i]) == 0 ||
+             strcmp("ass", argv[i]) == 0 ||
+             strcmp("Ass", argv[i]) == 0 ||
+             strcmp("as", argv[i]) == 0 ||
+             strcmp("As", argv[i]) == 0 ||
+             strcmp("a", argv[i]) == 0 ||
+             strcmp("A", argv[i]) == 0) {
+      command = "assemble";
+    }
+    else if (strcmp("postprocess", argv[i]) == 0 ||
+             strcmp("Postprocess", argv[i]) == 0 ||
+             strcmp("post", argv[i]) == 0 ||
+             strcmp("Post", argv[i]) == 0 ||
+             strcmp("pos", argv[i]) == 0 ||
+             strcmp("Pos", argv[i]) == 0 ||
+             strcmp("po", argv[i]) == 0 ||
+             strcmp("Po", argv[i]) == 0) {
+      command = "postprocess";
+    }
+    else if (strcmp("all", argv[i]) == 0 ||
+             strcmp("All", argv[i]) == 0) {
+      command = "all";
+    }
+
+    // Check for config file path
+    else if (strcmp("--config", argv[i]) == 0 ||
+             strcmp("-cfg", argv[i]) == 0) {
+      if (strcmp(argv[i + 1] + strlen(argv[i + 1]) - 4, ".ini") == 0 ||
+          strcmp(argv[i + 1] + strlen(argv[i + 1]) - 4, ".INI") == 0) {
+        pathConfig = argv[i + 1];
+        fs::path pathConfigFile(pathConfig.c_str());
+        if (!fs::exists(pathConfigFile)) {
+          // ERROR: Config file not found!
+          std::cout << "ERROR: Config file: " << pathConfig << " not found\n" << std::endl;
+          exit(1);
+        }
+      }
+      else {
+        // ERROR: Config flag invoked, but no config file specified!
+        std::cerr << "ERROR: If using '--config', you must specify config file (.INI)" << std::endl;
+        std::cerr << "  (example: --config path/to/config.ini)\n" << std::endl;
+        exit(1);
+      }
+    }
+
+    // Check for '--left' read sequence FASTQ file(s)
+    else if (strcmp("--left", argv[i]) == 0 ||
+             strcmp("-1", argv[i]) == 0) {
+      leftReads = argv[i + 1];
+    }
+    // Check for '--right' read sequence FASTQ file(s)
+    else if (strcmp("--right", argv[i]) == 0 ||
+             strcmp("-2", argv[i]) == 0) {
+      rightReads = argv[i + 1];
+    }
+    // Check for '--assembly' transcripts sequence FASTA file
+    else if (strcmp("--assembly", argv[i]) == 0 ||
+             strcmp("-a", argv[i]) == 0) {
+      assembly = argv[i + 1];
+      if (!fs::exists(fs::path(assembly.c_str()))) {
+        std::cerr << "ERROR: Assemble '" + assembly + "' does not exist\n" << std::endl;
+        exit(1);
+      }
+    }
+    else if (strcmp("--reference-proteome", argv[i]) == 0 ||
+             strcmp("--ref-proteome", argv[i]) == 0 ||
+             strcmp("-rp", argv[i]) == 0) {
+      refProt = argv[i + 1];
+      if (!fs::exists(fs::path(refProt.c_str()))) {
+        std::cerr << "ERROR: Reference proteome '" + refProt + "' does not exist\n" << std::endl;
+        exit(1);
+      }
+    }
+    else if (strcmp("--kraken-db", argv[i]) == 0 ||
+             strcmp("-kdb", argv[i]) == 0) {
+      kraken2Dbs = argv[i + 1];
+    }
+    // Check for '--output', for specifying where outputs should
+    // go if no config file is used
+    else if (strcmp("--output-directory", argv[i]) == 0 ||
+             strcmp("--output", argv[i]) == 0 ||
+             strcmp("-od", argv[i]) == 0) {
+      outDir = argv[i + 1];
+      if (!fs::exists(outDir.c_str())) {
+        std::cerr << "ERROR: Output directory '" + outDir + "' does not exist\n" << std::endl;
+        exit(1);
+      }
+    }
+
+    // Check for number of threads flag
+    else if (strcmp("--threads", argv[i]) == 0 ||
+             strcmp("--Threads", argv[i]) == 0 ||
+             strcmp("-t", argv[i]) == 0 ||
+             strcmp("-T", argv[i]) == 0) {
+      if (i != argc - 1) {
+        threadStr = argv[i + 1];
+        for (int j = 0; j < strlen(argv[i + 1]); j++) {
+          if (!isdigit(threadStr[j])) {
+            // ERROR: Bad thread argument
+            std::cerr << "ERROR: Invalid argument given for --threads/-t" << std::endl;
+            std::cerr << "  (example: --threads 8)\n" << std::endl;
+            exit(1);
+          }
+        }
+      }
+      else {
+        // No thread count given, using 1 thread
+        threadStr = "1";
+      }
+    }
+
+    // Check for ammount of ram to be dedicated
+    else if (strcmp("--ram", argv[i]) == 0 ||
+             strcmp("--Ram", argv[i]) == 0 ||
+             strcmp("-r", argv[i]) == 0 ||
+             strcmp("-R", argv[i]) == 0) {
+
+      if (i != argc - 1) {
+        ramStr = argv[i + 1];
+
+        for (int j = 0; j < strlen(argv[i + 1]); j++) {
+          if (!isdigit(ramStr[j])) {
+            // ERROR: Bad memory argument
+            std::cerr << "ERROR: Invalid argument given for --ram/-r" << std::endl;
+            std::cerr << "  (example: --ram 10)\n" << std::endl;
+            exit(1);
+          }
+        }
+      }
+      else {
+        // No RAM ammount given, using 1 GB
+        ramStr = "8";
+      }
+    }
+    // Check for '--retain' flag, which tells Semblans not to delete outputs from
+    // intermediate steps in the pipeline
+    else if (strcmp("--retain", argv[i]) == 0 ||
+             strcmp("--Retain", argv[i]) == 0 ||
+             strcmp("-f", argv[i]) == 0 ||
+             strcmp("-F", argv[i]) == 0) {
+      retainInterFiles = true;
+    }
+    // Check for '--berbose' flag, which tells Semblans to print a detailed output
+    // to the terminal's standard output. This does not affect verbosity of log files.
+    // Regardless of terminal output, log files always receive maximum verbosity.
+    else if (strcmp("--verbose", argv[i]) == 0 ||
+             strcmp("--Verbose", argv[i]) == 0 ||
+             strcmp("-v", argv[i]) == 0 ||
+             strcmp("-V", argv[i]) == 0) {
+      verboseOutput = true;
+    }
+  }
+}
+
+void preprocess(std::vector<std::string> sraRuns, bool serialProcess, std::string pathConfig,
+                std::string leftReads, std::string rightReads, std::string kraken2Dbs,
+                std::string outDir, std::string threadStr, std::string ramStr,
+                std::string retain, std::string verbose, std::string entirePipeline,
+                std::string logFilePath) {
+  
+  std::ifstream cfgIniFile;
+  std::ofstream cfgIniSub;
+  std::string currLine;
+  std::string currCfgIniSub;
+  std::string currPreCmd;
+  size_t pos;
+  int result;
+
+  if (pathConfig == "") {
+    if (leftReads == "" && rightReads == "") {
+      std::cerr << "ERROR: If not using '--config', user must specify ";
+      std::cerr << "the left/right read files for preprocessing" << std::endl;
+      std::cerr << "  (example: --left reads_1_left.fq,reads_2_left.fq,..." << std::endl;
+      std::cerr << "            --right reads_1_right.fq,reads2_right.fq,..." << std::endl;
+      exit(1);
+    }
+  }
+
+  std::string preCmd = SEMBLANS_DIR + "preprocess " + pathConfig + " " +
+                       leftReads + " " + rightReads + " " + kraken2Dbs + " " +
+                       outDir + " " + threadStr + " " + ramStr +
+                       retain + verbose + entirePipeline;
+
+  if (serialProcess) {
+    for (auto sraStr : sraRuns) {
+      currCfgIniSub = pathConfig.substr(0, pathConfig.rfind(".ini")).insert(pathConfig.rfind("/") + 1, ".") +
+                      "." + std::string(fs::path(sraStr.c_str()).stem().c_str()) + ".ini";
+      std::replace(currCfgIniSub.begin(), currCfgIniSub.end(), ' ', '_');
+      cfgIniFile.open(pathConfig);
+      cfgIniSub.open(currCfgIniSub);
+      while (std::getline(cfgIniFile, currLine)) {
+        for (auto sraStrOther : sraRuns) {
+          if (sraStrOther == sraStr) {
+            continue;
+          }
+          pos = currLine.find(sraStrOther);
+          if (pos != std::string::npos) {
+            currLine.replace(currLine.find(sraStrOther), sraStrOther.length(), "");
+          }
+        }
+        cfgIniSub << currLine << std::endl;
+      }
+      cfgIniFile.close();
+      cfgIniSub.close();
+      currPreCmd = SEMBLANS_DIR + "preprocess " + currCfgIniSub + " " +
+                   leftReads + " " + rightReads + " " + kraken2Dbs + " " +
+                   outDir + " " + threadStr + " " + ramStr + " " + retain +
+                   verbose + entirePipeline;
+
+      logOutput("\nPerforming preprocessing only\n\n", logFilePath);
+      if (verbose == " true") {
+        logOutput("  Running command: " + currPreCmd + "\n", logFilePath);
+      }
+
+      result = system(currPreCmd.c_str());
+      checkExitSignal(result, logFilePath);
+    }
+  }
+  else {
+    logOutput("\nPerforming preprocessing only\n\n", logFilePath);
+    if (verbose == " true") {
+      logOutput("  Running command: " + preCmd + "\n", logFilePath);
+    }
+    result = system(preCmd.c_str());
+    checkExitSignal(result, logFilePath);
+  }
+}
+
+
+void assemble(std::vector<std::string> sraRuns, bool serialProcess, std::string pathConfig,
+              std::string leftReads, std::string rightReads, std::string kraken2Dbs,
+              std::string outDir, std::string threadStr, std::string ramStr,
+              std::string retain, std::string verbose, std::string entirePipeline,
+              std::string logFilePath) {
+
+  std::ifstream cfgIniFile;
+  std::ofstream cfgIniSub;
+  std::string currLine;
+  std::string currCfgIniSub;
+  std::string currAssCmd;
+  size_t pos;
+  int result;
+
+  std::string assCmd = SEMBLANS_DIR + "assemble " + pathConfig + " " +
+                       leftReads + " " + rightReads + " " + outDir + " " +
+                       threadStr + " " + ramStr + retain + verbose + entirePipeline;
+
+  if (serialProcess) {
+    for (auto sraStr : sraRuns) {
+      currCfgIniSub = pathConfig.substr(0, pathConfig.rfind(".ini")).insert(pathConfig.rfind("/") + 1, ".") +
+                      "." + std::string(fs::path(sraStr.c_str()).stem().c_str()) + ".ini";
+      std::replace(currCfgIniSub.begin(), currCfgIniSub.end(), ' ', '_');
+      cfgIniFile.open(pathConfig);
+      cfgIniSub.open(currCfgIniSub);
+      while (std::getline(cfgIniFile, currLine)) {
+        for (auto sraStrOther : sraRuns) {
+          if (sraStrOther == sraStr) {
+            continue;
+          }
+          pos = currLine.find(sraStrOther);
+          if (pos != std::string::npos) {
+            currLine.replace(currLine.find(sraStrOther), sraStrOther.length(), "");
+          }
+        }
+        cfgIniSub << currLine << std::endl;
+      }
+      cfgIniFile.close();
+      cfgIniSub.close();
+
+      currAssCmd = SEMBLANS_DIR + "assemble " + currCfgIniSub + " " +
+                   leftReads + " " + rightReads + " " + outDir + " " +
+                   threadStr + " " + ramStr + retain + verbose + entirePipeline;
+
+      logOutput("\nPerforming assembly only\n\n", logFilePath);
+      if (verbose == " true") {
+        logOutput("  Running command: " + currAssCmd + "\n", logFilePath);
+      }
+      result = system(currAssCmd.c_str());
+      checkExitSignal(result, logFilePath);
+    }
+  }
+  else {
+    logOutput("\nPerforming assembly only\n\n", logFilePath);
+    if (verbose == " true") {
+      logOutput("  Running command: " + assCmd + "\n", logFilePath);
+    }
+    result = system(assCmd.c_str());
+    checkExitSignal(result, logFilePath);
+  }
+}
+
+
+void postprocess(std::vector<std::string> sraRuns, bool serialProcess, std::string pathConfig,
+                 std::string leftReads, std::string rightReads, std::string assembly,
+                 std::string refProt, std::string outDir, std::string threadStr,
+                 std::string ramStr, std::string retain, std::string verbose,
+                 std::string entirePipeline, std::string logFilePath) {
+
+  std::ifstream cfgIniFile;
+  std::ofstream cfgIniSub;
+  std::string currLine;
+  std::string currCfgIniSub;
+  std::string currPostCmd;
+  size_t pos;
+  int result;
+
+  if (pathConfig == "") {
+    if (assembly == "" || (leftReads == "" && rightReads == "")) {
+      std::cerr << "ERROR: If not using '--config', user must specify assembly, " << std::endl;
+      std::cerr << "the left/right read files that were used in assembly, and" << std::endl;
+      std::cerr << "a reference proteome." << std::endl;
+      std::cerr << "  (example: --assembly transcripts.fa" << std::endl;
+      std::cerr << "            --ref-proteome refProt.fa" << std::endl;
+      std::cerr << "            --left reads_1_left.fq,reads_2_left.fq,..." << std::endl;
+      std::cerr << "            --right reads_1_right.fq, reads_2_right.fq,..." << std::endl;
+      exit(1);
+    }
+    if (refProt == "") {
+      std::cerr << "ERROR: If not using '--config', ";
+      std::cerr << "user must specify a reference proteome FASTA" << std::endl;
+      std::cerr << "  (example: --reference-proteome path/to/ref_prot.fa)\n" << std::endl;
+      exit(1);
+    }
+  }
+
+  std::string postCmd = SEMBLANS_DIR + "postprocess " + pathConfig + " " +
+                        leftReads + " " + rightReads + " " + assembly + " " +
+                        refProt + " " + outDir + " " + threadStr + " " + ramStr + " " +
+                        retain + verbose + entirePipeline;
+
+  if (serialProcess) {
+    for (auto sraStr : sraRuns) {
+      currCfgIniSub = pathConfig.substr(0, pathConfig.rfind(".ini")).insert(pathConfig.rfind("/") + 1, ".") +
+                      "." + std::string(fs::path(sraStr.c_str()).stem().c_str()) + ".ini";
+      std::replace(currCfgIniSub.begin(), currCfgIniSub.end(), ' ', '_');
+      cfgIniFile.open(pathConfig);
+      cfgIniSub.open(currCfgIniSub);
+      while (std::getline(cfgIniFile, currLine)) {
+        for (auto sraStrOther : sraRuns) {
+          if (sraStrOther == sraStr) {
+            continue;
+          }
+          pos = currLine.find(sraStrOther);
+          if (pos != std::string::npos) {
+            currLine.replace(currLine.find(sraStrOther), sraStrOther.length(), "");
+          }
+        }
+        cfgIniSub << currLine << std::endl;
+      }
+      cfgIniFile.close();
+      cfgIniSub.close();
+
+      currPostCmd = SEMBLANS_DIR + "postprocess " + pathConfig + " " +
+                    leftReads + " " + rightReads + " " + assembly + " " +
+                    refProt + " " + outDir + " " + threadStr + " " + ramStr +
+                    retain + verbose + entirePipeline;
+
+      logOutput("\nPerforming postprocess only\n\n", logFilePath);
+      if (verbose == " true") {
+        logOutput("  Running command: " + currPostCmd + "\n", logFilePath);
+      }
+      result = system(currPostCmd.c_str());
+      checkExitSignal(result, logFilePath);
+    }
+  }
+  else {
+    logOutput("\nPerforming postprocess only\n\n", logFilePath);
+    if (verbose == " true") {
+      logOutput("  Running command: " + postCmd + "\n", logFilePath);
+    }
+    result = system(postCmd.c_str());
+    checkExitSignal(result, logFilePath);
+  }
+}
+
 
 int main(int argc, char * argv[]) {
   //print_intro();
@@ -156,172 +552,12 @@ int main(int argc, char * argv[]) {
     retainInterFiles = false;
     verboseOutput = false;
 
-    for (int i = 0; i < argc; i++) {
+    // Parse through Semblans argument vector
+    parseArgv(argc, argv, command, leftReads, rightReads,
+              assembly, refProt, outDir, threadStr, ramStr,
+              pathConfig, kraken2Dbs, retainInterFiles,
+              verboseOutput);
 
-      // Check for semblans command (preprocess/assemble/postprocess)
-      // If none is given, will perform all
-      if (strcmp("preprocess", argv[i]) == 0 ||
-          strcmp("Preprocess", argv[i]) == 0 ||
-          strcmp("pre", argv[i]) == 0 ||
-          strcmp("Pre", argv[i]) == 0 ||
-          strcmp("pr", argv[i]) == 0 ||
-          strcmp("Pr", argv[i]) == 0) {
-        command = "preprocess";
-      }
-      else if (strcmp("assemble", argv[i]) == 0 ||
-               strcmp("Assemble", argv[i]) == 0 ||
-               strcmp("ass", argv[i]) == 0 ||
-               strcmp("Ass", argv[i]) == 0 ||
-               strcmp("as", argv[i]) == 0 ||
-               strcmp("As", argv[i]) == 0 ||
-               strcmp("a", argv[i]) == 0 ||
-               strcmp("A", argv[i]) == 0) {
-        command = "assemble";
-      }
-      else if (strcmp("postprocess", argv[i]) == 0 ||
-               strcmp("Postprocess", argv[i]) == 0 ||
-               strcmp("post", argv[i]) == 0 ||
-               strcmp("Post", argv[i]) == 0 ||
-               strcmp("pos", argv[i]) == 0 ||
-               strcmp("Pos", argv[i]) == 0 ||
-               strcmp("po", argv[i]) == 0 ||
-               strcmp("Po", argv[i]) == 0) {
-        command = "postprocess";
-      }
-      else if (strcmp("all", argv[i]) == 0 ||
-               strcmp("All", argv[i]) == 0) {
-        command = "all";
-      }
-
-      // Check for config file path
-      else if (strcmp("--config", argv[i]) == 0 ||
-               strcmp("-cfg", argv[i]) == 0) {
-        if (strcmp(argv[i + 1] + strlen(argv[i + 1]) - 4, ".ini") == 0 ||
-            strcmp(argv[i + 1] + strlen(argv[i + 1]) - 4, ".INI") == 0) {
-          pathConfig = argv[i + 1];
-          fs::path pathConfigFile(pathConfig.c_str());
-          if (!fs::exists(pathConfigFile)) {
-            // ERROR: Config file not found!
-            std::cout << "ERROR: Config file: " << pathConfig << " not found\n" << std::endl;
-            exit(1);
-          }
-        }
-        else {
-          // ERROR: Config flag invoked, but no config file specified!
-          std::cerr << "ERROR: If using '--config', you must specify config file (.INI)" << std::endl;
-          std::cerr << "  (example: --config path/to/config.ini)\n" << std::endl;
-          exit(1);
-        }
-      }
-
-      // Check for '--left' read sequence FASTQ file(s)
-      else if (strcmp("--left", argv[i]) == 0 ||
-               strcmp("-1", argv[i]) == 0) {
-        leftReads = argv[i + 1];
-      }
-      // Check for '--right' read sequence FASTQ file(s)
-      else if (strcmp("--right", argv[i]) == 0 ||
-               strcmp("-2", argv[i]) == 0) {
-        rightReads = argv[i + 1];
-      }
-      // Check for '--assembly' transcripts sequence FASTA file
-      else if (strcmp("--assembly", argv[i]) == 0 ||
-               strcmp("-a", argv[i]) == 0) {
-        assembly = argv[i + 1];
-        if (!fs::exists(fs::path(assembly.c_str()))) {
-          std::cerr << "ERROR: Assemble '" + assembly + "' does not exist\n" << std::endl;
-          exit(1);
-        }
-      }
-      else if (strcmp("--reference-proteome", argv[i]) == 0 ||
-               strcmp("--ref-proteome", argv[i]) == 0 ||
-               strcmp("-rp", argv[i]) == 0) {
-        refProt = argv[i + 1];
-        if (!fs::exists(fs::path(refProt.c_str()))) {
-          std::cerr << "ERROR: Reference proteome '" + refProt + "' does not exist\n" << std::endl;
-          exit(1);
-        }
-      }
-      else if (strcmp("--kraken-db", argv[i]) == 0 ||
-               strcmp("-kdb", argv[i]) == 0) {
-        kraken2Dbs = argv[i + 1];
-      }
-      // Check for '--output', for specifying where outputs should
-      // go if no config file is used
-      else if (strcmp("--output-directory", argv[i]) == 0 ||
-               strcmp("--output", argv[i]) == 0 ||
-               strcmp("-od", argv[i]) == 0) {
-        outDir = argv[i + 1];
-        if (!fs::exists(outDir.c_str())) {
-          std::cerr << "ERROR: Output directory '" + outDir + "' does not exist\n" << std::endl;
-          exit(1);
-        }
-      }
-
-      // Check for number of threads flag
-      else if (strcmp("--threads", argv[i]) == 0 ||
-               strcmp("--Threads", argv[i]) == 0 ||
-               strcmp("-t", argv[i]) == 0 ||
-               strcmp("-T", argv[i]) == 0) {
-        if (i != argc - 1) {
-          threadStr = argv[i + 1];
-          for (int j = 0; j < strlen(argv[i + 1]); j++) {
-            if (!isdigit(threadStr[j])) {
-              // ERROR: Bad thread argument
-              std::cerr << "ERROR: Invalid argument given for --threads/-t" << std::endl;
-              std::cerr << "  (example: --threads 8)\n" << std::endl;
-              exit(1);
-            }
-          }
-          numThreads = atoi(threadStr.c_str());
-        }
-        else {
-          // No thread count given, using 1 thread
-        }
-      }
-
-      // Check for ammount of ram to be dedicated
-      else if (strcmp("--ram", argv[i]) == 0 ||
-               strcmp("--Ram", argv[i]) == 0 ||
-               strcmp("-r", argv[i]) == 0 ||
-               strcmp("-R", argv[i]) == 0) {
-
-        if (i != argc - 1) {
-          ramStr = argv[i + 1];
-
-          for (int j = 0; j < strlen(argv[i + 1]); j++) {
-            if (!isdigit(ramStr[j])) {
-              // ERROR: Bad memory argument
-              std::cerr << "ERROR: Invalid argument given for --ram/-r" << std::endl;
-              std::cerr << "  (example: --ram 10)\n" << std::endl;
-              exit(1);
-            }
-          }
-        }
-        else {
-          // No RAM ammount given, using 1 GB
-          ramStr = "1";
-        }
-        ram = atoi(ramStr.c_str());
-      }
-      // Check for '--retain' flag, which tells Semblans not to delete outputs from
-      // intermediate steps in the pipeline
-      else if (strcmp("--retain", argv[i]) == 0 ||
-               strcmp("--Retain", argv[i]) == 0 ||
-               strcmp("-f", argv[i]) == 0 ||
-               strcmp("-F", argv[i]) == 0) {
-        retainInterFiles = true;
-      }
-      // Check for '--berbose' flag, which tells Semblans to print a detailed output
-      // to the terminal's standard output. This does not affect verbosity of log files.
-      // Regardless of terminal output, log files always receive maximum verbosity.
-      else if (strcmp("--verbose", argv[i]) == 0 ||
-               strcmp("--Verbose", argv[i]) == 0 ||
-               strcmp("-v", argv[i]) == 0 ||
-               strcmp("-V", argv[i]) == 0) {
-        verboseOutput = true;
-      }
-    }
     // If no Semblans submodule specified, run all three (preprocess, assemble, postprocess)
     if (command == "") {
       command = "all";
@@ -335,37 +571,6 @@ int main(int argc, char * argv[]) {
       useCfg = false;
       if (outDir == "") {
         outDir = ".";
-      }
-      // Catch case of user running preprocess or entire pipeline without config file, and not
-      // defining forward or reverse ended reads in their command
-      if (command == "preprocess" || command == "all") {
-        if (leftReads == "" && rightReads == "") {
-          std::cerr << "ERROR: If not using '--config', user must specify ";
-          std::cerr << "the left/right read files for preprocessing" << std::endl;
-          std::cerr << "  (example: --left reads_1_left.fq,reads_2_left.fq,..." << std::endl;
-          std::cerr << "            --right reads_1_right.fq,reads2_right.fq,..." << std::endl;
-          exit(1);
-        }
-      }
-      // Catch case of user running postprocess without config file, and not defining forward or
-      // reverse ended reads, assembly in their command
-      if (command == "postprocess") {
-        if (assembly == "" || (leftReads == "" && rightReads == "")) {
-          std::cerr << "ERROR: If not using '--config', user must specify assembly, " << std::endl;
-          std::cerr << "the left/right read files that were used in assembly, and" << std::endl;
-          std::cerr << "a reference proteome." << std::endl;
-          std::cerr << "  (example: --assembly transcripts.fa" << std::endl;
-          std::cerr << "            --ref-proteome refProt.fa" << std::endl;
-          std::cerr << "            --left reads_1_left.fq,reads_2_left.fq,..." << std::endl;
-          std::cerr << "            --right reads_1_right.fq, reads_2_right.fq,..." << std::endl;
-          exit(1);
-        }
-        if (refProt == "") {
-          std::cerr << "ERROR: If not using '--config', ";
-          std::cerr << "user must specify a reference proteome FASTA" << std::endl;
-          std::cerr << "  (example: --reference-proteome path/to/ref_prot.fa)\n" << std::endl;
-          exit(1);
-        }
       }
       // If running entire assembly without config file, define names of resulting assemblies
       if (command == "all") {
@@ -453,22 +658,6 @@ int main(int argc, char * argv[]) {
     else {
       entirePipeline = " false";
     }
-
-    preCmd = SEMBLANS_DIR + "preprocess " + pathConfig + " " +
-             leftReads + " " + rightReads + " " + kraken2Dbs + " " +
-             outDir + " " +
-             std::to_string(numThreads) + " " +
-             std::to_string(ram);
-    preCmd += retain;
-    preCmd += verbose;
-    preCmd += entirePipeline;
-    assCmd = SEMBLANS_DIR + "assemble " + pathConfig + " " +
-             leftReads + " " + rightReads + " " + outDir + " " +
-             std::to_string(numThreads) + " " +
-             std::to_string(ram);
-    assCmd += retain;
-    assCmd += verbose;
-    assCmd += entirePipeline;
     postCmd = SEMBLANS_DIR + "postprocess " + pathConfig + " " +
               leftReads + " " + rightReads + " " + assembly + " " +
               refProt + " " + outDir + " " +
@@ -492,153 +681,24 @@ int main(int argc, char * argv[]) {
 
     // Case 1: preprocess
     if (command == "preprocess") {
-      if (assembly != "") {
-        std::cerr << "ERROR: '--assembly' flag can only be invoked for postprocess" << std::endl;
-        exit(1);
-      }
-      if (serialProcess) {
-        for (auto sraStr : sraRuns) {
-          currCfgIniSub = pathConfig.substr(0, pathConfig.rfind(".ini")).insert(pathConfig.rfind("/") + 1, ".") +
-                          "." + std::string(fs::path(sraStr.c_str()).stem().c_str()) + ".ini";
-          std::replace(currCfgIniSub.begin(), currCfgIniSub.end(), ' ', '_');
-          cfgIniFile.open(pathConfig);
-          cfgIniSub.open(currCfgIniSub);
-          while (std::getline(cfgIniFile, currLine)) {
-            for (auto sraStrOther : sraRuns) {
-              if (sraStrOther == sraStr) {
-                continue;
-              }
-              pos = currLine.find(sraStrOther);
-              if (pos != std::string::npos) {
-                currLine.replace(currLine.find(sraStrOther), sraStrOther.length(), "");
-              }
-            }
-            cfgIniSub << currLine << std::endl;
-          }
-          cfgIniFile.close();
-          cfgIniSub.close();
-          currPreCmd = SEMBLANS_DIR + "preprocess " + currCfgIniSub + " " +
-                       leftReads + " " + rightReads + " " + kraken2Dbs + " " +
-                       outDir + " " +
-                       std::to_string(numThreads) + " " +
-                       std::to_string(ram) + retain + verbose + entirePipeline;
-
-          logOutput("\nPerforming preprocessing only\n\n", logFilePath);
-          if (verbose == " true") {
-            logOutput("  Running command: " + currPreCmd + "\n", logFilePath);
-          }
-
-          result = system(currPreCmd.c_str());
-          checkExitSignal(result, logFilePath);
-        }
-      }
-      else {
-        logOutput("\nPerforming preprocessing only\n\n", logFilePath);
-        if (verbose == " true") {
-          logOutput("  Running command: " + preCmd + "\n", logFilePath);
-        }
-        result = system(preCmd.c_str());
-        checkExitSignal(result, logFilePath);
-      }
+      preprocess(sraRuns, serialProcess, pathConfig, leftReads, rightReads,
+                 kraken2Dbs, outDir, threadStr, ramStr, retain, verbose,
+                 entirePipeline, logFilePath);
       exit(0);
     }
     // Case 2: assemble
     if (command == "assemble") {
-      if (assembly != "") {
-        std::cerr << "ERROR: '--assembly' flag can only be invoked for postprocess" << std::endl;
-        exit(1);
-      }
-      if (serialProcess) {
-        for (auto sraStr : sraRuns) {
-          currCfgIniSub = pathConfig.substr(0, pathConfig.rfind(".ini")).insert(pathConfig.rfind("/") + 1, ".") +
-                          "." + std::string(fs::path(sraStr.c_str()).stem().c_str()) + ".ini";
-          std::replace(currCfgIniSub.begin(), currCfgIniSub.end(), ' ', '_');
-          cfgIniFile.open(pathConfig);
-          cfgIniSub.open(currCfgIniSub);
-          while (std::getline(cfgIniFile, currLine)) {
-            for (auto sraStrOther : sraRuns) {
-              if (sraStrOther == sraStr) {
-                continue;
-              }
-              pos = currLine.find(sraStrOther);
-              if (pos != std::string::npos) {
-                currLine.replace(currLine.find(sraStrOther), sraStrOther.length(), "");
-              }
-            }
-            cfgIniSub << currLine << std::endl;
-          }
-          cfgIniFile.close();
-          cfgIniSub.close();
-
-          currAssCmd = SEMBLANS_DIR + "assemble " + currCfgIniSub + " " +
-                       leftReads + " " + rightReads + " " + outDir + " " +
-                       std::to_string(numThreads) + " " +
-                       std::to_string(ram) + retain + verbose + entirePipeline;
-
-          logOutput("\nPerforming assembly only\n\n", logFilePath);
-          if (verbose == " true") {
-            logOutput("  Running command: " + currAssCmd + "\n", logFilePath);
-          }
-          result = system(currAssCmd.c_str());
-          checkExitSignal(result, logFilePath);
-        }
-      }
-      else {
-        logOutput("\nPerforming assembly only\n\n", logFilePath);
-        if (verbose == " true") {
-          logOutput("  Running command: " + assCmd + "\n", logFilePath);
-        }
-        result = system(assCmd.c_str());
-        checkExitSignal(result, logFilePath);
-      }
+      assemble(sraRuns, serialProcess, pathConfig, leftReads, rightReads,
+               kraken2Dbs, outDir, threadStr, ramStr, retain, verbose,
+               entirePipeline, logFilePath);
       exit(0);
     }
     // Case 3: postprocess
     if (command == "postprocess") {
-      if (serialProcess) {
-        for (auto sraStr : sraRuns) {
-          currCfgIniSub = pathConfig.substr(0, pathConfig.rfind(".ini")).insert(pathConfig.rfind("/") + 1, ".") +
-                          "." + std::string(fs::path(sraStr.c_str()).stem().c_str()) + ".ini";
-          std::replace(currCfgIniSub.begin(), currCfgIniSub.end(), ' ', '_');
-          cfgIniFile.open(pathConfig);
-          cfgIniSub.open(currCfgIniSub);
-          while (std::getline(cfgIniFile, currLine)) {
-            for (auto sraStrOther : sraRuns) {
-              if (sraStrOther == sraStr) {
-                continue;
-              }
-              pos = currLine.find(sraStrOther);
-              if (pos != std::string::npos) {
-                currLine.replace(currLine.find(sraStrOther), sraStrOther.length(), "");
-              }
-            }
-            cfgIniSub << currLine << std::endl;
-          }
-          cfgIniFile.close();
-          cfgIniSub.close();
-
-          currPostCmd = SEMBLANS_DIR + "postprocess " + pathConfig + " " +
-                        leftReads + " " + rightReads + " " + assembly + " " +
-                        refProt + " " + outDir + " " +
-                        std::to_string(numThreads) + " " +
-                        std::to_string(ram) + retain + verbose + entirePipeline;
-
-          logOutput("\nPerforming postprocess only\n\n", logFilePath);
-          if (verbose == " true") {
-            logOutput("  Running command: " + currPostCmd + "\n", logFilePath);
-          }
-          result = system(currPostCmd.c_str());
-          checkExitSignal(result, logFilePath);
-        }
-      }
-      else {
-        logOutput("\nPerforming postprocess only\n\n", logFilePath);
-        if (verbose == " true") {
-          logOutput("  Running command: " + postCmd + "\n", logFilePath);
-        }
-        result = system(postCmd.c_str());
-        checkExitSignal(result, logFilePath);
-      }
+      postprocess(sraRuns, serialProcess, pathConfig, leftReads, rightReads,
+                  assembly, outDir, refProt, threadStr, ramStr, retain, verbose,
+                  entirePipeline, logFilePath);
+            
       exit(0);
     }
     // Case 4: all three
@@ -734,10 +794,10 @@ int main(int argc, char * argv[]) {
         logOutput("\n ┌───────────────────────────────────────────────────────┐", logFilePath);
         logOutput("\n │         Phase 1: Preprocessing of Short-reads         │", logFilePath);
         logOutput("\n └───────────────────────────────────────────────────────┘\n", logFilePath);
-        if (verbose == " true") {
-          logOutput("  Running command: " + preCmd + "\n", logFilePath);
-        }
-        result = system(preCmd.c_str());
+        preprocess(sraRuns, serialProcess, pathConfig, leftReads, rightReads,
+                   kraken2Dbs, outDir, threadStr, ramStr, retain, verbose,
+                   entirePipeline, logFilePath);
+
         if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
           std::cerr << "\nPreprocess exited" << std::endl;
           system("setterm -cursor on");
@@ -746,10 +806,9 @@ int main(int argc, char * argv[]) {
         logOutput("\n ┌───────────────────────────────────────────────────────┐", logFilePath);
         logOutput("\n │        Phase 2: De Novo Assembly of Short-reads       │", logFilePath);
         logOutput("\n └───────────────────────────────────────────────────────┘\n", logFilePath);
-        if (verbose == " true") {
-          logOutput("  Running command: " + assCmd + "\n", logFilePath);
-        }
-        result = system(assCmd.c_str());
+        assemble(sraRuns, serialProcess, pathConfig, leftReads, rightReads,
+                 kraken2Dbs, outDir, threadStr, ramStr, retain, verbose,
+                 entirePipeline, logFilePath);
         if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
           std::cerr << "\nAssembly exited" << std::endl;
           system("setterm -cursor on");
@@ -758,10 +817,9 @@ int main(int argc, char * argv[]) {
         logOutput("\n ┌────────────────────────────────────────────────────────┐", logFilePath);
         logOutput("\n │    Phase 3: Postprocessing of Assembled Transcripts    │", logFilePath);
         logOutput("\n └────────────────────────────────────────────────────────┘\n", logFilePath);
-        if (verbose == " true") {
-          logOutput("  Running command: " + postCmd + "\n", logFilePath);
-        }
-        result = system(postCmd.c_str());
+        postprocess(sraRuns, serialProcess, pathConfig, leftReads, rightReads,
+                    assembly, refProt, outDir, threadStr, ramStr, retain, verbose,
+                    entirePipeline, logFilePath);
         if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
           std::cerr << "\nPostprocess exited" << std::endl;
           system("setterm -cursor on");
