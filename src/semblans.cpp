@@ -575,23 +575,41 @@ int main(int argc, char * argv[]) {
       // If running entire assembly without config file, define names of resulting assemblies
       if (command == "all") {
         // Placeholder: create assemblies vector
-        size_t commaInd;
-        size_t currPos = 0;
+        size_t commaIndF;
+        size_t commaIndR;
+        size_t currPosF = 0;
+        size_t currPosR = 0;
         size_t numIndex;
         std::string currForward;
-        std::string currForwardPrefix;
-        fs::path currForwardPath;
+        std::string currReverse;
+        std::string currPrefixF;
+        std::string currPrefixR;
+        fs::path currPathF;
+        fs::path currPathR;
+        std::string currAssembly;
         std::vector<std::string> assemblies;
         do {
-          commaInd = leftReads.find(',', currPos);
-          currForward = leftReads.substr(currPos, commaInd - currPos - 1);
-          currForwardPath = fs::canonical(fs::path(currForward.c_str()));
-          currForwardPrefix = std::string(currForwardPath.stem().c_str());
-          
-          assemblies.push_back(outDir + "/00-Transcript_assembly/" +
-                               currForwardPrefix + ".Trinity.fasta");
-          currPos = commaInd + 1;
-        } while (commaInd != std::string::npos);
+          commaIndF = leftReads.find(',', currPosF);
+          commaIndR = rightReads.find(',', currPosR);
+
+          currForward = leftReads.substr(currPosF, commaIndF - currPosF - 1);
+          currReverse = rightReads.substr(currPosR, commaIndR - currPosR - 1);
+
+          currPathF = fs::canonical(fs::path(currForward.c_str()));
+          currPathR = fs::canonical(fs::path(currReverse.c_str()));
+
+          currPrefixF = std::string(currPathF.stem().c_str());
+          currPrefixR = std::string(currPathR.stem().c_str());
+
+          if (currPrefixF.back() == '1' && currPrefixR.back() == '2') {
+            currPrefixF.pop_back();
+            currPrefixF.pop_back();
+          }
+          currAssembly = outDir + "/assembly/00-Transcript_assembly/" + currPrefixF + ".Trinity.fasta";
+          assemblies.push_back(currAssembly);
+          currPosF = commaIndF + 1;
+          currPosR = commaIndR + 1;
+        } while (commaIndF != std::string::npos);
         for (auto ass : assemblies) {
           assembly += ass;
           if (ass != assemblies.back()) {

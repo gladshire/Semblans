@@ -457,7 +457,7 @@ std::vector<std::string> run_trinity_bulk(std::map<std::string, std::vector<SRA>
     }
     else {
       cpDir = outDir + "/.checkpoints/";
-      trinOutDir = outDir + "/00-Transcript_assembly/";
+      trinOutDir = outDir + "/assembly/00-Transcript_assembly/";
     }
 
     currTrinOutNon = trinOutDir + "/" + sraGroup.first + ".unmapped.Trinity.fasta";

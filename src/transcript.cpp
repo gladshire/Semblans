@@ -20,7 +20,12 @@ transcript::transcript(SRA sra) {
     fileBase = sra.make_file_str();
   }
   else {
-    fileBase = sra.get_file_prefix().first;
+    if (sra.get_file_prefix().first.back() == '1' &&
+        sra.get_file_prefix().second.back() == '2') {
+      fileBase = sra.get_file_prefix().first;
+      fileBase.pop_back();
+      fileBase.pop_back();
+    }
   }
   file_prefix = fileBase;
  
@@ -104,7 +109,7 @@ transcript::transcript(std::string filename, INI_MAP cfgIni) {
 }
 
 transcript::transcript(std::string filename, std::string outDir) {
-  outDir = std::string(fs::canonical(outDir.c_str()).parent_path().c_str()) + "/";
+  outDir = std::string(fs::canonical(outDir.c_str()).parent_path().c_str());
 
   org_name = "";
   tax_id = "";
@@ -118,7 +123,7 @@ transcript::transcript(std::string filename, std::string outDir) {
   std::string fileBase = std::string(filePrefix.c_str());
 
   file_prefix = fileBase;
-  
+
   // Define trinity assembly path
   //trans_path_trinity = (projPath + stepDirs[7] + "/" + fileBase + ".Trinity.fasta").c_str();
   trans_path_trinity = filename;
@@ -126,31 +131,31 @@ transcript::transcript(std::string filename, std::string outDir) {
   //trans_path_gene_map = (projPath + stepDirs[7] + "/" + fileBase + ".Trinity.fasta" + 
   //                       ".gene_trans_map").c_str();
   // Define chimera cut file path
-  trans_path_ccut = (outDir + stepDirs[7] + "/" + fileBase + ".Trinity.cut").c_str();
+  trans_path_ccut = (outDir + stepDirs[8] + "/" + fileBase + ".Trinity.cut").c_str();
   // Define chimera info file path
-  trans_path_cinfo = (outDir + stepDirs[7] + "/" + fileBase + ".Trinity.info").c_str();
+  trans_path_cinfo = (outDir + stepDirs[8] + "/" + fileBase + ".Trinity.info").c_str();
   // Define chimera-filtered transcript path
-  trans_path_chimera = (outDir + stepDirs[7] + "/" + fileBase + ".chim_filt.fasta").c_str();
+  trans_path_chimera = (outDir + stepDirs[8] + "/" + fileBase + ".chim_filt.fasta").c_str();
   // Define blastx output path
-  trans_path_blastx = (outDir + stepDirs[7] + "/" + fileBase + ".Trinity.blastx").c_str();
+  trans_path_blastx = (outDir + stepDirs[8] + "/" + fileBase + ".Trinity.blastx").c_str();
   // Define salmon index path
-  trans_path_index = (outDir + stepDirs[8] + "/" + fileBase + "_salmon_index").c_str();
+  trans_path_index = (outDir + stepDirs[9] + "/" + fileBase + "_salmon_index").c_str();
   // Define salmon quant path
-  trans_path_quant = (outDir + stepDirs[8] + "/" + fileBase + "_salmon_quant").c_str();
+  trans_path_quant = (outDir + stepDirs[9] + "/" + fileBase + "_salmon_quant").c_str();
   // Define corset cluster path
-  trans_path_clust = (outDir + stepDirs[8] + "/" + fileBase + "_salmon-clusters.txt").c_str();
+  trans_path_clust = (outDir + stepDirs[9] + "/" + fileBase + "_salmon-clusters.txt").c_str();
   // Define largest cluster transcripts path
-  trans_path_largest = (outDir + stepDirs[8] + "/" + fileBase + ".lc.fasta").c_str();
+  trans_path_largest = (outDir + stepDirs[9] + "/" + fileBase + ".lc.fasta").c_str();
   // Define redundant transcripts path
-  trans_path_redund = (outDir + stepDirs[8] + "/" + fileBase + ".rd.fasta").c_str();
+  trans_path_redund = (outDir + stepDirs[9] + "/" + fileBase + ".rd.fasta").c_str();
   // Define corset counts path
-  trans_path_counts = (outDir + stepDirs[8] + "/" + fileBase + "_salmon-counts.txt").c_str();
+  trans_path_counts = (outDir + stepDirs[9] + "/" + fileBase + "_salmon-counts.txt").c_str();
   // Define transdecoder cds path
-  trans_path_cds = (outDir + stepDirs[9] + "/" + fileBase + ".transdecoder.cds.fasta").c_str();
+  trans_path_cds = (outDir + stepDirs[10] + "/" + fileBase + ".transdecoder.cds.fasta").c_str();
   // Define transdecoder prot path 
-  trans_path_prot = (outDir + stepDirs[9] + "/" + fileBase + ".transdecoder.pep.fasta").c_str();
+  trans_path_prot = (outDir + stepDirs[10] + "/" + fileBase + ".transdecoder.pep.fasta").c_str();
   // Define annotated transcripts path
-  trans_path_annot = (outDir + stepDirs[10] + "/" + fileBase + ".annotated.fasta").c_str();
+  trans_path_annot = (outDir + stepDirs[11] + "/" + fileBase + ".annotated.fasta").c_str();
 }
 
 // Return the organism name

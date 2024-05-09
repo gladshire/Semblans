@@ -404,4 +404,3 @@ if ( [ ! -e "./bin/preprocess" ] ||
 else
 	echo "Semblans built successfully"
 fi
-fi
