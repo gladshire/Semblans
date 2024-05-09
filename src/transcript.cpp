@@ -109,7 +109,7 @@ transcript::transcript(std::string filename, INI_MAP cfgIni) {
 }
 
 transcript::transcript(std::string filename, std::string outDir) {
-  outDir = std::string(fs::canonical(outDir.c_str()).parent_path().c_str());
+  outDir = std::string(fs::canonical(outDir.c_str()).parent_path().c_str()) + "/";
 
   org_name = "";
   tax_id = "";
