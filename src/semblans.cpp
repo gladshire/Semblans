@@ -279,6 +279,13 @@ void parseArgv(int argc, char * argv[], std::string & command,
              strcmp("-V", argv[i]) == 0) {
       verboseOutput = true;
     }
+    // Flag not recognized. Report and exit;
+    else {
+      std::cerr << "ERROR: Unrecognized flag '" << argv[i] << "'" << std::endl;
+      std::cerr << "  For a list of command flags, call" << std::endl;
+      std::cerr << "  semblans --help/-h\n" << std::endl;
+      exit(1);
+    }
   }
 }
 
