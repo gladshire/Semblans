@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <stdlib.h>
 #include <sys/ioctl.h>
 #include <signal.h>
 #include <boost/filesystem.hpp>

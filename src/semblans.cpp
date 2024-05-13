@@ -115,8 +115,11 @@ void parseArgv(int argc, char * argv[], std::string & command,
                std::string & kraken2Dbs, bool & retainInterFiles,
                bool & verboseOutput) {
 
+  bool argIsFlag;
+  std::vector<int> nonFlagInd;
+  nonFlagInd.push_back(0);
   for (int i = 0; i < argc; i++) {
-
+    argIsFlag = true;
     // Check for semblans command (preprocess/assemble/postprocess)
     // If none is given, will perform all
     if (strcmp("preprocess", argv[i]) == 0 ||
@@ -158,6 +161,7 @@ void parseArgv(int argc, char * argv[], std::string & command,
       if (strcmp(argv[i + 1] + strlen(argv[i + 1]) - 4, ".ini") == 0 ||
           strcmp(argv[i + 1] + strlen(argv[i + 1]) - 4, ".INI") == 0) {
         pathConfig = argv[i + 1];
+        nonFlagInd.push_back(i + 1);
         fs::path pathConfigFile(pathConfig.c_str());
         if (!fs::exists(pathConfigFile)) {
           // ERROR: Config file not found!
@@ -177,16 +181,19 @@ void parseArgv(int argc, char * argv[], std::string & command,
     else if (strcmp("--left", argv[i]) == 0 ||
              strcmp("-1", argv[i]) == 0) {
       leftReads = argv[i + 1];
+      nonFlagInd.push_back(i + 1);
     }
     // Check for '--right' read sequence FASTQ file(s)
     else if (strcmp("--right", argv[i]) == 0 ||
              strcmp("-2", argv[i]) == 0) {
       rightReads = argv[i + 1];
+      nonFlagInd.push_back(i + 1);
     }
     // Check for '--assembly' transcripts sequence FASTA file
     else if (strcmp("--assembly", argv[i]) == 0 ||
              strcmp("-a", argv[i]) == 0) {
       assembly = argv[i + 1];
+      nonFlagInd.push_back(i + 1);
       if (!fs::exists(fs::path(assembly.c_str()))) {
         std::cerr << "ERROR: Assemble '" + assembly + "' does not exist\n" << std::endl;
         exit(1);
@@ -196,6 +203,7 @@ void parseArgv(int argc, char * argv[], std::string & command,
              strcmp("--ref-proteome", argv[i]) == 0 ||
              strcmp("-rp", argv[i]) == 0) {
       refProt = argv[i + 1];
+      nonFlagInd.push_back(i + 1);
       if (!fs::exists(fs::path(refProt.c_str()))) {
         std::cerr << "ERROR: Reference proteome '" + refProt + "' does not exist\n" << std::endl;
         exit(1);
@@ -204,6 +212,7 @@ void parseArgv(int argc, char * argv[], std::string & command,
     else if (strcmp("--kraken-db", argv[i]) == 0 ||
              strcmp("-kdb", argv[i]) == 0) {
       kraken2Dbs = argv[i + 1];
+      nonFlagInd.push_back(i + 1);
     }
     // Check for '--output', for specifying where outputs should
     // go if no config file is used
@@ -211,6 +220,7 @@ void parseArgv(int argc, char * argv[], std::string & command,
              strcmp("--output", argv[i]) == 0 ||
              strcmp("-od", argv[i]) == 0) {
       outDir = argv[i + 1];
+      nonFlagInd.push_back(i + 1);
       if (!fs::exists(outDir.c_str())) {
         std::cerr << "ERROR: Output directory '" + outDir + "' does not exist\n" << std::endl;
         exit(1);
@@ -224,6 +234,7 @@ void parseArgv(int argc, char * argv[], std::string & command,
              strcmp("-T", argv[i]) == 0) {
       if (i != argc - 1) {
         threadStr = argv[i + 1];
+        nonFlagInd.push_back(i + 1);
         for (int j = 0; j < strlen(argv[i + 1]); j++) {
           if (!isdigit(threadStr[j])) {
             // ERROR: Bad thread argument
@@ -247,7 +258,7 @@ void parseArgv(int argc, char * argv[], std::string & command,
 
       if (i != argc - 1) {
         ramStr = argv[i + 1];
-
+        nonFlagInd.push_back(i + 1);
         for (int j = 0; j < strlen(argv[i + 1]); j++) {
           if (!isdigit(ramStr[j])) {
             // ERROR: Bad memory argument
@@ -258,7 +269,7 @@ void parseArgv(int argc, char * argv[], std::string & command,
         }
       }
       else {
-        // No RAM ammount given, using 1 GB
+        // No RAM ammount given, using 8 GB
         ramStr = "8";
       }
     }
@@ -270,7 +281,7 @@ void parseArgv(int argc, char * argv[], std::string & command,
              strcmp("-F", argv[i]) == 0) {
       retainInterFiles = true;
     }
-    // Check for '--berbose' flag, which tells Semblans to print a detailed output
+    // Check for '--verbose' flag, which tells Semblans to print a detailed output
     // to the terminal's standard output. This does not affect verbosity of log files.
     // Regardless of terminal output, log files always receive maximum verbosity.
     else if (strcmp("--verbose", argv[i]) == 0 ||
@@ -281,10 +292,17 @@ void parseArgv(int argc, char * argv[], std::string & command,
     }
     // Flag not recognized. Report and exit;
     else {
-      std::cerr << "ERROR: Unrecognized flag '" << argv[i] << "'" << std::endl;
-      std::cerr << "  For a list of command flags, call" << std::endl;
-      std::cerr << "  semblans --help/-h\n" << std::endl;
-      exit(1);
+      for (int k = 0; k < nonFlagInd.size(); k++) {
+        if (i == nonFlagInd[k]) {
+          argIsFlag = false;
+        }
+      }
+      if (argIsFlag) {
+        std::cerr << "ERROR: Unrecognized flag '" << argv[i] << "'" << std::endl;
+        std::cerr << "  For a list of acceptable flags, call" << std::endl;
+        std::cerr << "  semblans -h/--help\n" << std::endl;
+        exit(1);
+      }
     }
   }
 }
