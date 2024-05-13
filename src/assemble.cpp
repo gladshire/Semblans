@@ -738,11 +738,11 @@ int main(int argc, char * argv[]) {
         currSraPrefix2 = sra.get_file_prefix().second;
         //sraGroups.emplace(sra.get_file_prefix().first.substr(0, 
         //                  sra.get_file_prefix().first.find_last_of("_")), currSraGroup);
-        numIndex1 = std::string(fs::path(currSraPrefix1.c_str()).stem().c_str()).find("_1");
-        numIndex2 = std::string(fs::path(currSraPrefix2.c_str()).stem().c_str()).find("_2");
+        numIndex1 = std::string(fs::path(currSraPrefix1.c_str()).stem().c_str()).find("1");
+        numIndex2 = std::string(fs::path(currSraPrefix2.c_str()).stem().c_str()).find("2");
         if (numIndex1 == numIndex2) {
-          currSraPrefix1.erase(numIndex1, 2);
-          currSraPrefix2.erase(numIndex2, 2);
+          currSraPrefix1.erase(numIndex1 - 1, 2);
+          currSraPrefix2.erase(numIndex2 - 1, 2);
         }
         sraGroups.emplace(currSraPrefix1, currSraGroup);
         /*
