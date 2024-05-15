@@ -459,7 +459,7 @@ void postprocess(std::vector<std::string> sraRuns, bool serialProcess, std::stri
   size_t pos;
   int result;
 
-  if (pathConfig == "") {
+  if (pathConfig == "null") {
     if (assembly == "" || (leftReads == "" && rightReads == "")) {
       std::cerr << "ERROR: If not using '--config', user must specify assembly, " << std::endl;
       std::cerr << "the left/right read files that were used in assembly, and" << std::endl;
@@ -482,6 +482,8 @@ void postprocess(std::vector<std::string> sraRuns, bool serialProcess, std::stri
                         leftReads + " " + rightReads + " " + assembly + " " +
                         refProt + " " + outDir + " " + threadStr + " " + ramStr + " " +
                         retain + verbose + entirePipeline;
+
+  std::cout << postCmd << std::endl;
 
   if (serialProcess) {
     for (auto sraStr : sraRuns) {
