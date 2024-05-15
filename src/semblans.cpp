@@ -470,7 +470,7 @@ void postprocess(std::vector<std::string> sraRuns, bool serialProcess, std::stri
       std::cerr << "            --right reads_1_right.fq, reads_2_right.fq,..." << std::endl;
       exit(1);
     }
-    if (refProt == "") {
+    if (refProt == "null") {
       std::cerr << "ERROR: If not using '--config', ";
       std::cerr << "user must specify a reference proteome FASTA" << std::endl;
       std::cerr << "  (example: --reference-proteome path/to/ref_prot.fa)\n" << std::endl;
@@ -541,14 +541,14 @@ int main(int argc, char * argv[]) {
   std::string ramStr;
   int numThreads;
   int ram;
-  std::string pathConfig;
+  std::string pathConfig = "null";
   std::string command;
-  std::string leftReads;
-  std::string rightReads;
-  std::string assembly;
-  std::string refProt;
-  std::string kraken2Dbs;
-  std::string outDir;
+  std::string leftReads = "null";
+  std::string rightReads = "null";
+  std::string assembly = "null";
+  std::string refProt = "null";
+  std::string kraken2Dbs = "null";
+  std::string outDir = "null";
   bool useCfg = true;
   bool serialProcess = false;
   bool retainInterFiles;
@@ -676,6 +676,7 @@ int main(int argc, char * argv[]) {
     // If config file not being used
     else {
       pathConfig = "null";
+      
       logFilePath = std::string((fs::canonical(fs::path(outDir.c_str()).parent_path()) /
                                 "log.txt").c_str());
     }
@@ -741,9 +742,8 @@ int main(int argc, char * argv[]) {
     // Case 3: postprocess
     if (command == "postprocess") {
       postprocess(sraRuns, serialProcess, pathConfig, leftReads, rightReads,
-                  assembly, outDir, refProt, threadStr, ramStr, retain, verbose,
+                  assembly, refProt, outDir, threadStr, ramStr, retain, verbose,
                   entirePipeline, logFilePath);
-            
       exit(0);
     }
     // Case 4: all three
