@@ -1,6 +1,6 @@
 CC = g++ -std=c++11
 CFLAGS = '-Wl,-rpath,$$ORIGIN/../lib/' -g -pthread
-LIBS = -L../lib -lboost_system -lboost_filesystem -ldl -lconfini
+LIBS = -L../lib -lboost_system -lboost_filesystem -lboost_regex -ldl -lconfini
 INCLUDE_PATH = -I../lib/ -I../include
 OBJ_LINK = semblans.o log.o print_info.o ini_parse.o sra.o transcript.o
 

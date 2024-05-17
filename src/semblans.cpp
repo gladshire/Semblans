@@ -106,6 +106,24 @@ void print_help_postprocess() {
  
 }
 
+// Utility function to obtain name of cleaned read files from raw file names
+std::vector<std::string> makeCleanedNames(std::string commaSepReadFiles) {
+  std::vector<std::string> cleanedReads;
+  fs::path currFilePath;
+  size_t commaInd;
+  size_t currPos = 0;
+  std::string currStr;
+  do {
+    commaInd = commaSepReadFiles.find(',', currPos);
+    currStr = commaSepReadFiles.substr(currPos, commaInd - currPos);
+    currFilePath = fs::path(currStr.c_str());
+    currFilePath.replace_extension(".orep.filt.fq");
+    cleanedReads.push_back(std::string(currFilePath.c_str()));
+    currPos = commaInd + 1;
+  } while (commaInd != std::string::npos);
+  return cleanedReads;
+}
+
 
 void parseArgv(int argc, char * argv[], std::string & command,
                std::string & leftReads, std::string & rightReads,
@@ -307,11 +325,11 @@ void parseArgv(int argc, char * argv[], std::string & command,
   }
 }
 
-void preprocess(std::vector<std::string> sraRuns, bool serialProcess, std::string pathConfig,
-                std::string leftReads, std::string rightReads, std::string kraken2Dbs,
-                std::string outDir, std::string threadStr, std::string ramStr,
-                std::string retain, std::string verbose, std::string entirePipeline,
-                std::string logFilePath) {
+int preprocess(std::vector<std::string> sraRuns, bool serialProcess, std::string pathConfig,
+               std::string leftReads, std::string rightReads, std::string kraken2Dbs,
+               std::string outDir, std::string threadStr, std::string ramStr,
+               std::string retain, std::string verbose, std::string entirePipeline,
+               std::string logFilePath) {
   
   std::ifstream cfgIniFile;
   std::ofstream cfgIniSub;
@@ -377,14 +395,15 @@ void preprocess(std::vector<std::string> sraRuns, bool serialProcess, std::strin
     result = system(preCmd.c_str());
     checkExitSignal(result, logFilePath);
   }
+  return result;
 }
 
 
-void assemble(std::vector<std::string> sraRuns, bool serialProcess, std::string pathConfig,
-              std::string leftReads, std::string rightReads, std::string kraken2Dbs,
-              std::string outDir, std::string threadStr, std::string ramStr,
-              std::string retain, std::string verbose, std::string entirePipeline,
-              std::string logFilePath) {
+int assemble(std::vector<std::string> sraRuns, bool serialProcess, std::string pathConfig,
+             std::string leftReads, std::string rightReads, std::string kraken2Dbs,
+             std::string outDir, std::string threadStr, std::string ramStr,
+             std::string retain, std::string verbose, std::string entirePipeline,
+             std::string logFilePath) {
 
   std::ifstream cfgIniFile;
   std::ofstream cfgIniSub;
@@ -448,14 +467,15 @@ void assemble(std::vector<std::string> sraRuns, bool serialProcess, std::string 
     result = system(assCmd.c_str());
     checkExitSignal(result, logFilePath);
   }
+  return result;
 }
 
 
-void postprocess(std::vector<std::string> sraRuns, bool serialProcess, std::string pathConfig,
-                 std::string leftReads, std::string rightReads, std::string assembly,
-                 std::string refProt, std::string outDir, std::string threadStr,
-                 std::string ramStr, std::string retain, std::string verbose,
-                 std::string entirePipeline, std::string logFilePath) {
+int postprocess(std::vector<std::string> sraRuns, bool serialProcess, std::string pathConfig,
+                std::string leftReads, std::string rightReads, std::string assembly,
+                std::string refProt, std::string outDir, std::string threadStr,
+                std::string ramStr, std::string retain, std::string verbose,
+                std::string entirePipeline, std::string logFilePath) {
 
   std::ifstream cfgIniFile;
   std::ofstream cfgIniSub;
@@ -525,8 +545,23 @@ void postprocess(std::vector<std::string> sraRuns, bool serialProcess, std::stri
     result = system(postCmd.c_str());
     checkExitSignal(result, logFilePath);
   }
+  return result;
 }
 
+
+std::string getDirectory(std::string parentDir, std::string dir) {
+  std::vector<std::string> matching_files;
+  fs::directory_iterator end_itr;
+  boost::regex filter(dir);
+  for (fs::directory_iterator i(parentDir); i != end_itr; i++) {
+    boost::smatch what;
+    if (!boost::regex_match(i->path().filename().string(), what, filter)) {
+      continue;
+    }
+    matching_files.push_back(i->path().string());
+  }
+  return matching_files.front();
+}
 
 int main(int argc, char * argv[]) {
   //print_intro();
@@ -571,8 +606,6 @@ int main(int argc, char * argv[]) {
     ramStr = "";
     numThreads = 1;
     ram = 1;
-    std::string pathConfig = "";
-    std::string command = "";
     retainInterFiles = false;
     verboseOutput = false;
 
@@ -587,11 +620,8 @@ int main(int argc, char * argv[]) {
       command = "all";
     }
 
-    if (kraken2Dbs == "") {
-      kraken2Dbs = "null";
-    }
     // If no config file specified, check for sequence files in Semblans call
-    if (pathConfig == "") {
+    if (pathConfig == "null") {
       useCfg = false;
       if (outDir == "") {
         outDir = ".";
@@ -612,6 +642,7 @@ int main(int argc, char * argv[]) {
         fs::path currPathR;
         std::string currAssembly;
         std::vector<std::string> assemblies;
+        // Construct string containing comma-separated list of resulting assembly files
         do {
           commaIndF = leftReads.find(',', currPosF);
           commaIndR = rightReads.find(',', currPosR);
@@ -629,6 +660,9 @@ int main(int argc, char * argv[]) {
             currPrefixF.pop_back();
             currPrefixF.pop_back();
           }
+
+          currPrefixF += ".orep.filt";
+
           currAssembly = outDir + "/assembly/01-Transcript_assembly/" + currPrefixF + ".Trinity.fasta";
           assemblies.push_back(currAssembly);
           currPosF = commaIndF + 1;
@@ -739,10 +773,17 @@ int main(int argc, char * argv[]) {
       exit(0);
     }
     // Case 4: all three
+    // TODO: Semblans currently passes raw files into all three
     if (command == "all") {
+      std::string cleanedReadsDir;
+      std::vector<std::string> leftReadsCleanedVec;
+      std::vector<std::string> rightReadsCleanedVec;
+      std::string leftReadsCleaned;
+      std::string rightReadsCleaned;
       std::string currLeft;
       std::string currRight;
       std::vector<std::string> assemblies;
+
       if (serialProcess) {
         for (auto sraStr : sraRuns) {
           currCfgIniSub = pathConfig.substr(0, pathConfig.rfind(".ini")).insert(pathConfig.rfind("/") + 1, ".") +
@@ -796,7 +837,7 @@ int main(int argc, char * argv[]) {
           }
           result = system(currPreCmd.c_str());
           if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
-            std::cerr << "\nPreprocess exited" << std::endl;
+            checkExitSignal(result, logFilePath);
             system("setterm -cursor on");
             exit(1);
           }
@@ -831,21 +872,34 @@ int main(int argc, char * argv[]) {
         logOutput("\n ┌───────────────────────────────────────────────────────┐", logFilePath);
         logOutput("\n │         Phase 1: Preprocessing of Short-reads         │", logFilePath);
         logOutput("\n └───────────────────────────────────────────────────────┘\n", logFilePath);
-        preprocess(sraRuns, serialProcess, pathConfig, leftReads, rightReads,
-                   kraken2Dbs, outDir, threadStr, ramStr, retain, verbose,
-                   entirePipeline, logFilePath);
-
+        result = preprocess(sraRuns, serialProcess, pathConfig, leftReads, rightReads,
+                            kraken2Dbs, outDir, threadStr, ramStr, retain, verbose,
+                            entirePipeline, logFilePath);
         if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
+          std::cout << result << std::endl;
+          std::cout << WIFEXITED(result) << std::endl;
           std::cerr << "\nPreprocess exited" << std::endl;
           system("setterm -cursor on");
           exit(1);
         }
+        cleanedReadsDir = getDirectory(outDir + "/preprocess/", "..-Filter_overrepresented");
+        leftReadsCleanedVec = makeCleanedNames(leftReads);
+        rightReadsCleanedVec = makeCleanedNames(rightReads);
+        for (int i = 0; i < leftReadsCleanedVec.size(); i++) {
+          leftReadsCleaned += cleanedReadsDir + "/" + leftReadsCleanedVec[i];
+          rightReadsCleaned += cleanedReadsDir + "/" + rightReadsCleanedVec[i];
+          if (i < leftReadsCleanedVec.size() - 1) {
+            leftReadsCleaned += ",";
+            rightReadsCleaned += ",";
+          }
+        }
+
         logOutput("\n ┌───────────────────────────────────────────────────────┐", logFilePath);
         logOutput("\n │        Phase 2: De Novo Assembly of Short-reads       │", logFilePath);
         logOutput("\n └───────────────────────────────────────────────────────┘\n", logFilePath);
-        assemble(sraRuns, serialProcess, pathConfig, leftReads, rightReads,
-                 kraken2Dbs, outDir, threadStr, ramStr, retain, verbose,
-                 entirePipeline, logFilePath);
+        result = assemble(sraRuns, serialProcess, pathConfig, leftReadsCleaned, rightReadsCleaned,
+                          kraken2Dbs, outDir, threadStr, ramStr, retain, verbose,
+                          entirePipeline, logFilePath);
         if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
           std::cerr << "\nAssembly exited" << std::endl;
           system("setterm -cursor on");
@@ -854,10 +908,9 @@ int main(int argc, char * argv[]) {
         logOutput("\n ┌────────────────────────────────────────────────────────┐", logFilePath);
         logOutput("\n │    Phase 3: Postprocessing of Assembled Transcripts    │", logFilePath);
         logOutput("\n └────────────────────────────────────────────────────────┘\n", logFilePath);
-        
-        postprocess(sraRuns, serialProcess, pathConfig, leftReads, rightReads,
-                    assembly, refProt, outDir, threadStr, ramStr, retain, verbose,
-                    entirePipeline, logFilePath);
+        result = postprocess(sraRuns, serialProcess, pathConfig, leftReadsCleaned, rightReadsCleaned,
+                             assembly, refProt, outDir, threadStr, ramStr, retain, verbose,
+                             entirePipeline, logFilePath);
         if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
           std::cerr << "\nPostprocess exited" << std::endl;
           system("setterm -cursor on");
