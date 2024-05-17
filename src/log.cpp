@@ -2,7 +2,6 @@
 
 
 
-
 // Utility function to replace one character with another in a text file
 void replaceChar(std::string inFilePath, char oldChar, char newChar) {
   std::ifstream inLogFile(inFilePath);
@@ -77,4 +76,14 @@ void checkExitSignal(int commandResult, std::string logFile) {
     logOutput("\nExited with signal " + std::to_string(WTERMSIG(commandResult)) + "\n", logFile);
     exit(1);
   }
+}
+
+// Given a file path, return its prefix with no extensions
+std::string removeExtensions(std::string filePath) {
+  fs::path filePrefix(fs::path(filePath.c_str()));
+  while (!filePrefix.extension().empty()) {
+    filePrefix = filePrefix.stem();
+  }
+  std::string fileStem(filePrefix.c_str());
+  return fileStem;
 }

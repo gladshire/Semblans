@@ -117,9 +117,6 @@ transcript::transcript(std::string filename, std::string outDir) {
   while (!filePrefix.extension().empty()) {
     filePrefix = filePrefix.stem();
   }
-  //while (fileBase.find(".") != std::string::npos) {
-  //  fileBase = std::string(fs::path(fileBase).stem().c_str());
-  //}
   std::string fileBase = std::string(filePrefix.c_str());
 
   file_prefix = fileBase;

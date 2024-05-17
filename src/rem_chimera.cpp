@@ -163,7 +163,8 @@ void detect_chimera(std::string blastxFile, std::string outDir) {
 
   std::ifstream fileBlastx(blastxFile);
   if (!fileBlastx.is_open()) {
-    std::cout << "Could not open BLASTX file. Terminating." << std::endl;
+    std::cerr << "\nERROR: Could not open BLASTX file. Terminating." << std::endl;
+    system("setterm -cursor on");
     exit(1);
   }
   std::ofstream fileCut(cutFilePath.c_str());

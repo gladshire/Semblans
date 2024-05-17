@@ -183,8 +183,6 @@ std::vector<std::string> remChimeraBulk(const std::vector<transcript> & transVec
     currTransCut = trans.get_trans_path_ccut().c_str();
     chimOutDir = trans.get_trans_path_chimera().parent_path().c_str();
 
-
-    std::cout << currBlastx << std::endl;
     if (!dispOutput) {
       procRunning = true;
       std::thread chimeraThread(progressAnim, "  ", logFilePath);
@@ -339,17 +337,6 @@ std::vector<std::string> corsetBulk(const std::vector<transcript> & transVec, st
   if (!cfgIni.empty()) {
     cfgIniPipeline = cfgIni.at("Pipeline");
   }
-  /*
-  INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
-  std::string currTransInCors;
-  std::string currTransPrefix;
-  std::string currEqClassFile;
-  std::string currTransClust;
-  std::string currTransLargestClust;
-  std::string currTransRedund;
-  std::string currOutDir;
-  uintmax_t ram_b = (uintmax_t)stoi(ram_gb) * 1000000000;
-  */
   for (auto trans : transVec) {
     // Check if corset run checkpoint exists
     if (trans.checkpointExists("clust")) {
@@ -478,7 +465,7 @@ std::vector<std::pair<std::string, std::string>> transdecBulk(const std::vector<
       logOutput("ERROR: Reference proteome " + refProteome + " not found\n", logFilePath);
       exit(1);
     }
-    blastDbDir = outDir + stepDirs[0] + "/";
+    blastDbDir = outDir + stepDirs[8] + "/";
     blastDbName = std::string(fs::path(refProteome.c_str()).stem().c_str());
   }
   for (auto trans : transVec) {

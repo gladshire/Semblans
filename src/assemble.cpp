@@ -418,6 +418,7 @@ std::vector<std::string> run_trinity_bulk(std::map<std::string, std::vector<SRA>
   std::vector<std::pair<std::string, std::string>> sraRunsInterest;
   std::vector<std::pair<std::string, std::string>> sraRunsNoInterest;
   std::pair<std::string, std::string> currTrinIn;
+  std::string inFilePrefix;
   std::string currTrinOutAll;
   std::string currTrinOutInt;
   std::string currTrinOutNon;
@@ -457,11 +458,13 @@ std::vector<std::string> run_trinity_bulk(std::map<std::string, std::vector<SRA>
     }
     else {
       cpDir = outDir + "/.checkpoints/";
-      trinOutDir = outDir + "/assembly/00-Transcript_assembly/";
+      trinOutDir = outDir + "/assembly/01-Transcript_assembly/";
     }
 
-    currTrinOutNon = trinOutDir + "/" + sraGroup.first + ".unmapped.Trinity.fasta";
-    currTrinOutAll = trinOutDir + "/" + sraGroup.first + ".Trinity.fasta";
+    inFilePrefix = removeExtensions(sraGroup.first);
+    
+    currTrinOutNon = trinOutDir + "/" + inFilePrefix + ".unmapped.Trinity.fasta";
+    currTrinOutAll = trinOutDir + "/" + inFilePrefix + ".Trinity.fasta";
 
     // Iterate over all SRA runs in current assembly group, preparing vectors containing input files for them,
     // as well as their mapped and unmapped read files generated during read isolation/extraction
@@ -834,11 +837,6 @@ int main(int argc, char * argv[]) {
     logOutput("ERROR: Assemble invoked improperly.\n", logFilePath);
   }
 
-  if (!entirePipeline) {
-    for (auto outFile : outFiles) {
-      system(("mv " + outFile + " " + outDir).c_str());
-    }
-  }
   system("setterm -cursor on");
   return 0;
 }

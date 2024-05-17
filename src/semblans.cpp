@@ -362,7 +362,6 @@ void preprocess(std::vector<std::string> sraRuns, bool serialProcess, std::strin
                    outDir + " " + threadStr + " " + ramStr + " " + retain +
                    verbose + entirePipeline;
 
-      logOutput("\nPerforming preprocessing only\n\n", logFilePath);
       if (verbose == " true") {
         logOutput("  Running command: " + currPreCmd + "\n", logFilePath);
       }
@@ -372,7 +371,6 @@ void preprocess(std::vector<std::string> sraRuns, bool serialProcess, std::strin
     }
   }
   else {
-    logOutput("\nPerforming preprocessing only\n\n", logFilePath);
     if (verbose == " true") {
       logOutput("  Running command: " + preCmd + "\n", logFilePath);
     }
@@ -426,7 +424,6 @@ void assemble(std::vector<std::string> sraRuns, bool serialProcess, std::string 
                    leftReads + " " + rightReads + " " + outDir + " " +
                    threadStr + " " + ramStr + retain + verbose + entirePipeline;
 
-      logOutput("\nPerforming assembly only\n\n", logFilePath);
       if (verbose == " true") {
         logOutput("  Running command: " + currAssCmd + "\n", logFilePath);
       }
@@ -435,7 +432,6 @@ void assemble(std::vector<std::string> sraRuns, bool serialProcess, std::string 
     }
   }
   else {
-    logOutput("\nPerforming assembly only\n\n", logFilePath);
     if (verbose == " true") {
       logOutput("  Running command: " + assCmd + "\n", logFilePath);
     }
@@ -460,8 +456,9 @@ void postprocess(std::vector<std::string> sraRuns, bool serialProcess, std::stri
   int result;
 
   if (pathConfig == "null") {
-    if (assembly == "" || (leftReads == "" && rightReads == "")) {
-      std::cerr << "ERROR: If not using '--config', user must specify assembly, " << std::endl;
+    if (assembly == "null" || refProt == "null" || outDir == "null" ||
+        (leftReads == "null" && rightReads == "null")) {
+      std::cerr << "\nERROR: If not using '--config', user must specify assembly, " << std::endl;
       std::cerr << "the left/right read files that were used in assembly, and" << std::endl;
       std::cerr << "a reference proteome." << std::endl;
       std::cerr << "  (example: --assembly transcripts.fa" << std::endl;
@@ -470,20 +467,12 @@ void postprocess(std::vector<std::string> sraRuns, bool serialProcess, std::stri
       std::cerr << "            --right reads_1_right.fq, reads_2_right.fq,..." << std::endl;
       exit(1);
     }
-    if (refProt == "null") {
-      std::cerr << "ERROR: If not using '--config', ";
-      std::cerr << "user must specify a reference proteome FASTA" << std::endl;
-      std::cerr << "  (example: --reference-proteome path/to/ref_prot.fa)\n" << std::endl;
-      exit(1);
-    }
   }
 
   std::string postCmd = SEMBLANS_DIR + "postprocess " + pathConfig + " " +
                         leftReads + " " + rightReads + " " + assembly + " " +
                         refProt + " " + outDir + " " + threadStr + " " + ramStr + " " +
                         retain + verbose + entirePipeline;
-
-  std::cout << postCmd << std::endl;
 
   if (serialProcess) {
     for (auto sraStr : sraRuns) {
@@ -512,7 +501,6 @@ void postprocess(std::vector<std::string> sraRuns, bool serialProcess, std::stri
                     refProt + " " + outDir + " " + threadStr + " " + ramStr +
                     retain + verbose + entirePipeline;
 
-      logOutput("\nPerforming postprocess only\n\n", logFilePath);
       if (verbose == " true") {
         logOutput("  Running command: " + currPostCmd + "\n", logFilePath);
       }
@@ -521,7 +509,6 @@ void postprocess(std::vector<std::string> sraRuns, bool serialProcess, std::stri
     }
   }
   else {
-    logOutput("\nPerforming postprocess only\n\n", logFilePath);
     if (verbose == " true") {
       logOutput("  Running command: " + postCmd + "\n", logFilePath);
     }
@@ -601,7 +588,7 @@ int main(int argc, char * argv[]) {
       }
       // If running entire assembly without config file, define names of resulting assemblies
       if (command == "all") {
-        // Placeholder: create assemblies vector
+        assembly = "";
         size_t commaIndF;
         size_t commaIndR;
         size_t currPosF = 0;
@@ -632,7 +619,7 @@ int main(int argc, char * argv[]) {
             currPrefixF.pop_back();
             currPrefixF.pop_back();
           }
-          currAssembly = outDir + "/assembly/00-Transcript_assembly/" + currPrefixF + ".Trinity.fasta";
+          currAssembly = outDir + "/assembly/01-Transcript_assembly/" + currPrefixF + ".Trinity.fasta";
           assemblies.push_back(currAssembly);
           currPosF = commaIndF + 1;
           currPosR = commaIndR + 1;
@@ -704,14 +691,6 @@ int main(int argc, char * argv[]) {
     else {
       entirePipeline = " false";
     }
-    postCmd = SEMBLANS_DIR + "postprocess " + pathConfig + " " +
-              leftReads + " " + rightReads + " " + assembly + " " +
-              refProt + " " + outDir + " " +
-              std::to_string(numThreads) + " " +
-              std::to_string(ram);
-    postCmd += retain;
-    postCmd += verbose;
-    postCmd += entirePipeline;
     int result;
 
     print_intro(logFilePath);
@@ -727,6 +706,7 @@ int main(int argc, char * argv[]) {
 
     // Case 1: preprocess
     if (command == "preprocess") {
+      logOutput("\nPerforming preprocessing only\n\n", logFilePath);
       preprocess(sraRuns, serialProcess, pathConfig, leftReads, rightReads,
                  kraken2Dbs, outDir, threadStr, ramStr, retain, verbose,
                  entirePipeline, logFilePath);
@@ -734,6 +714,7 @@ int main(int argc, char * argv[]) {
     }
     // Case 2: assemble
     if (command == "assemble") {
+      logOutput("\nPerforming assembly only\n\n", logFilePath);
       assemble(sraRuns, serialProcess, pathConfig, leftReads, rightReads,
                kraken2Dbs, outDir, threadStr, ramStr, retain, verbose,
                entirePipeline, logFilePath);
@@ -741,6 +722,7 @@ int main(int argc, char * argv[]) {
     }
     // Case 3: postprocess
     if (command == "postprocess") {
+      logOutput("\nPerforming postprocess only\n\n", logFilePath);
       postprocess(sraRuns, serialProcess, pathConfig, leftReads, rightReads,
                   assembly, refProt, outDir, threadStr, ramStr, retain, verbose,
                   entirePipeline, logFilePath);
@@ -862,6 +844,7 @@ int main(int argc, char * argv[]) {
         logOutput("\n ┌────────────────────────────────────────────────────────┐", logFilePath);
         logOutput("\n │    Phase 3: Postprocessing of Assembled Transcripts    │", logFilePath);
         logOutput("\n └────────────────────────────────────────────────────────┘\n", logFilePath);
+        
         postprocess(sraRuns, serialProcess, pathConfig, leftReads, rightReads,
                     assembly, refProt, outDir, threadStr, ramStr, retain, verbose,
                     entirePipeline, logFilePath);

@@ -1112,7 +1112,7 @@ int main(int argc, char * argv[]) {
       exit(1);
     }
 
-    logOutput("\nRaw sequence data prepared for pre-assembly processing\n", logFilePath);
+    logOutput("\nRaw sequence data prepared for cleaning\n", logFilePath);
     
     std::string fastqc_dir_1(sras[0].get_fastqc_dir_1().first.parent_path().parent_path().c_str());
     std::string fastqc_dir_2(sras[0].get_fastqc_dir_2().first.parent_path().parent_path().c_str());
@@ -1212,13 +1212,6 @@ int main(int argc, char * argv[]) {
                                 logFilePath, outDir, noKrakenDb);
     }
 
-    if (!entirePipeline) {
-      for (auto filePair : outFiles) {
-        system(("mv " + filePair.first + " " + outDir).c_str());
-        system(("mv " + filePair.second + " " + outDir).c_str());
-      }
-    }
-    //printVertEllipse(logFilePath, 3);
     logOutput("\n", logFilePath);
     printBreakLine(logFilePath, 6, 47);
     logOutput("\n\nPreprocess finished successfully\n", logFilePath);

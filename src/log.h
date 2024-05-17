@@ -7,7 +7,10 @@
 #include <iomanip>
 #include <stdio.h>
 #include <boost/iostreams/tee.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/iostreams/stream.hpp>
+
+namespace fs = boost::filesystem;
 
 typedef boost::iostreams::tee_device<std::ostream, std::ostream> teedev;
 typedef boost::iostreams::stream<teedev, std::char_traits<typename std::ostream::char_type>,
@@ -24,3 +27,5 @@ void printBreakLine(std::string logFile, int leadingSpace, int length);
 std::string getPercent(float valPercent, int precision);
 
 void checkExitSignal(int commandResult, std::string logFile);
+
+std::string removeExtensions(std::string filePath);

@@ -179,8 +179,6 @@ long int rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
               << sraRunIn.first << "\n  " << sraRunIn.second << std::endl;
     return -1;
   }
-  logOutput("\r  Unfixable reads removed: " + std::to_string(numUnfix) +
-            "         ", logFile);
 
   if (!compressFiles) {
     inFile1.close();
