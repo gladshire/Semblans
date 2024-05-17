@@ -113,10 +113,7 @@ transcript::transcript(std::string filename, std::string outDir) {
 
   org_name = "";
   tax_id = "";
-  fs::path filePrefix(fs::path(filename.c_str()));
-  while (!filePrefix.extension().empty()) {
-    filePrefix = filePrefix.stem();
-  }
+  fs::path filePrefix(fs::path(filename.c_str()).stem().stem());
   std::string fileBase = std::string(filePrefix.c_str());
 
   file_prefix = fileBase;

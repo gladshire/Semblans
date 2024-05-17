@@ -321,10 +321,10 @@ void preprocess(std::vector<std::string> sraRuns, bool serialProcess, std::strin
   size_t pos;
   int result;
 
-  if (pathConfig == "") {
-    if (leftReads == "" && rightReads == "") {
+  if (pathConfig == "null") {
+    if (outDir == "null" || (leftReads == "null" && rightReads == "null")) {
       std::cerr << "ERROR: If not using '--config', user must specify ";
-      std::cerr << "the left/right read files for preprocessing" << std::endl;
+      std::cerr << "a path for outputs and the left/right read files for preprocessing" << std::endl;
       std::cerr << "  (example: --left reads_1_left.fq,reads_2_left.fq,..." << std::endl;
       std::cerr << "            --right reads_1_right.fq,reads2_right.fq,..." << std::endl;
       exit(1);
@@ -397,6 +397,16 @@ void assemble(std::vector<std::string> sraRuns, bool serialProcess, std::string 
   std::string assCmd = SEMBLANS_DIR + "assemble " + pathConfig + " " +
                        leftReads + " " + rightReads + " " + outDir + " " +
                        threadStr + " " + ramStr + retain + verbose + entirePipeline;
+
+  if (pathConfig == "null") {
+    if (outDir == "null" || (leftReads == "null" && rightReads == "null")) {
+      std::cerr << "ERROR: If not using '--config', user must specify ";
+      std::cerr << "a path for outputs and the left/right read files for assembly" << std::endl;
+      std::cerr << "  (example: --left reads_1_left.fq,reads_2_left.fq,..." << std::endl;
+      std::cerr << "            --right reads_1_right.fq,reads2_right.fq,..." << std::endl;
+      exit(1);
+    }
+  }
 
   if (serialProcess) {
     for (auto sraStr : sraRuns) {

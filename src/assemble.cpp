@@ -461,8 +461,8 @@ std::vector<std::string> run_trinity_bulk(std::map<std::string, std::vector<SRA>
       trinOutDir = outDir + "/assembly/01-Transcript_assembly/";
     }
 
-    inFilePrefix = removeExtensions(sraGroup.first);
-    
+    inFilePrefix = sraGroup.first;
+
     currTrinOutNon = trinOutDir + "/" + inFilePrefix + ".unmapped.Trinity.fasta";
     currTrinOutAll = trinOutDir + "/" + inFilePrefix + ".Trinity.fasta";
 
