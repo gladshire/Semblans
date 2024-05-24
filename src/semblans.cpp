@@ -116,7 +116,7 @@ std::vector<std::string> makeCleanedNames(std::string commaSepReadFiles) {
   do {
     commaInd = commaSepReadFiles.find(',', currPos);
     currStr = commaSepReadFiles.substr(currPos, commaInd - currPos);
-    currFilePath = fs::path(currStr.c_str());
+    currFilePath = fs::path(currStr.c_str()).stem();
     currFilePath.replace_extension(".orep.filt.fq");
     cleanedReads.push_back(std::string(currFilePath.c_str()));
     currPos = commaInd + 1;
@@ -598,7 +598,7 @@ int main(int argc, char * argv[]) {
   }
   if (argc == 2 && (strcmp("--version", argv[1]) == 0 ||
                     strcmp("-v", argv[1]) == 0)) {
-    std::cout << "Semblans version: v1.0.6" << std::endl;
+    std::cout << "Semblans version: v1.0.7" << std::endl;
   }
   else {
     // Parse through flags in commands

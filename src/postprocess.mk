@@ -1,5 +1,5 @@
 CC = g++ -std=c++11
-CFLAGS = '-Wl,-rpath,$$ORIGIN/../lib/' -pthread -g
+CFLAGS = '-Wl,-rpath,$$ORIGIN/../lib/' -pthread
 LIBS = -L../lib -lboost_system -lboost_filesystem -lboost_iostreams -ldl -lconfini -lcurl
 INCLUDE_PATH = -I../lib/ -I../include
 OBJ_LINK = postprocess.o log.o sra.o sra_toolkit.o ini_parse.o transcript.o seq.o llist.o seq_hash.o ncbi_blast.o diamond.o rem_chimera.o salmon_wrap.o corset_wrap.o filter_corset.o transdecoder_wrap.o print_info.o panther_score.o annotate.o
