@@ -31,8 +31,9 @@ void print_help_base() {
   std::cout << "  [MODE]" << std::endl;
   std::cout << "  -1/-2, --left/--right  Specifies simple mode." << std::endl;
   std::cout << "                         Path to left/right read FASTQ(s) should follow the corresponding flags." << std::endl;
-  std::cout << "                         To specify multiple pairs of files, separate file paths with commas" << std::endl;
-  std::cout << "  -od, --output          Specifies path to where Semblans should place output files." << std::endl;
+  std::cout << "                         To specify multiple pairs of files, separate file paths with commas." << std::endl;
+  std::cout << "  -od, --out-directory   Specifies path to where Semblans should place output files." << std::endl;
+  std::cout << "  -o, --output           Specifies the name of the resulting assembly Semblans creates." << std::endl;
   std::cout << "                         Directory must already exist" << std::endl;
   std::cout << "  -kdb, --kraken-db      Specifies which Kraken databases to use during removal of foreign reads." << std::endl;
   std::cout << "                         To specify multiple databases, separate their paths with commas." << std::endl;
@@ -67,7 +68,8 @@ void print_help_preprocess() {
   std::cout << "  -1/-2, --left/--right  Specifies simple mode." << std::endl;
   std::cout << "                         Path to left/right read FASTQ(s) should follow the corresponding flags." << std::endl;
   std::cout << "                         To specify multiple pairs of files, separate file paths with commas" << std::endl;
-  std::cout << "  -od,  --output         Specifies path to where Semblans should place output files." << std::endl;
+  std::cout << "  -od,  --out-directory  Specifies path to where Semblans should place output files." << std::endl;
+  std::cout << "  -o, --output           Specifies the name of the resulting assembly Semblans creates." << std::endl;
   std::cout << "                         Directory must already exist" << std::endl;
   std::cout << "  -kdb, --kraken-db      Specifies which Kraken databases to use during removal of foreign reads." << std::endl;
   std::cout << "                         To specify multiple databases, separate their paths with commas." << std::endl;
@@ -94,7 +96,8 @@ void print_help_postprocess() {
   std::cout << "                         To specify multiple pairs of files, separate file paths with commas" << std::endl;
   std::cout << "  -a,   --assembly       Specifies an assembly for Semblans to operate on." << std::endl;
   std::cout << "                         Only used during postprocessing." << std::endl;
-  std::cout << "  -od,  --output         Specifies path to where Semblans should place output files." << std::endl;
+  std::cout << "  -od,  --out-directory  Specifies path to where Semblans should place output files." << std::endl;
+  std::cout << "  -o, --output           Specifies the name of the resulting assembly Semblans creates." << std::endl;
   std::cout << "                         Directory must already exist" << std::endl;
   std::cout << "  -cfg, --config         Specifies config file mode." << std::endl;
   std::cout << "                         Path to config file should follow this argument" << std::endl;
@@ -128,10 +131,10 @@ std::vector<std::string> makeCleanedNames(std::string commaSepReadFiles) {
 void parseArgv(int argc, char * argv[], std::string & command,
                std::string & leftReads, std::string & rightReads,
                std::string & assembly, std::string & refProt,
-               std::string & outDir, std::string & threadStr,
-               std::string & ramStr, std::string & pathConfig,
-               std::string & kraken2Dbs, bool & retainInterFiles,
-               bool & verboseOutput) {
+               std::string & outDir, std::string & outPrefix,
+               std::string & threadStr, std::string & ramStr,
+               std::string & pathConfig, std::string & kraken2Dbs,
+               bool & retainInterFiles, bool & verboseOutput) {
 
   bool argIsFlag;
   std::vector<int> nonFlagInd;
@@ -227,15 +230,17 @@ void parseArgv(int argc, char * argv[], std::string & command,
         exit(1);
       }
     }
+    // Check for '--kraken-db', for specifying which kraken databases to use during foreign
+    // sequence filtration
     else if (strcmp("--kraken-db", argv[i]) == 0 ||
              strcmp("-kdb", argv[i]) == 0) {
       kraken2Dbs = argv[i + 1];
       nonFlagInd.push_back(i + 1);
     }
-    // Check for '--output', for specifying where outputs should
+    // Check for '--output-directory', for specifying where outputs should
     // go if no config file is used
     else if (strcmp("--output-directory", argv[i]) == 0 ||
-             strcmp("--output", argv[i]) == 0 ||
+             strcmp("--out-directory", argv[i]) == 0 ||
              strcmp("-od", argv[i]) == 0) {
       outDir = argv[i + 1];
       nonFlagInd.push_back(i + 1);
@@ -244,7 +249,13 @@ void parseArgv(int argc, char * argv[], std::string & command,
         exit(1);
       }
     }
-
+    // Check for '--out', for specifying the name/prefix of the output file
+    else if (strcmp("--output", argv[i]) == 0 ||
+             strcmp("--out", argv[i]) == 0 ||
+             strcmp("-o", argv[i]) == 0) {
+      outPrefix = argv[i + 1];
+      nonFlagInd.push_back(i + 1);
+    }
     // Check for number of threads flag
     else if (strcmp("--threads", argv[i]) == 0 ||
              strcmp("--Threads", argv[i]) == 0 ||
@@ -340,9 +351,12 @@ int preprocess(std::vector<std::string> sraRuns, bool serialProcess, std::string
   int result;
 
   if (pathConfig == "null") {
-    if (outDir == "null" || (leftReads == "null" && rightReads == "null")) {
-      std::cerr << "ERROR: If not using '--config', user must specify ";
-      std::cerr << "a path for outputs and the left/right read files for preprocessing" << std::endl;
+    if (outDir == "null") {
+      outDir = ".";
+    }
+
+    if (leftReads == "null" && rightReads == "null") {
+      std::cerr << "ERROR: If not using '--config', user must specify the left/right read files for preprocessing" << std::endl;
       std::cerr << "  (example: --left reads_1_left.fq,reads_2_left.fq,..." << std::endl;
       std::cerr << "            --right reads_1_right.fq,reads2_right.fq,..." << std::endl;
       exit(1);
@@ -401,7 +415,7 @@ int preprocess(std::vector<std::string> sraRuns, bool serialProcess, std::string
 
 int assemble(std::vector<std::string> sraRuns, bool serialProcess, std::string pathConfig,
              std::string leftReads, std::string rightReads, std::string kraken2Dbs,
-             std::string outDir, std::string threadStr, std::string ramStr,
+             std::string outDir, std::string outPrefix, std::string threadStr, std::string ramStr,
              std::string retain, std::string verbose, std::string entirePipeline,
              std::string logFilePath) {
 
@@ -414,13 +428,20 @@ int assemble(std::vector<std::string> sraRuns, bool serialProcess, std::string p
   int result;
 
   std::string assCmd = SEMBLANS_DIR + "assemble " + pathConfig + " " +
-                       leftReads + " " + rightReads + " " + outDir + " " +
+                       leftReads + " " + rightReads + " " + outDir + " " + outPrefix + " " +
                        threadStr + " " + ramStr + retain + verbose + entirePipeline;
 
   if (pathConfig == "null") {
-    if (outDir == "null" || (leftReads == "null" && rightReads == "null")) {
-      std::cerr << "ERROR: If not using '--config', user must specify ";
-      std::cerr << "a path for outputs and the left/right read files for assembly" << std::endl;
+    if (outDir == "null") {
+      outDir = ".";
+    }
+    if (outPrefix == "null") {
+      std::cerr << "\nERROR: If not using '--config', user must name their assembly with the '--output/--out' flag" << std::endl;
+      std::cerr << "  (example: --output/--out/-o assemblyName" << std::endl;
+      exit(1);
+    }
+    if (leftReads == "null" && rightReads == "null") {
+      std::cerr << "\nERROR: If not using '--config', user must specify the left/right read files for assembly" << std::endl;
       std::cerr << "  (example: --left reads_1_left.fq,reads_2_left.fq,..." << std::endl;
       std::cerr << "            --right reads_1_right.fq,reads2_right.fq,..." << std::endl;
       exit(1);
@@ -450,7 +471,7 @@ int assemble(std::vector<std::string> sraRuns, bool serialProcess, std::string p
       cfgIniSub.close();
 
       currAssCmd = SEMBLANS_DIR + "assemble " + currCfgIniSub + " " +
-                   leftReads + " " + rightReads + " " + outDir + " " +
+                   leftReads + " " + rightReads + " " + outDir + " " + outPrefix + " " +
                    threadStr + " " + ramStr + retain + verbose + entirePipeline;
 
       if (verbose == " true") {
@@ -473,9 +494,9 @@ int assemble(std::vector<std::string> sraRuns, bool serialProcess, std::string p
 
 int postprocess(std::vector<std::string> sraRuns, bool serialProcess, std::string pathConfig,
                 std::string leftReads, std::string rightReads, std::string assembly,
-                std::string refProt, std::string outDir, std::string threadStr,
-                std::string ramStr, std::string retain, std::string verbose,
-                std::string entirePipeline, std::string logFilePath) {
+                std::string refProt, std::string outDir, std::string outPrefix,
+                std::string threadStr, std::string ramStr, std::string retain,
+                std::string verbose, std::string entirePipeline, std::string logFilePath) {
 
   std::ifstream cfgIniFile;
   std::ofstream cfgIniSub;
@@ -486,8 +507,15 @@ int postprocess(std::vector<std::string> sraRuns, bool serialProcess, std::strin
   int result;
 
   if (pathConfig == "null") {
-    if (assembly == "null" || refProt == "null" || outDir == "null" ||
-        (leftReads == "null" && rightReads == "null")) {
+    if (outDir == "null") {
+      outDir = ".";
+    }
+    if (outPrefix == "null") {
+      std::cerr << "\nERROR: If not using '--config', user must name their assembly with the '--output/--out' flag" << std::endl;
+      std::cerr << "  (example: --output/--out/-o assemblyName" << std::endl;
+      exit(1);
+    }
+    if (assembly == "null" || refProt == "null" || (leftReads == "null")) {
       std::cerr << "\nERROR: If not using '--config', user must specify assembly, " << std::endl;
       std::cerr << "the left/right read files that were used in assembly, and" << std::endl;
       std::cerr << "a reference proteome." << std::endl;
@@ -501,7 +529,8 @@ int postprocess(std::vector<std::string> sraRuns, bool serialProcess, std::strin
 
   std::string postCmd = SEMBLANS_DIR + "postprocess " + pathConfig + " " +
                         leftReads + " " + rightReads + " " + assembly + " " +
-                        refProt + " " + outDir + " " + threadStr + " " + ramStr + " " +
+                        refProt + " " + outDir + " " + outPrefix + " " + 
+                        threadStr + " " + ramStr + " " +
                         retain + verbose + entirePipeline;
 
   if (serialProcess) {
@@ -528,7 +557,8 @@ int postprocess(std::vector<std::string> sraRuns, bool serialProcess, std::strin
 
       currPostCmd = SEMBLANS_DIR + "postprocess " + pathConfig + " " +
                     leftReads + " " + rightReads + " " + assembly + " " +
-                    refProt + " " + outDir + " " + threadStr + " " + ramStr +
+                    refProt + " " + outDir + " " + outPrefix + " " +
+                    threadStr + " " + ramStr +
                     retain + verbose + entirePipeline;
 
       if (verbose == " true") {
@@ -581,6 +611,7 @@ int main(int argc, char * argv[]) {
   std::string refProt = "null";
   std::string kraken2Dbs = "null";
   std::string outDir = "null";
+  std::string outPrefix = "null";
   bool useCfg = true;
   bool serialProcess = false;
   bool retainInterFiles;
@@ -611,9 +642,9 @@ int main(int argc, char * argv[]) {
 
     // Parse through Semblans argument vector
     parseArgv(argc, argv, command, leftReads, rightReads,
-              assembly, refProt, outDir, threadStr, ramStr,
-              pathConfig, kraken2Dbs, retainInterFiles,
-              verboseOutput);
+              assembly, refProt, outDir, outPrefix, 
+              threadStr, ramStr, pathConfig, kraken2Dbs,
+              retainInterFiles, verboseOutput);
 
     // If no Semblans submodule specified, run all three (preprocess, assemble, postprocess)
     if (command == "") {
@@ -623,26 +654,12 @@ int main(int argc, char * argv[]) {
     // If no config file specified, check for sequence files in Semblans call
     if (pathConfig == "null") {
       useCfg = false;
-      if (outDir == "") {
+      if (outDir == "null") {
         outDir = ".";
       }
-      // If running entire assembly without config file, define names of resulting assemblies
+      // If running entire assembly without config file, define name of resulting assembly
       if (command == "all") {
-        assembly = "";
-        size_t commaIndF;
-        size_t commaIndR;
-        size_t currPosF = 0;
-        size_t currPosR = 0;
-        size_t numIndex;
-        std::string currForward;
-        std::string currReverse;
-        std::string currPrefixF;
-        std::string currPrefixR;
-        fs::path currPathF;
-        fs::path currPathR;
-        std::string currAssembly;
-        std::vector<std::string> assemblies;
-        // Construct string containing comma-separated list of resulting assembly files
+        /*
         do {
           commaIndF = leftReads.find(',', currPosF);
           commaIndR = rightReads.find(',', currPosR);
@@ -673,18 +690,13 @@ int main(int argc, char * argv[]) {
           if (ass != assemblies.back()) {
             assembly += ",";
           }
-        }
+        }*/
+        assembly = outDir + "/assembly/01-Transcript_assembly/" + outPrefix + ".Trinity.fasta";
       }
     }
 
     // If config file being used, set up workspace for project
     if (useCfg) {
-      leftReads = "null";
-      rightReads = "null";
-      kraken2Dbs = "null";
-      refProt = "null";
-      outDir = "null";
-      assembly = "null";
       cfgIni = make_ini_map(pathConfig.c_str());
       cfgIniGen = cfgIni["General"];
       logFilePath = std::string((fs::canonical(fs::path(cfgIniGen["log_file"].c_str()).parent_path()) /
@@ -760,7 +772,7 @@ int main(int argc, char * argv[]) {
     if (command == "assemble") {
       logOutput("\nPerforming assembly only\n\n", logFilePath);
       assemble(sraRuns, serialProcess, pathConfig, leftReads, rightReads,
-               kraken2Dbs, outDir, threadStr, ramStr, retain, verbose,
+               kraken2Dbs, outDir, outPrefix, threadStr, ramStr, retain, verbose,
                entirePipeline, logFilePath);
       exit(0);
     }
@@ -768,12 +780,11 @@ int main(int argc, char * argv[]) {
     if (command == "postprocess") {
       logOutput("\nPerforming postprocess only\n\n", logFilePath);
       postprocess(sraRuns, serialProcess, pathConfig, leftReads, rightReads,
-                  assembly, refProt, outDir, threadStr, ramStr, retain, verbose,
+                  assembly, refProt, outDir, outPrefix, threadStr, ramStr, retain, verbose,
                   entirePipeline, logFilePath);
       exit(0);
     }
     // Case 4: all three
-    // TODO: Semblans currently passes raw files into all three
     if (command == "all") {
       std::string cleanedReadsDir;
       std::vector<std::string> leftReadsCleanedVec;
@@ -817,12 +828,12 @@ int main(int argc, char * argv[]) {
 
           currAssCmd = SEMBLANS_DIR + "assemble " + currCfgIniSub + " " +
                        leftReads + " " + rightReads + " " + outDir + " " +
-                       std::to_string(numThreads) + " " +
+                       outPrefix + " " + std::to_string(numThreads) + " " +
                        std::to_string(ram) + retain + verbose + entirePipeline;
 
           currPostCmd = SEMBLANS_DIR + "postprocess " + pathConfig + " " +
                         leftReads + " " + rightReads + " " + assembly + " " +
-                        refProt + " " + outDir + " " +
+                        refProt + " " + outDir + " " + outPrefix + " " +
                         std::to_string(numThreads) + " " +
                         std::to_string(ram) + retain + verbose + entirePipeline;
 
@@ -876,29 +887,34 @@ int main(int argc, char * argv[]) {
                             kraken2Dbs, outDir, threadStr, ramStr, retain, verbose,
                             entirePipeline, logFilePath);
         if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
-          std::cout << result << std::endl;
-          std::cout << WIFEXITED(result) << std::endl;
           std::cerr << "\nPreprocess exited" << std::endl;
           system("setterm -cursor on");
           exit(1);
         }
         cleanedReadsDir = getDirectory(outDir + "/preprocess/", "..-Filter_overrepresented");
         leftReadsCleanedVec = makeCleanedNames(leftReads);
-        rightReadsCleanedVec = makeCleanedNames(rightReads);
+        if (rightReads != "null") {
+          rightReadsCleanedVec = makeCleanedNames(rightReads);
+        }
         for (int i = 0; i < leftReadsCleanedVec.size(); i++) {
           leftReadsCleaned += cleanedReadsDir + "/" + leftReadsCleanedVec[i];
-          rightReadsCleaned += cleanedReadsDir + "/" + rightReadsCleanedVec[i];
+          if (rightReads != "null") {
+            rightReadsCleaned += cleanedReadsDir + "/" + rightReadsCleanedVec[i];
+          }
           if (i < leftReadsCleanedVec.size() - 1) {
             leftReadsCleaned += ",";
             rightReadsCleaned += ",";
           }
+        }
+        if (rightReads == "null") {
+          rightReadsCleaned = "null";
         }
 
         logOutput("\n ┌───────────────────────────────────────────────────────┐", logFilePath);
         logOutput("\n │        Phase 2: De Novo Assembly of Short-reads       │", logFilePath);
         logOutput("\n └───────────────────────────────────────────────────────┘\n", logFilePath);
         result = assemble(sraRuns, serialProcess, pathConfig, leftReadsCleaned, rightReadsCleaned,
-                          kraken2Dbs, outDir, threadStr, ramStr, retain, verbose,
+                          kraken2Dbs, outDir, outPrefix, threadStr, ramStr, retain, verbose,
                           entirePipeline, logFilePath);
         if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
           std::cerr << "\nAssembly exited" << std::endl;
@@ -909,7 +925,7 @@ int main(int argc, char * argv[]) {
         logOutput("\n │    Phase 3: Postprocessing of Assembled Transcripts    │", logFilePath);
         logOutput("\n └────────────────────────────────────────────────────────┘\n", logFilePath);
         result = postprocess(sraRuns, serialProcess, pathConfig, leftReadsCleaned, rightReadsCleaned,
-                             assembly, refProt, outDir, threadStr, ramStr, retain, verbose,
+                             assembly, refProt, outDir, outPrefix, threadStr, ramStr, retain, verbose,
                              entirePipeline, logFilePath);
         if (WIFSIGNALED(result) || (result != 0 && WIFEXITED(result) == 1)) {
           std::cerr << "\nPostprocess exited" << std::endl;

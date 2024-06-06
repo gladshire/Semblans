@@ -139,8 +139,10 @@ long int rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
         }
         if (numUnfix % 100000 == 0) {
           numUnfix100k++;
-          std::cout << "\r  Unfixable reads removed: " + std::to_string(numUnfix100k * 100000) +
-                    " ...     " << std::flush;
+          if (dispOutput) {
+            std::cout << "\r  Unfixable reads removed: " + std::to_string(numUnfix100k * 100000) +
+                      " ...     " << std::flush;
+          }
         }
 
         for (int i = 0; i < 3; i++) {

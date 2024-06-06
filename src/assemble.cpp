@@ -404,7 +404,7 @@ std::vector<std::string> run_trinity_bulk(std::map<std::string, std::vector<SRA>
                                           bool assembSeqsInterest, bool assembSeqsNoInterest,
                                           bool assembAllSeqs,
                                           bool dispOutput, bool retainInterFiles,
-                                          std::string logFile, std::string outDir,
+                                          std::string logFile, std::string outDir, std::string outPrefix,
                                           const INI_MAP & cfgIni = {}) {
   logOutput("\nStarting de-novo assembly\n", logFile);
   std::vector<std::string> outFiles;
@@ -559,6 +559,7 @@ int main(int argc, char * argv[]) {
   std::string leftReads;
   std::string rightReads;
   std::string outDir;
+  std::string outPrefix;
   std::string logFilePath;
   std::vector<std::string> readFilesLeft;
   std::vector<std::string> readFilesRight;
@@ -578,12 +579,12 @@ int main(int argc, char * argv[]) {
   bool assembleAllSeqs;
   bool compressFiles= false;
  
-  if (argc > 1) {
-    threads = argv[5];
-    ram_gb = argv[6];
-    retainInterFiles = stringToBool(argv[7]);
-    dispOutput = stringToBool(argv[8]);
-    entirePipeline = stringToBool(argv[9]);
+  if (argc == 11) {
+    threads = argv[6];
+    ram_gb = argv[7];
+    retainInterFiles = stringToBool(argv[8]);
+    dispOutput = stringToBool(argv[9]);
+    entirePipeline = stringToBool(argv[10]);
     configPath = argv[1];
     selectiveAssembly = false;
     assembleInterest = false;
@@ -594,6 +595,7 @@ int main(int argc, char * argv[]) {
       leftReads = argv[2];
       rightReads = argv[3];
       outDir = argv[4];
+      outPrefix = argv[5];
       readFilesLeft = getCommaSepStrings(leftReads);
       readFilesRight = getCommaSepStrings(rightReads);
       outDir = std::string((fs::canonical(fs::path(outDir.c_str())).parent_path()).c_str()) + "/" +
@@ -616,7 +618,7 @@ int main(int argc, char * argv[]) {
           logOutput("\nERROR: --left read file '" + readFilesLeft[i] + "' not found\n", logFilePath);
           exit(1);
         }
-        if (!fs::exists(readFilesRight[i].c_str())) {
+        if (readFilesRight[i] != "null" && !fs::exists(readFilesRight[i].c_str())) {
           logOutput("\nERROR: --right read file '" + readFilesRight[i] + "' not found\n", logFilePath);
           exit(1);
         }
@@ -733,14 +735,15 @@ int main(int argc, char * argv[]) {
     size_t numIndex2;
     std::vector<std::string> iniStrArray;
     std::vector<SRA> currSraGroup;
-    // Iterate through user-defined assembly groups in config file
     if (cfgIniAssemblyGroups.empty()) {
       for (auto sra : sras) {
         currSraGroup.push_back(sra);
-        currSraPrefix1 = sra.get_file_prefix().first;
-        currSraPrefix2 = sra.get_file_prefix().second;
+        sraGroups.emplace(outPrefix, currSraGroup);
+        //currSraPrefix1 = sra.get_file_prefix().first;
+        //currSraPrefix2 = sra.get_file_prefix().second;
         //sraGroups.emplace(sra.get_file_prefix().first.substr(0, 
         //                  sra.get_file_prefix().first.find_last_of("_")), currSraGroup);
+        /*
         numIndex1 = std::string(fs::path(currSraPrefix1.c_str()).stem().c_str()).find("1");
         numIndex2 = std::string(fs::path(currSraPrefix2.c_str()).stem().c_str()).find("2");
         if (numIndex1 == numIndex2) {
@@ -748,7 +751,6 @@ int main(int argc, char * argv[]) {
           currSraPrefix2.erase(numIndex2 - 1, 2);
         }
         sraGroups.emplace(currSraPrefix1, currSraGroup);
-        /*
         else {
           sraGroups.emplace(currSraPrefix1, currSraGroup);
         }
@@ -823,12 +825,12 @@ int main(int argc, char * argv[]) {
     if (configPath != "null") {
       outFiles = run_trinity_bulk(sraGroups, threads, ram_gb, assembleInterest, 
                                   assembleOthers, assembleAllSeqs, dispOutput,
-                                  retainInterFiles, logFilePath, "", cfgIni);
+                                  retainInterFiles, logFilePath, "", "", cfgIni);
     }
     else {
       outFiles = run_trinity_bulk(sraGroups, threads, ram_gb, assembleInterest,
                                   assembleOthers, assembleAllSeqs, dispOutput,
-                                  retainInterFiles, logFilePath, outDir);
+                                  retainInterFiles, logFilePath, outDir, outPrefix);
     }
 
     logOutput("\nAssemble finished successfully\n\n", logFilePath);

@@ -587,6 +587,7 @@ int main(int argc, char * argv[]) {
   std::string assembly;
   std::string refProt;
   std::string outDir;
+  std::string outPrefix;
   std::string projDir;
   std::string logFilePath;
   std::vector<std::string> readFilesLeft;
@@ -609,12 +610,12 @@ int main(int argc, char * argv[]) {
   std::vector<transcript> transVec;
   std::vector<std::string> outFiles;
   std::vector<std::pair<std::string, std::string>> outFilesFinal;
-  if (argc > 1) {
-    threads = argv[7];
-    ram_gb = argv[8];
-    retainInterFiles = stringToBool(argv[9]);
-    dispOutput = stringToBool(argv[10]);
-    entirePipeline = stringToBool(argv[11]);
+  if (argc == 13) {
+    threads = argv[8];
+    ram_gb = argv[9];
+    retainInterFiles = stringToBool(argv[10]);
+    dispOutput = stringToBool(argv[11]);
+    entirePipeline = stringToBool(argv[12]);
     // Determine whether sequence files are specified in config file or postprocess call
     configPath = argv[1];
     // Set up postprocess parameters based on command line input
@@ -624,6 +625,7 @@ int main(int argc, char * argv[]) {
       assembly = argv[4];
       refProt = argv[5];
       outDir = argv[6];
+      outPrefix = argv[7];
       readFilesLeft = getCommaSepStrings(leftReads);
       readFilesRight = getCommaSepStrings(rightReads);
       if (readFilesLeft.size() != readFilesRight.size()) {

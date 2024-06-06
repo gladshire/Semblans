@@ -1020,7 +1020,7 @@ int main(int argc, char * argv[]) {
           logOutput("\nERROR: --left read file '" + readFilesLeft[i] + "' not found\n", logFilePath);
           exit(1);
         }
-        if (!fs::exists(readFilesRight[i].c_str())) {
+        if (readFilesRight[i] != "null" && !fs::exists(readFilesRight[i].c_str())) {
           logOutput("\nERROR: --right read file '" + readFilesRight[i] + "' not found\n", logFilePath);
           exit(1);
         }

@@ -22,7 +22,8 @@ bool runPaired(std::vector<std::pair<std::string, std::string>> sraRunsIn) {
   int numSingle = 0;
   int numPaired = 0;
   for (auto sraRun : sraRunsIn) {
-    if (sraRun.second != "") {
+    if (sraRun.second != "" &&
+        sraRun.second != "null") {
       numPaired++;
     }
     else {
@@ -55,13 +56,15 @@ void salmon_quant(std::string transIn, std::string transIndex, std::string trans
   // Construct largest possible list of either paired or single runs
   for (int i = 0; i < sraRunsIn.size(); i++) {
     if (morePaired) {
-      if (sraRunsIn[i].second != "") {
+      if (sraRunsIn[i].second != "" &&
+          sraRunsIn[i].second != "null") {
         sras1 += (sraRunsIn[i].first + " ");
         sras2 += (sraRunsIn[i].second + " ");
       }
     }
     else {
-      if (sraRunsIn[i].second == "") {
+      if (sraRunsIn[i].second == "" ||
+          sraRunsIn[i].second == "null") {
         sras1 += (sraRunsIn[i].first + " ");
       }
     }

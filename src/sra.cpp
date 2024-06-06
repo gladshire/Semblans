@@ -308,9 +308,20 @@ SRA::SRA(std::string fileName1, std::string fileName2, INI_MAP cfgIni, bool comp
 SRA::SRA(std::string fileName1, std::string fileName2, std::string outDir, bool compressedFiles,
          bool dummy) {
 
+  sra_accession = "";
+  org_name = "";
+  tax_id = "";
+  spots = 0;
+  spots_m = -1;
+  bp = 0;
+  paired = (fileName2 == "null") ? false : true;
+  this->compressedFiles = compressedFiles;
+
   //outDir = std::string(fs::canonical(outDir.c_str()).parent_path().c_str()) + "/";
   fileName1 = std::string(fs::canonical(fileName1.c_str()).c_str());
-  fileName2 = std::string(fs::canonical(fileName2.c_str()).c_str());
+  if (paired) {
+    fileName2 = std::string(fs::canonical(fileName2.c_str()).c_str());
+  }
 
   //std::string localDataDir(cfgIni["General"]["local_data_directory"]);
   std::string compressExt;
@@ -318,16 +329,8 @@ SRA::SRA(std::string fileName1, std::string fileName2, std::string outDir, bool 
   std::string fileBase2(fs::path(fileName2.c_str()).stem().c_str());
 
   file_prefix_1 = fileBase1;
-  file_prefix_2 = fileBase2;
+  file_prefix_2 = (paired) ? fileBase2 : "";
 
-  sra_accession = "";
-  org_name = "";
-  tax_id = "";
-  spots = 0;
-  spots_m = -1;
-  bp = 0;
-  paired = (fileName2 == "") ? false : true;
-  this->compressedFiles = compressedFiles;
 
   if (compressedFiles) {
     compressExt = ".gz";
@@ -385,11 +388,6 @@ SRA::SRA(std::string fileName1, std::string fileName2, std::string outDir, bool 
     }
     numReads2 /= 4;
   }
-
-  //if (paired && (numReads1 != numReads2)) {
-  //  logOutput("ERROR: Forward and reverse files do not have the same number of reads.", logFile);
-  //  exit(1);
-  //}
 
   spots = numReads1;
 
