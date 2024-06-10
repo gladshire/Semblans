@@ -12,6 +12,12 @@ Through the collation of several external packages and the leveraging of C++ dat
 
 All documentation for Semblans can be found in the [wiki](https://github.com/gladshire/Semblans/wiki)
 
+# Installation
+To install Semblans, navigate to its root directory and then call
+```
+./install.sh
+```
+
 Reference peptide sets for **postprocess**
 
 [**Ensembl animal reference**](https://uofi.app.box.com/s/0rlp6q0u5uvc161mzbdr3c0xoiti63sk)
