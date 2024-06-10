@@ -24,6 +24,7 @@ By default, Semblans will not retrieve the PantherDB functional protein database
 ```
 ./install.sh --with-panther
 ```
+**Be aware that the PantherDB database is large (~17GB compressed; ~80GB uncompressed), and can take up to an hour for download.**
 
 # Quick Start / Test data
 
