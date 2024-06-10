@@ -13,9 +13,23 @@ Through the collation of several external packages and the leveraging of C++ dat
 All documentation for Semblans can be found in the [wiki](https://github.com/gladshire/Semblans/wiki)
 
 # Installation
-To install Semblans, navigate to its root directory and then call
+
+If the user has downloaded a pre-compiled Semblans release, this step is **NOT NECESSARY**. To install Semblans, navigate to its root directory and then call:
 ```
 ./install.sh
+```
+Please allow several minutes for Semblans to set up the necessary packages.
+
+By default, Semblans will not retrieve the PantherDB functional protein database for sequence annotation. **If the user intends to utilize Semblans' annotation functionality, they should instead call the following installation command:
+```
+./install.sh --with-panther
+```
+
+# Quick Start / Test data
+
+Included with Semblans is a directory called 'examples'. This directory contains a very small short read dataset ("ChloroSubSet") for testing/verifying functionality of the Semblans pipeline. To test, uncompress the data from **ChloroSubSet.tar.gz**. The user should then **ensure they have a reference proteome**, as one is necessary for several of the pipeline's postprocessing stages. Links to broad, kingdom-level reference proteomes are hosted at the bottom of this document. In this example, I use the kingdom-level plant proteome. Once prepared, the user may call:
+```
+semblans --left ChloroSubSet_1.fq --right ChloroSubSet_2.fq --ref-proteome ensembl_plant.pep.all.fa --threads 8 --ram 10
 ```
 
 Reference peptide sets for **postprocess**
