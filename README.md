@@ -30,7 +30,7 @@ By default, Semblans will not retrieve the PantherDB functional protein database
 
 Included with Semblans is a directory called 'examples'. This directory contains a very small short read dataset ("ChloroSubSet") for testing/verifying functionality of the Semblans pipeline. To test, uncompress the data from **ChloroSubSet.tar.gz**. The user should then **ensure they have a reference proteome**, as one is necessary for several of the pipeline's postprocessing stages. Links to broad, kingdom-level reference proteomes are hosted at the bottom of this document. In this example, I use the kingdom-level plant proteome. Once prepared, the user may call:
 ```
-semblans --left ChloroSubSet_1.fq --right ChloroSubSet_2.fq --ref-proteome ensembl_plant.pep.all.fa --threads 8 --ram 10
+semblans --left ChloroSubSet_1.fq --right ChloroSubSet_2.fq --prefix ChloroSubSet --ref-proteome ensembl_plant.pep.all.fa --threads 8 --ram 10
 ```
 
 Reference peptide sets for **postprocess**
