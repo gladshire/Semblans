@@ -357,6 +357,10 @@ int preprocess(std::vector<std::string> sraRuns, bool serialProcess, std::string
       std::cerr << "            --right reads_1_right.fq,reads2_right.fq,..." << std::endl;
       exit(1);
     }
+    if (outDir == "null") {
+      system("mkdir ./semblans_out > /dev/null 2>&1");
+      outDir = "semblans_out";
+    }
   }
 
   std::string preCmd = SEMBLANS_DIR + "preprocess " + pathConfig + " " +
@@ -439,6 +443,10 @@ int assemble(std::vector<std::string> sraRuns, bool serialProcess, std::string p
       std::cerr << "            --right reads_1_right.fq,reads2_right.fq,..." << std::endl;
       exit(1);
     }
+    if (outDir == "null") {
+      system(("mkdir ./semblans_out > /dev/null 2>&1").c_str());
+      outDir = "semblans_out";
+    }
   }
 
   if (serialProcess) {
@@ -514,6 +522,10 @@ int postprocess(std::vector<std::string> sraRuns, bool serialProcess, std::strin
       std::cerr << "            --left reads_1_left.fq,reads_2_left.fq,..." << std::endl;
       std::cerr << "            --right reads_1_right.fq, reads_2_right.fq,..." << std::endl;
       exit(1);
+    }
+    if (outDir == "null") {
+      system(("mkdir ./semblans_out > /dev/null 2>&1").c_str());
+      outDir = "semblans_out";
     }
   }
 
@@ -645,8 +657,7 @@ int main(int argc, char * argv[]) {
     if (pathConfig == "null") {
       useCfg = false;
       if (outDir == "null") {
-        system("mkdir semblans_out > /dev/null 2>&1");
-        outDir = "semblans_out";
+        outDir = ".";
       }
       // If running entire assembly without config file, define name of resulting assembly
       if (command == "all") {

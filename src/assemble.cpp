@@ -5,6 +5,7 @@ std::atomic<bool> procRunning(false);
 // Update Trinity output transcript headers according to a given prefix string
 void updateHeaders(std::string fastaFilePath, std::string newPrefix,
                    uintmax_t ram_b) {
+
   uintmax_t numBytesFasta = fs::file_size(fastaFilePath.c_str());
   uintmax_t lenHashTable = numBytesFasta / 160;
 

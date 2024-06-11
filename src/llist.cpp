@@ -72,7 +72,7 @@ void linkedList::setSeqHead(const std::string & oldHead,
   std::string currHead;
   while (currNode != nullptr) {
     currHead = currNode->seqEntry.get_header();
-    if (currHead.substr(0, currHead.find(" ")) == oldHead) {
+    if (currHead == oldHead) {
       currNode->seqEntry.set_header(newHead);
       return;
     }
