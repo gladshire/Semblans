@@ -603,12 +603,7 @@ int main(int argc, char * argv[]) {
                std::string((fs::canonical(fs::path(outDir.c_str())).filename()).c_str()) + "/";      
       logFilePath = outDir + "log.txt";
 
-      // if (entirePipeline) {
-      //   make_proj_space(outDir, "all");
-      // }
-      // else {
       make_proj_space(outDir, "assembly");
-      // }
 
       if (readFilesLeft.size() != readFilesRight.size()) {
         logOutput("ERROR: Number of left/right read files do not match", logFilePath);
@@ -739,7 +734,7 @@ int main(int argc, char * argv[]) {
     if (cfgIniAssemblyGroups.empty()) {
       for (auto sra : sras) {
         currSraGroup.push_back(sra);
-        sraGroups.emplace(outPrefix, currSraGroup);
+        //sraGroups.emplace(outPrefix, currSraGroup);
         //currSraPrefix1 = sra.get_file_prefix().first;
         //currSraPrefix2 = sra.get_file_prefix().second;
         //sraGroups.emplace(sra.get_file_prefix().first.substr(0, 
@@ -757,8 +752,9 @@ int main(int argc, char * argv[]) {
         }
         sraGroups.emplace(currSraPrefix.substr(0, currSraPrefix.find("_1", currSraGroup
         */
-        currSraGroup.clear();
+        //currSraGroup.clear();
       }
+      sraGroups.emplace(outPrefix, currSraGroup);
     }
     for (auto assemblyGroup : cfgIniAssemblyGroups) {
       // Get group name and group array string 

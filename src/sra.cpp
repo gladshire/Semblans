@@ -38,8 +38,9 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool dispOutput,
   int result;
   int numRetries = 0;
 
+  logOutput("\nObtaining information for accession(s)", logFile);
   while (true) {
-    // After 5 unsuccessful retries, 
+    // After 5 unsuccessful retries, break and exit
     if (numRetries == 5) {
       logOutput("\n  ERROR: Could not retrieve accession \"" + sra_accession + "\"\n", logFile);
       this->sra_accession = "FAILURE";
@@ -48,8 +49,6 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool dispOutput,
     system(curlCmdStr.c_str());
     std::this_thread::sleep_for(queryLim);
 
-    //std::this_thread::sleep_for(std::chrono::milliseconds(500));
-  
     // Parse XML file for object information
     try {
       rapidxml::file<> sra_xml((".tmp" + std::to_string(num) + ".xml").c_str());

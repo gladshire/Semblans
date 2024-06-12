@@ -183,8 +183,6 @@ std::vector<std::string> remChimeraBulk(const std::vector<transcript> & transVec
     currTransCut = trans.get_trans_path_ccut().c_str();
     chimOutDir = trans.get_trans_path_chimera().parent_path().c_str();
 
-    std::cout << currBlastx << std::endl;
-
     if (!dispOutput) {
       procRunning = true;
       std::thread chimeraThread(progressAnim, "  ", logFilePath);

@@ -32,7 +32,7 @@ void print_help_base() {
   std::cout << "  -1/-2, --left/--right  Specifies simple mode." << std::endl;
   std::cout << "                         Path to left/right read FASTQ(s) should follow the corresponding flags." << std::endl;
   std::cout << "                         To specify multiple pairs of files, separate file paths with commas." << std::endl;
-  std::cout << "  -od, --out-directory   Specifies path to where Semblans should place output files." << std::endl;
+  std::cout << "  -o, --out-directory   Specifies path to where Semblans should place output files." << std::endl;
   std::cout << "  -p, --prefix           Specifies the name of the resulting assembly Semblans creates." << std::endl;
   std::cout << "                         Directory must already exist" << std::endl;
   std::cout << "  -kdb, --kraken-db      Specifies which Kraken databases to use during removal of foreign reads." << std::endl;
@@ -68,7 +68,7 @@ void print_help_preprocess() {
   std::cout << "  -1/-2, --left/--right  Specifies simple mode." << std::endl;
   std::cout << "                         Path to left/right read FASTQ(s) should follow the corresponding flags." << std::endl;
   std::cout << "                         To specify multiple pairs of files, separate file paths with commas" << std::endl;
-  std::cout << "  -od,  --out-directory  Specifies path to where Semblans should place output files." << std::endl;
+  std::cout << "  -o,  --out-directory  Specifies path to where Semblans should place output files." << std::endl;
   std::cout << "  -p, --prefix           Specifies the name of the resulting assembly Semblans creates." << std::endl;
   std::cout << "                         Directory must already exist" << std::endl;
   std::cout << "  -kdb, --kraken-db      Specifies which Kraken databases to use during removal of foreign reads." << std::endl;
@@ -96,7 +96,7 @@ void print_help_postprocess() {
   std::cout << "                         To specify multiple pairs of files, separate file paths with commas" << std::endl;
   std::cout << "  -a,   --assembly       Specifies an assembly for Semblans to operate on." << std::endl;
   std::cout << "                         Only used during postprocessing." << std::endl;
-  std::cout << "  -od,  --out-directory  Specifies path to where Semblans should place output files." << std::endl;
+  std::cout << "  -o,  --out-directory  Specifies path to where Semblans should place output files." << std::endl;
   std::cout << "  -p, --prefix           Specifies the name of the resulting assembly Semblans creates." << std::endl;
   std::cout << "                         Directory must already exist" << std::endl;
   std::cout << "  -cfg, --config         Specifies config file mode." << std::endl;
@@ -241,7 +241,7 @@ void parseArgv(int argc, char * argv[], std::string & command,
     // go if no config file is used
     else if (strcmp("--output-directory", argv[i]) == 0 ||
              strcmp("--out-directory", argv[i]) == 0 ||
-             strcmp("-od", argv[i]) == 0) {
+             strcmp("-o", argv[i]) == 0) {
       outDir = argv[i + 1];
       nonFlagInd.push_back(i + 1);
       if (!fs::exists(outDir.c_str())) {
@@ -327,7 +327,7 @@ void parseArgv(int argc, char * argv[], std::string & command,
         }
       }
       if (argIsFlag) {
-        std::cerr << "ERROR: Unrecognized flag '" << argv[i] << "'" << std::endl;
+        std::cerr << "\nERROR: Unrecognized flag '" << argv[i] << "'" << std::endl;
         std::cerr << "  For a list of acceptable flags, call" << std::endl;
         std::cerr << "  semblans -h/--help\n" << std::endl;
         exit(1);
@@ -336,6 +336,85 @@ void parseArgv(int argc, char * argv[], std::string & command,
   }
 }
 
+
+void checkCommandIsValid(std::string command,
+                         std::string leftReads, std::string rightReads,
+                         std::string assembly, std::string refProt,
+                         std::string outDir, std::string outPrefix,
+                         std::string pathConfig, std::string kraken2Dbs) {
+  // Check if Semblans command in quick mode (no .INI file) is valid
+  if (pathConfig == "null") {
+    // Make sure user specified read files (--left/--right) for assembly
+    if (leftReads == "null" && rightReads == "null") {
+      std::cerr << "\nERROR: User must specify the left/right read file(s) for assembly" << std::endl;
+      std::cerr << "  (example: --left reads_1_left.fq,reads_2_left.fq,..." << std::endl;
+      std::cerr << "            --right reads_1_right.fq,reads2_right.fq,..." << std::endl;
+      exit(1);
+    }
+    // Make sure user specified an assembly output prefix (--prefix) if they are assembling 
+    if (command != "preprocess" && outPrefix == "null") {
+      std::cerr << "\nERROR: User must name their assembly with the '--prefix/--pre/-p' flag" << std::endl;
+      std::cerr << "  (example: --prefix/--pre/-p assemblyPrefix)" << std::endl;
+      exit(1);
+    }
+    // If user called preprocess, alert user to extraneous command arguments, then proceed
+    if (command == "preprocess") {
+      if (assembly != "null" || refProt != "null") {
+        std::cerr << "\nWARNING: Preprocessing of reads was called, and user specified" << std::endl;
+        std::cerr << "an assembly and/or a reference proteome." << std::endl;
+        std::cerr << "\n  Neither are necessary for the preprocessing of raw reads," << std::endl;
+        std::cerr << "  so they will be ignored" << std::endl;
+      }
+    }
+    // If user called assemble, alert user to extraneous command arguments, then proceed
+    if (command == "assemble") {
+      if (kraken2Dbs != "null" || refProt != "null") {
+        std::cerr << "\nWARNING: Assembly of reads was called, and user specified" << std::endl;
+        std::cerr << "a Kraken2 database and/or reference proteome." << std::endl;
+        std::cerr << "\n  Neither are necessary for the assembly of reads," << std::endl;
+        std::cerr << "  so they will be ignored" << std::endl;
+      }
+    } 
+    // If user called postprocess, make sure they specified an assembly file, reference
+    // proteome
+    if (command == "postprocess") {
+      if (assembly == "null" || refProt == "null") {
+        std::cerr << "\nERROR: Postprocessing of transcripts requires an assembly file" << std::endl;
+        std::cerr << "and reference proteome for postprocessing" << std::endl;
+        std::cerr << "  (example: --assembly/-a transcripts.fa" << std::endl;
+        std::cerr << "            --ref-proteome/-rp reference_prot.fa)" << std::endl;
+        exit(1);
+      }
+    }
+    // If user is running entire pipeline, make sure they specified a reference proteome
+    if (command == "all") {
+      if (refProt == "null") {
+        std::cerr << "\nERROR: Running the entire pipeline requires a reference proteome" << std::endl;
+        std::cerr << "  (example: --ref-proteome/-rp reference_prot.fa)" << std::endl;
+        exit(1);
+      }
+    }
+  }
+  // Check if Semblans command in advanced mode (with .INI file) is valid
+  else {
+    if (leftReads != "null" || rightReads != "null" ||
+        assembly != "null" || refProt != "null" ||
+        outDir != "null" || outPrefix != "null" ||
+        kraken2Dbs != "null") {
+      std::cerr << "\nERROR: If running in advanced mode (with --config), user should not use the flags:" << std::endl;
+      std::cerr << "  --left/-1, --right/-2" << std::endl;
+      std::cerr << "  --kraken-db/-kdb" << std::endl;
+      std::cerr << "  --assembly/-a" << std::endl;
+      std::cerr << "  --ref-proteome/-rp" << std::endl;
+      std::cerr << "  --out-directory/-o" << std::endl;
+      std::cerr << "These settings are controlled via the .INI configuration file" << std::endl;
+      exit(1);
+    }
+  }
+}
+
+
+// Call the Semblans 'preprocess' binary, which performs all steps up to assembly
 int preprocess(std::vector<std::string> sraRuns, bool serialProcess, std::string pathConfig,
                std::string leftReads, std::string rightReads, std::string kraken2Dbs,
                std::string outDir, std::string threadStr, std::string ramStr,
@@ -349,15 +428,6 @@ int preprocess(std::vector<std::string> sraRuns, bool serialProcess, std::string
   std::string currPreCmd;
   size_t pos;
   int result;
-
-  if (pathConfig == "null") {
-    if (leftReads == "null" && rightReads == "null") {
-      std::cerr << "ERROR: If not using '--config', user must specify the left/right read files for preprocessing" << std::endl;
-      std::cerr << "  (example: --left reads_1_left.fq,reads_2_left.fq,..." << std::endl;
-      std::cerr << "            --right reads_1_right.fq,reads2_right.fq,..." << std::endl;
-      exit(1);
-    }
-  }
 
   std::string preCmd = SEMBLANS_DIR + "preprocess " + pathConfig + " " +
                        leftReads + " " + rightReads + " " + kraken2Dbs + " " +
@@ -408,7 +478,8 @@ int preprocess(std::vector<std::string> sraRuns, bool serialProcess, std::string
   return result;
 }
 
-
+// Call the Semblans 'assemble' binary, which performs the construction of transcripts from
+// short reads
 int assemble(std::vector<std::string> sraRuns, bool serialProcess, std::string pathConfig,
              std::string leftReads, std::string rightReads, std::string kraken2Dbs,
              std::string outDir, std::string outPrefix, std::string threadStr, std::string ramStr,
@@ -426,20 +497,6 @@ int assemble(std::vector<std::string> sraRuns, bool serialProcess, std::string p
   std::string assCmd = SEMBLANS_DIR + "assemble " + pathConfig + " " +
                        leftReads + " " + rightReads + " " + outDir + " " + outPrefix + " " +
                        threadStr + " " + ramStr + retain + verbose + entirePipeline;
-
-  if (pathConfig == "null") {
-    if (outPrefix == "null") {
-      std::cerr << "\nERROR: If not using '--config', user must name their assembly with the '--prefix/--pre' flag" << std::endl;
-      std::cerr << "  (example: --output/--out/-o assemblyName" << std::endl;
-      exit(1);
-    }
-    if (leftReads == "null" && rightReads == "null") {
-      std::cerr << "\nERROR: If not using '--config', user must specify the left/right read files for assembly" << std::endl;
-      std::cerr << "  (example: --left reads_1_left.fq,reads_2_left.fq,..." << std::endl;
-      std::cerr << "            --right reads_1_right.fq,reads2_right.fq,..." << std::endl;
-      exit(1);
-    }
-  }
 
   if (serialProcess) {
     for (auto sraStr : sraRuns) {
@@ -484,7 +541,7 @@ int assemble(std::vector<std::string> sraRuns, bool serialProcess, std::string p
   return result;
 }
 
-
+// Call the Semblans 'postprocess' binary, which performs further refining of transcripts
 int postprocess(std::vector<std::string> sraRuns, bool serialProcess, std::string pathConfig,
                 std::string leftReads, std::string rightReads, std::string assembly,
                 std::string refProt, std::string outDir, std::string outPrefix,
@@ -499,23 +556,7 @@ int postprocess(std::vector<std::string> sraRuns, bool serialProcess, std::strin
   size_t pos;
   int result;
 
-  if (pathConfig == "null") {
-    if (outPrefix == "null") {
-      std::cerr << "\nERROR: If not using '--config', user must name their assembly with the '--prefix/--pre' flag" << std::endl;
-      std::cerr << "  (example: --prefix/--pre/-p assemblyName" << std::endl;
-      exit(1);
-    }
-    if (assembly == "null" || refProt == "null" || (leftReads == "null")) {
-      std::cerr << "\nERROR: If not using '--config', user must specify assembly, " << std::endl;
-      std::cerr << "the left/right read files that were used in assembly, and" << std::endl;
-      std::cerr << "a reference proteome." << std::endl;
-      std::cerr << "  (example: --assembly transcripts.fa" << std::endl;
-      std::cerr << "            --ref-proteome refProt.fa" << std::endl;
-      std::cerr << "            --left reads_1_left.fq,reads_2_left.fq,..." << std::endl;
-      std::cerr << "            --right reads_1_right.fq, reads_2_right.fq,..." << std::endl;
-      exit(1);
-    }
-  }
+  
 
   std::string postCmd = SEMBLANS_DIR + "postprocess " + pathConfig + " " +
                         leftReads + " " + rightReads + " " + assembly + " " +
@@ -622,6 +663,7 @@ int main(int argc, char * argv[]) {
     std::cout << "Semblans version: v1.0.7" << std::endl;
   }
   else {
+
     // Parse through flags in commands
     threadStr = "";
     ramStr = "";
@@ -684,6 +726,9 @@ int main(int argc, char * argv[]) {
     }
 
     std::ofstream logFile(logFilePath, std::ios_base::trunc);
+
+    // Print Semblans intro in terminal
+    print_intro(logFilePath);
  
     std::string verbose;
     std::string retain;
@@ -708,7 +753,9 @@ int main(int argc, char * argv[]) {
     }
     int result;
 
-    print_intro(logFilePath);
+    // Make sure Semblans command entered by user is valid
+    checkCommandIsValid(command, leftReads, rightReads, assembly,
+                        refProt, outDir, outPrefix, pathConfig, kraken2Dbs);
 
     std::ifstream cfgIniFile;
     std::ofstream cfgIniSub;
