@@ -754,7 +754,7 @@ int main(int argc, char * argv[]) {
       std::string currRight;
       std::vector<std::string> assemblies;
 
-      if (outPrefix == "null") {
+      if (pathConfig == "null" && outPrefix == "null") {
         std::cerr << "\nERROR: If not using '--config', user must name their assembly with the '--prefix/--pre' flag" << std::endl;
         std::cerr << "  (example: --prefix/--pre/-p assemblyName" << std::endl;
         exit(1);

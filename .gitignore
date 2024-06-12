@@ -1,6 +1,7 @@
 *.fasta
 *.fastq
 *.fa
+*.fq
 *.bc
 *.jf_dump
 *.mer_counts
