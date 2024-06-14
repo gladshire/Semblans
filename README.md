@@ -14,7 +14,7 @@ All documentation for Semblans can be found in the [wiki](https://github.com/gla
 
 # Installation
 
-If the user has downloaded a pre-compiled Semblans release, this step is **NOT NECESSARY**. To install Semblans, navigate to its root directory and then call:
+If the user has downloaded a pre-compiled Semblans release, this step is not necessary. To install Semblans, navigate to its root directory and then call:
 ```
 ./install.sh
 ```
@@ -24,7 +24,7 @@ By default, Semblans will not retrieve the PantherDB functional protein database
 ```
 ./install.sh --with-panther
 ```
-**Be aware that the PantherDB database is large (~17GB compressed; ~80GB uncompressed), and can take up to an hour for download.**
+**Be aware that the PantherDB database is large (~17GB compressed; ~80GB uncompressed), and can take some time to download.**
 
 # Quick Start / Test data
 
