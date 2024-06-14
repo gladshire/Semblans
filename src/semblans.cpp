@@ -150,6 +150,7 @@ void parseArgv(int argc, char * argv[], std::string & command,
         strcmp("pr", argv[i]) == 0 ||
         strcmp("Pr", argv[i]) == 0) {
       command = "preprocess";
+      continue;
     }
     else if (strcmp("assemble", argv[i]) == 0 ||
              strcmp("Assemble", argv[i]) == 0 ||
@@ -160,6 +161,7 @@ void parseArgv(int argc, char * argv[], std::string & command,
              strcmp("a", argv[i]) == 0 ||
              strcmp("A", argv[i]) == 0) {
       command = "assemble";
+      continue;
     }
     else if (strcmp("postprocess", argv[i]) == 0 ||
              strcmp("Postprocess", argv[i]) == 0 ||
@@ -170,15 +172,43 @@ void parseArgv(int argc, char * argv[], std::string & command,
              strcmp("po", argv[i]) == 0 ||
              strcmp("Po", argv[i]) == 0) {
       command = "postprocess";
+      continue;
     }
     else if (strcmp("all", argv[i]) == 0 ||
              strcmp("All", argv[i]) == 0) {
       command = "all";
+      continue;
     }
 
+    // Check for '--retain' flag, which tells Semblans not to delete outputs from
+    // intermediate steps in the pipeline
+    else if (strcmp("--retain", argv[i]) == 0 ||
+             strcmp("--Retain", argv[i]) == 0 ||
+             strcmp("-f", argv[i]) == 0 ||
+             strcmp("-F", argv[i]) == 0) {
+      retainInterFiles = true;
+      continue;
+    }
+    // Check for '--verbose' flag, which tells Semblans to print a detailed output
+    // to the terminal's standard output. This does not affect verbosity of log files.
+    // Regardless of terminal output, log files always receive maximum verbosity.
+    else if (strcmp("--verbose", argv[i]) == 0 ||
+             strcmp("--Verbose", argv[i]) == 0 ||
+             strcmp("-v", argv[i]) == 0 ||
+             strcmp("-V", argv[i]) == 0) {
+      verboseOutput = true;
+      continue;
+    }
+    // If the argument was none of the above, and is the terminating argument,
+    // exit, since all subsequent arguments take input
+    if (i == argc - 1 && i != nonFlagInd.back()) {
+      std::cerr << "\nERROR: Invalid usage. For instructions, call" << std::endl;
+      std::cerr << "  semblans --help\n" << std::endl;
+      exit(1);
+    }
     // Check for config file path
-    else if (strcmp("--config", argv[i]) == 0 ||
-             strcmp("-cfg", argv[i]) == 0) {
+    if (strcmp("--config", argv[i]) == 0 ||
+        strcmp("-cfg", argv[i]) == 0) {
       if (strcmp(argv[i + 1] + strlen(argv[i + 1]) - 4, ".ini") == 0 ||
           strcmp(argv[i + 1] + strlen(argv[i + 1]) - 4, ".INI") == 0) {
         pathConfig = argv[i + 1];
@@ -186,21 +216,25 @@ void parseArgv(int argc, char * argv[], std::string & command,
         fs::path pathConfigFile(pathConfig.c_str());
         if (!fs::exists(pathConfigFile)) {
           // ERROR: Config file not found!
-          std::cout << "ERROR: Config file: " << pathConfig << " not found\n" << std::endl;
+          std::cout << "\nERROR: Config file: " << pathConfig << " not found\n" << std::endl;
           exit(1);
         }
       }
       else {
         // ERROR: Config flag invoked, but no config file specified!
-        std::cerr << "ERROR: If using '--config', you must specify config file (.INI)" << std::endl;
+        std::cerr << "\nERROR: If using '--config', you must specify config file (.INI)" << std::endl;
         std::cerr << "  (example: --config path/to/config.ini)\n" << std::endl;
         exit(1);
       }
     }
-
     // Check for '--left' read sequence FASTQ file(s)
     else if (strcmp("--left", argv[i]) == 0 ||
-             strcmp("-1", argv[i]) == 0) {
+        strcmp("-1", argv[i]) == 0) {
+      if (i == argc - 1) {
+        std::cerr << "\nERROR: Invalid usage. For instructions, call:\n" << std::endl;
+        std::cerr << "  semblans --help\n" << std::endl;
+        exit(1);
+      }
       leftReads = argv[i + 1];
       nonFlagInd.push_back(i + 1);
     }
@@ -220,6 +254,7 @@ void parseArgv(int argc, char * argv[], std::string & command,
         exit(1);
       }
     }
+    // Check for '--reference-proteome' FASTA file
     else if (strcmp("--reference-proteome", argv[i]) == 0 ||
              strcmp("--ref-proteome", argv[i]) == 0 ||
              strcmp("-rp", argv[i]) == 0) {
@@ -298,27 +333,11 @@ void parseArgv(int argc, char * argv[], std::string & command,
         }
       }
       else {
-        // No RAM ammount given, using 8 GB
+        // No RAM amount given, using 8 GB
         ramStr = "8";
       }
     }
-    // Check for '--retain' flag, which tells Semblans not to delete outputs from
-    // intermediate steps in the pipeline
-    else if (strcmp("--retain", argv[i]) == 0 ||
-             strcmp("--Retain", argv[i]) == 0 ||
-             strcmp("-f", argv[i]) == 0 ||
-             strcmp("-F", argv[i]) == 0) {
-      retainInterFiles = true;
-    }
-    // Check for '--verbose' flag, which tells Semblans to print a detailed output
-    // to the terminal's standard output. This does not affect verbosity of log files.
-    // Regardless of terminal output, log files always receive maximum verbosity.
-    else if (strcmp("--verbose", argv[i]) == 0 ||
-             strcmp("--Verbose", argv[i]) == 0 ||
-             strcmp("-v", argv[i]) == 0 ||
-             strcmp("-V", argv[i]) == 0) {
-      verboseOutput = true;
-    }
+
     // Flag not recognized. Report and exit;
     else {
       for (int k = 0; k < nonFlagInd.size(); k++) {
