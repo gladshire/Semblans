@@ -178,7 +178,7 @@ if [ ! -e "./external/Trimmomatic/trimmomatic-0.39.jar" ]; then
 	unzip trimmomatic.zip -d ./external/
         mv ./external/Trimmomatic* ./external/Trimmomatic
 	cd ./external/Trimmomatic/adapters/
-	echo -e "$(cat NexteraPE-PE.fa)\n$(cat TruSeq2-PE.fa TruSeq2-SE.fa TruSeq3-PE-2.fa)\n$(cat TruSeq3-PE.fa)\n$(cat TruSeq3-SE.fa)" > TruSeq_all.fa
+	echo -e "$(cat NexteraPE-PE.fa)\n$(cat TruSeq2-PE.fa)\n$(cat TruSeq2-SE.fa)\n$(cat TruSeq3-PE-2.fa)\n$(cat TruSeq3-PE.fa)\n$(cat TruSeq3-SE.fa)" > TruSeq_all.fa
 	cd ../../../
 	rm trimmomatic.zip
 else

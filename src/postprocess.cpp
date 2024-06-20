@@ -417,7 +417,7 @@ std::vector<std::string> corsetBulk(const std::vector<transcript> & transVec, st
 std::vector<std::pair<std::string, std::string>> transdecBulk(const std::vector<transcript> & transVec,
                                                               std::string threads, std::string ram_gb,
                                                               bool retainInterFiles, bool dispOutput,
-                                                              std::string logFilePath,
+                                                              std::string logFilePath, bool getMultOrfs,
                                                               std::string refProt, std::string outDir,
                                                               const INI_MAP & cfgIni = {}) {
   logOutput("\nStarting prediction of coding regions\n", logFilePath);
@@ -499,15 +499,15 @@ std::vector<std::pair<std::string, std::string>> transdecBulk(const std::vector<
       procRunning = true;
       std::thread transDecThread(progressAnim, "  ", logFilePath);
       run_transdecoder(currTransInTD, currTransCds, currTransPep, useBlast, maxEvalue,
-                       maxTargetSeqs, threads, ram_b, currDb, currOutDirTD, dispOutput,
-                       logFilePath);
+                       maxTargetSeqs, getMultOrfs, threads, ram_b, currDb, currOutDirTD,
+                       dispOutput, logFilePath);
       procRunning = false;
       transDecThread.join();
     }
     else {
       run_transdecoder(currTransInTD, currTransCds, currTransPep, useBlast, maxEvalue,
-                       maxTargetSeqs, threads, ram_b, currDb, currOutDirTD, dispOutput,
-                       logFilePath);
+                       maxTargetSeqs, getMultOrfs, threads, ram_b, currDb, currOutDirTD,
+                       dispOutput, logFilePath);
     }
     currOutFilePair.first = currTransCds;
     currOutFilePair.second = currTransPep;
@@ -590,7 +590,7 @@ int main(int argc, char * argv[]) {
   std::string logFilePath;
   std::vector<std::string> readFilesLeft;
   std::vector<std::string> readFilesRight;
-
+  bool getMultOrfs = false;
 
   const char * home = std::getenv("HOME");
   std::string threads;
@@ -654,6 +654,7 @@ int main(int argc, char * argv[]) {
       cfgIni = make_ini_map(argv[1]);
       cfgIniGen = cfgIni["General"];
       cfgIniPipeline = cfgIni["Pipeline"];
+      getMultOrfs = ini_get_bool(cfgIni["TransDecoder settings"]["get_multiple_orfs"].c_str(), 0);
       if (entirePipeline) {
         make_proj_space(cfgIni, "all");
       }
@@ -776,10 +777,10 @@ int main(int argc, char * argv[]) {
     printBreakLine(logFilePath, 6, 47);    
     // Run transdecoder
     if (configPath != "null") {
-      outFilesFinal = transdecBulk(transVec, threads, ram_gb, retainInterFiles, dispOutput, logFilePath, "", "", cfgIni);
+      outFilesFinal = transdecBulk(transVec, threads, ram_gb, retainInterFiles, dispOutput, logFilePath, getMultOrfs, "", "", cfgIni);
     }
     else {
-      outFilesFinal = transdecBulk(transVec, threads, ram_gb, retainInterFiles, dispOutput, logFilePath, refProt, outDir);
+      outFilesFinal = transdecBulk(transVec, threads, ram_gb, retainInterFiles, dispOutput, logFilePath, getMultOrfs, refProt, outDir);
     }
 
     printBreakLine(logFilePath, 6, 47);

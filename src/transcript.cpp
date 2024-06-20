@@ -286,7 +286,7 @@ std::string transcript::make_file_str() {
 }
 
 std::string transcript::makeCheckpointName(std::string ext) {
-  fs::path outDir = get_trans_path_trinity().parent_path().parent_path() / ".checkpoints";
+  fs::path outDir = get_trans_path_trinity().parent_path().parent_path().parent_path() / ".checkpoints";
   std::string cpFileName = std::string(outDir.c_str()) + "/" + get_file_prefix() + "." + ext + ".ok";
   return cpFileName;
 }

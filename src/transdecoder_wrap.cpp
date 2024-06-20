@@ -51,15 +51,19 @@ bool blastpout_ok(std::string blastpFile) {
 }
 
 // Given a transcripts file, predict the sequence data's coding regions using
-// TransDecoder
+// TransDecoder.Predict with a BLASTP alignment
 void run_transdecoder(std::string transIn, std::string transCds, std::string transPep,
                       bool useBlast, std::string maxEvalue, std::string maxTargetSeqs,
-                      std::string threads, uintmax_t ram_b,
+                      bool getMultOrfs, std::string threads, uintmax_t ram_b,
                       std::string dbPath, std::string outDir,
                       bool dispOutput, std::string logFile) {
   std::string transFilePath(transIn);
   fs::path cdsFilePath(transCds);
   fs::path pepFilePath(transPep);
+  std::string transFileName;
+  std::string tdLongOrfs_cmd;
+  std::string tdPredict_cmd;
+  std::string singleMultOrfsFlag;
 
   std::string transPrefix = fs::path(transIn.c_str()).filename().stem().stem().c_str();
 
@@ -108,9 +112,17 @@ void run_transdecoder(std::string transIn, std::string transCds, std::string tra
       //logOutput("Skip finding final CDS and PEP", logFile);
     }
     else {
-      std::string tdPredict_cmd = PATH_TRANSD_PREDICT + " -t " + transFilePath +
-                                  " --retain_blastp_hits " + outDir + "/" + blastpout +
-                                  " --cpu " + threads;
+      // If multiple ORFs desired, 
+      if (getMultOrfs) {
+        singleMultOrfsFlag = "";
+      }
+      else {
+        singleMultOrfsFlag = " --single_best_only ";
+      }
+      tdPredict_cmd = PATH_TRANSD_PREDICT + " -t " + transFilePath +
+                      " --retain_blastp_hits " + outDir + "/" + blastpout +
+                      singleMultOrfsFlag +
+                      " --cpu " + threads;
       fs::path currDir = fs::current_path();
       fs::current_path(fs::path(outDir.c_str()));
       int resultPD;
