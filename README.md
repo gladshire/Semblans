@@ -32,6 +32,7 @@ Included with Semblans is a directory called 'examples'. This directory contains
 ```
 semblans --left ChloroSubSet_1.fq --right ChloroSubSet_2.fq --prefix ChloroSubSet --ref-proteome ensembl_plant.pep.all.fa --threads 8 --ram 10
 ```
+Some users may experience issues, particularly during the transcript assembly phase during Trinity. Common errors and solutions are hosted on our GitHub's [wiki page](https://github.com/gladshire/Semblans/wiki/Common-Errors-&-Solutions#issues-at-trinity-stage). As cataloguing these is an ongoing process, we urge users to post an issue on the Semblans repository page detailing their problem if it persists or is otherwise unaddressed by this page.
 
 Reference peptide sets for **postprocess**
 
