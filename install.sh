@@ -82,13 +82,14 @@ fi
 echo "  Installing libconfini library ..."
 wget -q https://github.com/madmurphy/libconfini/releases/download/1.16.4/libconfini-1.16.4-x86_64-bin.tar.xz
 tar -xf libconfini-1.16.4-x86_64-bin.tar.xz
+rm -rf ./include/libconfini
 mkdir -p ./include/libconfini
 mv ./usr/include/* ./include/libconfini/
 mv ./usr/lib/* ./lib/
 mv ./usr/share/doc/libconfini/AUTHORS ./include/libconfini/
 mv ./usr/share/doc/libconfini/COPYING ./include/libconfini/
 rm libconfini-1.16.4-x86_64-bin.tar.xz
-rm -rf ./usr/
+rm -rf ./usr
 
 # Install libcurl
 echo " Installing libcurl library ..."
