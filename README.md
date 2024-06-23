@@ -12,19 +12,22 @@ Through the collation of several external packages and the leveraging of C++ dat
 
 All documentation for Semblans can be found in the [wiki](https://github.com/gladshire/Semblans/wiki)
 
-# Installation
+# Dependencies
 
-**Dependencies**: Semblans will install most of the dependencies it requires, but make sure you have working installations of:
+Semblans will install most of the dependencies it requires, but make sure you have working installations of:
 - [**bowtie2**](https://bowtie-bio.sourceforge.net/bowtie2/index.shtml)
 - [**jellyfish**](https://genome.umd.edu/jellyfish.html)
 - [**salmon**](https://salmon.readthedocs.io/en/latest/salmon.html)
 - [**samtools**](http://www.htslib.org)
+- [**numpy**](https://numpy.org)
 
 On Ubuntu this can be done by running:
 ```bash
 sudo apt update
-sudo apt install bowtie2 jellyfish salmon samtools
+sudo apt install bowtie2 jellyfish salmon samtools python3-numpy
 ```
+
+# Installation
 
 If the user has downloaded a pre-compiled Semblans release, this step is not necessary. To install Semblans, navigate to its root directory and then call:
 ```bash
