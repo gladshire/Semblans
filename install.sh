@@ -33,12 +33,15 @@ else
   echo "If user wishes to perform annotations, they should include the --with-panther / -p flag."
 fi
 
-# Prepare Semblans file structure
-mkdir -p include &>/dev/null
-mkdir -p lib &>/dev/null
-mkdir -p external &>/dev/null
+# Prepare Semblans directory structure
+rm -rf ./include ./lib ./external ./data
+
+mkdir -p ./include
+mkdir -p ./lib
+mkdir -p ./external
+
 if $install_panther; then
-	mkdir -p data &>/dev/null
+	mkdir -p ./data
 fi
 
 #========================================================================
@@ -82,7 +85,6 @@ fi
 echo "  Installing libconfini library ..."
 wget -q https://github.com/madmurphy/libconfini/releases/download/1.16.4/libconfini-1.16.4-x86_64-bin.tar.xz
 tar -xf libconfini-1.16.4-x86_64-bin.tar.xz
-rm -rf ./include/libconfini
 mkdir -p ./include/libconfini
 mv ./usr/include/* ./include/libconfini/
 mv ./usr/lib/* ./lib/
