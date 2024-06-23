@@ -34,11 +34,11 @@ else
 fi
 
 # Prepare Semblans file structure
-mkdir include &>/dev/null
-mkdir lib &>/dev/null
-mkdir external &>/dev/null
+mkdir -p include &>/dev/null
+mkdir -p lib &>/dev/null
+mkdir -p external &>/dev/null
 if $install_panther; then
-	mkdir data &>/dev/null
+	mkdir -p data &>/dev/null
 fi
 
 #========================================================================
