@@ -1,4 +1,14 @@
-#!/bin/bash
+#!/usr/bin/env bash
+####################################################
+# Suppress printing of error messages
+# exec 2>/dev/null
+# Stop on first error
+set -o errexit
+# Set trap on ERR to be inherited by shell functions
+set -o errtrace
+# Trap errors
+trap 'echo Error at line: $LINENO' ERR
+####################################################
 
 # Determine whether to install PANTHER for annotation
 install_panther=false
@@ -11,7 +21,6 @@ for flag in "$@"; do
     exit 0
   fi
 done
-
 
 echo "Initiating install of Semblans"
 
@@ -39,14 +48,14 @@ fi
 echo "Now installing required libraries"
 
 # Install boost libraries
-if ( [ ! -f ./lib/libboost_filesystem.a ] ||
-     [ ! -f ./lib/libboost_regex.a ] ||
-     [ ! -f ./lib/libboost_system.a ] ||
-     [ ! -f ./lib/libboost_locale.a ] ); then
+if  [ ! -f ./lib/libboost_filesystem.a ] ||
+    [ ! -f ./lib/libboost_regex.a ] ||
+    [ ! -f ./lib/libboost_system.a ] ||
+    [ ! -f ./lib/libboost_locale.a ]; then
 	echo "  Installing Boost libraries ..."
 	wget -q https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.gz
 	tar -xf boost_1_81_0.tar.gz
-	cd boost_1_81_0
+	cd boost_1_81_0 || return 1
 	./bootstrap.sh --prefix=../
 	./b2 install cxxflags="-std=c++11" link=static
 	make
@@ -102,7 +111,7 @@ if [ ! -e "./external/hmmer/bin/hmmscan" ]; then
 	wget -q http://eddylab.org/software/hmmer/hmmer.tar.gz
 	tar -xf hmmer.tar.gz -C ./external/
 	mv ./external/hmmer* ./external/hmmer
-	cd ./external/hmmer
+	cd ./external/hmmer || return 1
 	./configure --prefix "$PWD"
 	make
 	make install
@@ -132,13 +141,13 @@ fi
 
 
 # Install NCBI sra-tools
-if ( [ ! -e "./external/sratoolkit/bin/prefetch" ] &&
-     [ ! -e "./external/sratoolkit/bin/fasterq-dump" ] ); then
+if  [ ! -e "./external/sratoolkit/bin/prefetch" ] &&
+    [ ! -e "./external/sratoolkit/bin/fasterq-dump" ]; then
 	echo "Installing SRA-Tools ..."
 	wget -q --output-document sratoolkit.tar.gz https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/current/sratoolkit.current-ubuntu64.tar.gz
 	tar -xf sratoolkit.tar.gz -C ./external/
 	mv ./external/sratoolkit* ./external/sratoolkit
-	cd ./external/sratoolkit
+	cd ./external/sratoolkit || return 1
 	wget -q https://raw.githubusercontent.com/ncbi/sra-tools/master/LICENSE
 	cd ../../
 	rm sratoolkit.tar.gz
@@ -163,9 +172,9 @@ if [ ! -e "./external/Rcorrector/rcorrector" ]; then
 	wget -q --output-document rcorrector.tar.gz https://github.com/mourisl/Rcorrector/archive/refs/tags/v1.0.7.tar.gz
 	tar -xf rcorrector.tar.gz -C ./external/
 	mv ./external/Rcorrector* ./external/Rcorrector
-	cd ./external/Rcorrector
+	cd ./external/Rcorrector || return 1
 	make
-	cd ../../
+	cd ../..
 	rm rcorrector.tar.gz
 else
 	echo "Rcorrector already installed. Skipping ..."
@@ -177,9 +186,9 @@ if [ ! -e "./external/Trimmomatic/trimmomatic-0.39.jar" ]; then
 	wget -q --output-document trimmomatic.zip http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/Trimmomatic-0.39.zip
 	unzip trimmomatic.zip -d ./external/
         mv ./external/Trimmomatic* ./external/Trimmomatic
-	cd ./external/Trimmomatic/adapters/
+	cd ./external/Trimmomatic/adapters || return 1
 	echo -e "$(cat NexteraPE-PE.fa)\n$(cat TruSeq2-PE.fa)\n$(cat TruSeq2-SE.fa)\n$(cat TruSeq3-PE-2.fa)\n$(cat TruSeq3-PE.fa)\n$(cat TruSeq3-SE.fa)" > TruSeq_all.fa
-	cd ../../../
+	cd ../../..
 	rm trimmomatic.zip
 else
 	echo "Trimmomatic already installed. Skipping ..."
@@ -191,9 +200,9 @@ if [ ! -e "./external/kraken2/kraken2" ]; then
 	wget -q --output-document kraken2.tar.gz https://github.com/DerrickWood/kraken2/archive/refs/tags/v2.1.2.tar.gz
 	tar -xf kraken2.tar.gz -C ./external/
 	mv ./external/kraken2-2.1.2 ./external/kraken2
-	cd ./external/kraken2
+	cd ./external/kraken2 || return 1
 	./install_kraken2.sh .
-	cd ../../
+	cd ../..
 	rm kraken2.tar.gz
 else
 	echo "Kraken2 already installed. Skipping ..."
@@ -205,19 +214,19 @@ if [ ! -e "./external/trinityrnaseq/Trinity" ]; then
 	wget -q --output-document trinity.tar.gz https://github.com/trinityrnaseq/trinityrnaseq/releases/download/Trinity-v2.15.1/trinityrnaseq-v2.15.1.FULL.tar.gz
 	tar -xf trinity.tar.gz -C ./external/
 	mv ./external/trinityrnaseq-v2.15.1 ./external/trinityrnaseq
-	cd ./external/trinityrnaseq/trinity-plugins/bamsifter
+	cd ./external/trinityrnaseq/trinity-plugins/bamsifter || return 1
 	sed -i '1s/^/#include <string> \n/' sift_bam_max_cov.cpp
-	cd ../../
+	cd ../..
 	make
-	cd ../../
+	cd ../..
 	rm trinity.tar.gz
 else
 	echo "Trinity already installed. Skipping ..."
 fi
 
 # Install NCBI BLAST
-if ( [ ! -e "./external/ncbi-blast+/bin/blastx" ] ||
-     [ ! -e "./external/ncbi-blast+/bin/blastp" ] ); then
+if [ ! -e "./external/ncbi-blast+/bin/blastx" ] ||
+   [ ! -e "./external/ncbi-blast+/bin/blastp" ]; then
 	echo "Installing NCBI-BLAST+ ..."
 	wget -q --output-document ncbi-blast.tar.gz https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.15.0/ncbi-blast-2.15.0+-x64-linux.tar.gz
 	tar -xf ncbi-blast.tar.gz -C ./external/
@@ -228,15 +237,15 @@ else
 fi
 
 # Install Diamond
-if ( [ ! -e "./external/diamond/diamond" ] ); then
+if [ ! -e "./external/diamond/diamond" ]; then
 	echo "Installing Diamond ..."
 	mkdir ./external/diamond-2.1.7
 	wget -q --output-document diamond.tar.gz https://github.com/bbuchfink/diamond/releases/download/v2.1.7/diamond-linux64.tar.gz
 	tar -xf diamond.tar.gz -C ./external/diamond-2.1.7/
 	mv ./external/diamond-2.1.7 ./external/diamond
-	cd ./external/diamond
+	cd ./external/diamond || return 1
 	wget -q https://raw.githubusercontent.com/bbuchfink/diamond/master/LICENSE
-	cd ../../
+	cd ../..
 	rm diamond.tar.gz
 else
 	echo "Diamond already installed. Skipping ..."
@@ -244,51 +253,51 @@ fi
 
 
 # Install Corset
-if ( [ ! -e "./external/corset/corset" ] ); then
+if [ ! -e "./external/corset/corset" ]; then
 	echo "Installing Corset ..."
 	wget -q --output-document corset.tar.gz https://github.com/Oshlack/Corset/releases/download/version-1.09/corset-1.09-linux64.tar.gz
 	tar -xf corset.tar.gz -C ./external/
 	mv ./external/corset-1.09-linux64 ./external/corset
-	cd ./external/corset/
+	cd ./external/corset || return 1
 	chmod -x LICENSE
 	chmod -x COPYING
-	cd ../../
+	cd ../..
 	rm corset.tar.gz
 else
 	echo "Corset already installed. Skipping ..."
 fi
 
 # Install STAR
-#if ( [ ! -e "./external/STAR/bin" ] ); then
-#	echo "Installing STAR ..."
-#	wget -q --output-document star.tar.gz https://github.com/alexdobin/STAR/archive/refs/tags/2.7.11a.tar.gz
-#	tar -xf star.tar.gz -C ./external/
-#	mv ./external/STAR* ./external/STAR
-#	cd ./external/STAR/source/
-#	make STAR
-#	cd ../../../
-#	rm star.tar.gz
-#else
-#	echo "STAR alread installed. Skipping ..."
-#fi
+# if [ ! -e "./external/STAR/bin" ]; then
+# 	echo "Installing STAR ..."
+# 	wget -q --output-document star.tar.gz https://github.com/alexdobin/STAR/archive/refs/tags/2.7.11a.tar.gz
+# 	tar -xf star.tar.gz -C ./external/
+# 	mv ./external/STAR* ./external/STAR
+# 	cd ./external/STAR/source || return 1
+# 	make STAR
+# 	cd ../../..
+# 	rm star.tar.gz
+# else
+# 	echo "STAR alread installed. Skipping ..."
+# fi
 
 # Install Salmon
-if ( [ ! -e "./external/salmon/bin/salmon" ] ); then
+if [ ! -e "./external/salmon/bin/salmon" ]; then
 	echo "Installing Salmon ..."
 	wget -q --output-document salmon.tar.gz https://github.com/COMBINE-lab/salmon/releases/download/v1.10.0/salmon-1.10.0_linux_x86_64.tar.gz
 	tar -xf salmon.tar.gz -C ./external/
 	mv ./external/salmon* ./external/salmon
-	cd ./external/salmon
+	cd ./external/salmon || return 1
 	wget -q https://raw.githubusercontent.com/COMBINE-lab/salmon/master/LICENSE
-	cd ../../
+	cd ../..
 	rm salmon.tar.gz
 else
 	echo "Salmon already installed. Skipping ..."
 fi
 
 # Install TransDecoder
-if ( [ ! -e "./external/TransDecoder/TransDecoder.LongOrfs" ] ||
-     [ ! -e "./external/TransDecoder/TransDecoder.Predict" ] ); then
+if [ ! -e "./external/TransDecoder/TransDecoder.LongOrfs" ] ||
+   [ ! -e "./external/TransDecoder/TransDecoder.Predict" ]; then
 	echo "Installing TransDecoder ..."
 	wget -q --output-document transdecoder.tar.gz https://github.com/TransDecoder/TransDecoder/archive/refs/tags/TransDecoder-v5.7.0.tar.gz
 	tar -xf transdecoder.tar.gz -C ./external/
@@ -317,8 +326,8 @@ if $install_panther ; then
 fi
 
 # Check SRA Toolkit installation
-if ( [ ! -e "./external/sratoolkit/bin/prefetch" ] &&
-     [ -e "./external/sratoolkit/bin/fasterq-dump" ] ); then
+if [ ! -e "./external/sratoolkit/bin/prefetch" ] &&
+   [ -e "./external/sratoolkit/bin/fasterq-dump" ]; then
 	packagesNotInstalled+=("SRA-Tools")
 fi
 
@@ -348,8 +357,8 @@ if [ ! -e "./external/trinityrnaseq/Trinity" ]; then
 fi
 
 # Check BLAST installation
-if ( [ ! -e "./external/ncbi-blast+/bin/blastx" ] ||
-     [ ! -e "./external/ncbi-blast+/bin/blastp" ] ); then
+if [ ! -e "./external/ncbi-blast+/bin/blastx" ] ||
+   [ ! -e "./external/ncbi-blast+/bin/blastp" ]; then
 	packagesNotInstalled+=("BLAST+")
 fi
 
@@ -369,8 +378,8 @@ if [ ! -e "./external/salmon/bin/salmon" ]; then
 fi
 
 # Check TransDecoder installation
-if ( [ ! -e "./external/TransDecoder/TransDecoder.LongOrfs" ] ||
-     [ ! -e "./external/TransDecoder/TransDecoder.Predict" ] ); then
+if [ ! -e "./external/TransDecoder/TransDecoder.LongOrfs" ] ||
+   [ ! -e "./external/TransDecoder/TransDecoder.Predict" ]; then
 	packagesNotInstalled+=("TransDecoder")
 fi
 
@@ -391,14 +400,14 @@ fi
 #========================================================================
 
 echo "Now building Semblans ..."
-mkdir ./bin/
+mkdir ./bin
 make
 
 # Determine if build was successful
-if ( [ ! -e "./bin/preprocess" ] ||
-     [ ! -e "./bin/assemble" ] ||
-     [ ! -e "./bin/postprocess" ] ||
-     [ ! -e "./bin/semblans" ] ); then
+if [ ! -e "./bin/preprocess" ] ||
+   [ ! -e "./bin/assemble" ] ||
+   [ ! -e "./bin/postprocess" ] ||
+   [ ! -e "./bin/semblans" ]; then
 	echo "ERROR: Semblans failed to build from source"
 	exit 1
 else
