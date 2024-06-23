@@ -36,8 +36,8 @@ Some users may experience issues, particularly during the transcript assembly ph
 
 Reference peptide sets for **postprocess**
 
-[**Ensembl animal reference**](https://uofi.app.box.com/s/0rlp6q0u5uvc161mzbdr3c0xoiti63sk)
+[**Ensembl animal reference**](https://www.dropbox.com/scl/fi/n49jm9i1yscrfrsj1dnq8/ensembl_animals.pep.all.fa.gz?rlkey=yemush6bm36wr4fu7dpe8h5e0&st=98kgb83l&dl=1)
 
-[**Ensembl plant reference**](https://uofi.app.box.com/s/lvg7x2qrxvg8hfcmue9xv4y9t1rgfb48)
+[**Ensembl plant reference**](https://www.dropbox.com/scl/fi/hbvtnd9wsiwt8k7gakcmq/ensembl_plant.pep.all.fa.gz?rlkey=8cp9sn5wrt9uu4vc2pmg8xvin&st=1gesuqq0&dl=1)
 
-[**Ensembl fungi reference**](https://uofi.box.com/s/qc4nmun4apb0pik5fqxukn4qvn3wm943)
+[**Ensembl fungi reference**](https://www.dropbox.com/scl/fi/8as6tci331utcrqrl7txz/ensembl_fungi.pep.all.fa.gz?rlkey=eyhsv35lelnao5xgd7s9dy51e&st=oc9dz9s6&dl=1)
