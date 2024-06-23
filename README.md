@@ -15,10 +15,10 @@ All documentation for Semblans can be found in the [wiki](https://github.com/gla
 # Installation
 
 **Dependencies**: Semblans will install most of the dependencies it requires, but make sure you have working installations of:
-    - [**bowtie2**](https://bowtie-bio.sourceforge.net/bowtie2/index.shtml)
-    - [**jellyfish**](https://genome.umd.edu/jellyfish.html)
-    - [**salmon**](https://salmon.readthedocs.io/en/latest/salmon.html)
-    - [**samtools**](http://www.htslib.org)
+- [**bowtie2**](https://bowtie-bio.sourceforge.net/bowtie2/index.shtml)
+- [**jellyfish**](https://genome.umd.edu/jellyfish.html)
+- [**salmon**](https://salmon.readthedocs.io/en/latest/salmon.html)
+- [**samtools**](http://www.htslib.org)
 
 If the user has downloaded a pre-compiled Semblans release, this step is not necessary. To install Semblans, navigate to its root directory and then call:
 ```
