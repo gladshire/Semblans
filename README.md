@@ -20,14 +20,20 @@ All documentation for Semblans can be found in the [wiki](https://github.com/gla
 - [**salmon**](https://salmon.readthedocs.io/en/latest/salmon.html)
 - [**samtools**](http://www.htslib.org)
 
-If the user has downloaded a pre-compiled Semblans release, this step is not necessary. To install Semblans, navigate to its root directory and then call:
+On Ubuntu this can be done by running:
+```bash
+sudo apt update
+sudo apt install bowtie2 jellyfish salmon samtools
 ```
+
+If the user has downloaded a pre-compiled Semblans release, this step is not necessary. To install Semblans, navigate to its root directory and then call:
+```bash
 ./install.sh
 ```
 Please allow several minutes for Semblans to set up the necessary packages.
 
 By default, Semblans will not retrieve the PantherDB functional protein database for sequence annotation. **If the user intends to utilize Semblans' annotation functionality, they should instead call the following installation command:
-```
+```bash
 ./install.sh --with-panther
 ```
 **Be aware that the PantherDB database is large (~17GB compressed; ~80GB uncompressed), and can take some time to download.**
@@ -35,8 +41,14 @@ By default, Semblans will not retrieve the PantherDB functional protein database
 # Quick Start / Test data
 
 Included with Semblans is a directory called 'examples'. This directory contains a very small short read dataset ("ChloroSubSet") for testing/verifying functionality of the Semblans pipeline. To test, uncompress the data from **ChloroSubSet.tar.gz**. The user should then **ensure they have a reference proteome**, as one is necessary for several of the pipeline's postprocessing stages. Links to broad, kingdom-level reference proteomes are hosted at the bottom of this document. In this example, I use the kingdom-level plant proteome. Once prepared, the user may call:
-```
-semblans --left ChloroSubSet_1.fq --right ChloroSubSet_2.fq --prefix ChloroSubSet --ref-proteome ensembl_plant.pep.all.fa --threads 8 --ram 10
+```bash
+semblans \
+--left ChloroSubSet_1.fq \
+--right ChloroSubSet_2.fq \
+--prefix ChloroSubSet \
+--ref-proteome ensembl_plant.pep.all.fa \
+--threads 8 \
+--ram 10
 ```
 Some users may experience issues, particularly during the transcript assembly phase during Trinity. Common errors and solutions are hosted on our GitHub's [wiki page](https://github.com/gladshire/Semblans/wiki/Common-Errors-&-Solutions#issues-at-trinity-stage). As cataloguing these is an ongoing process, we urge users to post an issue on the Semblans repository page detailing their problem if it persists or is otherwise unaddressed by this page.
 
