@@ -61,8 +61,6 @@ if  [ ! -f ./lib/libboost_filesystem.a ] ||
 	cd boost_1_81_0 || return 1
 	./bootstrap.sh --prefix=../
 	./b2 install cxxflags="-std=c++11" link=static
-	make
-	make install
 	mv LICENSE_1_0.txt ../include/boost/
 	cd ..
 	rm -rf boost_1_81_0*
