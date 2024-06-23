@@ -82,7 +82,7 @@ fi
 echo "  Installing libconfini library ..."
 wget -q https://github.com/madmurphy/libconfini/releases/download/1.16.4/libconfini-1.16.4-x86_64-bin.tar.xz
 tar -xf libconfini-1.16.4-x86_64-bin.tar.xz
-mkdir ./include/libconfini
+mkdir -p ./include/libconfini
 mv ./usr/include/* ./include/libconfini/
 mv ./usr/lib/* ./lib/
 mv ./usr/share/doc/libconfini/AUTHORS ./include/libconfini/
@@ -239,7 +239,7 @@ fi
 # Install Diamond
 if [ ! -e "./external/diamond/diamond" ]; then
 	echo "Installing Diamond ..."
-	mkdir ./external/diamond-2.1.7
+	mkdir -p ./external/diamond-2.1.7
 	wget -q --output-document diamond.tar.gz https://github.com/bbuchfink/diamond/releases/download/v2.1.7/diamond-linux64.tar.gz
 	tar -xf diamond.tar.gz -C ./external/diamond-2.1.7/
 	mv ./external/diamond-2.1.7 ./external/diamond
@@ -400,7 +400,7 @@ fi
 #========================================================================
 
 echo "Now building Semblans ..."
-mkdir ./bin
+mkdir -p ./bin
 make
 
 # Determine if build was successful
