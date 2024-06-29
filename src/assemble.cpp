@@ -734,6 +734,9 @@ int main(int argc, char * argv[]) {
     if (cfgIniAssemblyGroups.empty()) {
       for (auto sra : sras) {
         currSraGroup.push_back(sra);
+        if (outPrefix == "") {
+          outPrefix = sra.get_file_prefix().first + "_" + sra.get_file_prefix().second;
+        }
         //sraGroups.emplace(outPrefix, currSraGroup);
         //currSraPrefix1 = sra.get_file_prefix().first;
         //currSraPrefix2 = sra.get_file_prefix().second;

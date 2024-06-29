@@ -85,7 +85,6 @@ void blastxBulk(const std::vector<transcript> & transVec, std::string threads,
     }
     blastDbDir = cfgIniGen.at("output_directory") + "/" +
                  cfgIniGen.at("project_name") + "/" +
-                 "postprocess/" +                 
                  stepDirs[8] + "/";
     blastDbName = std::string(fs::path(refProteome.c_str()).stem().c_str());
   }
@@ -114,6 +113,9 @@ void blastxBulk(const std::vector<transcript> & transVec, std::string threads,
     currTransIn = trans.get_trans_path_trinity().c_str();
     // Run BlastX
     currBlastDbName = std::string(fs::path(refProteome.c_str()).stem().c_str());
+
+    std::cout << refProteome << std::endl;
+    std::cout << blastDbDir << std::endl;
 
     if (!dispOutput) {
       procRunning = true;

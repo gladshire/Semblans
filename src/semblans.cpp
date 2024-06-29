@@ -826,7 +826,6 @@ int main(int argc, char * argv[]) {
         exit(1);
       }
 
-
       if (serialProcess) {
         for (auto sraStr : sraRuns) {
           currCfgIniSub = pathConfig.substr(0, pathConfig.rfind(".ini")).insert(pathConfig.rfind("/") + 1, ".") +
@@ -923,22 +922,28 @@ int main(int argc, char * argv[]) {
           system("setterm -cursor on");
           exit(1);
         }
-        cleanedReadsDir = getDirectory(outDir + "/preprocess/", "..-Filter_overrepresented");
-        leftReadsCleanedVec = makeCleanedNames(leftReads);
-        if (rightReads != "null") {
-          rightReadsCleanedVec = makeCleanedNames(rightReads);
-        }
-        for (int i = 0; i < leftReadsCleanedVec.size(); i++) {
-          leftReadsCleaned += cleanedReadsDir + "/" + leftReadsCleanedVec[i];
+        if (pathConfig == "null") {
+          cleanedReadsDir = getDirectory(outDir + "/preprocess/", "..-Filter_overrepresented");
+          leftReadsCleanedVec = makeCleanedNames(leftReads);
           if (rightReads != "null") {
-            rightReadsCleaned += cleanedReadsDir + "/" + rightReadsCleanedVec[i];
+            rightReadsCleanedVec = makeCleanedNames(rightReads);
           }
-          if (i < leftReadsCleanedVec.size() - 1) {
-            leftReadsCleaned += ",";
-            rightReadsCleaned += ",";
+          for (int i = 0; i < leftReadsCleanedVec.size(); i++) {
+            leftReadsCleaned += cleanedReadsDir + "/" + leftReadsCleanedVec[i];
+            if (rightReads != "null") {
+              rightReadsCleaned += cleanedReadsDir + "/" + rightReadsCleanedVec[i];
+            }
+            if (i < leftReadsCleanedVec.size() - 1) {
+              leftReadsCleaned += ",";
+              rightReadsCleaned += ",";
+            }
+          }
+          if (rightReads == "null") {
+            rightReadsCleaned = "null";
           }
         }
-        if (rightReads == "null") {
+        else {
+          leftReadsCleaned = "null";
           rightReadsCleaned = "null";
         }
 
