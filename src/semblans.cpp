@@ -649,8 +649,8 @@ int main(int argc, char * argv[]) {
   INI_MAP_ENTRY cfgIniGen;
   std::vector<std::string> sraRuns;
   std::string logFilePath;
-  std::string threadStr;
-  std::string ramStr;
+  std::string threadStr = "1";
+  std::string ramStr = "8";
   int numThreads;
   int ram;
   std::string pathConfig = "null";
@@ -684,10 +684,8 @@ int main(int argc, char * argv[]) {
   else {
 
     // Parse through flags in commands
-    threadStr = "";
-    ramStr = "";
     numThreads = 1;
-    ram = 1;
+    ram = 8;
     retainInterFiles = false;
     verboseOutput = false;
 
@@ -701,6 +699,10 @@ int main(int argc, char * argv[]) {
     if (command == "") {
       command = "all";
     }
+
+    // Make sure Semblans command entered by user is valid
+    checkCommandIsValid(command, leftReads, rightReads, assembly,
+                        refProt, outDir, outPrefix, pathConfig, kraken2Dbs);
 
     // If no config file specified, check for sequence files in Semblans call
     if (pathConfig == "null") {
@@ -772,9 +774,7 @@ int main(int argc, char * argv[]) {
     }
     int result;
 
-    // Make sure Semblans command entered by user is valid
-    checkCommandIsValid(command, leftReads, rightReads, assembly,
-                        refProt, outDir, outPrefix, pathConfig, kraken2Dbs);
+
 
     std::ifstream cfgIniFile;
     std::ofstream cfgIniSub;
