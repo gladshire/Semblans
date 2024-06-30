@@ -59,7 +59,7 @@ if  [ ! -f ./lib/libboost_filesystem.a ] ||
 	wget -q https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.gz
 	tar -xf boost_1_81_0.tar.gz
 	cd boost_1_81_0 || return 1
-	./bootstrap.sh --prefix=../
+	./bootstrap.sh --prefix=../ --with-python=python3
 	./b2 install cxxflags="-std=c++11" link=static
 	mv LICENSE_1_0.txt ../include/boost/
 	cd ..
