@@ -91,9 +91,6 @@ void run_trinity(std::pair<std::string, std::string> sraRun, std::string outFile
   }
   replaceChar(logFile, '\r', '\n');
   checkExitSignal(result, logFile);
-  //std::rename((outFile + ".Trinity.fasta").c_str(), outFile.c_str());
-  //std::rename((outFile + ".Trinity.fasta.gene_trans_map").c_str(),
-  //            (outFile + ".gene_trans_map").c_str());
   fs::rename(fs::path((outFile + ".Trinity.fasta").c_str()),
              fs::path(outFile.c_str()));
   fs::rename(fs::path((outFile + ".Trinity.fasta.gene_trans_map").c_str()),
@@ -215,10 +212,10 @@ void run_trinity_comb(std::vector<std::pair<std::string, std::string>> sraRuns,
     system("setterm -cursor on");
     exit(1);
   }
-  fs::remove_all(outFile.c_str());
-  std::rename((outFile + ".Trinity.fasta").c_str(), outFile.c_str());
-  std::rename((outFile + ".Trinity.fasta.gene_trans_map").c_str(),
-              (outFile + ".gene_trans_map").c_str());
+  //fs::remove_all(outFile.c_str());
+  //std::rename((outFile + ".Trinity.fasta").c_str(), outFile.c_str());
+  //std::rename((outFile + ".Trinity.fasta.gene_trans_map").c_str(),
+  //            (outFile + ".gene_trans_map").c_str());
   replaceChar(logFile, '\r', '\n');
   
     /*
