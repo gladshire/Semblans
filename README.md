@@ -31,7 +31,10 @@ sudo apt install bowtie2 jellyfish salmon samtools python3-numpy
 
 # Installation
 
-If the user has downloaded a pre-compiled Semblans release, this step is not necessary. To install Semblans, navigate to its root directory and then call:
+The easiest way to install Semblans is to download the latest the pre-built binaries [here](https://github.com/gladshire/Semblans/releases/tag/v1.0.1).
+
+If instead the user wishes to build from source, they must clone this repository, navigate to the Semblans root directory and then call: 
+
 ```bash
 ./install.sh
 ```
