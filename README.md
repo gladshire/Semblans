@@ -4,7 +4,7 @@ Author: Miles Woodcock-Girard
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; As-***Sembl***-y pipeline for tr-***ans***-criptomes
 
-**The easiest way to install Semblans is to download the latest the pre-built binaries [here](https://github.com/gladshire/Semblans/releases/tag/v1.0.1)**
+## The easiest way to install Semblans is to download the latest the pre-built binaries [here](https://github.com/gladshire/Semblans/releases/tag/v1.0.1)
 
 Semblans is a tool that enables the automatic assembly of *de novo* transcriptomes for non-model organisms.
 
