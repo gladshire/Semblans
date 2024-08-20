@@ -10,6 +10,8 @@ Through the integration of several external packages and the leveraging of C++ d
 
 ![](https://live.staticflickr.com/65535/53545551413_5bd8abc933_k.jpg)
 
+**The easiest way to install Semblans is to download the latest the pre-built binaries [here](https://github.com/gladshire/Semblans/releases/tag/v1.0.1)**
+
 All documentation for Semblans can be found in the [wiki](https://github.com/gladshire/Semblans/wiki)
 
 # Dependencies
