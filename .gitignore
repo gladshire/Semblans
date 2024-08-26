@@ -2,6 +2,7 @@
 *.fastq
 *.fa
 *.fq
+.*CONFIG*.ini
 *.bc
 *.jf_dump
 *.mer_counts

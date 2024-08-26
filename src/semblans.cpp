@@ -853,20 +853,19 @@ int main(int argc, char * argv[]) {
 
           currPreCmd = SEMBLANS_DIR + "preprocess " + currCfgIniSub + " " +
                        leftReads + " " + rightReads + " " + kraken2Dbs + " " +
-                       outDir + " " +
-                       std::to_string(numThreads) + " " +
-                       std::to_string(ram) + retain + verbose + entirePipeline;
+                       outDir + " " + threadStr + " " + ramStr + " " +
+                       retain + verbose + entirePipeline;
 
           currAssCmd = SEMBLANS_DIR + "assemble " + currCfgIniSub + " " +
                        leftReads + " " + rightReads + " " + outDir + " " +
-                       outPrefix + " " + std::to_string(numThreads) + " " +
-                       std::to_string(ram) + retain + verbose + entirePipeline;
+                       outPrefix + " " + threadStr + " " + ramStr + " " +
+                       retain + verbose + entirePipeline;
 
           currPostCmd = SEMBLANS_DIR + "postprocess " + currCfgIniSub + " " +
                         leftReads + " " + rightReads + " " + assembly + " " +
                         refProt + " " + outDir + " " + outPrefix + " " +
-                        std::to_string(numThreads) + " " +
-                        std::to_string(ram) + retain + verbose + entirePipeline;
+                        threadStr + " " + ramStr + " " + 
+                        retain + verbose + entirePipeline;
 
 
 
