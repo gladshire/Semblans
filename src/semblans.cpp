@@ -679,7 +679,7 @@ int main(int argc, char * argv[]) {
   }
   if (argc == 2 && (strcmp("--version", argv[1]) == 0 ||
                     strcmp("-v", argv[1]) == 0)) {
-    std::cout << "Semblans version: v1.0.7" << std::endl;
+    std::cout << "Semblans version: v1.0.1" << std::endl;
   }
   else {
 
@@ -722,7 +722,7 @@ int main(int argc, char * argv[]) {
       cfgIni = make_ini_map(pathConfig.c_str());
       cfgIniGen = cfgIni["General"];
       logFilePath = std::string((fs::canonical(fs::path(cfgIniGen["log_file"].c_str()).parent_path()) /
-                              fs::path(cfgIniGen["log_file"].c_str()).filename()).c_str());
+                                 fs::path(cfgIniGen["log_file"].c_str()).filename()).c_str());
     
       fs::create_directory((fs::canonical(fs::path(cfgIniGen["output_directory"].c_str())) /
                             fs::path(cfgIniGen["project_name"].c_str())));
@@ -862,7 +862,7 @@ int main(int argc, char * argv[]) {
                        outPrefix + " " + std::to_string(numThreads) + " " +
                        std::to_string(ram) + retain + verbose + entirePipeline;
 
-          currPostCmd = SEMBLANS_DIR + "postprocess " + pathConfig + " " +
+          currPostCmd = SEMBLANS_DIR + "postprocess " + currCfgIniSub + " " +
                         leftReads + " " + rightReads + " " + assembly + " " +
                         refProt + " " + outDir + " " + outPrefix + " " +
                         std::to_string(numThreads) + " " +
