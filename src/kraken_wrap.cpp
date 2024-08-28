@@ -6,17 +6,17 @@
 std::vector<std::string> get_kraken2_dbs(const INI_MAP &iniFile) {
   std::string krakDbDir = iniFile.at("Kraken2 settings").at("db_directory");
   std::vector<std::string> kraken2Dbs;
-  std::string dbPath;
+  fs::path dbPath;
   if (iniFile.at("Kraken2 filter order").empty()) {
     return kraken2Dbs;
   }
   for (auto db : iniFile.at("Kraken2 filter order")) {
-    dbPath = krakDbDir + db.first;
-    if (!fs::exists(fs::path(dbPath.c_str()))) {
-      std::cerr << "ERROR: Kraken2 database '" << dbPath << "' not found." << std::endl;
+    dbPath = fs::path(krakDbDir.c_str()) / fs::path(db.first.c_str());
+    if (!fs::exists(dbPath)) {
+      std::cerr << "ERROR: Kraken2 database '" << dbPath.c_str() << "' not found." << std::endl;
       exit(1);
     }
-    kraken2Dbs.push_back(dbPath);
+    kraken2Dbs.push_back(dbPath.c_str());
   }
   return kraken2Dbs;
 }
