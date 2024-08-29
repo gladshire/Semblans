@@ -250,7 +250,7 @@ void parseArgv(int argc, char * argv[], std::string & command,
       assembly = argv[i + 1];
       nonFlagInd.push_back(i + 1);
       if (!fs::exists(fs::path(assembly.c_str()))) {
-        std::cerr << "ERROR: Assemble '" + assembly + "' does not exist\n" << std::endl;
+        std::cerr << "ERROR: Assembly '" + assembly + "' does not exist\n" << std::endl;
         exit(1);
       }
     }
@@ -420,7 +420,7 @@ void checkCommandIsValid(std::string command,
         assembly != "null" || refProt != "null" ||
         outDir != "null" || outPrefix != "null" ||
         kraken2Dbs != "null") {
-      std::cerr << "\nERROR: If running in advanced mode (with --config), user should not use the flags:" << std::endl;
+      std::cerr << "\nERROR: If running in advanced mode (with --config), user should NOT include the flags:" << std::endl;
       std::cerr << "  --left/-1, --right/-2" << std::endl;
       std::cerr << "  --kraken-db/-kdb" << std::endl;
       std::cerr << "  --assembly/-a" << std::endl;
@@ -727,6 +727,15 @@ int main(int argc, char * argv[]) {
       fs::create_directory((fs::canonical(fs::path(cfgIniGen["output_directory"].c_str())) /
                             fs::path(cfgIniGen["project_name"].c_str())));
       //std::ofstream logFile(logFilePath, std::ios_base::trunc);
+      // If entire pipeline being run, check for existence of reference proteome file
+      fs::path refProtPath = fs::path(cfgIniGen["reference_proteome_path"].c_str());
+      if (command == "all") {
+        if (!fs::exists(refProtPath)) {
+          std::cerr << "ERROR: Reference proteome '" + std::string(refProtPath.c_str()) + "' does not exist\n" << std::endl;
+          exit(1);
+        }
+      }
+      
 
       serialProcess = ini_get_bool(cfgIniGen.at("serial_processing").c_str(), 0);
       if (serialProcess) {
