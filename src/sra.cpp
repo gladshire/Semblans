@@ -37,6 +37,7 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool dispOutput,
                            sra_accession + "&api_key=" + apiKey;
   int result;
   int numRetries = 0;
+  std::string platform;
 
   logOutput("\nObtaining information for accession(s)", logFile);
   while (true) {
@@ -80,11 +81,28 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool dispOutput,
       while(strcmp(parse_node->name(), "LibraryLayout")) {
         parse_node = parse_node->next_sibling();
       }
-      if (!strcmp(parse_node->value(), "PAIRED") && spots_m > 0) {
+      if (!strcmp(parse_node->value(), "PAIRED") && spots_m == 0) {
+        // NO single spots
+        paired = false;
+      }
+      else if (!strcmp(parse_node->value(), "PAIRED") && spots_m != spots_m) {
+        // There are single spots
         paired = true;
       }
       else {
-        paired = false;
+        // NO single spots
+        paired = true;
+      }
+
+      // Ensure sequencing platform is ILLUMINA
+      while (strcmp(parse_node->name(), "Platform")) {
+        parse_node = parse_node->next_sibling();
+      }
+      platform = std::string(parse_node->value());
+      if (platform != "ILLUMINA") {
+        std::cout << "ERROR: Accession \'" << sra_accession << "\' was not run on Illumina" << std::endl;
+        std::cout << "  All SRA accessions must be Illumina runs, and cannot be PacBio, 10X, etc" << std::endl;
+        exit(1);
       }
 
       // Set object member for taxonomic ID number
@@ -608,12 +626,18 @@ void SRA::set_sra_path_orep_filt(std::pair<fs::path, fs::path> sraOrepFiltFiles)
 // Utility function to construct filename for SRA
 std::string SRA::make_file_str() {
   std::string filename;
+  std::string filenameCleaned;
   std::string orgName = get_org_name();
   while (orgName.find(" ") != std::string::npos) {
     orgName = orgName.replace(orgName.find(" "), 1, "_");
   }
   filename = get_accession() + "_" + get_tax_id() + "_" + orgName;
-  return filename;
+  for (int i = 0; i < filename.size(); i++) {
+    if (isalnum(filename[i]) || filename[i] == '_') {
+      filenameCleaned.push_back(filename[i]);
+    }
+  }
+  return filenameCleaned;
 }
 
 std::string SRA::makeCheckpointName(std::string ext) {

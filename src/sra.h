@@ -3,6 +3,7 @@
 #include <string>
 #include <iostream>
 #include <cstring>
+#include <cctype>
 #include <chrono>
 #include <thread>
 #include <boost/filesystem.hpp>

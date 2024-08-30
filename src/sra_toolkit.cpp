@@ -63,7 +63,7 @@ void fasterq_sra(SRA sra, std::string threads, bool dispOutput,
   std::string fasterqCmd;
   if (compressOutput) {
     fasterqCmd = "( " + PATH_FASTERQ + " " + sraAccession + fasterqFlag +
-                 " --split-spot -Z | awk \'{" +
+                 " --split-3 -Z | awk \'{" +
                  "if ((NR-1) % 8 < 4) {print | \"" + PATH_PIGZ + " --fast -p " + threads + " > " + outFile + "_1.fastq.gz\"} " +
                  "else {print | \"" + PATH_PIGZ + " --fast -p " + threads + " > " + outFile + "_2.fastq.gz\"} }\' )";
   }

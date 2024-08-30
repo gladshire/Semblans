@@ -1,5 +1,3 @@
-// TODO: Implement post-filter summary
-
 #include "kraken_wrap.h"
 
 // Obtain the paths to kraken2 databases from user config INI file

@@ -1,3 +1,6 @@
+// TODO: If an SRA crashes, report, move on to the next one, do not exit
+
+
 #include "semblans.h"
 
 std::atomic<bool> procRunning(false);
