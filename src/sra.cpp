@@ -81,13 +81,17 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool dispOutput,
       while(strcmp(parse_node->name(), "LibraryLayout")) {
         parse_node = parse_node->next_sibling();
       }
-      if (!strcmp(parse_node->value(), "PAIRED") && spots_m == 0) {
+      if (strcmp(parse_node->value(), "PAIRED") && spots_m == 0) {
         // NO single spots
         paired = false;
       }
-      else if (!strcmp(parse_node->value(), "PAIRED") && spots_m != spots) {
+      else if (strcmp(parse_node->value(), "PAIRED") && spots_m != spots) {
         // There are single spots
         paired = true;
+      }
+      else if (!strcmp(parse_node->value(), "PAIRED")) {
+        // single spots
+        paired = false;
       }
       else {
         // NO single spots
