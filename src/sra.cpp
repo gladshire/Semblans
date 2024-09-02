@@ -39,7 +39,7 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool dispOutput,
   int numRetries = 0;
   std::string platform;
 
-  logOutput("\nObtaining information for accession(s)", logFile);
+  logOutput("\nObtaining information for accession: " + sra_accession + "\n", logFile);
   while (true) {
     // After 5 unsuccessful retries, break and exit
     if (numRetries == 5) {

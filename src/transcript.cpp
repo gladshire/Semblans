@@ -71,9 +71,6 @@ transcript::transcript(std::string filename, INI_MAP cfgIni) {
   tax_id = "";
   std::string fileBase(fs::path(filename).filename().stem().stem().c_str());
 
-  std::cout << projPath << std::endl;
-  std::cout << stepDirs[8] << std::endl;
-
   //while (fileBase.find(".") != std::string::npos) {
   //  fileBase = std::string(fs::path(fileBase).stem().c_str());
   //}

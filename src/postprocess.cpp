@@ -114,9 +114,6 @@ void blastxBulk(const std::vector<transcript> & transVec, std::string threads,
     // Run BlastX
     currBlastDbName = std::string(fs::path(refProteome.c_str()).stem().c_str());
 
-    std::cout << refProteome << std::endl;
-    std::cout << blastDbDir << std::endl;
-
     if (!dispOutput) {
       procRunning = true;
       std::thread blastxThread(progressAnim, "  ", logFilePath);
@@ -171,7 +168,7 @@ std::vector<std::string> remChimeraBulk(const std::vector<transcript> & transVec
     // Check if chimera removal checkpoint exists
     if (trans.checkpointExists("chim.fix")) {
       logOutput("  Chimera removal checkpoint found for: " +
-                trans.get_file_prefix(), logFilePath);
+        trans.get_file_prefix() + "\n", logFilePath);
       continue;
     }
     logOutput("  Now running chimera removal for:\n", logFilePath);
@@ -784,7 +781,7 @@ int main(int argc, char * argv[]) {
     else {
       outFilesFinal = transdecBulk(transVec, threads, ram_gb, retainInterFiles, dispOutput, logFilePath, getMultOrfs, refProt, outDir);
     }
-
+    logOutput("\n\n", logFilePath);
     printBreakLine(logFilePath, 6, 47);
     if (configPath != "null") {
       if (ini_get_bool(cfgIniPipeline.at("annotate_transcripts").c_str(), 0)) {
