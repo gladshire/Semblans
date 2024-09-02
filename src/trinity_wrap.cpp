@@ -58,18 +58,18 @@ void run_trinity(std::pair<std::string, std::string> sraRun, std::string outFile
   logOutput("\n", logFile);
   int result;
   if (inFile2 != "") {
-    trinCmd = PATH_TRINITY + " --seqType fq" +
-              " --left " + inFile1 + " --right " + inFile2 +
-              " --max_memory " + ram_gb + "G " + "--CPU " + threads +
-              " --bflyCalculateCPU" + " --full_cleanup" +
-              " --no_normalize_reads" + " --output " + outFile;
+    trinCmd = "export PATH=" + PATH_SALMON_DIR + ":$PATH && " + PATH_TRINITY + " --seqType fq" +
+      " --left " + inFile1 + " --right " + inFile2 +
+      " --max_memory " + ram_gb + "G " + "--CPU " + threads +
+      " --bflyCalculateCPU" + " --full_cleanup" +
+      " --no_normalize_reads" + " --output " + outFile;
   }
   else {
-    trinCmd = PATH_TRINITY + " --seqType fq" +
-              " --single " + inFile1 +
-              " --max_memory " + ram_gb + "G " + "--CPU " + threads +
-              " --bflyCalculateCPU" + " --full_cleanup" +
-              " --no_normalize_reads" + " --output " + outFile;
+    trinCmd = "export PATH=" + PATH_SALMON_DIR + ":$PATH && " + PATH_TRINITY + " --seqType fq" +
+      " --single " + inFile1 +
+      " --max_memory " + ram_gb + "G " + "--CPU " + threads +
+      " --bflyCalculateCPU" + " --full_cleanup" +
+      " --no_normalize_reads" + " --output " + outFile;
   }
 
   if (dispOutput) {
