@@ -711,20 +711,27 @@ int main(int argc, char * argv[]) {
                   logFilePath);
         exit(1);
       }
-      fs::path currFile = transcript(sras[0]).get_trans_path_trinity().parent_path();
+      fs::path trinityOutDir = transcript(sras[0]).get_trans_path_trinity().parent_path();
       fs::path currPrefix;
-      fs::directory_iterator fileIter{currFile};
+      fs::directory_iterator fileIter{ trinityOutDir };
+      // ToDo: @Miles, this simply sticks ALL of the FASTA files from the
+      //       Trinity output directory to the list. We should probably check
+      //       if the file maps to a user provided:
+      //           1. FASTQ file
+      //           2. SRA
+      //       Semblans should not do ANYTHING with the files NOT descending
+      //       from sources provided in the config file.
       while (fileIter != fs::directory_iterator{}) {
         // Iterate through files in Semblans transcript directory
         // Push transcript to transVec transcripts vector
-        if (fileIter->path().extension() == ".fasta") {
-          currFile = fileIter->path();
+        if (fileIter->path().extension() == ".fasta" && !fs::is_directory(fileIter->path())) {
+          fs::path currFile = fileIter->path();
           currPrefix = currFile;
           while (!currPrefix.extension().empty()) {
             currPrefix = currPrefix.stem();
           }
           fs::rename(currFile, currFile.parent_path() /
-                               fs::path((std::string(currPrefix.c_str()) + ".Trinity.fasta").c_str()));
+            fs::path((std::string(currPrefix.c_str()) + ".Trinity.fasta").c_str()));
           transcript currTrans(fileIter->path().c_str(), cfgIni);
           transVec.push_back(currTrans);
         }
