@@ -8,10 +8,10 @@ extern std::vector<std::string> stepDirs;
 
 // Suimmarize the initialized postprocessing job's parameters
 void postSummary(const std::vector<transcript> transVec, std::string configPath,
-                 std::string logFilePath, std::string refProt, 
+                 std::string logFilePath, std::string refProt,
                  std::string threads, std::string ram_gb,
                  bool retainInterFiles, bool compressFiles) {
- 
+
   logOutput("\nSemblans Postprocess started with following parameters:\n", logFilePath);
   logOutput("  Config file:     " +
             std::string(fs::path(configPath.c_str()).filename().c_str()) + "\n",
@@ -168,7 +168,7 @@ std::vector<std::string> remChimeraBulk(const std::vector<transcript> & transVec
   std::string currTransCut;
   std::string chimOutDir;
   for (auto trans : transVec) {
-    // Check if chimera removal checkpoint exists 
+    // Check if chimera removal checkpoint exists
     if (trans.checkpointExists("chim.fix")) {
       logOutput("  Chimera removal checkpoint found for: " +
                 trans.get_file_prefix(), logFilePath);
@@ -177,7 +177,7 @@ std::vector<std::string> remChimeraBulk(const std::vector<transcript> & transVec
     logOutput("  Now running chimera removal for:\n", logFilePath);
     summarize_sing_trans(trans, logFilePath, 4);
 
-   
+
     currTransInChim = trans.get_trans_path_trinity().c_str();
     currTransOutChim = trans.get_trans_path_chimera().c_str();
     currBlastx = trans.get_trans_path_blastx().c_str();
@@ -259,10 +259,10 @@ void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
         }
         currSraRunsIn.push_back(currSraRun);
       }
-    } 
+    }
     currIndex = trans.get_trans_path_index().c_str();
     currQuant = trans.get_trans_path_quant().c_str();
-   
+
     // Check if salmon index checkpoint exists
     if (trans.checkpointExists("index")) {
       logOutput("  Indexing checkpoint found for: " +
@@ -367,7 +367,7 @@ std::vector<std::string> corsetBulk(const std::vector<transcript> & transVec, st
     currTransLargestClust = trans.get_trans_path_largest().c_str();
     currTransRedund = trans.get_trans_path_redund().c_str();
     currOutDir = trans.get_trans_path_clust().parent_path().c_str();
-   
+
     // Perform corset run
     if (!dispOutput) {
       procRunning = true;
@@ -492,10 +492,10 @@ std::vector<std::pair<std::string, std::string>> transdecBulk(const std::vector<
     }
     currTransCds = trans.get_trans_path_cds().c_str();
     currTransPep = trans.get_trans_path_prot().c_str();
-    
+
     currDb = blastDbDir + "/" + blastDbName;
     currOutDirTD = trans.get_trans_path_cds().parent_path().c_str();
-       
+
     // Perform transdecoder run to obtain coding sequences / peptides
     if (!dispOutput) {
       procRunning = true;
@@ -529,7 +529,7 @@ void annotateBulk(const std::vector<transcript> & transVec, std::string threads,
   std::string currTransPep;
   std::string currTransOut;
   for (auto trans : transVec) {
-    // Check if annotation checkpoint exists 
+    // Check if annotation checkpoint exists
     if (trans.checkpointExists("annotate")) {
       logOutput("\n  Annotation checkpoint found for: " +
                 trans.get_file_prefix(), logFilePath);
@@ -540,7 +540,7 @@ void annotateBulk(const std::vector<transcript> & transVec, std::string threads,
 
     currTransIn = trans.get_trans_path_cds().c_str();
     currTransPep = trans.get_trans_path_prot().c_str();
-  
+
     currTransOut = trans.get_trans_path_annot().c_str();
 
     // Perform annotation of transcript
@@ -632,7 +632,7 @@ int main(int argc, char * argv[]) {
         logOutput("ERROR: Number of left/right read files do not match", logFilePath);
         exit(1);
       }
-      
+
       outDir = std::string((fs::canonical(fs::path(outDir.c_str())).parent_path()).c_str()) + "/" +
                std::string((fs::canonical(fs::path(outDir.c_str())).filename()).c_str()) + "/";
       // if (entirePipeline) {
@@ -776,7 +776,7 @@ int main(int argc, char * argv[]) {
       outFiles = corsetBulk(transVec, ram_gb, retainInterFiles, dispOutput, logFilePath, cfgIni);
     }
     logOutput("\n", logFilePath);
-    printBreakLine(logFilePath, 6, 47);    
+    printBreakLine(logFilePath, 6, 47);
     // Run transdecoder
     if (configPath != "null") {
       outFilesFinal = transdecBulk(transVec, threads, ram_gb, retainInterFiles, dispOutput, logFilePath, getMultOrfs, "", "", cfgIni);

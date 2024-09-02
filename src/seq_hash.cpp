@@ -9,7 +9,7 @@ seqHash::seqHash() {
 
 // Constructor for seqHash object allowing definition of hash table size
 seqHash::seqHash(uintmax_t lenTable) {
-  seqHashData = new linkedList[lenTable]; 
+  seqHashData = new linkedList[lenTable];
   lenHashTable = lenTable;
   numItems = 0;
 }
@@ -70,7 +70,7 @@ seqHash::seqHash(uintmax_t lenTable, fs::path transFilePath, uintmax_t ram_b) {
       }
       seqStartPos = std::find(headerStartPos, inFileL, '\n') + 1;
       currHeader = std::string(headerStartPos + 1, seqStartPos - 1);
-      
+
       // Extract sequence
       seqEndPos = std::find(seqStartPos, inFileL, '\n');
 

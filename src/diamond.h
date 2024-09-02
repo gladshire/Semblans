@@ -29,4 +29,3 @@ void blastpDiam(std::string pepFilePath, std::string blastDb,
                 std::string maxEvalue, std::string maxTargetSeqs,
                 std::string threads, std::string outFile,
                 bool dispOutput, std::string logFile);
-

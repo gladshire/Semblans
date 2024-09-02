@@ -36,6 +36,6 @@ class seqHash {
     uintmax_t getLength();
     uintmax_t getNumItems();
     void clear();
-    linkedList * getHashData();    
+    linkedList * getHashData();
     ~seqHash();
 };

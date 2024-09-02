@@ -210,7 +210,7 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool dispOutput,
 SRA::SRA(std::string fileName1, std::string fileName2, INI_MAP cfgIni, bool compressedFiles,
          std::string logFile) {
 
-  
+
   std::string outDir(fs::canonical(fs::path(cfgIni["General"]["output_directory"].c_str())).c_str());
   std::string projName(cfgIni["General"]["project_name"]);
   std::string projPath((fs::path(outDir.c_str()) / fs::path(projName.c_str())).c_str());
@@ -239,10 +239,10 @@ SRA::SRA(std::string fileName1, std::string fileName2, INI_MAP cfgIni, bool comp
   else {
     compressExt = "";
   }
- 
+
   std::ifstream sraFile1;
   std::ifstream sraFile2;
-  std::streamsize s; 
+  std::streamsize s;
 
   uintmax_t numReads1 = 0;
   uintmax_t numReads2 = 0;
@@ -261,7 +261,7 @@ SRA::SRA(std::string fileName1, std::string fileName2, INI_MAP cfgIni, bool comp
   while (!sraFile1.eof() && !sraFile1.good()) {
     sraFile1.read(&buffer[0], 1000000000);
     s = sraFile1.gcount();
-    
+
     nlPos = &buffer[0];
     inFileL = &buffer[0] + s;
     while (nlPos != inFileL) {
@@ -355,10 +355,10 @@ SRA::SRA(std::string fileName1, std::string fileName2, std::string outDir, bool 
   else {
     compressExt = "";
   }
- 
+
   std::ifstream sraFile1;
   std::ifstream sraFile2;
-  std::streamsize s; 
+  std::streamsize s;
 
   uintmax_t numReads1 = 0;
   uintmax_t numReads2 = 0;
@@ -377,7 +377,7 @@ SRA::SRA(std::string fileName1, std::string fileName2, std::string outDir, bool 
   while (!sraFile1.eof() && !sraFile1.good()) {
     sraFile1.read(&buffer[0], 1000000000);
     s = sraFile1.gcount();
-    
+
     nlPos = &buffer[0];
     inFileL = &buffer[0] + s;
     while (nlPos != inFileL) {
@@ -433,7 +433,7 @@ SRA::SRA(std::string fileName1, std::string fileName2, std::string outDir, bool 
       fastqc_dir_2_2 = (outDir + stepDirs[5] + fileBase2 + "/" + fileBase2).c_str();
       sra_path_orep_filt_2 = (outDir + stepDirs[6] + fileBase2 + ".orep.filt.fq" + compressExt).c_str();
     }
-  } 
+  }
 }
 
 // Copy constructor for SRA object

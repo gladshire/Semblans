@@ -46,7 +46,7 @@ void prefetch_sra(SRA sra, bool dispOutput, std::string logFile) {
   checkExitSignal(result, logFile);
 }
 
-// Given an SRA run object, dump prefetched data to a FASTQ file 
+// Given an SRA run object, dump prefetched data to a FASTQ file
 void fasterq_sra(SRA sra, std::string threads, bool dispOutput,
                  bool compressOutput, std::string logFile) {
   std::string prefetchDir(sra.get_sra_path_raw().first.parent_path().c_str());
@@ -92,7 +92,7 @@ void align_file_buffer(std::istream & inStream1, std::istream & inStream2,
   std::string read;
   std::string readMatch;
   if (!inStream1.eof() && !inStream2.eof()) {
-    
+
     while ((inStream1.peek() != '@' && inStream1.peek() != '>') &&
            (inStream2.peek() != '@' && inStream2.peek() != '>')) {
       if (inStream1.peek() != '@' && inStream1.peek() != '>') {
@@ -123,7 +123,7 @@ void align_file_buffer(std::istream & inStream1, std::istream & inStream2,
       if (inStream1.peek() == '\n') {
         inStream1.get();
         if (inStream1.peek() == '@' || inStream1.peek() == '>') {
-          
+
         }
       }
       if (inStream2.peek() == '\n') {

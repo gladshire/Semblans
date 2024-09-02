@@ -3,7 +3,7 @@
 void makeBlastDb(std::string pathProtRef, std::string outDir,
                  bool dispOutput, std::string logFile) {
   fs::path pathProtRefFile(pathProtRef.c_str());
-  std::string protRefStr(pathProtRefFile.stem().c_str()); 
+  std::string protRefStr(pathProtRefFile.stem().c_str());
   fs::path outDbFile((outDir + "/" + protRefStr).c_str());
   std::string printOut;
   if (dispOutput) {
@@ -75,7 +75,7 @@ void blastp(std::string pepFilePath, std::string blastDb,
     return;
   }
   std::string blastpCmd = BLASTP + " -query " + pepFilePath + " -db " + blastDb +
-                          " -evalue " + maxEvalue + " -max_target_seqs " + maxTargetSeqs + 
+                          " -evalue " + maxEvalue + " -max_target_seqs " + maxTargetSeqs +
                           " -outfmt 6 " + "-num_threads " + threads + " > " + outFile + printOut;
   result = system(blastpCmd.c_str());
   checkExitSignal(result, logFile);

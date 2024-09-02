@@ -64,7 +64,7 @@ void run_kraken2(std::pair<std::string, std::string> sraRunIn,
   if (compressFiles) {
     krakOutput = "";
   }
-  else {    
+  else {
     krakOutput = " --output - --unclassified-out " + sraRunOut;
     if (keepForeign) {
       krakOutput += " --classified-out " + sraRunOutClass;
@@ -93,8 +93,7 @@ void run_kraken2(std::pair<std::string, std::string> sraRunIn,
   }
   else {
     krakCmd += " >>" + logFile + " 2>&1";
-  } 
+  }
   result = system(krakCmd.c_str());
   checkExitSignal(result, logFile);
 }
-

@@ -16,4 +16,3 @@ namespace dl = boost::dll;
 
 void pantherScore(std::string transPepIn, std::string outFile, std::string threads,
                   bool dispOutput, std::string logFile);
-

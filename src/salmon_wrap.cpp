@@ -45,14 +45,14 @@ void salmon_quant(std::string transIn, std::string transIndex, std::string trans
   std::string transFilePath(transIn);
   std::string indexFilePath(transIndex);
   std::string quantFilePath(transQuant);
-  
+
   std::string sras1 = "";
   std::string sras2 = "";
 
   // Determine if more data exists for paired or single runs contituting transcript
   bool morePaired = false;
   morePaired = runPaired(sraRunsIn);
-  
+
   // Construct largest possible list of either paired or single runs
   for (int i = 0; i < sraRunsIn.size(); i++) {
     if (morePaired) {

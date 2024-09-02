@@ -95,7 +95,7 @@ void run_trinity(std::pair<std::string, std::string> sraRun, std::string outFile
              fs::path(outFile.c_str()));
   fs::rename(fs::path((outFile + ".Trinity.fasta.gene_trans_map").c_str()),
              fs::path((outFile + ".gene_trans_map").c_str()));
-  
+
 }
 
 // Perform a de novo assembly using multiple SRAs' sequence data with Trinity
@@ -103,7 +103,7 @@ void run_trinity_comb(std::vector<std::pair<std::string, std::string>> sraRuns,
                       std::string outFile,
                       std::string threads, std::string ram_gb,
                       bool dispOutput, std::string logFile) {
-  
+
   // Run Trinity for assembly using multiple SRA runs
   logOutput("\n  Combined assembly chosen\n\n  Preparing reads for assembly\n", logFile);
   long long int ram_b = (long long int)stoi(ram_gb) * 1000000000;
@@ -176,7 +176,7 @@ void run_trinity_comb(std::vector<std::pair<std::string, std::string>> sraRuns,
     }
   }
 
-  // Summarize Trinity assembly job 
+  // Summarize Trinity assembly job
   logOutput("    Now assembling de-novo transcriptome for:\n", logFile);
   for (auto sraRun : sraRuns) {
     logOutput("\n      SRA Run:", logFile);
@@ -186,7 +186,7 @@ void run_trinity_comb(std::vector<std::pair<std::string, std::string>> sraRuns,
     }
     logOutput("\n", logFile);
   }
-  
+
   std::string trin_cmd;
   std::string printOut;
   if (dispOutput) {
@@ -217,12 +217,12 @@ void run_trinity_comb(std::vector<std::pair<std::string, std::string>> sraRuns,
   //std::rename((outFile + ".Trinity.fasta.gene_trans_map").c_str(),
   //            (outFile + ".gene_trans_map").c_str());
   replaceChar(logFile, '\r', '\n');
-  
+
     /*
     trin_cmd = PATH_TRINITY + " --seqType fq" + " --single " + inFile1 + " --max_memory " +
                ram_gb + "G " + "--CPU " + threads + " --bflyCalculateCPU" + " --full_cleanup" +
-               " --no_normalize_reads" + " --run_as_paired" + " --output " + outFile + printOut; 
-  
+               " --no_normalize_reads" + " --run_as_paired" + " --output " + outFile + printOut;
+
     // Run Trinity assembly
     procRunning = true;
     std::thread trinProgThread(progressAnim, "    ", logFile);

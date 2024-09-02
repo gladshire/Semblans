@@ -13,7 +13,7 @@ void run_rcorr(std::pair<std::string, std::string> sraRun, std::string outDir,
   std::string wkProp;
 
   std::string printOut;
-  
+
   bool isPaired;
   int result;
   if (sraRun.second != "") {

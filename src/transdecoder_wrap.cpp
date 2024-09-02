@@ -31,7 +31,7 @@ bool blastpout_ok(std::string blastpFile) {
   }
   std::set<std::string> uniqueQuery;
   std::ifstream inFile(blastpFile);
-  
+
   std::string currLine;
   std::string currQuery;
   size_t wsPos = 0;
@@ -112,7 +112,7 @@ void run_transdecoder(std::string transIn, std::string transCds, std::string tra
       //logOutput("Skip finding final CDS and PEP", logFile);
     }
     else {
-      // If multiple ORFs desired, 
+      // If multiple ORFs desired,
       if (getMultOrfs) {
         singleMultOrfsFlag = "";
       }
