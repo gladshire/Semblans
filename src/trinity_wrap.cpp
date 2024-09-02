@@ -58,18 +58,18 @@ void run_trinity(std::pair<std::string, std::string> sraRun, std::string outFile
   logOutput("\n", logFile);
   int result;
   if (inFile2 != "") {
-    trinCmd = PATH_TRINITY + " --seqType fq" +
-              " --left " + inFile1 + " --right " + inFile2 +
-              " --max_memory " + ram_gb + "G " + "--CPU " + threads +
-              " --bflyCalculateCPU" + " --full_cleanup" +
-              " --no_normalize_reads" + " --output " + outFile;
+    trinCmd = "export PATH=" + PATH_SALMON_DIR + ":$PATH && " + PATH_TRINITY + " --seqType fq" +
+      " --left " + inFile1 + " --right " + inFile2 +
+      " --max_memory " + ram_gb + "G " + "--CPU " + threads +
+      " --bflyCalculateCPU" + " --full_cleanup" +
+      " --no_normalize_reads" + " --output " + outFile;
   }
   else {
-    trinCmd = PATH_TRINITY + " --seqType fq" +
-              " --single " + inFile1 +
-              " --max_memory " + ram_gb + "G " + "--CPU " + threads +
-              " --bflyCalculateCPU" + " --full_cleanup" +
-              " --no_normalize_reads" + " --output " + outFile;
+    trinCmd = "export PATH=" + PATH_SALMON_DIR + ":$PATH && " + PATH_TRINITY + " --seqType fq" +
+      " --single " + inFile1 +
+      " --max_memory " + ram_gb + "G " + "--CPU " + threads +
+      " --bflyCalculateCPU" + " --full_cleanup" +
+      " --no_normalize_reads" + " --output " + outFile;
   }
 
   if (dispOutput) {
@@ -91,11 +91,35 @@ void run_trinity(std::pair<std::string, std::string> sraRun, std::string outFile
   }
   replaceChar(logFile, '\r', '\n');
   checkExitSignal(result, logFile);
-  fs::rename(fs::path((outFile + ".Trinity.fasta").c_str()),
-             fs::path(outFile.c_str()));
-  fs::rename(fs::path((outFile + ".Trinity.fasta.gene_trans_map").c_str()),
-             fs::path((outFile + ".gene_trans_map").c_str()));
-  
+
+  // Handle Trinity output
+  fs::path outFileTrinityFasta = fs::path(outFile + ".Trinity.fasta");
+  fs::path outFileTrinityMap = fs::path(outFile + ".Trinity.fasta.gene_trans_map");
+
+  // Handle cases when Trinity fails to clean up its mess
+  if (fs::exists(outFile) && fs::is_directory(outFile)) {
+    if (fs::exists(outFileTrinityFasta) && !fs::is_directory(outFileTrinityFasta) &&
+      fs::exists(outFileTrinityMap) && !fs::is_directory(outFileTrinityMap)
+      ) {
+      logOutput("    \nRemoving Trinity working directory, may take some time...\n", logFile);
+      fs::remove_all(outFile);
+    }
+  }
+  // ToDo: Miles, previously Semblans would crash when trying to move
+  //       non-existing Trinity output files. I made it exit cleanly,
+  //       but, ideally, Semblans should skip downstream processing of
+  //       the failed assembly and move on to the next one.
+  if (fs::exists(outFileTrinityFasta) && !fs::is_directory(outFileTrinityFasta) &&
+    fs::exists(outFileTrinityMap) && !fs::is_directory(outFileTrinityMap)
+    ) {
+    fs::rename(outFileTrinityFasta, outFile);
+    fs::rename(outFileTrinityMap, fs::path(outFile + ".gene_trans_map"));
+  }
+  else {
+    logOutput("    ERROR: Trinity failed for unknown reasons. Salmon segmentation fault sometimes causes this.\n", logFile);
+    system("setterm -cursor on");
+    exit(1);
+  }
 }
 
 // Perform a de novo assembly using multiple SRAs' sequence data with Trinity
@@ -103,7 +127,7 @@ void run_trinity_comb(std::vector<std::pair<std::string, std::string>> sraRuns,
                       std::string outFile,
                       std::string threads, std::string ram_gb,
                       bool dispOutput, std::string logFile) {
-  
+
   // Run Trinity for assembly using multiple SRA runs
   logOutput("\n  Combined assembly chosen\n\n  Preparing reads for assembly\n", logFile);
   long long int ram_b = (long long int)stoi(ram_gb) * 1000000000;
@@ -176,7 +200,7 @@ void run_trinity_comb(std::vector<std::pair<std::string, std::string>> sraRuns,
     }
   }
 
-  // Summarize Trinity assembly job 
+  // Summarize Trinity assembly job
   logOutput("    Now assembling de-novo transcriptome for:\n", logFile);
   for (auto sraRun : sraRuns) {
     logOutput("\n      SRA Run:", logFile);
@@ -186,7 +210,7 @@ void run_trinity_comb(std::vector<std::pair<std::string, std::string>> sraRuns,
     }
     logOutput("\n", logFile);
   }
-  
+
   std::string trin_cmd;
   std::string printOut;
   if (dispOutput) {
@@ -217,12 +241,12 @@ void run_trinity_comb(std::vector<std::pair<std::string, std::string>> sraRuns,
   //std::rename((outFile + ".Trinity.fasta.gene_trans_map").c_str(),
   //            (outFile + ".gene_trans_map").c_str());
   replaceChar(logFile, '\r', '\n');
-  
+
     /*
     trin_cmd = PATH_TRINITY + " --seqType fq" + " --single " + inFile1 + " --max_memory " +
                ram_gb + "G " + "--CPU " + threads + " --bflyCalculateCPU" + " --full_cleanup" +
-               " --no_normalize_reads" + " --run_as_paired" + " --output " + outFile + printOut; 
-  
+               " --no_normalize_reads" + " --run_as_paired" + " --output " + outFile + printOut;
+
     // Run Trinity assembly
     procRunning = true;
     std::thread trinProgThread(progressAnim, "    ", logFile);

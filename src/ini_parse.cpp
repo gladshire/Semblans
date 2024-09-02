@@ -117,7 +117,7 @@ void make_proj_space(const INI_MAP &iniFile, std::string pipeStage) {
     stepDirs[1] = "preprocess/" + currNum + "-" + stepDirs[1];
     system(("mkdir " + projDir + stepDirs[1] + " > /dev/null 2>&1").c_str());
     stepNum++;
-  
+
     // If pipeline running error correction, create its directory
     currNum = getStepNum(stepNum);
     if (ini_get_bool(pipeSteps.at("error_correction").c_str(), -1)) {
@@ -132,7 +132,7 @@ void make_proj_space(const INI_MAP &iniFile, std::string pipeStage) {
       stepDirs[3] = "preprocess/" + currNum + "-" + stepDirs[3];
       system(("mkdir " + projDir + stepDirs[3] + " > /dev/null 2>&1").c_str());
       stepNum++;
-    } 
+    }
 
     // If pipeline running foreign sequence filtering, create its directory
     currNum = getStepNum(stepNum);
@@ -175,7 +175,7 @@ void make_proj_space(const INI_MAP &iniFile, std::string pipeStage) {
       system(("mkdir " + projDir + stepDirs[8] + " > /dev/null 2>&1").c_str());
       stepNum++;
     }
-  
+
     // If pipeline running cluster-based filtration, create its directory
     currNum = getStepNum(stepNum);
     if (ini_get_bool(pipeSteps.at("cluster_filtering").c_str(), -1)) {
@@ -183,7 +183,7 @@ void make_proj_space(const INI_MAP &iniFile, std::string pipeStage) {
       system(("mkdir " + projDir + stepDirs[9] + " > /dev/null 2>&1").c_str());
       stepNum++;
     }
-  
+
     // Create directory for transcripts coding seqs, proteins
     currNum = getStepNum(stepNum);
     stepDirs[10] = "postprocess/" + currNum + "-" + stepDirs[10];
@@ -201,10 +201,6 @@ void make_proj_space(const INI_MAP &iniFile, std::string pipeStage) {
   //  exit(1);
   //}
 }
-  
-  
-  
-
 
 // Given the path/name of an INI config file, return a map of its data
 // which can be indexed by sections, and then by keys
@@ -225,4 +221,3 @@ INI_MAP make_ini_map(const char * configPath) {
   fclose(configIni);
   return iniMap;
 }
-

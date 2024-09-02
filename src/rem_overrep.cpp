@@ -136,7 +136,7 @@ bool rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
   int seqLength1;
   int seqLength2;
   bool overRep;
- 
+
   // Instantiate input stream for compressed file
   io::filtering_streambuf<io::input> gzInBuffer1;
   io::filtering_streambuf<io::input> gzInBuffer2;
@@ -172,7 +172,7 @@ bool rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
     if (compressFiles) {
       inputStream1.read(inFile1Data, ram_b_per_file);
       inputStream2.read(inFile2Data, ram_b_per_file);
-  
+
       s1 = inputStream1.gcount();
       s2 = inputStream2.gcount();
     }
@@ -188,7 +188,7 @@ bool rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
     nlPos2 = inFile2Data;
     writeStart1 = inFile1Data;
     writeStart2 = inFile2Data;
-    
+
     inFile1L = inFile1Data + s1;
     inFile2L = inFile2Data + s2;
 
@@ -255,7 +255,7 @@ bool rem_overrep_pe(std::pair<std::string, std::string> sraRunIn,
             outFile2.write(writeStart2, writeEnd2 - writeStart2);
           }
         }
- 
+
         numReads++;
         for (int i = 0; i < 2; i++) {
           nlPos1 = std::find(nlPos1 + 1, inFile1L, '\n');
@@ -478,4 +478,3 @@ bool rem_overrep_se(std::string sraRunIn, std::string sraRunOut,
   }
   return true;
 }
-

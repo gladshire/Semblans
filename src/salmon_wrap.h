@@ -21,5 +21,3 @@ bool runPaired(std::vector<std::pair<std::string, std::string>> sraRunsIn);
 void salmon_quant(std::string transIn, std::string transIndex, std::string transQuant,
                   std::vector<std::pair<std::string, std::string>> sraRunsIn,
                   std::string threads, bool dispOutput, std::string logFile);
-
-

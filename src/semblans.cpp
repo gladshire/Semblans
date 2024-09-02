@@ -14,7 +14,7 @@ void print_intro(std::string logFile) {
   logOutput("                            |     |                     \n", logFile);
   logOutput("      __|   _ \\  __ `__ \\   __ \\  |   _` |  __ \\    __| \n", logFile);
   logOutput("    \\__ \\   __/  |   |   |  |   | |  (   |  |   | \\__ \\ \n", logFile);
-  logOutput("    ____/ \\___| _|  _|  _| _.__/ _| \\__,_| _|  _| ____/ \n", logFile); 
+  logOutput("    ____/ \\___| _|  _|  _| _.__/ _| \\__,_| _|  _| ____/ \n", logFile);
   logOutput("\n\n\n", logFile);
   printBreakLine(logFile, 6, 47);
 }
@@ -109,7 +109,7 @@ void print_help_postprocess() {
   std::cout << "  -f,   --retain         Prevents deletion of intermediate files in pipeline" << std::endl;
   std::cout << "  -v,   --verbose        Prints all output from Semblans and sub-programs" << std::endl;
   std::cout << "  -h,   --help           Displays this help screen" << std::endl;
- 
+
 }
 
 // Utility function to obtain name of cleaned read files from raw file names
@@ -373,7 +373,7 @@ void checkCommandIsValid(std::string command,
       std::cerr << "            --right reads_1_right.fq,reads2_right.fq,..." << std::endl;
       exit(1);
     }
-    // Make sure user specified an assembly output prefix (--prefix) if they are assembling 
+    // Make sure user specified an assembly output prefix (--prefix) if they are assembling
     if (command != "preprocess" && outPrefix == "null") {
       std::cerr << "\nERROR: User must name their assembly with the '--prefix/--pre/-p' flag" << std::endl;
       std::cerr << "  (example: --prefix/--pre/-p assemblyPrefix)" << std::endl;
@@ -396,7 +396,7 @@ void checkCommandIsValid(std::string command,
         std::cerr << "\n  Neither are necessary for the assembly of reads," << std::endl;
         std::cerr << "  so they will be ignored" << std::endl;
       }
-    } 
+    }
     // If user called postprocess, make sure they specified an assembly file, reference
     // proteome
     if (command == "postprocess") {
@@ -442,7 +442,7 @@ int preprocess(std::vector<std::string> sraRuns, bool serialProcess, std::string
                std::string outDir, std::string threadStr, std::string ramStr,
                std::string retain, std::string verbose, std::string entirePipeline,
                std::string logFilePath) {
-  
+
   std::ifstream cfgIniFile;
   std::ofstream cfgIniSub;
   std::string currLine;
@@ -578,11 +578,11 @@ int postprocess(std::vector<std::string> sraRuns, bool serialProcess, std::strin
   size_t pos;
   int result;
 
-  
+
 
   std::string postCmd = SEMBLANS_DIR + "postprocess " + pathConfig + " " +
                         leftReads + " " + rightReads + " " + assembly + " " +
-                        refProt + " " + outDir + " " + outPrefix + " " + 
+                        refProt + " " + outDir + " " + outPrefix + " " +
                         threadStr + " " + ramStr + " " +
                         retain + verbose + entirePipeline;
 
@@ -673,8 +673,8 @@ int main(int argc, char * argv[]) {
   std::string preCmd;
   std::string assCmd;
   std::string postCmd;
-  if (argc == 1 || 
-      (argc == 2 && 
+  if (argc == 1 ||
+      (argc == 2 &&
        (strcmp("--help", argv[1]) == 0 ||
         strcmp("-h", argv[1]) == 0))) {
     print_help_base();
@@ -694,7 +694,7 @@ int main(int argc, char * argv[]) {
 
     // Parse through Semblans argument vector
     parseArgv(argc, argv, command, leftReads, rightReads,
-              assembly, refProt, outDir, outPrefix, 
+              assembly, refProt, outDir, outPrefix,
               threadStr, ramStr, pathConfig, kraken2Dbs,
               retainInterFiles, verboseOutput);
 
@@ -726,7 +726,7 @@ int main(int argc, char * argv[]) {
       cfgIniGen = cfgIni["General"];
       logFilePath = std::string((fs::canonical(fs::path(cfgIniGen["log_file"].c_str()).parent_path()) /
                                  fs::path(cfgIniGen["log_file"].c_str()).filename()).c_str());
-    
+
       fs::create_directory((fs::canonical(fs::path(cfgIniGen["output_directory"].c_str())) /
                             fs::path(cfgIniGen["project_name"].c_str())));
       //std::ofstream logFile(logFilePath, std::ios_base::trunc);
@@ -738,7 +738,7 @@ int main(int argc, char * argv[]) {
           exit(1);
         }
       }
-      
+
 
       serialProcess = ini_get_bool(cfgIniGen.at("serial_processing").c_str(), 0);
       if (serialProcess) {
@@ -753,7 +753,7 @@ int main(int argc, char * argv[]) {
     // If config file not being used
     else {
       pathConfig = "null";
-      
+
       logFilePath = std::string((fs::canonical(fs::path(outDir.c_str()).parent_path()) /
                                 "log.txt").c_str());
     }
@@ -762,7 +762,7 @@ int main(int argc, char * argv[]) {
 
     // Print Semblans intro in terminal
     print_intro(logFilePath);
- 
+
     std::string verbose;
     std::string retain;
     std::string entirePipeline;
@@ -842,7 +842,7 @@ int main(int argc, char * argv[]) {
         for (auto sraStr : sraRuns) {
           currCfgIniSub = pathConfig.substr(0, pathConfig.rfind(".ini")).insert(pathConfig.rfind("/") + 1, ".") +
                           "." + std::string(fs::path(sraStr.c_str()).stem().c_str()) + ".ini";
-          
+
           std::replace(currCfgIniSub.begin(), currCfgIniSub.end(), ' ', '_');
           cfgIniFile.open(pathConfig);
           cfgIniSub.open(currCfgIniSub);
@@ -876,7 +876,7 @@ int main(int argc, char * argv[]) {
           currPostCmd = SEMBLANS_DIR + "postprocess " + currCfgIniSub + " " +
                         leftReads + " " + rightReads + " " + assembly + " " +
                         refProt + " " + outDir + " " + outPrefix + " " +
-                        threadStr + " " + ramStr + " " + 
+                        threadStr + " " + ramStr + " " +
                         retain + verbose + entirePipeline;
 
 

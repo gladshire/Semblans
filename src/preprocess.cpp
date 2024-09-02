@@ -14,7 +14,7 @@ void preSummary(const std::vector<SRA> sras, std::string configPath,
             logFilePath);
   logOutput("  Threads (Cores): " + threads + "\n", logFilePath);
   logOutput("  Memory (GB):     " + ram_gb + "\n", logFilePath);
-  logOutput("  SRA run(s):\n", logFilePath); 
+  logOutput("  SRA run(s):\n", logFilePath);
   summarize_all_sras(sras, logFilePath, 6);
   if (krakenDbs[0] != "null") {
     logOutput("  Kraken2 Database(s):\n", logFilePath);
@@ -190,7 +190,7 @@ void fastqcBulk1(std::vector<SRA> & sras, std::string threads, bool dispOutput,
       logOutput("\n", logFilePath);
       run_fastqc(currFastqcIn1, threads, currFastqcOut1, dispOutput, logFilePath);
     }
-    
+
     // Make checkpoint file
     sra.makeCheckpoint("fastqc1");
   }
@@ -252,7 +252,7 @@ void fastqcBulk2(std::vector<SRA> & sras, std::string threads, bool dispOutput,
     }
     logOutput("\n  Now running quality analysis on reads for:\n", logFilePath);
     summarize_sing_sra(sra, logFilePath, 4);
-    
+
 
     if (!dispOutput) {
       procRunning = true;
@@ -309,7 +309,7 @@ std::vector<std::pair<std::string, std::string>> errorCorrBulk(std::vector<SRA> 
 
     currRcorrOut.first = sra.get_sra_path_corr().first.c_str();
     currRcorrOut.second = sra.get_sra_path_corr().second.c_str();
-     
+
     // Check for checkpoint file
     if (sra.checkpointExists("corr")) {
       if (!sra.get_accession().empty()) {
@@ -394,7 +394,7 @@ std::vector<std::pair<std::string, std::string>> remUnfixBulk(std::vector<SRA> &
       std::thread fixThread(progressAnim, "  ", logFilePath);
       if (sra.is_paired()) {
         readsRemoved = rem_unfix_pe(currCorrFixIn, currCorrFixOut, ram_b,
-                                    dispOutput, compressFiles, logFilePath); 
+                                    dispOutput, compressFiles, logFilePath);
       }
       else {
         readsRemoved = rem_unfix_se(currCorrFixIn.first, currCorrFixOut.first, ram_b,
@@ -407,7 +407,7 @@ std::vector<std::pair<std::string, std::string>> remUnfixBulk(std::vector<SRA> &
       logOutput("\n", logFilePath);
       if (sra.is_paired()) {
         readsRemoved = rem_unfix_pe(currCorrFixIn, currCorrFixOut, ram_b,
-                                    dispOutput, compressFiles, logFilePath); 
+                                    dispOutput, compressFiles, logFilePath);
       }
       else {
         readsRemoved = rem_unfix_se(currCorrFixIn.first, currCorrFixOut.first, ram_b,
@@ -457,7 +457,7 @@ std::vector<std::pair<std::string, std::string>> trimBulk(std::vector<SRA> & sra
   std::string currLine;
   std::string::const_iterator sStart, sEnd;
   bool inFilesGood = false;
-  
+
   std::string maxSeedMismatch;
   std::string minScorePaired;
   std::string minScoreSingle;
@@ -501,14 +501,14 @@ std::vector<std::pair<std::string, std::string>> trimBulk(std::vector<SRA> & sra
       }
       else {
         logOutput(std::string("\n  Adapter trimming checkpoint found for: ") +
-                  "\n    " + sra.get_file_prefix().first + 
+                  "\n    " + sra.get_file_prefix().first +
                   "\n    " + sra.get_file_prefix().second + "\n",
                   logFilePath);
       }
       continue;
     }
     currTrimIn.first = sra.get_sra_path_corr_fix().first.c_str();
-    currTrimIn.second = sra.get_sra_path_corr_fix().second.c_str();   
+    currTrimIn.second = sra.get_sra_path_corr_fix().second.c_str();
 
     if (!cfgIni.empty()) {
       if (!ini_get_bool(cfgPipeline.at("error_correction").c_str(), 0)) {
@@ -649,7 +649,7 @@ std::vector<std::pair<std::string, std::string>> filtForeignBulk(std::vector<SRA
   if (!cfgIni.empty()) {
     cfgIniPipeline = cfgIni.at("Pipeline");
     krakenSettings = cfgIni.at("Kraken2 settings");
-    keepForeign = ini_get_bool(krakenSettings.at("save_foreign_reads").c_str(), 0); 
+    keepForeign = ini_get_bool(krakenSettings.at("save_foreign_reads").c_str(), 0);
     confThreshold = krakenSettings.at("confidence_threshold");
     minBaseQuality = krakenSettings.at("min_base_quality");
     minHitGroups = krakenSettings.at("min_hit_groups");
@@ -660,7 +660,7 @@ std::vector<std::pair<std::string, std::string>> filtForeignBulk(std::vector<SRA
     minBaseQuality = "0";
     minHitGroups = "2";
   }
-  
+
   for (int i = 0; i < krakenDbs.size(); i++) {
     logOutput("\n  Now filtering reads with database: " +
               std::string(fs::path(krakenDbs[i].c_str()).parent_path().c_str()),
@@ -1004,7 +1004,7 @@ int main(int argc, char * argv[]) {
       outDir = std::string((fs::canonical(fs::path(outDir.c_str())).parent_path()).c_str()) + "/" +
                std::string((fs::canonical(fs::path(outDir.c_str())).filename()).c_str()) + "/";
       logFilePath = outDir + "log.txt";
-      
+
       if (readFilesLeft.size() != readFilesRight.size()) {
         logOutput("\nERROR: Number of left/right read files do not match\n", logFilePath);
         exit(1);
@@ -1027,7 +1027,7 @@ int main(int argc, char * argv[]) {
         sras.push_back(SRA(readFilesLeft[i], readFilesRight[i], outDir, compressFiles, false));
       }
     }
-    else { 
+    else {
       // Obtain contents of .INI configuration file
       cfgIni = make_ini_map(configPath.c_str());
       cfgIniGen = cfgIni["General"];
@@ -1062,7 +1062,7 @@ int main(int argc, char * argv[]) {
       // Obtain terminal window size for printing purposes
       struct winsize w;
       ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-    
+
       if (!sras.empty()) {
         outFiles = retrieveSraData(sras, threads, dispOutput, compressFiles, retainInterFiles, logFilePath);
       }
@@ -1113,10 +1113,10 @@ int main(int argc, char * argv[]) {
     }
 
     logOutput("\nRaw sequence data prepared for cleaning\n", logFilePath);
-    
+
     std::string fastqc_dir_1(sras[0].get_fastqc_dir_1().first.parent_path().parent_path().c_str());
     std::string fastqc_dir_2(sras[0].get_fastqc_dir_2().first.parent_path().parent_path().c_str());
-    
+
     //INI_MAP_ENTRY cfgPipeline = cfgIni.at("Pipeline");
 
     // Show summary of preprocess task
@@ -1159,7 +1159,7 @@ int main(int argc, char * argv[]) {
     //printVertEllipse(logFilePath, 3);
     logOutput("\n", logFilePath);
     printBreakLine(logFilePath, 6, 47);
-    
+
     // Run kraken2 to remove foreign reads
     if (configPath != "null") {
       if (ini_get_bool(cfgIniPipeline.at("filter_foreign_reads").c_str(), 0)) {
@@ -1178,7 +1178,7 @@ int main(int argc, char * argv[]) {
       if (kraken2DbFiles[0] != "null") {
         outFiles = filtForeignBulk(sras, kraken2DbFiles, threads, dispOutput, compressFiles, retainInterFiles,
                                    logFilePath, outDir);
-      } 
+      }
       else {
         logOutput("\nNo Kraken database specified. Skipping removal of foreign reads.\n",
                   logFilePath);

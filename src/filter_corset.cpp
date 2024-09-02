@@ -68,5 +68,5 @@ void filterCorset(std::string transIn, std::string transClust,
     }
   }
   // Dump largest cluster data to new fasta file
-  seqRetainedHash.dump(largestClust); 
+  seqRetainedHash.dump(largestClust);
 }

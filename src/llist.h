@@ -46,5 +46,3 @@ class linkedList {
     void dump(std::ofstream & outFile);
     void clear();
 };
-
-

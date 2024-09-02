@@ -28,11 +28,11 @@ transcript::transcript(SRA sra) {
     }
   }
   file_prefix = fileBase;
- 
+
   // Define trinity assembly path
   trans_path_trinity = (projPath + stepDirs[7] + "/" + fileBase + ".Trinity.fasta").c_str();
   // Define trinity gene map path
-  trans_path_gene_map = (projPath + stepDirs[7] + "/" + fileBase + ".Trinity.fasta" + 
+  trans_path_gene_map = (projPath + stepDirs[7] + "/" + fileBase + ".Trinity.fasta" +
                          ".gene_trans_map").c_str();
   // Define chimera cut file path
   trans_path_ccut = (projPath + stepDirs[8] + "/" + fileBase + ".Trinity.cut").c_str();
@@ -56,11 +56,11 @@ transcript::transcript(SRA sra) {
   trans_path_counts = (projPath + stepDirs[9] + "/" + fileBase + "_salmon-counts.txt").c_str();
   // Define transdecoder cds path
   trans_path_cds = (projPath + stepDirs[10] + "/" + fileBase + ".transdecoder.cds.fasta").c_str();
-  // Define transdecoder prot path 
+  // Define transdecoder prot path
   trans_path_prot = (projPath + stepDirs[10] + "/" + fileBase + ".transdecoder.pep.fasta").c_str();
   // Define annotated transcripts path
   trans_path_annot = (projPath + stepDirs[11] + "/" + fileBase + ".annotated.fasta").c_str();
-} 
+}
 
 // Constructor for transcript object, taking a FASTA file as input
 transcript::transcript(std::string filename, INI_MAP cfgIni) {
@@ -71,18 +71,15 @@ transcript::transcript(std::string filename, INI_MAP cfgIni) {
   tax_id = "";
   std::string fileBase(fs::path(filename).filename().stem().stem().c_str());
 
-  std::cout << projPath << std::endl;
-  std::cout << stepDirs[8] << std::endl;
-
   //while (fileBase.find(".") != std::string::npos) {
   //  fileBase = std::string(fs::path(fileBase).stem().c_str());
   //}
   file_prefix = fileBase;
-  
+
   // Define trinity assembly path
   trans_path_trinity = (projPath + stepDirs[7] + "/" + fileBase + ".Trinity.fasta").c_str();
   // Define trinity gene map path
-  trans_path_gene_map = (projPath + stepDirs[7] + "/" + fileBase + ".Trinity.fasta" + 
+  trans_path_gene_map = (projPath + stepDirs[7] + "/" + fileBase + ".Trinity.fasta" +
                          ".gene_trans_map").c_str();
   // Define chimera cut file path
   trans_path_ccut = (projPath + stepDirs[8] + "/" + fileBase + ".Trinity.cut").c_str();
@@ -106,7 +103,7 @@ transcript::transcript(std::string filename, INI_MAP cfgIni) {
   trans_path_counts = (projPath + stepDirs[9] + "/" + fileBase + "_salmon-counts.txt").c_str();
   // Define transdecoder cds path
   trans_path_cds = (projPath + stepDirs[10] + "/" + fileBase + ".transdecoder.cds.fasta").c_str();
-  // Define transdecoder prot path 
+  // Define transdecoder prot path
   trans_path_prot = (projPath + stepDirs[10] + "/" + fileBase + ".transdecoder.pep.fasta").c_str();
   // Define annotated transcripts path
   trans_path_annot = (projPath + stepDirs[11] + "/" + fileBase + ".annotated.fasta").c_str();
@@ -126,7 +123,7 @@ transcript::transcript(std::string filename, std::string outDir) {
   //trans_path_trinity = (projPath + stepDirs[7] + "/" + fileBase + ".Trinity.fasta").c_str();
   trans_path_trinity = filename;
   // Define trinity gene map path
-  //trans_path_gene_map = (projPath + stepDirs[7] + "/" + fileBase + ".Trinity.fasta" + 
+  //trans_path_gene_map = (projPath + stepDirs[7] + "/" + fileBase + ".Trinity.fasta" +
   //                       ".gene_trans_map").c_str();
   // Define chimera cut file path
   trans_path_ccut = (outDir + stepDirs[8] + "/" + fileBase + ".Trinity.cut").c_str();
@@ -150,7 +147,7 @@ transcript::transcript(std::string filename, std::string outDir) {
   trans_path_counts = (outDir + stepDirs[9] + "/" + fileBase + "_salmon-counts.txt").c_str();
   // Define transdecoder cds path
   trans_path_cds = (outDir + stepDirs[10] + "/" + fileBase + ".transdecoder.cds.fasta").c_str();
-  // Define transdecoder prot path 
+  // Define transdecoder prot path
   trans_path_prot = (outDir + stepDirs[10] + "/" + fileBase + ".transdecoder.pep.fasta").c_str();
   // Define annotated transcripts path
   trans_path_annot = (outDir + stepDirs[11] + "/" + fileBase + ".annotated.fasta").c_str();

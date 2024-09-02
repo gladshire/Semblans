@@ -18,7 +18,7 @@ void run_trimmomatic(std::pair<std::string, std::string> sraRunIn,
   std::string outFileU2 = sraRunOutU.second;
   int result;
   bool isPaired;
-  
+
   if (sraRunIn.second != "") {
     isPaired = true;
   }

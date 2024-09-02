@@ -47,10 +47,10 @@ long int rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
   // Instantiate input stream for compressed file
   io::filtering_streambuf<io::input> gzInBuffer1;
   io::filtering_streambuf<io::input> gzInBuffer2;
-     
+
   gzInBuffer1.push(io::gzip_decompressor());
   gzInBuffer2.push(io::gzip_decompressor());
-    
+
   gzInBuffer1.push(inFile1);
   gzInBuffer2.push(inFile2);
 
@@ -70,7 +70,7 @@ long int rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
 
   std::ostream outputStream1(&gzOutBuffer1);
   std::ostream outputStream2(&gzOutBuffer2);
- 
+
   uintmax_t numUnfix = 0;
   uintmax_t numUnfix100k = 0;
   uintmax_t numReads = 0;
@@ -82,14 +82,14 @@ long int rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
     if (compressFiles) {
       inputStream1.read(inFile1Data, ram_b_per_file);
       inputStream2.read(inFile2Data, ram_b_per_file);
-  
+
       s1 = inputStream1.gcount();
       s2 = inputStream2.gcount();
     }
     else {
       inFile1.read(inFile1Data, ram_b_per_file);
       inFile2.read(inFile2Data, ram_b_per_file);
-    
+
       s1 = inFile1.gcount();
       s2 = inFile2.gcount();
     }
@@ -101,7 +101,7 @@ long int rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
 
     inFile1L = inFile1Data + s1;
     inFile2L = inFile2Data + s2;
-    
+
     if (compressFiles) {
       align_file_buffer(inputStream1, inputStream2, inFile1Data, inFile2Data, s1, s2);
     }
@@ -126,7 +126,7 @@ long int rem_unfix_pe(std::pair<std::string, std::string> sraRunIn,
           writeEnd1 = nlPos1Prev;
           writeEnd2 = nlPos2Prev;
         }
- 
+
         if (okReads > 0) {
           if (compressFiles) {
             outputStream1.write(writeStart1, writeEnd1 - writeStart1);

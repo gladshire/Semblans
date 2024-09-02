@@ -5,7 +5,7 @@
 std::map<std::string, std::string> getGeneMatches(std::string annotFile) {
 
   std::map<std::string, std::string> geneMatches;
- 
+
   if (fs::is_empty(fs::path(annotFile.c_str()))) {
     return geneMatches;
   }
@@ -85,13 +85,13 @@ void annotateTranscript(std::string transIn, std::string transPep, std::string t
                         std::string logFile) {
   fs::path transPepPath(transPep.c_str());
   std::string transPepFileStr(transPepPath.c_str());
-  
+
   fs::path transInPath(transIn.c_str());
   std::string transInFileStr(transInPath.c_str());
 
   std::map<std::string, std::string> newSeqHeaders;
   // Prepare annotation data directory
-  std::string annotFile((fs::path(transOut.c_str()).parent_path() / 
+  std::string annotFile((fs::path(transOut.c_str()).parent_path() /
                          fs::path(transIn.c_str()).stem().stem()).c_str());
   annotFile += ".annot";
 
@@ -108,7 +108,7 @@ void annotateTranscript(std::string transIn, std::string transPep, std::string t
   linkedList * hashData = fastaPepHashTable.getHashData();
 
   // Initiate PANTHER scoring
-  pantherScore(transPepFileStr, annotFile, threads, dispOutput, logFile);  
+  pantherScore(transPepFileStr, annotFile, threads, dispOutput, logFile);
 
   // Obtain PANTHER gene descriptions
   newSeqHeaders = getGeneMatches(annotFile);

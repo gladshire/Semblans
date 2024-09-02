@@ -4,7 +4,7 @@
 //                   split its columns and push them to a vector
 std::vector<std::string> getLineVec(std::string line) {
   std::vector<std::string> lineVec;
-  
+
   if (line.length() < 3) {
     return lineVec;
   }
@@ -46,7 +46,7 @@ std::vector<std::string> expRange(std::vector<std::string> & hsp1,
   double end1d   = std::stod(end1, NULL);
   double start2d = std::stod(start2, NULL);
   double end2d   = std::stod(end2, NULL);
-  
+
   std::string start;
   std::string end;
   if (start1d < end1d && start2d < end2d) {
@@ -190,7 +190,7 @@ void detect_chimera(std::string blastxFile, std::string outDir) {
     currLineVec = getLineVec(currLine);
     pident = std::stod(currLineVec[5]);
     qcov = getQcov(currLineVec);
-    
+
     if (pident < PIDENT_CUTOFF || qcov < LENGTH_CUTOFF) {
       continue;
     }
@@ -233,7 +233,7 @@ void detect_chimera(std::string blastxFile, std::string outDir) {
   if (seqG) {
     seqG = checkBlock(qryB, true, fileCut, fileInfo);
   }
-  
+
   fileBlastx.close();
   fileCut.close();
   fileInfo.close();
@@ -310,4 +310,3 @@ void removeChimera(std::string transIn, std::string transOut,
   */
   fastaHashTable.dump(filtTrans);
 }
-

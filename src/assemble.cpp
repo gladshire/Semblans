@@ -48,7 +48,7 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
   for (auto seqFilePath : cfgSeqsInt) {
     seqsInterest.push_back(seqFilePath.first);
   }
-  
+
   uintmax_t ram_b = (uintmax_t)stoi(ram_gb) * 1000000000;
   std::pair<std::string, std::string> currSraIn;
   std::pair<std::string, std::string> currSraUmap;
@@ -61,7 +61,7 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
   uintmax_t lenReadsHash1;
   uintmax_t numBytesReads2;
   uintmax_t lenReadsHash2;
-  
+
   sequence currSeq;
   std::string currHead;
   std::string currSeqData;
@@ -92,7 +92,7 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
       if (!dispOutput) {
         procRunning = true;
         std::thread seqIndex(progressAnim, "    Now creating mapping index for \"" + currSeqFilePrefix + "\"", logFile);
-        
+
         star_index(std::vector<std::string>(1, seqsInterest[i]), fastaIndex, threads,
                    dispOutput, logFile);
 
@@ -104,12 +104,12 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
 
         star_index(std::vector<std::string>(1, seqsInterest[i]), fastaIndex, threads,
                    dispOutput, logFile);
-        
+
       }
       dummyTrans.makeCheckpoint(currSeqFilePrefix + ".idx.iso");
     }
-  
-    uintmax_t numReads; 
+
+    uintmax_t numReads;
     uintmax_t numMapped;
     int num1k;
     float percentMapped;
@@ -164,7 +164,7 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
       }
       filePrefix1 = sra.get_file_prefix().first;
       filePrefix2 = sra.get_file_prefix().second;
-      
+
       if (i > 0) {
         currSraIn.first = outDir + "/" + sra.get_file_prefix().first + ".unmapped.fq";
         currSraIn.second = outDir + "/" + sra.get_file_prefix().second + ".unmapped.fq";
@@ -172,10 +172,10 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
 
       sraRunsIn.push_back(currSraIn);
 
-      // Define name of STAR mapping output file      
+      // Define name of STAR mapping output file
       if (!sra.is_paired()) {
         fastaMap = std::string(dummyTrans.get_trans_path_trinity().parent_path().c_str()) + "/" +
-                     std::string(fs::path(currSeqFilePrefix.c_str()).stem().c_str()) + "_" + 
+                     std::string(fs::path(currSeqFilePrefix.c_str()).stem().c_str()) + "_" +
                      sra.get_file_prefix().first + "_mapping/";
       }
       else {
@@ -208,22 +208,22 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
 
       // The STAR mapping run has produced a text file 'unmapped_names.txt', which lists all the reads in
       // the SRA run that did NOT map to the index.
-      
+
       // Create sequence hash tables for rapid accession of each read by name
       // Then iterate through all unmapped reads listed in 'unmapped_names.txt', and maintain two sequence hash tables:
-      
+
       //   Unmapped hash table - will contain all reads that did not map to the STAR index (updated after each index)
       //     Mapped hash table - will contain all reads that mapped to the STAR index
       numBytesReads1 = fs::file_size(currSraIn.first.c_str());
       lenReadsHash1 = numBytesReads1 / 160;
-      
+
       procRunning = true;
       std::thread constructHash(progressAnim, "      Creating hash table from forward-ended reads ", logFile);
       seqHash readHashTable(lenReadsHash1, fs::path(currSraIn.first.c_str()), ram_b);
       procRunning = false;
       constructHash.join();
       numReads = readHashTable.getNumItems();
-      
+
       seqHash mappedHash(lenReadsHash1);
 
       logOutput("      Splitting reads into mapped and unmapped\n", logFile);
@@ -236,7 +236,7 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
       }
       std::string readName;
       numMapped = 0;
-      num1k = 0; 
+      num1k = 0;
       while (std::getline(bamMapFile, currLine)) {
         readName = currLine.substr(0, currLine.find("\t"));
         if (!mappedHash.inHashTable(readName)) {
@@ -269,7 +269,7 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
       readHashTable.dump(outDir + "/" + filePrefix1 + ".unmapped.fq");
       procRunning = false;
       dumpHash.join();
-      
+
       readHashTable.clear();
       mappedHash.clear();
       bamMapFile.close();
@@ -280,13 +280,13 @@ void isolateReads(const std::vector<SRA> & sras, std::string threads,
         logOutput("\n", logFile);
         numBytesReads2 = fs::file_size(currSraIn.second.c_str());
         lenReadsHash2 = numBytesReads2 / 160;
-        
+
         procRunning = true;
         std::thread constructHash(progressAnim, "      Creating hash table from reverse-ended reads ", logFile);
         seqHash readHashTable(lenReadsHash2, fs::path(currSraIn.second.c_str()), ram_b);
         procRunning = false;
         constructHash.join();
-        numReads = readHashTable.getNumItems();     
+        numReads = readHashTable.getNumItems();
 
         seqHash mappedHash(lenReadsHash2);
 
@@ -483,7 +483,7 @@ std::vector<std::string> run_trinity_bulk(std::map<std::string, std::vector<SRA>
               else {
                 currTrinIn.first = sra.get_sra_path_corr_fix().first.c_str();
                 currTrinIn.second = sra.get_sra_path_corr_fix().second.c_str();
-              }  
+              }
             }
             else {
               currTrinIn.first = sra.get_sra_path_trim_p().first.c_str();
@@ -494,7 +494,7 @@ std::vector<std::string> run_trinity_bulk(std::map<std::string, std::vector<SRA>
             currTrinIn.first = sra.get_sra_path_for_filt().first.c_str();
             currTrinIn.second = sra.get_sra_path_for_filt().second.c_str();
           }
-        } 
+        }
       }
       else {
         currTrinIn.first = sra.get_sra_path_raw().first.c_str();
@@ -506,7 +506,7 @@ std::vector<std::string> run_trinity_bulk(std::map<std::string, std::vector<SRA>
       outDir = fs::path(currTrinIn.first).parent_path().c_str();
       inDir = sra.get_sra_path_orep_filt().first.parent_path().c_str();
     }
-  
+
     // Perform assembly for all reads
     if (assembAllSeqs) {
       logOutput("\n  Now assembling all reads", logFile);
@@ -579,7 +579,7 @@ int main(int argc, char * argv[]) {
   bool assembleOthers;
   bool assembleAllSeqs;
   bool compressFiles= false;
- 
+
   if (argc == 11) {
     threads = argv[6];
     ram_gb = argv[7];
@@ -600,7 +600,7 @@ int main(int argc, char * argv[]) {
       readFilesLeft = getCommaSepStrings(leftReads);
       readFilesRight = getCommaSepStrings(rightReads);
       outDir = std::string((fs::canonical(fs::path(outDir.c_str())).parent_path()).c_str()) + "/" +
-               std::string((fs::canonical(fs::path(outDir.c_str())).filename()).c_str()) + "/";      
+               std::string((fs::canonical(fs::path(outDir.c_str())).filename()).c_str()) + "/";
       logFilePath = outDir + "log.txt";
 
       make_proj_space(outDir, "assembly");
@@ -620,14 +620,14 @@ int main(int argc, char * argv[]) {
         }
         sras.push_back(SRA(readFilesLeft[i], readFilesRight[i], outDir, compressFiles, true));
       }
-            
+
     }
     else {
       cfgIni = make_ini_map(argv[1]);
       cfgIniGen = cfgIni["General"];
       logFilePath = std::string((fs::canonical(cfgIniGen["log_file"].c_str()).parent_path() /
                                 fs::path(cfgIniGen["log_file"].c_str()).filename()).c_str());
-        
+
       if (!seqsInterest.empty()) {
         for (auto seqFilePath : seqsInterest) {
           if (!fs::exists(fs::path(seqFilePath.c_str()))) {
@@ -648,15 +648,15 @@ int main(int argc, char * argv[]) {
         assembleInterest = false;
         assembleOthers = false;
       }
-    
+
       // If all assembly options are disabled, exit
       if (!assembleInterest && !assembleOthers && !assembleAllSeqs) {
         logOutput("No assembly option specified. Have a nice day!\n", logFilePath);
         exit(1);
       }
-    
+
       bool compressFiles = false;
-    
+
       // Create file space
       if (entirePipeline) {
         make_proj_space(cfgIni, "all");
@@ -678,7 +678,7 @@ int main(int argc, char * argv[]) {
       else {
         sras = get_sras(cfgIni, dispOutput, compressFiles, logFilePath);
       }
-    
+
       for (auto fqFileName : cfgIni.at("Local files")) {
         localDataFiles.push_back(fqFileName.first);
       }
@@ -747,14 +747,14 @@ int main(int argc, char * argv[]) {
       currSraGroup.clear();
     }
     for (auto assemblyGroup : cfgIniAssemblyGroups) {
-      // Get group name and group array string 
+      // Get group name and group array string
       currGroupName = assemblyGroup.first;
       currIniArrStr = assemblyGroup.second;
 
       // Remove all whitespace from string
       currIniArrStr.erase(remove_if(currIniArrStr.begin(), currIniArrStr.end(), isspace),
                           currIniArrStr.end());
-      
+
       // Tokenize array string into vector of strings
       iniStrArray = getStrArray(currIniArrStr, ",");
 
@@ -789,7 +789,7 @@ int main(int argc, char * argv[]) {
                     logFilePath);
         }
       }
-      
+
         // Emplace current SRA group into map
       sraGroups.emplace(currGroupName, currSraGroup);
       currSraGroup.clear();
@@ -810,7 +810,7 @@ int main(int argc, char * argv[]) {
     }
     // Perform assembly with Trinity
     if (configPath != "null") {
-      outFiles = run_trinity_bulk(sraGroups, threads, ram_gb, assembleInterest, 
+      outFiles = run_trinity_bulk(sraGroups, threads, ram_gb, assembleInterest,
                                   assembleOthers, assembleAllSeqs, dispOutput,
                                   retainInterFiles, logFilePath, "", "", cfgIni);
     }

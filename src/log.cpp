@@ -6,7 +6,7 @@
 void replaceChar(std::string inFilePath, char oldChar, char newChar) {
   std::ifstream inLogFile(inFilePath);
   std::ofstream outLogFile(inFilePath + ".tmp");
-   
+
   char currChar;
   char lastChar;
   while (inLogFile.get(currChar)) {
