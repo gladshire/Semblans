@@ -85,7 +85,7 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool dispOutput,
         // NO single spots
         paired = false;
       }
-      else if (!strcmp(parse_node->value(), "PAIRED") && spots_m != spots_m) {
+      else if (!strcmp(parse_node->value(), "PAIRED") && spots_m != spots) {
         // There are single spots
         paired = true;
       }
