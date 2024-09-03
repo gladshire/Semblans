@@ -33,7 +33,13 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool dispOutput,
   }
 
   // Download temp XML file for SRA accession, containing information for object members
-  std::string curlCmdStr = "curl -s -o .tmp" + std::to_string(num) + ".xml \"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?rettype=runinfo&db=sra&id=\"" +
+  std::string temp_sra_xml_file_name = (".tmp" + std::to_string(num) + ".xml");
+
+  if (fs::exists(temp_sra_xml_file_name)) {
+    fs::remove(temp_sra_xml_file_name);
+  }
+
+  std::string curlCmdStr = "curl -s -o " + temp_sra_xml_file_name + " \"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?rettype=runinfo&db=sra&id=\"" +
                            sra_accession + "&api_key=" + apiKey;
   int result;
   int numRetries = 0;
@@ -41,8 +47,8 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool dispOutput,
 
   logOutput("\nObtaining information for accession: " + sra_accession + "\n", logFile);
   while (true) {
-    // After 5 unsuccessful retries, break and exit
-    if (numRetries == 5) {
+    // After 10 unsuccessful retries, break and exit
+    if (numRetries == 10) {
       logOutput("\n  ERROR: Could not retrieve accession \"" + sra_accession + "\"\n", logFile);
       this->sra_accession = "FAILURE";
       break;
@@ -52,7 +58,7 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool dispOutput,
 
     // Parse XML file for object information
     try {
-      rapidxml::file<> sra_xml((".tmp" + std::to_string(num) + ".xml").c_str());
+      rapidxml::file<> sra_xml(temp_sra_xml_file_name.c_str());
       rapidxml::xml_document<> sra_doc;
       sra_doc.parse<0>(sra_xml.data());
       rapidxml::xml_node<> * parse_node = sra_doc.first_node()->first_node()->first_node();
