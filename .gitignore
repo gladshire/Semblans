@@ -34,3 +34,6 @@ plant_cdna/*
 project/*
 *.code-workspace
 boost_1*/*
+*.zip
+*.gz
+*.xz

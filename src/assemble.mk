@@ -32,5 +32,5 @@ llist.o: llist.cpp llist.h
 seq_hash.o: seq_hash.cpp seq_hash.h
 	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c seq_hash.cpp $(LIBS)
 clean:
-	rm assemble.o
-	rm trinity_wrap.o
+	rm -f assemble.o
+	rm -f trinity_wrap.o
