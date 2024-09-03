@@ -1,6 +1,7 @@
 MAKE = make -C./src -f
 #$(info $$HOME is [${HOME}])
 all:
+	mkdir -p bin
 	$(MAKE) preprocess.mk
 	#$(MAKE) preprocess.mk clean
 	$(MAKE) assemble.mk
