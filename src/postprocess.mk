@@ -46,4 +46,4 @@ panther_score.o: panther_score.cpp panther_score.h
 annotate.o: annotate.cpp annotate.h
 	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c annotate.cpp $(LIBS)
 clean:
-	rm $(OBJ_LINK)
+	rm -f $(OBJ_LINK)

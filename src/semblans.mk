@@ -19,8 +19,8 @@ sra.o: sra.cpp sra.h
 transcript.o: transcript.cpp transcript.h
 	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c transcript.cpp $(LIBS)
 clean:
-	rm semblans.o
-	rm print_info.o
-	rm ini_parse.o
-	rm sra.o
-	rm transcript.o
+	rm -f semblans.o
+	rm -f print_info.o
+	rm -f ini_parse.o
+	rm -f sra.o
+	rm -f transcript.o

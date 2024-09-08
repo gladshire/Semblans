@@ -42,11 +42,11 @@ llist.o: llist.cpp llist.h
 seq_hash.o: seq_hash.cpp seq_hash.h
 	$(CC) $(CFLAGS) $(INCLUDE_PATH) -c seq_hash.cpp $(LIBS)
 clean:
-	rm preprocess.o
-	rm fastqc_wrap.o
-	rm rcorr_wrap.o
-	rm rem_unfixable.o
-	rm trimm_wrap.o
-	rm kraken_wrap.o
-	rm rem_overrep.o
-	rm print_info.o
+	rm -f preprocess.o
+	rm -f fastqc_wrap.o
+	rm -f rcorr_wrap.o
+	rm -f rem_unfixable.o
+	rm -f trimm_wrap.o
+	rm -f kraken_wrap.o
+	rm -f rem_overrep.o
+	rm -f print_info.o

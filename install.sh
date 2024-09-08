@@ -34,7 +34,7 @@ else
 fi
 
 # Prepare Semblans directory structure
-rm -rf ./include ./lib ./external ./data
+rm -rf ./include ./lib ./external ./data ./bin
 
 mkdir -p ./include
 mkdir -p ./lib
@@ -50,6 +50,12 @@ fi
 
 echo "Now installing required libraries"
 
+#
+# ToDo: Miles, boost failed to build for me because of this:
+#       "--with-python=python3"    <-- with Python 3.12 as my default
+#                                      Python install.
+#       "--with-python=python3.10" <-- worked fine.
+#
 # Install boost libraries
 if  [ ! -f ./lib/libboost_filesystem.a ] ||
     [ ! -f ./lib/libboost_regex.a ] ||
@@ -59,8 +65,14 @@ if  [ ! -f ./lib/libboost_filesystem.a ] ||
 	wget -q https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.gz
 	tar -xf boost_1_81_0.tar.gz
 	cd boost_1_81_0 || return 1
-	./bootstrap.sh --prefix=../ --with-python=python3
+	{
+    ./bootstrap.sh --prefix=../ --with-python=python3.10
 	./b2 install cxxflags="-std=c++11" link=static
+    } ||
+    {
+    ./bootstrap.sh --prefix=../ --with-python=python3
+    ./b2 install cxxflags="-std=c++11" link=static
+    }
 	mv LICENSE_1_0.txt ../include/boost/
 	cd ..
 	rm -rf boost_1_81_0*
@@ -85,7 +97,8 @@ wget -q https://github.com/madmurphy/libconfini/releases/download/1.16.4/libconf
 tar -xf libconfini-1.16.4-x86_64-bin.tar.xz
 mkdir -p ./include/libconfini
 mv ./usr/include/* ./include/libconfini/
-mv ./usr/lib/* ./lib/
+mkdir -p ./lib/pkgconfig
+mv ./usr/lib/pkgconfig/* ./lib/pkgconfig/
 mv ./usr/share/doc/libconfini/AUTHORS ./include/libconfini/
 mv ./usr/share/doc/libconfini/COPYING ./include/libconfini/
 rm libconfini-1.16.4-x86_64-bin.tar.xz
@@ -95,7 +108,8 @@ rm -rf ./usr
 echo " Installing libcurl library ..."
 wget -q https://curl.se/download/curl-8.1.2.tar.gz
 tar -xf curl-8.1.2.tar.gz
-mv ./curl-8.1.2/include/curl ./include/
+mkdir -p ./include/curl
+mv ./curl-8.1.2/include/curl/* ./include/curl
 mv ./curl-8.1.2/COPYING ./include/curl
 rm -rf curl-8.1.2
 rm curl-8.1.2.tar.gz
