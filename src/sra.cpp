@@ -35,9 +35,11 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool dispOutput,
   // Download temp XML file for SRA accession, containing information for object members
   std::string temp_sra_xml_file_name = (".tmp" + std::to_string(num) + ".xml");
 
-  if (fs::exists(temp_sra_xml_file_name)) {
-    fs::remove(temp_sra_xml_file_name);
-  }
+  // Remove the downloaded temporary XML file.
+  // system("rm -f .tmp*.xml");
+  // if (fs::exists(temp_sra_xml_file_name)) {
+  //   fs::remove(temp_sra_xml_file_name);
+  // }
 
   std::string curlCmdStr = "curl -s -o " + temp_sra_xml_file_name + " \"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?rettype=runinfo&db=sra&id=\"" +
                            sra_accession + "&api_key=" + apiKey;
@@ -45,8 +47,9 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool dispOutput,
   int numRetries = 0;
   std::string platform;
 
-  logOutput("\nObtaining information for accession: " + sra_accession + "\n", logFile);
+  logOutput("\nObtaining information for accession: " + sra_accession + " :: " +apiKey+ "\n", logFile);
   while (true) {
+    std::this_thread::sleep_for(queryLim);
     // After 10 unsuccessful retries, break and exit
     if (numRetries == 10) {
       logOutput("\n  ERROR: Could not retrieve accession \"" + sra_accession + "\"\n", logFile);
@@ -54,7 +57,8 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool dispOutput,
       break;
     }
     system(curlCmdStr.c_str());
-    std::this_thread::sleep_for(queryLim);
+
+    logOutput("\nObtaining information for accession: " + sra_accession + " :: " +std::to_string(numRetries)+ " :: " +std::to_string(queryLim.count())+ "\n", logFile);
 
     // Parse XML file for object information
     try {
@@ -62,8 +66,23 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool dispOutput,
       rapidxml::xml_document<> sra_doc;
       sra_doc.parse<0>(sra_xml.data());
       rapidxml::xml_node<> * parse_node = sra_doc.first_node()->first_node()->first_node();
-      // Set object SRA accession number
-      this->sra_accession = sra_accession;
+
+      // Get the SRA accession from the XML file
+      while(strcmp(parse_node->name(), "Run")) {
+        parse_node = parse_node->next_sibling();
+      }
+      auto sra_accession_retrieved = std::string(parse_node->value());
+
+      if (sra_accession_retrieved != sra_accession) {
+        numRetries++;
+        queryLim += queryLim;
+        continue;
+      } else {
+        // Set object SRA accession number
+        this->sra_accession = sra_accession_retrieved;
+      }
+
+      logOutput("\nRetrieved: " + sra_accession_retrieved + "\n", logFile);
 
       // Set object member for number of spots read
       while(strcmp(parse_node->name(), "spots")) {
@@ -129,11 +148,11 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool dispOutput,
     }
     catch (const std::runtime_error & e) {
       numRetries++;
-      queryLim *= 2;
+      queryLim += queryLim;
     }
     catch (const rapidxml::parse_error & e) {
       numRetries++;
-      queryLim *= 2;
+      queryLim += queryLim;
     }
   }
   if (this->sra_accession != "FAILURE") {

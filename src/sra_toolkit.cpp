@@ -22,7 +22,7 @@ std::vector<SRA> get_sras(const INI_MAP &iniFile, bool dispOutput, bool compress
       }
       i++;
     }
-    system("rm .tmp*.xml");
+    system("rm -f .tmp*.xml");
   }
   return sras;
 }

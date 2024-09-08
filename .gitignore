@@ -37,3 +37,4 @@ boost_1*/*
 *.zip
 *.gz
 *.xz
+.vscode/*
