@@ -97,6 +97,7 @@ wget -q https://github.com/madmurphy/libconfini/releases/download/1.16.4/libconf
 tar -xf libconfini-1.16.4-x86_64-bin.tar.xz
 mkdir -p ./include/libconfini
 mv ./usr/include/* ./include/libconfini/
+mv ./usr/lib/* ./lib/
 mkdir -p ./lib/pkgconfig
 mv ./usr/lib/pkgconfig/* ./lib/pkgconfig/
 mv ./usr/share/doc/libconfini/AUTHORS ./include/libconfini/
