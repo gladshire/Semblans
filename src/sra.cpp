@@ -33,31 +33,56 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool dispOutput,
   }
 
   // Download temp XML file for SRA accession, containing information for object members
-  std::string curlCmdStr = "curl -s -o .tmp" + std::to_string(num) + ".xml \"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?rettype=runinfo&db=sra&id=\"" +
+  std::string temp_sra_xml_file_name = (".tmp" + std::to_string(num) + ".xml");
+
+  // Remove the downloaded temporary XML file.
+  // system("rm -f .tmp*.xml");
+  // if (fs::exists(temp_sra_xml_file_name)) {
+  //   fs::remove(temp_sra_xml_file_name);
+  // }
+
+  std::string curlCmdStr = "curl -s -o " + temp_sra_xml_file_name + " \"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?rettype=runinfo&db=sra&id=\"" +
                            sra_accession + "&api_key=" + apiKey;
   int result;
   int numRetries = 0;
   std::string platform;
 
-  logOutput("\nObtaining information for accession(s)\n", logFile);
+  logOutput("\nObtaining information for accession: " + sra_accession + " :: " +apiKey+ "\n", logFile);
   while (true) {
-    // After 5 unsuccessful retries, break and exit
-    if (numRetries == 5) {
+    std::this_thread::sleep_for(queryLim);
+    // After 10 unsuccessful retries, break and exit
+    if (numRetries == 10) {
       logOutput("\n  ERROR: Could not retrieve accession \"" + sra_accession + "\"\n", logFile);
       this->sra_accession = "FAILURE";
       break;
     }
     system(curlCmdStr.c_str());
-    std::this_thread::sleep_for(queryLim);
+
+    logOutput("\nObtaining information for accession: " + sra_accession + " :: " +std::to_string(numRetries)+ " :: " +std::to_string(queryLim.count())+ "\n", logFile);
 
     // Parse XML file for object information
     try {
-      rapidxml::file<> sra_xml((".tmp" + std::to_string(num) + ".xml").c_str());
+      rapidxml::file<> sra_xml(temp_sra_xml_file_name.c_str());
       rapidxml::xml_document<> sra_doc;
       sra_doc.parse<0>(sra_xml.data());
       rapidxml::xml_node<> * parse_node = sra_doc.first_node()->first_node()->first_node();
-      // Set object SRA accession number
-      this->sra_accession = sra_accession;
+
+      // Get the SRA accession from the XML file
+      while(strcmp(parse_node->name(), "Run")) {
+        parse_node = parse_node->next_sibling();
+      }
+      auto sra_accession_retrieved = std::string(parse_node->value());
+
+      if (sra_accession_retrieved != sra_accession) {
+        numRetries++;
+        queryLim += queryLim;
+        continue;
+      } else {
+        // Set object SRA accession number
+        this->sra_accession = sra_accession_retrieved;
+      }
+
+      logOutput("\nRetrieved: " + sra_accession_retrieved + "\n", logFile);
 
       // Set object member for number of spots read
       while(strcmp(parse_node->name(), "spots")) {
@@ -99,15 +124,18 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool dispOutput,
       while(strcmp(parse_node->name(), "LibraryLayout")) {
         parse_node = parse_node->next_sibling();
       }
-      if (!strcmp(parse_node->value(), "PAIRED") && spots_m == 0) {
-        // NO single spots
+      auto lib_layout = std::string(parse_node->value());
+
+      if (lib_layout != "PAIRED") {
+        // single spots
         paired = false;
-      }
-      else if (!strcmp(parse_node->value(), "PAIRED") && spots_m != spots_m) {
-        // There are single spots
+      } else if (spots_m == 0) {
+        // only single spots
+        paired = false;
+      } else if (spots_m != spots) {
+        // there are additional single spots
         paired = true;
-      }
-      else {
+      } else {
         // NO single spots
         paired = true;
       }
@@ -138,11 +166,11 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool dispOutput,
     }
     catch (const std::runtime_error & e) {
       numRetries++;
-      queryLim *= 2;
+      queryLim += queryLim;
     }
     catch (const rapidxml::parse_error & e) {
       numRetries++;
-      queryLim *= 2;
+      queryLim += queryLim;
     }
   }
   if (this->sra_accession != "FAILURE") {
@@ -228,7 +256,7 @@ SRA::SRA(std::string sra_accession, INI_MAP cfgIni, bool dispOutput,
 SRA::SRA(std::string fileName1, std::string fileName2, INI_MAP cfgIni, bool compressedFiles,
          std::string logFile) {
 
-  
+
   std::string outDir(fs::canonical(fs::path(cfgIni["General"]["output_directory"].c_str())).c_str());
   std::string projName(cfgIni["General"]["project_name"]);
   std::string projPath((fs::path(outDir.c_str()) / fs::path(projName.c_str())).c_str());
@@ -257,10 +285,10 @@ SRA::SRA(std::string fileName1, std::string fileName2, INI_MAP cfgIni, bool comp
   else {
     compressExt = "";
   }
- 
+
   std::ifstream sraFile1;
   std::ifstream sraFile2;
-  std::streamsize s; 
+  std::streamsize s;
 
   uintmax_t numReads1 = 0;
   uintmax_t numReads2 = 0;
@@ -279,7 +307,7 @@ SRA::SRA(std::string fileName1, std::string fileName2, INI_MAP cfgIni, bool comp
   while (!sraFile1.eof() && !sraFile1.good()) {
     sraFile1.read(&buffer[0], 1000000000);
     s = sraFile1.gcount();
-    
+
     nlPos = &buffer[0];
     inFileL = &buffer[0] + s;
     while (nlPos != inFileL) {
@@ -373,10 +401,10 @@ SRA::SRA(std::string fileName1, std::string fileName2, std::string outDir, bool 
   else {
     compressExt = "";
   }
- 
+
   std::ifstream sraFile1;
   std::ifstream sraFile2;
-  std::streamsize s; 
+  std::streamsize s;
 
   uintmax_t numReads1 = 0;
   uintmax_t numReads2 = 0;
@@ -395,7 +423,7 @@ SRA::SRA(std::string fileName1, std::string fileName2, std::string outDir, bool 
   while (!sraFile1.eof() && !sraFile1.good()) {
     sraFile1.read(&buffer[0], 1000000000);
     s = sraFile1.gcount();
-    
+
     nlPos = &buffer[0];
     inFileL = &buffer[0] + s;
     while (nlPos != inFileL) {
@@ -451,7 +479,7 @@ SRA::SRA(std::string fileName1, std::string fileName2, std::string outDir, bool 
       fastqc_dir_2_2 = (outDir + stepDirs[5] + fileBase2 + "/" + fileBase2).c_str();
       sra_path_orep_filt_2 = (outDir + stepDirs[6] + fileBase2 + ".orep.filt.fq" + compressExt).c_str();
     }
-  } 
+  }
 }
 
 // Copy constructor for SRA object
