@@ -64,15 +64,14 @@ if  [ ! -f ./lib/libboost_filesystem.a ] ||
 	echo "  Installing Boost libraries ..."
 	wget -q https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.gz
 	tar -xf boost_1_81_0.tar.gz
-	cd boost_1_81_0 || return 1
-	{
-    ./bootstrap.sh --prefix=../ --with-python=python3.10
+	cd boost_1_81_0 || return   1
+	# {
+  ./bootstrap.sh --prefix=../ --with-python=python3
 	./b2 install cxxflags="-std=c++11" link=static
-    } ||
-    {
-    ./bootstrap.sh --prefix=../ --with-python=python3
-    ./b2 install cxxflags="-std=c++11" link=static
-    }
+  # } || {
+  #   ./bootstrap.sh --prefix=../ --with-python=python3.10
+  #   ./b2 install cxxflags="-std=c++11" link=static
+  # }
 	mv LICENSE_1_0.txt ../include/boost/
 	cd ..
 	rm -rf boost_1_81_0*
@@ -96,8 +95,8 @@ echo "  Installing libconfini library ..."
 wget -q https://github.com/madmurphy/libconfini/releases/download/1.16.4/libconfini-1.16.4-x86_64-bin.tar.xz
 tar -xf libconfini-1.16.4-x86_64-bin.tar.xz
 mkdir -p ./include/libconfini
-mv ./usr/include/* ./include/libconfini/
-mv ./usr/lib/* ./lib/
+cp -rf ./usr/include/* ./include/libconfini/
+cp -rf ./usr/lib/* ./lib/
 mkdir -p ./lib/pkgconfig
 mv ./usr/lib/pkgconfig/* ./lib/pkgconfig/
 mv ./usr/share/doc/libconfini/AUTHORS ./include/libconfini/
@@ -140,7 +139,7 @@ fi
 # Install PANTHER HMM Scoring components
 if $install_panther ; then
 	if [ ! -e "./external/pantherScore/pantherScore2.2.pl" ]; then
-  		echo "Downloading PANTHER components ..."
+  	echo "Downloading PANTHER components ..."
 		wget -q http://data.pantherdb.org/ftp/hmm_scoring/current_release/PANTHER18.0_hmmscoring.tgz
 		tar -xzf PANTHER*.tgz
 		mv target panther_db/
