@@ -1,0 +1,14 @@
+name: semblans
+services:
+  semblans:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: semblans
+    image: ubuntu:22.04
+    networks:
+      default: null
+    entrypoint: ["semblans"]
+networks:
+  default:
+    name: semblans
