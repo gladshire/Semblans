@@ -33,7 +33,7 @@ sudo apt install bowtie2 jellyfish salmon samtools python3-numpy
 
 The easiest way to install Semblans is to download the latest the pre-built binaries [here](https://github.com/gladshire/Semblans/releases/tag/v1.0.1).
 
-If instead the user wishes to build from source, they must clone this repository, navigate to the Semblans root directory and then call: 
+If instead the user wishes to build from source, they must clone this repository, navigate to the Semblans root directory and then call:
 
 ```bash
 ./install.sh
@@ -60,10 +60,10 @@ semblans \
 ```
 Some users may experience issues, particularly during the transcript assembly phase during Trinity. Common errors and solutions are hosted on our GitHub's [wiki page](https://github.com/gladshire/Semblans/wiki/Common-Errors-&-Solutions#issues-at-trinity-stage). As cataloguing these is an ongoing process, we urge users to post an issue on the Semblans repository page detailing their problem if it persists or is otherwise unaddressed by this page.
 
-Reference peptide sets for **postprocess**
+Reference peptide sets (gzipped FASTA) for the **postprocess** step:
 
-[**Ensembl animal reference**](https://www.dropbox.com/scl/fi/n49jm9i1yscrfrsj1dnq8/ensembl_animals.pep.all.fa.gz?rlkey=yemush6bm36wr4fu7dpe8h5e0&st=98kgb83l&dl=1)
+**Ensembl animal reference** (3.1 GiB) [[Option 1](https://uofi.box.com/shared/static/0rlp6q0u5uvc161mzbdr3c0xoiti63sk) | [Option 2](https://www.dropbox.com/scl/fi/n49jm9i1yscrfrsj1dnq8/ensembl_animals.pep.all.fa.gz?rlkey=yemush6bm36wr4fu7dpe8h5e0&st=98kgb83l&dl=1)]
 
-[**Ensembl plant reference**](https://www.dropbox.com/scl/fi/hbvtnd9wsiwt8k7gakcmq/ensembl_plant.pep.all.fa.gz?rlkey=8cp9sn5wrt9uu4vc2pmg8xvin&st=1gesuqq0&dl=1)
+**Ensembl fungi reference** (4.7 GiB) [[Option 1](https://uofi.box.com/shared/static/qc4nmun4apb0pik5fqxukn4qvn3wm943) | [Option 2](https://www.dropbox.com/scl/fi/8as6tci331utcrqrl7txz/ensembl_fungi.pep.all.fa.gz?rlkey=eyhsv35lelnao5xgd7s9dy51e&st=oc9dz9s6&dl=1)]
 
-[**Ensembl fungi reference**](https://www.dropbox.com/scl/fi/8as6tci331utcrqrl7txz/ensembl_fungi.pep.all.fa.gz?rlkey=eyhsv35lelnao5xgd7s9dy51e&st=oc9dz9s6&dl=1)
+**Ensembl plant reference** (2.1 GiB) [[Option 1](https://uofi.box.com/shared/static/lvg7x2qrxvg8hfcmue9xv4y9t1rgfb48) | [Option 2](https://www.dropbox.com/scl/fi/hbvtnd9wsiwt8k7gakcmq/ensembl_plant.pep.all.fa.gz?rlkey=8cp9sn5wrt9uu4vc2pmg8xvin&st=1gesuqq0&dl=1)]
