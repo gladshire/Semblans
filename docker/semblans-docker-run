@@ -19,4 +19,4 @@ docker run \
 --user "$(id -u):$(id -g)" \
 --volume "$PWD:$PWD" \
 --workdir "$PWD" \
-semblans:latest "$@"
+ghcr.io/karolisr/semblans:latest "$@"
