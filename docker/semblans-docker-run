@@ -10,4 +10,13 @@ set -o errtrace
 # trap 'echo Error at line: $LINENO' ERR
 ####################################################
 
-docker run --rm --interactive --tty semblans:latest "$@"
+docker run \
+--rm \
+--interactive \
+--tty \
+--volume /etc/passwd:/etc/passwd:ro \
+--volume /etc/group:/etc/group:ro \
+--user "$(id -u):$(id -g)" \
+--volume "$PWD:$PWD" \
+--workdir "$PWD" \
+semblans:latest "$@"
