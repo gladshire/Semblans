@@ -6,7 +6,7 @@ Author: Miles Woodcock-Girard
 
 Semblans is a tool that enables the automatic assembly of *de novo* transcriptomes for non-model organisms.
 
-## The easiest way to install Semblans is to download the latest the pre-built binaries [here](https://github.com/gladshire/Semblans/releases/tag/v1.0.1)
+## The easiest way to install Semblans is to download the latest the pre-built binaries [here](https://github.com/gladshire/Semblans/releases)
 
 Through the integration of several external packages and the leveraging of C++ data streaming performance, Semblans streamlines the necessary pre-processing, quality control, assembly, and post-assembly steps, allowing a hands-off assembly process without loss to versatility. The following diagram shows a graphical workflow of the pipeline:
 
@@ -31,7 +31,7 @@ sudo apt install bowtie2 jellyfish salmon samtools python3-numpy
 
 # Installation
 
-The easiest way to install Semblans is to download the latest the pre-built binaries [here](https://github.com/gladshire/Semblans/releases/tag/v1.0.1).
+The easiest way to install Semblans is to download the latest the pre-built binaries [here](https://github.com/gladshire/Semblans/releases).
 
 If instead the user wishes to build from source, they must clone this repository, navigate to the Semblans root directory and then call:
 
