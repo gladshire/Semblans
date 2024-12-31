@@ -8,7 +8,7 @@ Semblans is a tool that enables the automatic assembly of *de novo* transcriptom
 
 ## The easiest way to install Semblans is via Docker, or to download the latest the pre-built binaries [here](https://github.com/gladshire/Semblans/releases)
 
-Through the integration of several external packages and the leveraging of C++ data streaming performance, Semblans streamlines the necessary pre-processing, quality control, assembly, and post-assembly steps, allowing a hands-off assembly process without loss to versatility. The following diagram shows a graphical workflow of the pipeline:
+Through the integration of several external packages and the leveraging of C++ data streaming performance, Semblans streamlines the necessary pre-processing, quality control, assembly, and post-assembly steps, allowing a hands-off assembly process without loss to versatility. The following diagram shows a graphical workflow of the pipeline. The reference proteome has been omitted for simplicity, but is utilized by Diamond during the BLASTX / BLASTP steps of postprocess:
 
 ![](https://live.staticflickr.com/65535/54238413023_f9215a0ee1_o.jpg)
 
