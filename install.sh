@@ -66,7 +66,8 @@ if  [ ! -f ./lib/libboost_filesystem.a ] ||
     tar -xf boost_1_81_0.tar.gz
     cd boost_1_81_0 || return   1
     # {
-    ./bootstrap.sh --prefix=../ --with-python=python3
+    ./bootstrap.sh --prefix=../ --with-python=python3 \
+                   --with-libraries=filesystem,iostreams,locale,regex,system
     ./b2 install cxxflags="-std=c++11" link=static
   # } || {
   #   ./bootstrap.sh --prefix=../ --with-python=python3.10
