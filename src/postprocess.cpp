@@ -110,7 +110,7 @@ void blastxBulk(const std::vector<transcript> & transVec, std::string threads,
     }
     logOutput("  Now running BLASTX alignment for:\n", logFilePath);
     summarize_sing_trans(trans, logFilePath, 4);
-    currTransIn = trans.get_trans_path_trinity().c_str();
+    currTransIn = trans.get_trans_path_assembly().c_str();
     // Run BlastX
     currBlastDbName = std::string(fs::path(refProteome.c_str()).stem().c_str());
 
@@ -175,7 +175,7 @@ std::vector<std::string> remChimeraBulk(const std::vector<transcript> & transVec
     summarize_sing_trans(trans, logFilePath, 4);
 
 
-    currTransInChim = trans.get_trans_path_trinity().c_str();
+    currTransInChim = trans.get_trans_path_assembly().c_str();
     currTransOutChim = trans.get_trans_path_chimera().c_str();
     currBlastx = trans.get_trans_path_blastx().c_str();
     currTransInfo = trans.get_trans_path_cinfo().c_str();
@@ -229,9 +229,12 @@ void salmonBulk(const std::vector<transcript> & transVec, std::string threads,
     currTransInSalm = trans.get_trans_path_chimera().c_str();
     if (!cfgIni.empty()) {
       if (!ini_get_bool(cfgIniPipeline.at("remove_chimera_reads").c_str(), 0)) {
-        currTransInSalm = trans.get_trans_path_trinity().c_str();
+        currTransInSalm = trans.get_trans_path_assembly().c_str();
       }
-      currTransInfoFileStr = std::string(trans.get_trans_path_trinity().replace_extension(".ti").c_str());
+      currTransInfoFileStr = std::string(trans.get_trans_path_assembly().replace_extension(".ti").c_str());
+
+      std::cout << currTransInfoFileStr << std::endl;
+
       currTransInfoFile.open(currTransInfoFileStr);
       while (getline(currTransInfoFile, currLineInfo)) {
         spacePos = currLineInfo.find(" ");
@@ -348,7 +351,7 @@ std::vector<std::string> corsetBulk(const std::vector<transcript> & transVec, st
     currTransInCors = trans.get_trans_path_chimera().c_str();
     if (!cfgIni.empty()) {
       if (!ini_get_bool(cfgIniPipeline.at("remove_chimera_reads").c_str(), 0)) {
-        currTransInCors = trans.get_trans_path_trinity().c_str();
+        currTransInCors = trans.get_trans_path_assembly().c_str();
       }
     }
     if (trans.get_org_name() == "") {
@@ -480,7 +483,7 @@ std::vector<std::pair<std::string, std::string>> transdecBulk(const std::vector<
     if (!cfgIni.empty()) {
       if (!ini_get_bool(cfgIniPipeline.at("cluster_filtering").c_str(), 0)) {
         if (!ini_get_bool(cfgIniPipeline.at("remove_chimera_reads").c_str(), 0)) {
-          currTransInTD = trans.get_trans_path_trinity().c_str();
+          currTransInTD = trans.get_trans_path_assembly().c_str();
         }
         else {
           currTransInTD = trans.get_trans_path_chimera().c_str();
@@ -731,7 +734,8 @@ int main(int argc, char * argv[]) {
             currPrefix = currPrefix.stem();
           }
           fs::rename(currFile, currFile.parent_path() /
-            fs::path((std::string(currPrefix.c_str()) + ".Trinity.fasta").c_str()));
+            fs::path((std::string(currPrefix.c_str()) + ".fasta").c_str()));
+
           transcript currTrans(fileIter->path().c_str(), cfgIni);
           transVec.push_back(currTrans);
         }

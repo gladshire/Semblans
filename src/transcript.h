@@ -18,6 +18,7 @@ class transcript {
     std::string file_prefix;
     fs::path trans_path_trinity;
     fs::path trans_path_gene_map;
+    fs::path trans_path_assembly;
     fs::path trans_path_blastx;
     fs::path trans_path_ccut;
     fs::path trans_path_cinfo;
@@ -40,6 +41,7 @@ class transcript {
     std::string get_tax_id();
     fs::path get_trans_path_trinity();
     fs::path get_trans_path_gene_map();
+    fs::path get_trans_path_assembly();
     fs::path get_trans_path_blastx();
     fs::path get_trans_path_ccut();
     fs::path get_trans_path_cinfo();

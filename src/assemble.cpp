@@ -421,6 +421,7 @@ std::vector<std::string> run_trinity_bulk(std::map<std::string, std::vector<SRA>
   std::pair<std::string, std::string> currTrinIn;
   std::string inFilePrefix;
   std::string currTrinOutAll;
+  std::string currOutAll;
   std::string currTrinOutInt;
   std::string currTrinOutNon;
   fs::path cpDir;
@@ -466,6 +467,7 @@ std::vector<std::string> run_trinity_bulk(std::map<std::string, std::vector<SRA>
 
     currTrinOutNon = trinOutDir + "/" + inFilePrefix + ".unmapped.Trinity.fasta";
     currTrinOutAll = trinOutDir + "/" + inFilePrefix + ".Trinity.fasta";
+    currOutAll = trinOutDir + "/" + inFilePrefix + ".fasta";
 
     // Iterate over all SRA runs in current assembly group, preparing vectors containing input files for them,
     // as well as their mapped and unmapped read files generated during read isolation/extraction
@@ -518,12 +520,15 @@ std::vector<std::string> run_trinity_bulk(std::map<std::string, std::vector<SRA>
           run_trinity(sraRunsInTrin.at(0), currTrinOutAll, threads, ram_gb, dispOutput, logFile);
         }
         // Make file for entire assembly containing associated SRAs
-        transInfoFileStr = std::string(fs::path(currTrinOutAll.c_str()).replace_extension(".ti").c_str());
+        transInfoFileStr = std::string(fs::path(currOutAll.c_str()).replace_extension(".ti").c_str());
         makeTransInfoFile(sraRunsInTrin, transInfoFileStr);
 
-        outFiles.push_back(currTrinOutAll);
+        // Rename output file to remove .Trinity extension
+	std::rename(currTrinOutAll.c_str(), currOutAll.c_str());
+
+        outFiles.push_back(currOutAll);
         makeGroupCheckpoint(std::string(cpDir.c_str()), sraGroup.first);
-        updateHeaders(currTrinOutAll, sraGroup.first, ram_b);
+        updateHeaders(currOutAll, sraGroup.first, ram_b);
       }
       else {
         logOutput("\n    Global assembly checkpoint found for: " + sraGroup.first, logFile);

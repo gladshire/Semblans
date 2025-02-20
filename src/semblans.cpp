@@ -716,7 +716,7 @@ int main(int argc, char * argv[]) {
       }
       // If running entire assembly without config file, define name of resulting assembly
       if (command == "all") {
-        assembly = outDir + "/assembly/01-Transcript_assembly/" + outPrefix + ".Trinity.fasta";
+        assembly = outDir + "/assembly/01-Transcript_assembly/" + outPrefix + ".fasta";
       }
     }
 
@@ -754,8 +754,10 @@ int main(int argc, char * argv[]) {
     else {
       pathConfig = "null";
 
-      logFilePath = std::string((fs::canonical(fs::path(outDir.c_str()).parent_path()) /
+      logFilePath = std::string((fs::canonical(fs::path(outDir.c_str())) /
                                 "log.txt").c_str());
+
+      std::cout << logFilePath << std::endl;
     }
 
     std::ofstream logFile(logFilePath, std::ios_base::trunc);

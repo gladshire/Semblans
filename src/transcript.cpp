@@ -34,6 +34,8 @@ transcript::transcript(SRA sra) {
   // Define trinity gene map path
   trans_path_gene_map = (projPath + stepDirs[7] + "/" + fileBase + ".Trinity.fasta" +
                          ".gene_trans_map").c_str();
+  // Define general assembly path
+  trans_path_assembly = (projPath + stepDirs[7] + "/" + fileBase + ".fasta").c_str();
   // Define chimera cut file path
   trans_path_ccut = (projPath + stepDirs[8] + "/" + fileBase + ".Trinity.cut").c_str();
   // Define chimera info file path
@@ -71,24 +73,23 @@ transcript::transcript(std::string filename, INI_MAP cfgIni) {
   tax_id = "";
   std::string fileBase(fs::path(filename).filename().stem().stem().c_str());
 
-  //while (fileBase.find(".") != std::string::npos) {
-  //  fileBase = std::string(fs::path(fileBase).stem().c_str());
-  //}
   file_prefix = fileBase;
 
   // Define trinity assembly path
   trans_path_trinity = (projPath + stepDirs[7] + "/" + fileBase + ".Trinity.fasta").c_str();
   // Define trinity gene map path
-  trans_path_gene_map = (projPath + stepDirs[7] + "/" + fileBase + ".Trinity.fasta" +
-                         ".gene_trans_map").c_str();
+  // trans_path_gene_map = (projPath + stepDirs[7] + "/" + fileBase + ".Trinity.fasta" +
+  //                        ".gene_trans_map").c_str();
+  // Define general assembly path
+  trans_path_assembly = (projPath + stepDirs[7] + "/" + fileBase + ".fasta").c_str();
   // Define chimera cut file path
-  trans_path_ccut = (projPath + stepDirs[8] + "/" + fileBase + ".Trinity.cut").c_str();
+  trans_path_ccut = (projPath + stepDirs[8] + "/" + fileBase + ".cut").c_str();
   // Define chimera info file path
-  trans_path_cinfo = (projPath + stepDirs[8] + "/" + fileBase + ".Trinity.info").c_str();
+  trans_path_cinfo = (projPath + stepDirs[8] + "/" + fileBase + ".info").c_str();
   // Define chimera-filtered transcript path
   trans_path_chimera = (projPath + stepDirs[8] + "/" + fileBase + ".chim_filt.fasta").c_str();
   // Define blastx output path
-  trans_path_blastx = (projPath + stepDirs[8] + "/" + fileBase + ".Trinity.blastx").c_str();
+  trans_path_blastx = (projPath + stepDirs[8] + "/" + fileBase + ".blastx").c_str();
   // Define salmon index path
   trans_path_index = (projPath + stepDirs[9] + "/" + fileBase + "_salmon_index").c_str();
   // Define salmon quant path
@@ -114,25 +115,29 @@ transcript::transcript(std::string filename, std::string outDir) {
 
   org_name = "";
   tax_id = "";
-  fs::path filePrefix(fs::path(filename.c_str()).stem().stem());
-  std::string fileBase = std::string(filePrefix.c_str());
+
+  std::string fileBase = std::string(filename.c_str());
+  while (fileBase.find(".") != std::string::npos) {
+    fileBase = std::string(fs::path(fileBase).stem().c_str());
+  }
 
   file_prefix = fileBase;
 
   // Define trinity assembly path
-  //trans_path_trinity = (projPath + stepDirs[7] + "/" + fileBase + ".Trinity.fasta").c_str();
   trans_path_trinity = filename;
   // Define trinity gene map path
   //trans_path_gene_map = (projPath + stepDirs[7] + "/" + fileBase + ".Trinity.fasta" +
   //                       ".gene_trans_map").c_str();
+  // Define general assembly path
+  trans_path_assembly = filename;
   // Define chimera cut file path
-  trans_path_ccut = (outDir + stepDirs[8] + "/" + fileBase + ".Trinity.cut").c_str();
+  trans_path_ccut = (outDir + stepDirs[8] + "/" + fileBase + ".cut").c_str();
   // Define chimera info file path
-  trans_path_cinfo = (outDir + stepDirs[8] + "/" + fileBase + ".Trinity.info").c_str();
+  trans_path_cinfo = (outDir + stepDirs[8] + "/" + fileBase + ".info").c_str();
   // Define chimera-filtered transcript path
   trans_path_chimera = (outDir + stepDirs[8] + "/" + fileBase + ".chim_filt.fasta").c_str();
   // Define blastx output path
-  trans_path_blastx = (outDir + stepDirs[8] + "/" + fileBase + ".Trinity.blastx").c_str();
+  trans_path_blastx = (outDir + stepDirs[8] + "/" + fileBase + ".blastx").c_str();
   // Define salmon index path
   trans_path_index = (outDir + stepDirs[9] + "/" + fileBase + "_salmon_index").c_str();
   // Define salmon quant path
@@ -163,43 +168,57 @@ std::string transcript::get_tax_id() {
   return tax_id;
 }
 
-// Return the path to the Trinity assembly file
+// Return the path to Trinity assembly file
 fs::path transcript::get_trans_path_trinity() {
   return trans_path_trinity;
 }
 
+// Return the path to the Trinity gene_map file
 fs::path transcript::get_trans_path_gene_map() {
   return trans_path_gene_map;
 }
 
+// Return the path to general assembly file (for non-Trinity cases)
+fs::path transcript::get_trans_path_assembly() {
+  return trans_path_assembly;
+}
+
+// Return the path to the chimera cut file
 fs::path transcript::get_trans_path_ccut() {
   return trans_path_ccut;
 }
 
+// Return the path to the chimera info file
 fs::path transcript::get_trans_path_cinfo() {
   return trans_path_cinfo;
 }
 
+// Return the path to the chimera-filtered transcripts
 fs::path transcript::get_trans_path_chimera() {
   return trans_path_chimera;
 }
 
+// Return the path to the BLASTX of transcripts against reference proteome
 fs::path transcript::get_trans_path_blastx() {
   return trans_path_blastx;
 }
 
+// Return the path to the transcript salmon index file
 fs::path transcript::get_trans_path_index() {
   return trans_path_index;
 }
 
+// Return the path to the transcript salmon quant file
 fs::path transcript::get_trans_path_quant() {
   return trans_path_quant;
 }
 
+// Return the path to the transcript clusters file
 fs::path transcript::get_trans_path_clust() {
   return trans_path_clust;
 }
 
+// Return the path to the transcript largest clusters file
 fs::path transcript::get_trans_path_largest() {
   return trans_path_largest;
 }
@@ -212,17 +231,21 @@ fs::path transcript::get_trans_path_counts() {
   return trans_path_counts;
 }
 
+// Return the path to the resulting coding sequences (CDS) fasta file
 fs::path transcript::get_trans_path_cds() {
   return trans_path_cds;
 }
 
+// Return the path to the resulting peptides (PEP) fasta file
 fs::path transcript::get_trans_path_prot() {
   return trans_path_prot;
 }
 
+// Return the path to the PANTHER annotations file
 fs::path transcript::get_trans_path_annot() {
   return trans_path_annot;
 }
+
 
 std::string transcript::get_file_prefix() {
   return file_prefix;
@@ -280,18 +303,21 @@ void transcript::set_trans_path_prot(fs::path transProt) {
   trans_path_prot = transProt;
 }
 
+// Utility function to make a transcript file name
 std::string transcript::make_file_str() {
   std::string filename;
   filename = get_tax_id() + "_" + get_org_name().replace(get_org_name().find(" "), 1, "_");
   return filename;
 }
 
+// Utility function to make a checkpoint file name
 std::string transcript::makeCheckpointName(std::string ext) {
   fs::path outDir = get_trans_path_trinity().parent_path().parent_path().parent_path() / ".checkpoints";
   std::string cpFileName = std::string(outDir.c_str()) + "/" + get_file_prefix() + "." + ext + ".ok";
   return cpFileName;
 }
 
+// Helper function to make a checkpoint file for a stage
 void transcript::makeCheckpoint(std::string ext) {
   std::string cpFileName = makeCheckpointName(ext);
   std::ofstream cpFile;
@@ -299,6 +325,7 @@ void transcript::makeCheckpoint(std::string ext) {
   cpFile.close();
 }
 
+// Helper function to check if a checkpoint file exists for a stage
 bool transcript::checkpointExists(std::string ext) {
   fs::path cpFilePath(makeCheckpointName(ext).c_str());
   if (fs::exists(cpFilePath)) {
