@@ -4,7 +4,9 @@ Author: Miles Woodcock-Girard
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; As-***Sembl***-y pipeline for tr-***ans***-criptomes
 
-Semblans is a tool that enables the automatic assembly of *de novo* transcriptomes for non-model organisms.
+Semblans is a tool that enables the automatic assembly of *de novo* transcriptomes for non-model organisms. Read our application note in *Bioinformatics*.
+
+https://doi.org/10.1093/bioinformatics/btaf003
 
 ## The easiest way to install Semblans is via Docker, or to download the latest the pre-built binaries [here](https://github.com/gladshire/Semblans/releases)
 
@@ -58,7 +60,7 @@ semblans \
 --threads 4 \
 --ram 10
 ```
-Some users may experience issues, particularly during the transcript assembly phase during Trinity. Common errors and solutions are hosted on our GitHub's [wiki page](https://github.com/gladshire/Semblans/wiki/Common-Errors-&-Solutions#issues-at-trinity-stage). As cataloguing these is an ongoing process, we urge users to post an issue on the Semblans repository page detailing their problem if it persists or is otherwise unaddressed by this page.
+Some users may experience issues, particularly during the transcript assembly phase. Common errors and solutions are hosted on our GitHub's [wiki page](https://github.com/gladshire/Semblans/wiki/Common-Errors-&-Solutions#issues-at-trinity-stage). As cataloguing these is an ongoing process, we urge users to post an issue on the Semblans repository page detailing their problem if it persists or is otherwise unaddressed by this page.
 
 Reference peptide sets (gzipped FASTA) for the **postprocess** step:
 
@@ -67,3 +69,7 @@ Reference peptide sets (gzipped FASTA) for the **postprocess** step:
 **Ensembl fungi reference** (4.7 GiB) [[Option 1](https://uofi.box.com/shared/static/qc4nmun4apb0pik5fqxukn4qvn3wm943) | [Option 2](https://www.dropbox.com/scl/fi/8as6tci331utcrqrl7txz/ensembl_fungi.pep.all.fa.gz?rlkey=eyhsv35lelnao5xgd7s9dy51e&st=oc9dz9s6&dl=1)]
 
 **Ensembl plant reference** (2.1 GiB) [[Option 1](https://uofi.box.com/shared/static/lvg7x2qrxvg8hfcmue9xv4y9t1rgfb48) | [Option 2](https://www.dropbox.com/scl/fi/hbvtnd9wsiwt8k7gakcmq/ensembl_plant.pep.all.fa.gz?rlkey=8cp9sn5wrt9uu4vc2pmg8xvin&st=1gesuqq0&dl=1)]
+
+# Citing
+
+Woodcock-Girard, M. D., Bretz, E. C., Robertson, H. M., Ramanauskas, K., Hampton-Marcell, J. T., & Walker, J. F. (2024). Semblans: automated assembly and processing of RNA-seq data. Bioinformatics (Oxford, England), 41(1), btaf003. https://doi.org/10.1093/bioinformatics/btaf003
